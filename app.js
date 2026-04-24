@@ -37,15 +37,13 @@ function showLogin() {
 }
 
 async function handleLogin() {
-  const phone = document.getElementById('login-phone').value;
   const pass = document.getElementById('login-pass').value;
-  if(!phone || !pass) return alertError('login-alert', 'Please enter details');
+  if(!pass) return alertError('login-alert', 'Please enter your password');
   
   showLoader(true);
   try {
-    user = await apiCall('login', { phone, password: pass });
+    user = await apiCall('login', { password: pass });
     localStorage.setItem('user', JSON.stringify(user));
-    document.getElementById('login-phone').value = '';
     document.getElementById('login-pass').value = '';
     showApp();
   } catch (err) {
@@ -66,22 +64,47 @@ async function showApp() {
   document.getElementById('app-view').classList.remove('hidden-view');
   document.getElementById('nav-user-name').innerText = user.name;
   document.getElementById('logout-btn').classList.remove('hidden');
-  switchTab('dashboard');
-  loadLeavesData();
   
-  try {
-    const settings = await apiCall('getSettings', { adminPass: null }); 
-    const select = document.getElementById('form-type');
-    select.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+  if (user.role === 'admin') {
+    // Show Admin UI
+    document.getElementById('tab-dashboard').classList.add('hidden');
+    document.getElementById('tab-my-leaves').classList.add('hidden');
+    document.getElementById('tab-submit-leave').classList.add('hidden');
+    document.getElementById('tab-admin').classList.remove('hidden');
     
-    const deptSelect = document.getElementById('dash-dept');
-    deptSelect.innerHTML = '<option value="">All Departments</option>' + user.departments.map(d => `<option value="${d}">${d}</option>`).join('');
-  } catch(e){}
+    switchTab('admin');
+    if (typeof loadAdminSettings === 'function') loadAdminSettings();
+  } else {
+    // Show User UI
+    document.getElementById('tab-dashboard').classList.remove('hidden');
+    document.getElementById('tab-my-leaves').classList.remove('hidden');
+    document.getElementById('tab-submit-leave').classList.remove('hidden');
+    document.getElementById('tab-admin').classList.add('hidden');
+    
+    switchTab('dashboard');
+    loadLeavesData();
+    
+    // Setup background static data for form dropdowns
+    try {
+      const settings = await apiCall('getSettings', { adminPass: null }); 
+      const select = document.getElementById('form-type');
+      select.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+      
+      const deptSelect = document.getElementById('dash-dept');
+      deptSelect.innerHTML = '<option value="">All Departments</option>' + user.departments.map(d => `<option value="${d}">${d}</option>`).join('');
+    } catch(e){}
+  }
 }
 
 function switchTab(tabId) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden-view'));
-  document.getElementById(`view-${tabId}`).classList.remove('hidden-view');
+  document.querySelectorAll('.tab-content').forEach(el => {
+    el.classList.add('hidden-view');
+    el.classList.remove('flex'); // Prevent dashboard from breaking flex rules
+  });
+  
+  const view = document.getElementById(`view-${tabId}`);
+  view.classList.remove('hidden-view');
+  if(tabId === 'dashboard') view.classList.add('flex'); // Restore flex
   
   document.querySelectorAll('#app-view button[id^="tab-"]').forEach(btn => {
     btn.classList.remove('border-blue-600', 'text-blue-600');
