@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Company Leave & Event Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  <style>
+    /* Minimalist transitions and util classes */
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .hidden-view { display: none !important; }
+    .spinner { border: 3px solid rgba(0,0,0,.1); width: 24px; height: 24px; border-radius: 50%; border-left-color: #3b82f6; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen flex flex-col">
+
+  <!-- Environment Configuration -->
+  <script>
+    const ENV = 'Dev'; // TOGGLE TO 'Prod' FOR PRODUCTION
+    const DEV_URL = 'https://script.google.com/macros/s/AKfycbzQTzldgdLeGT3-II8Q6CrrUdX-lMNrPGbJBWY1eHFwpn-cx8bzE6MpFFXDuTQbogeA/exec';
+    const PROD_URL = 'https://script.google.com/macros/s/AKfycbw6GmmwAW7UoSpjNoCnkdeAVDHmA0amBu73hy43NOj77KGggTzXeRvOFhpWA_dDE3k7/exec';
+    const API_URL = ENV === 'Dev' ? DEV_URL : PROD_URL;
+  </script>
+
+  <!-- Dev Mode Banner -->
+  <div id="dev-banner" class="bg-red-600 text-white text-center py-1 text-sm font-bold tracking-widest hidden">DEV MODE</div>
+  <script>if (ENV === 'Dev') document.getElementById('dev-banner').classList.remove('hidden');</script>
+
+  <!-- Navbar -->
+  <nav class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
+    <div class="font-bold text-lg text-blue-600 dark:text-blue-400">LeaveTracker</div>
+    <div class="flex items-center space-x-3">
+      <span id="nav-user-name" class="text-sm font-medium hidden md:block"></span>
+      <button onclick="toggleTheme()" class="text-xl px-2">🌗</button>
+      <button onclick="updateApp()" class="text-sm bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-md shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition">Update App</button>
+      <button onclick="showAdminLogin()" class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+      </button>
+      <button id="logout-btn" onclick="logout()" class="text-sm text-red-500 font-medium hidden">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow flex flex-col p-4 w-full max-w-5xl mx-auto relative">
+    
+    <!-- Loader Overlay -->
+    <div id="loader" class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-40 flex-col items-center justify-center hidden">
+      <div class="spinner mb-2"></div><p class="text-sm font-medium">Processing...</p>
+    </div>
+
+    <!-- Login View -->
+    <section id="login-view" class="flex flex-col items-center justify-center flex-grow">
+      <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-sm border dark:border-gray-700">
+        <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+        <div id="login-alert" class="hidden bg-red-100 text-red-700 text-sm p-2 rounded mb-4 text-center"></div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Phone Number</label>
+          <input type="tel" id="login-phone" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 87678453">
+        </div>
+        <div class="mb-6 relative">
+          <label class="block text-sm font-medium mb-1">Password</label>
+          <input type="password" id="login-pass" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none pr-10">
+          <button onclick="togglePassword('login-pass')" class="absolute right-2 top-8 text-gray-500">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+          </button>
+        </div>
+        <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">Login</button>
+      </div>
+    </section>
+
+    <!-- Dashboard / Tabs View -->
+    <section id="app-view" class="hidden-view flex-col flex-grow">
+      <!-- Tabs -->
+      <div class="flex space-x-1 mb-6 border-b dark:border-gray-700">
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600">Dashboard</button>
+        <button onclick="switchTab('my-leaves')" id="tab-my-leaves" class="px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent">My Leaves</button>
+        <button onclick="switchTab('submit-leave')" id="tab-submit-leave" class="px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent">Submit Leave</button>
+      </div>
+
+      <!-- Dashboard Tab -->
+      <div id="view-dashboard" class="tab-content flex-grow flex flex-col">
+        <div class="flex flex-col md:flex-row justify-between mb-4 gap-2">
+          <input type="text" id="dash-search" placeholder="Search names..." class="border dark:border-gray-600 p-2 rounded bg-transparent outline-none focus:ring-1 focus:ring-blue-500" onkeyup="filterDashboard()">
+          <select id="dash-dept" class="border dark:border-gray-600 p-2 rounded bg-transparent outline-none focus:ring-1 focus:ring-blue-500" onchange="filterDashboard()">
+            <option value="">All Departments</option>
+          </select>
+        </div>
+        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded shadow-sm border dark:border-gray-700">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-100 dark:bg-gray-700">
+              <tr><th class="p-3">Name</th><th class="p-3">Dept</th><th class="p-3">Type</th><th class="p-3">Dates</th><th class="p-3">Status</th></tr>
+            </thead>
+            <tbody id="dash-body" class="divide-y dark:divide-gray-700"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- My Leaves Tab -->
+      <div id="view-my-leaves" class="tab-content hidden-view">
+        <div class="grid gap-4" id="my-leaves-container"></div>
+      </div>
+
+      <!-- Submit Form Tab -->
+      <div id="view-submit-leave" class="tab-content hidden-view max-w-xl mx-auto w-full">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow border dark:border-gray-700">
+          <form id="leave-form" onsubmit="event.preventDefault(); submitLeaveForm();" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Leave Type</label>
+              <select id="form-type" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent" onchange="toggleOverseasFields()" required></select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Start Date</label>
+                <input type="date" id="form-start" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">End Date</label>
+                <input type="date" id="form-end" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent" required>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Half Day?</label>
+              <select id="form-half" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+                <option value="None">No (Full Day)</option>
+                <option value="AM">AM (First Half)</option>
+                <option value="PM">PM (Second Half)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Covering Person</label>
+              <input type="text" id="form-cover" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent" required>
+            </div>
+            <div id="overseas-fields" class="hidden-view grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded border dark:border-gray-600">
+              <div>
+                <label class="block text-sm font-medium mb-1">Country (Compulsory)</label>
+                <input type="text" id="form-country" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">State (Optional)</label>
+                <input type="text" id="form-state" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Remarks</label>
+              <textarea id="form-remarks" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit Forecast</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Settings Overlay -->
+    <div id="admin-overlay" class="fixed inset-0 bg-black/60 z-50 hidden flex-col items-center justify-center p-4">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl w-full max-w-lg max-h-screen overflow-y-auto relative">
+        <button onclick="document.getElementById('admin-overlay').classList.add('hidden')" class="absolute top-4 right-4 text-xl">&times;</button>
+        
+        <div id="admin-login-step">
+          <h2 class="text-xl font-bold mb-4">Admin Access</h2>
+          <div id="admin-alert" class="hidden bg-red-100 text-red-700 text-sm p-2 rounded mb-4"></div>
+          <div class="mb-4 relative">
+            <label class="block text-sm font-medium mb-1">Settings Password</label>
+            <input type="password" id="admin-pass" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent pr-10">
+            <button onclick="togglePassword('admin-pass')" class="absolute right-2 top-8 text-gray-500">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+            </button>
+          </div>
+          <button onclick="verifyAdmin()" class="w-full bg-gray-800 dark:bg-gray-600 text-white py-2 rounded">Unlock</button>
+        </div>
+
+        <div id="admin-settings-step" class="hidden-view space-y-4">
+          <h2 class="text-xl font-bold border-b pb-2 dark:border-gray-700">App Settings</h2>
+          <div>
+            <label class="block text-sm font-medium mb-1">Change Admin Password</label>
+            <div class="relative">
+              <input type="password" id="set-admin-pass" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent placeholder-gray-400" placeholder="Leave blank to keep current">
+              <button onclick="togglePassword('set-admin-pass')" class="absolute right-2 top-2.5 text-gray-500"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Leave Types (Comma separated)</label>
+            <input type="text" id="set-leave-types" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">KAH Limit Percentage (%)</label>
+            <input type="number" id="set-kah-limit" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Approving Authority Email</label>
+            <input type="email" id="set-appr-email" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">KAH Personnel Search (Fuzzy)</label>
+            <input type="text" id="kah-search" placeholder="Type name to add..." class="w-full border dark:border-gray-600 rounded p-2 bg-transparent mb-2" onkeyup="searchKAH()">
+            <div id="kah-results" class="bg-gray-100 dark:bg-gray-700 max-h-32 overflow-y-auto text-sm rounded"></div>
+            <div class="mt-2 text-sm font-semibold">Current KAH List:</div>
+            <ul id="kah-selected-list" class="space-y-1 text-sm bg-gray-50 dark:bg-gray-900 p-2 rounded"></ul>
+          </div>
+          <button onclick="saveAdminSettings()" class="w-full bg-green-600 text-white font-bold py-2 rounded mt-4">Save Settings</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // --- Global State ---
+    let user = JSON.parse(localStorage.getItem('user')) || null;
+    let allLeaves = [];
+    let adminSettings = null; // Holds contacts & settings
+    let selectedKAH =[];
+    let fuseContacts = null;
+
+    // --- Init ---
+    if(localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (user) showApp();
+      else showLogin();
+      
+      // Enter key bindings
+      document.getElementById('login-pass').addEventListener('keypress', e => e.key === 'Enter' && handleLogin());
+      document.getElementById('admin-pass').addEventListener('keypress', e => e.key === 'Enter' && verifyAdmin());
+    });
+
+    // --- Utility Functions ---
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    function togglePassword(id) {
+      const el = document.getElementById(id);
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
+
+    function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+    function alertError(id, msg) {
+      const el = document.getElementById(id);
+      el.innerText = msg; el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 5000);
+    }
+
+    // --- API Comm ---
+    async function apiCall(action, data = {}) {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          redirect: 'follow',
+          body: JSON.stringify({ action, data })
+        });
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error);
+        return result.data;
+      } catch (err) {
+        if(err.message.includes('Failed to fetch')) {
+          alert("Network Error or Google Permissions Expired.\nIf you are the Administrator, please open the script editor and run INITIAL_SETUP().");
+        }
+        throw err;
+      }
+    }
+
+    // --- Auth ---
+    function showLogin() {
+      document.getElementById('login-view').classList.remove('hidden-view');
+      document.getElementById('app-view').classList.add('hidden-view');
+      document.getElementById('nav-user-name').innerText = '';
+      document.getElementById('logout-btn').classList.add('hidden');
+    }
+
+    async function handleLogin() {
+      const phone = document.getElementById('login-phone').value;
+      const pass = document.getElementById('login-pass').value;
+      if(!phone || !pass) return alertError('login-alert', 'Please enter details');
+      
+      showLoader(true);
+      try {
+        user = await apiCall('login', { phone, password: pass });
+        localStorage.setItem('user', JSON.stringify(user));
+        document.getElementById('login-phone').value = '';
+        document.getElementById('login-pass').value = '';
+        showApp();
+      } catch (err) {
+        alertError('login-alert', err.message);
+      }
+      showLoader(false);
+    }
+
+    function logout() {
+      localStorage.removeItem('user');
+      user = null;
+      showLogin();
+    }
+
+    // --- App Core ---
+    async function showApp() {
+      document.getElementById('login-view').classList.add('hidden-view');
+      document.getElementById('app-view').classList.remove('hidden-view');
+      document.getElementById('nav-user-name').innerText = user.name;
+      document.getElementById('logout-btn').classList.remove('hidden');
+      switchTab('dashboard');
+      loadLeavesData();
+      
+      // Load leave types for form silently
+      try {
+        const settings = await apiCall('getSettings', { adminPass: null }); // Get public settings
+        const select = document.getElementById('form-type');
+        select.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+        
+        const deptSelect = document.getElementById('dash-dept');
+        deptSelect.innerHTML = '<option value="">All Departments</option>' + user.departments.map(d => `<option value="${d}">${d}</option>`).join('');
+      } catch(e){}
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden-view'));
+      document.getElementById(`view-${tabId}`).classList.remove('hidden-view');
+      
+      document.querySelectorAll('#app-view button[id^="tab-"]').forEach(btn => {
+        btn.classList.remove('border-blue-600', 'text-blue-600');
+        btn.classList.add('text-gray-500', 'border-transparent');
+      });
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      activeBtn.classList.add('border-blue-600', 'text-blue-600');
+      activeBtn.classList.remove('text-gray-500', 'border-transparent');
+    }
+
+    async function loadLeavesData() {
+      showLoader(true);
+      try {
+        allLeaves = await apiCall('getLeaves');
+        renderDashboard();
+        renderMyLeaves();
+      } catch (err) { console.error(err); }
+      showLoader(false);
+    }
+
+    // --- Dashboard & Filtering ---
+    function renderDashboard() {
+      filterDashboard(); // Initial render uses filter state
+    }
+
+    function filterDashboard() {
+      const q = document.getElementById('dash-search').value.toLowerCase();
+      const d = document.getElementById('dash-dept').value;
+      const tbody = document.getElementById('dash-body');
+      
+      let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
+      if (d) filtered = filtered.filter(l => l.Department.includes(d));
+      
+      if (q) {
+        const fuse = new Fuse(filtered, { keys: ['Name', 'LeaveType'] });
+        filtered = fuse.search(q).map(res => res.item);
+      }
+
+      tbody.innerHTML = filtered.map(l => `
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+          <td class="p-3">${l.Name}</td>
+          <td class="p-3">${l.Department}</td>
+          <td class="p-3">${l.LeaveType} ${l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</td>
+          <td class="p-3">${new Date(l.StartDate).toLocaleDateString()} - ${new Date(l.EndDate).toLocaleDateString()}</td>
+          <td class="p-3 text-${l.Status.includes('Pending') ? 'orange' : 'green'}-600 font-medium">${l.Status}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderMyLeaves() {
+      const my = allLeaves.filter(l => l.Phone == user.phone);
+      document.getElementById('my-leaves-container').innerHTML = my.length ? my.map(l => `
+        <div class="border dark:border-gray-700 p-4 rounded shadow-sm bg-white dark:bg-gray-800">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="font-bold text-lg">${l.LeaveType}</h3>
+            <span class="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 font-bold">${l.Status}</span>
+          </div>
+          <p class="text-sm"><strong>Dates:</strong> ${new Date(l.StartDate).toLocaleDateString()} - ${new Date(l.EndDate).toLocaleDateString()} ${l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</p>
+          <p class="text-sm"><strong>Covering:</strong> ${l.CoveringPerson}</p>
+          ${l.Status !== 'Cancelled' ? `<button onclick="cancelLeave('${l.ID}')" class="mt-3 text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded transition">Cancel Leave</button>` : ''}
+        </div>
+      `).reverse().join('') : '<p class="text-gray-500">No leaves submitted yet.</p>';
+    }
+
+    // --- Form Actions ---
+    function toggleOverseasFields() {
+      const type = document.getElementById('form-type').value;
+      const el = document.getElementById('overseas-fields');
+      const countryInput = document.getElementById('form-country');
+      if (type === 'Overseas Leave' || type === 'Official Trip') {
+        el.classList.remove('hidden-view');
+        countryInput.required = true;
+      } else {
+        el.classList.add('hidden-view');
+        countryInput.required = false;
+        countryInput.value = '';
+        document.getElementById('form-state').value = '';
+      }
+    }
+
+    async function submitLeaveForm() {
+      showLoader(true);
+      const payload = {
+        name: user.name, phone: user.phone, departments: user.departments,
+        leaveType: document.getElementById('form-type').value,
+        startDate: document.getElementById('form-start').value,
+        endDate: document.getElementById('form-end').value,
+        halfDay: document.getElementById('form-half').value,
+        coveringPerson: document.getElementById('form-cover').value,
+        country: document.getElementById('form-country').value,
+        state: document.getElementById('form-state').value,
+        remarks: document.getElementById('form-remarks').value
+      };
+
+      try {
+        const res = await apiCall('submitLeave', payload);
+        alert(res.status === 'Approved' ? "Leave successfully submitted and approved!" : "Leave submitted but marked as Pending due to KAH limits. Admin notified.");
+        document.getElementById('leave-form').reset();
+        toggleOverseasFields();
+        loadLeavesData();
+        switchTab('my-leaves');
+      } catch (err) { alert("Error: " + err.message); }
+      showLoader(false);
+    }
+
+    async function cancelLeave(id) {
+      if(!confirm("Are you sure you want to cancel this leave? This will remove it from the Calendar.")) return;
+      showLoader(true);
+      try {
+        await apiCall('cancelLeave', { id: id, phone: user.phone });
+        loadLeavesData();
+      } catch (err) { alert("Error: " + err.message); }
+      showLoader(false);
+    }
+
+    // --- Admin Settings ---
+    let tempAdminPass = '';
+    function showAdminLogin() {
+      document.getElementById('admin-overlay').classList.remove('hidden');
+      document.getElementById('admin-login-step').classList.remove('hidden-view');
+      document.getElementById('admin-settings-step').classList.add('hidden-view');
+      document.getElementById('admin-pass').value = '';
+    }
+
+    async function verifyAdmin() {
+      const pass = document.getElementById('admin-pass').value;
+      showLoader(true);
+      try {
+        adminSettings = await apiCall('getSettings', { adminPass: pass });
+        tempAdminPass = pass;
+        
+        // Populate form
+        document.getElementById('set-leave-types').value = adminSettings.leaveTypes.join(', ');
+        document.getElementById('set-kah-limit').value = adminSettings.kahLimit;
+        document.getElementById('set-appr-email').value = adminSettings.approvingAuthority;
+        selectedKAH = adminSettings.kahList || [];
+        
+        fuseContacts = new Fuse(adminSettings.allContacts, { keys:['name', 'phone', 'dept'] });
+        renderSelectedKAH();
+        
+        document.getElementById('admin-login-step').classList.add('hidden-view');
+        document.getElementById('admin-settings-step').classList.remove('hidden-view');
+      } catch (err) { alertError('admin-alert', err.message); }
+      showLoader(false);
+    }
+
+    function searchKAH() {
+      const q = document.getElementById('kah-search').value;
+      const resContainer = document.getElementById('kah-results');
+      if(!q) return resContainer.innerHTML = '';
+      
+      const results = fuseContacts.search(q).slice(0, 5).map(r => r.item);
+      resContainer.innerHTML = results.map(c => `
+        <div class="p-2 border-b dark:border-gray-600 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 flex justify-between" onclick="addKAH('${c.phone}', '${c.name}', '${c.dept}')">
+          <span>${c.name} (${c.dept})</span><span class="text-xs text-blue-500 text-bold">+ Add</span>
+        </div>
+      `).join('');
+    }
+
+    function addKAH(phone, name, dept) {
+      if(!selectedKAH.some(k => k.phone === phone)) {
+        selectedKAH.push({ phone, name, dept });
+        renderSelectedKAH();
+      }
+      document.getElementById('kah-search').value = '';
+      document.getElementById('kah-results').innerHTML = '';
+    }
+
+    function removeKAH(phone) {
+      selectedKAH = selectedKAH.filter(k => k.phone !== phone);
+      renderSelectedKAH();
+    }
+
+    function renderSelectedKAH() {
+      document.getElementById('kah-selected-list').innerHTML = selectedKAH.map(k => `
+        <li class="flex justify-between items-center border-b dark:border-gray-700 py-1">
+          <span>${k.name} <span class="text-xs text-gray-500">(${k.dept})</span></span>
+          <button onclick="removeKAH('${k.phone}')" class="text-red-500 font-bold">&times;</button>
+        </li>
+      `).join('');
+    }
+
+    async function saveAdminSettings() {
+      showLoader(true);
+      const payload = {
+        adminPass: tempAdminPass,
+        newAdminPass: document.getElementById('set-admin-pass').value || null,
+        leaveTypes: document.getElementById('set-leave-types').value.split(',').map(s => s.trim()).filter(Boolean),
+        kahLimit: document.getElementById('set-kah-limit').value,
+        approvingAuthority: document.getElementById('set-appr-email').value,
+        kahList: selectedKAH
+      };
+      
+      try {
+        await apiCall('saveSettings', payload);
+        alert("Settings Saved!");
+        document.getElementById('admin-overlay').classList.add('hidden');
+        if(payload.newAdminPass) tempAdminPass = payload.newAdminPass;
+      } catch (err) { alert("Error: " + err.message); }
+      showLoader(false);
+    }
+
+    // --- PWA Service Worker & Update logic ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed: ', err));
+      });
+    }
+
+    function updateApp() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) { registration.unregister(); }
+          caches.keys().then(function(names) {
+            for (let name of names) caches.delete(name);
+          }).then(() => window.location.reload(true));
+        });
+      } else {
+        window.location.reload(true);
+      }
+    }
+  </script>
+</body>
+</html>
