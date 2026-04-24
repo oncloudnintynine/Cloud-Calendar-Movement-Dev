@@ -2,25 +2,13 @@
 let adminSettings = null; 
 let selectedKAH =[];
 let fuseContacts = null;
-let tempAdminPass = '';
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('admin-pass').addEventListener('keypress', e => e.key === 'Enter' && verifyAdmin());
-});
-
-function showAdminLogin() {
-  document.getElementById('admin-overlay').classList.remove('hidden');
-  document.getElementById('admin-login-step').classList.remove('hidden-view');
-  document.getElementById('admin-settings-step').classList.add('hidden-view');
-  document.getElementById('admin-pass').value = '';
-}
-
-async function verifyAdmin() {
-  const pass = document.getElementById('admin-pass').value;
+async function loadAdminSettings() {
+  if (!user || user.role !== 'admin') return;
+  
   showLoader(true);
   try {
-    adminSettings = await apiCall('getSettings', { adminPass: pass });
-    tempAdminPass = pass;
+    adminSettings = await apiCall('getSettings', { adminPass: user.pass });
     
     // Populate form
     document.getElementById('set-leave-types').value = adminSettings.leaveTypes.join(', ');
@@ -30,10 +18,9 @@ async function verifyAdmin() {
     
     fuseContacts = new Fuse(adminSettings.allContacts, { keys:['name', 'phone', 'dept'] });
     renderSelectedKAH();
-    
-    document.getElementById('admin-login-step').classList.add('hidden-view');
-    document.getElementById('admin-settings-step').classList.remove('hidden-view');
-  } catch (err) { alertError('admin-alert', err.message); }
+  } catch (err) { 
+    alert("Error loading settings: " + err.message); 
+  }
   showLoader(false);
 }
 
@@ -66,18 +53,20 @@ function removeKAH(phone) {
 
 function renderSelectedKAH() {
   document.getElementById('kah-selected-list').innerHTML = selectedKAH.map(k => `
-    <li class="flex justify-between items-center border-b dark:border-gray-700 py-1">
+    <li class="flex justify-between items-center border-b dark:border-gray-700 py-1 px-2">
       <span>${k.name} <span class="text-xs text-gray-500">(${k.dept})</span></span>
-      <button onclick="removeKAH('${k.phone}')" class="text-red-500 font-bold">&times;</button>
+      <button onclick="removeKAH('${k.phone}')" class="text-red-500 font-bold hover:text-red-700 text-lg">&times;</button>
     </li>
   `).join('');
 }
 
 async function saveAdminSettings() {
   showLoader(true);
+  const newPass = document.getElementById('set-admin-pass').value || null;
+  
   const payload = {
-    adminPass: tempAdminPass,
-    newAdminPass: document.getElementById('set-admin-pass').value || null,
+    adminPass: user.pass,
+    newAdminPass: newPass,
     leaveTypes: document.getElementById('set-leave-types').value.split(',').map(s => s.trim()).filter(Boolean),
     kahLimit: document.getElementById('set-kah-limit').value,
     approvingAuthority: document.getElementById('set-appr-email').value,
@@ -86,9 +75,14 @@ async function saveAdminSettings() {
   
   try {
     await apiCall('saveSettings', payload);
-    alert("Settings Saved!");
-    document.getElementById('admin-overlay').classList.add('hidden');
-    if(payload.newAdminPass) tempAdminPass = payload.newAdminPass;
-  } catch (err) { alert("Error: " + err.message); }
+    alert("Settings successfully saved!");
+    if(newPass) {
+      user.pass = newPass;
+      localStorage.setItem('user', JSON.stringify(user));
+      document.getElementById('set-admin-pass').value = ''; // clear input field
+    }
+  } catch (err) { 
+    alert("Error saving settings: " + err.message); 
+  }
   showLoader(false);
 }
