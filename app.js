@@ -9,7 +9,7 @@ let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
-let tempLeaveTypes = [];
+let tempLeaveTypes =[];
 let adminKAHList = [];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
@@ -122,8 +122,7 @@ async function handleLogin() {
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
     showApp();
-  } catch (err) { alertError('login-alert', err.message); }
-  finally { showLoader(false); }
+  } catch (err) { alertError('login-alert', err.message); showLoader(false); }
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
@@ -173,6 +172,9 @@ async function showApp() {
       const formLeaveType = document.getElementById('form-leave-type');
       if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
       
+      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+      applyMenuOrder(mOrder);
+      
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
         const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -194,9 +196,6 @@ async function showApp() {
         fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
 
-      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-      applyMenuOrder(mOrder);
-      
       await loadLeavesData();
       switchTab(mOrder[0]); 
 
@@ -278,7 +277,7 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
 
     let baseClass = "w-7 h-7 text-xs flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
     if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
-    else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-bold ";
+    else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
     else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
     const dot = hasEvent && !isSelected ? `<div class="absolute bottom-0.5 w-1 h-1 bg-blue-500 rounded-full"></div>` : '';
@@ -760,26 +759,14 @@ async function submitForm(ctx) {
     const action = currentEditId ? 'editLeave' : 'submitLeave';
     const res = await apiCall(action, payload);
     alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
-    cancelEditMode(); 
-    await loadLeavesData();
-  } catch (err) { 
-    alert("Error: " + err.message); 
-  } finally {
-    showLoader(false); 
-  }
+    cancelEditMode(); loadLeavesData();
+  } catch (err) { alert("Error: " + err.message); showLoader(false); }
 }
 
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { 
-    await apiCall('cancelLeave', { id: id, phone: user.phone }); 
-    await loadLeavesData(); 
-  } catch (err) {
-    alert("Error: " + err.message);
-  } finally {
-    showLoader(false); 
-  }
+  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) { showLoader(false); }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
