@@ -2,15 +2,20 @@
 let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
-
 let fuseAllContacts = null;
 let validContactNames =[];
 
-// In-Memory Form State
+// Form Data State
 let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
   event: { startD: new Date(), endD: new Date() }
 };
+
+// Calendar Navigation State
+let dashDate = new Date(); dashDate.setHours(0,0,0,0);
+let myDate = new Date(); myDate.setHours(0,0,0,0);
+let dashMonth = new Date(dashDate.getFullYear(), dashDate.getMonth(), 1);
+let myMonth = new Date(myDate.getFullYear(), myDate.getMonth(), 1);
 
 if(localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
 
@@ -25,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if(resC) resC.classList.add('hidden-view');
     }
   });
-
   initDates();
 });
 
@@ -33,6 +37,7 @@ function toggleTheme() {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 }
+
 function togglePassword(id, btnElement) {
   const el = document.getElementById(id);
   const isPassword = el.type === 'password';
@@ -44,7 +49,6 @@ function togglePassword(id, btnElement) {
   }
 }
 
-// FORMATTING (DD Mmm YYYY)
 const mos =['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function formatDisplayDate(dateObj) {
   return `${String(dateObj.getDate()).padStart(2,'0')} ${mos[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
@@ -97,7 +101,7 @@ async function showApp() {
     document.getElementById('tab-admin').classList.remove('hidden'); switchTab('admin');
     if (typeof loadAdminSettings === 'function') loadAdminSettings();
   } else {
-    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;['tab-dashboard','tab-my-leaves','tab-submit-leave','tab-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name}[${user.departments[0]}]` : user.name;['tab-dashboard','tab-my-leaves','tab-submit-leave','tab-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('tab-admin').classList.add('hidden'); switchTab('dashboard');
     loadLeavesData();
     try {
@@ -118,7 +122,7 @@ function switchTab(tabId) {
   document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('flex'); });
   const view = document.getElementById(`view-${tabId}`);
   view.classList.remove('hidden-view');
-  if(tabId === 'dashboard') view.classList.add('flex');
+  if(tabId === 'dashboard' || tabId === 'my-leaves') view.classList.add('flex');
   document.querySelectorAll('#app-view button[id^="tab-"]').forEach(btn => {
     btn.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
     btn.classList.add('text-gray-500', 'border-transparent');
@@ -134,12 +138,82 @@ async function loadLeavesData() {
   showLoader(false);
 }
 
-function renderDashboard() { filterDashboard(); }
+// --- Navigation & Matrix ---
+function changeMonth(ctx, offset) {
+  if (ctx === 'dash') { dashMonth.setMonth(dashMonth.getMonth() + offset); renderDashboard(); } 
+  else { myMonth.setMonth(myMonth.getMonth() + offset); renderMyLeaves(); }
+}
+function selectDate(ctx, y, m, d) {
+  if (ctx === 'dash') { dashDate = new Date(y, m, d); renderDashboard(); } 
+  else { myDate = new Date(y, m, d); renderMyLeaves(); }
+}
 
-function filterDashboard() {
+function buildCalendarHTML(ctx, monthDate, selDate, data) {
+  const y = monthDate.getFullYear(); const m = monthDate.getMonth();
+  const firstDay = new Date(y, m, 1).getDay(); const daysInMonth = new Date(y, m + 1, 0).getDate();
+  let html = '';
+  for(let i=0; i<firstDay; i++) html += `<div></div>`;
+
+  for(let d=1; d<=daysInMonth; d++) {
+    const current = new Date(y, m, d); current.setHours(0,0,0,0);
+    const isSelected = current.toDateString() === selDate.toDateString();
+    const isToday = current.toDateString() === new Date().toDateString();
+
+    const hasEvent = data.some(l => {
+      if(l.Status === 'Cancelled') return false;
+      const s = new Date(l.StartDate); s.setHours(0,0,0,0);
+      const e = new Date(l.EndDate); e.setHours(0,0,0,0);
+      return current >= s && current <= e;
+    });
+
+    let baseClass = "w-8 h-8 flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
+    if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
+    else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-bold ";
+    else baseClass += "hover:bg-gray-200 dark:hover:bg-gray-700 ";
+
+    const dot = hasEvent && !isSelected ? `<div class="absolute bottom-0 w-1 h-1 bg-blue-500 rounded-full"></div>` : '';
+    const selDot = hasEvent && isSelected ? `<div class="absolute bottom-0 w-1 h-1 bg-white rounded-full"></div>` : '';
+
+    html += `<div class="${baseClass}" onclick="selectDate('${ctx}', ${y}, ${m}, ${d})">${d}${dot}${selDot}</div>`;
+  }
+  return html;
+}
+
+function getBadgeClass(status) {
+  if(status.includes('Pending')) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+  if(status.includes('Cancelled')) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+  return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+}
+
+function buildAgendaHtml(items, isMyCalendar) {
+  if (items.length === 0) return `<p class="text-gray-500 text-center mt-4">No records for this date.</p>`;
+  return items.map(l => {
+    const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
+    const startStr = isEvent ? formatDisplayDateTime(new Date(l.StartDate)) : formatDisplayDate(new Date(l.StartDate));
+    const endStr = isEvent ? formatDisplayDateTime(new Date(l.EndDate)) : formatDisplayDate(new Date(l.EndDate));
+    let actionBtns = '';
+    
+    if (isMyCalendar && l.Status !== 'Cancelled') {
+      actionBtns = `<div class="flex space-x-2 mt-2 pt-2 border-t dark:border-gray-600"><button onclick="triggerEdit('${l.ID}')" class="font-semibold bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded transition">Edit</button><button onclick="cancelLeave('${l.ID}')" class="font-semibold bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded transition">Cancel</button></div>`;
+    }
+
+    return `
+    <div class="border border-gray-200 dark:border-gray-700 p-2.5 rounded-lg shadow-sm bg-gray-50 dark:bg-gray-700/50 flex flex-col">
+      <div class="flex justify-between items-start mb-1">
+        <h3 class="font-bold">${isMyCalendar ? l.LeaveType : l.Name + ' <span class="font-normal text-gray-500">(' + l.Department + ')</span>'}</h3>
+        <span class="text-[10px] font-bold px-2 py-0.5 rounded ${getBadgeClass(l.Status)}">${l.Status.replace('Approved', 'Cal Updated')}</span>
+      </div>
+      <p class="font-medium text-gray-700 dark:text-gray-300 text-xs">${isMyCalendar ? '' : l.LeaveType + ' '}${l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
+      <p class="text-xs text-gray-500 mt-0.5"><span class="font-semibold">Time:</span> ${startStr} to ${endStr}</p>
+      ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-xs text-gray-500 mt-0.5"><span class="font-semibold">Covering:</span> ${l.CoveringPerson}</p>` : ''}
+      ${actionBtns}
+    </div>`;
+  }).join('');
+}
+
+function renderDashboard() {
   const q = document.getElementById('dash-search').value.toLowerCase();
   const d = document.getElementById('dash-dept').value;
-  
   let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
   if (d) filtered = filtered.filter(l => l.Department.includes(d));
   if (q) {
@@ -147,71 +221,37 @@ function filterDashboard() {
     filtered = fuse.search(q).map(res => res.item);
   }
 
-  const mapHtml = (isMobile) => filtered.map(l => {
-    const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
-    const startStr = isEvent ? formatDisplayDateTime(new Date(l.StartDate)) : formatDisplayDate(new Date(l.StartDate));
-    const endStr = isEvent ? formatDisplayDateTime(new Date(l.EndDate)) : formatDisplayDate(new Date(l.EndDate));
-    
-    if (isMobile) {
-      return `
-      <div class="border border-gray-200 dark:border-gray-700 p-3 rounded-lg shadow-sm bg-white dark:bg-gray-800 flex flex-col">
-        <div class="flex justify-between items-start mb-1">
-          <h3 class="font-bold">${l.Name} <span class="text-xs font-normal text-gray-500 ml-1">(${l.Department})</span></h3>
-          <span class="text-xs font-bold px-2 py-0.5 rounded bg-${l.Status.includes('Pending') ? 'orange' : 'green'}-100 text-${l.Status.includes('Pending') ? 'orange' : 'green'}-700">${l.Status.includes('Pending') ? 'Pending' : 'Cal Updated'}</span>
-        </div>
-        <p class="font-medium text-gray-700 dark:text-gray-300">${l.LeaveType} ${l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</p>
-        <p class="text-xs text-gray-500 mt-1"><span class="font-semibold">Dates:</span> ${startStr} to ${endStr}</p>
-      </div>`;
-    } else {
-      return `
-      <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 border-b dark:border-gray-700 last:border-0">
-        <td class="px-2 py-1 font-medium">${l.Name}</td>
-        <td class="px-2 py-1 text-gray-500 dark:text-gray-400">${l.Department}</td>
-        <td class="px-2 py-1">${l.LeaveType} ${l.HalfDay !== 'None' ? '<span class="text-xs ml-1 bg-gray-200 dark:bg-gray-600 px-1 rounded">('+l.HalfDay+')</span>' : ''}</td>
-        <td class="px-2 py-1">${startStr} - ${endStr}</td>
-        <td class="px-2 py-1 text-${l.Status.includes('Pending') ? 'orange' : 'green'}-600 font-semibold">${l.Status.replace('Approved', 'Cal Updated')}</td>
-      </tr>`;
-    }
-  }).join('');
+  document.getElementById('dash-cal-month').innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
+  document.getElementById('dash-cal-grid').innerHTML = buildCalendarHTML('dash', dashMonth, dashDate, filtered);
+  document.getElementById('dash-agenda-title').innerText = formatDisplayDate(dashDate);
 
-  document.getElementById('dash-body-desktop').innerHTML = mapHtml(false);
-  document.getElementById('dash-body-mobile').innerHTML = mapHtml(true);
+  const dashTarget = new Date(dashDate); dashTarget.setHours(0,0,0,0);
+  const itemsForDate = filtered.filter(l => {
+    const s = new Date(l.StartDate); s.setHours(0,0,0,0);
+    const e = new Date(l.EndDate); e.setHours(0,0,0,0);
+    return dashTarget >= s && dashTarget <= e;
+  });
+  document.getElementById('dash-agenda').innerHTML = buildAgendaHtml(itemsForDate, false);
 }
 
 function renderMyLeaves() {
   const my = allLeaves.filter(l => l.Phone == user.phone);
-  const activeLeaves = my.filter(l => l.Status !== 'Cancelled');
+  document.getElementById('my-cal-month').innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
+  document.getElementById('my-cal-grid').innerHTML = buildCalendarHTML('my', myMonth, myDate, my);
+  document.getElementById('my-agenda-title').innerText = formatDisplayDate(myDate);
+
+  const myTarget = new Date(myDate); myTarget.setHours(0,0,0,0);
+  const itemsForDate = my.filter(l => {
+    if(l.Status === 'Cancelled') return false;
+    const s = new Date(l.StartDate); s.setHours(0,0,0,0);
+    const e = new Date(l.EndDate); e.setHours(0,0,0,0);
+    return myTarget >= s && myTarget <= e;
+  });
+  document.getElementById('my-agenda').innerHTML = buildAgendaHtml(itemsForDate, true);
+
   const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
-
-  const getBadgeClass = (status) => {
-    if(status.includes('Pending')) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
-    if(status.includes('Cancelled')) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
-    return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-  };
-
-  const createCard = (l) => {
-    const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
-    const startStr = isEvent ? formatDisplayDateTime(new Date(l.StartDate)) : formatDisplayDate(new Date(l.StartDate));
-    const endStr = isEvent ? formatDisplayDateTime(new Date(l.EndDate)) : formatDisplayDate(new Date(l.EndDate));
-    return `
-    <div class="border-2 dark:border-gray-700 p-3 rounded-lg shadow-sm bg-white dark:bg-gray-800">
-      <div class="flex justify-between items-start mb-1">
-        <h3 class="font-bold text-base">${l.LeaveType}</h3>
-        <span class="text-xs px-2 py-0.5 rounded ${getBadgeClass(l.Status)} font-bold">${l.Status.replace('Approved', 'Cal Updated')}</span>
-      </div>
-      <p><strong>Dates:</strong> ${startStr} - ${endStr} ${!isEvent && l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</p>
-      ${!isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p><strong>Covering:</strong> ${l.CoveringPerson}</p>` : ''}
-      ${l.Status !== 'Cancelled' ? `
-        <div class="flex space-x-2 mt-3">
-          <button onclick="triggerEdit('${l.ID}')" class="font-semibold bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded transition">Edit</button>
-          <button onclick="cancelLeave('${l.ID}')" class="font-semibold bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded transition">Cancel</button>
-        </div>` : ''}
-    </div>`;
-  };
-
-  document.getElementById('active-leaves-container').innerHTML = activeLeaves.length ? activeLeaves.map(createCard).reverse().join('') : '<p class="text-gray-500">No active records.</p>';
   document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
-    ? `<details class="group cursor-pointer"><summary class="font-semibold text-gray-500 hover:text-gray-700 select-none outline-none flex items-center"><span class="mr-1">▶</span> Cancelled (${cancelledLeaves.length})</summary><div class="grid gap-2 mt-2 opacity-70 cursor-default">${cancelledLeaves.map(createCard).reverse().join('')}</div></details>`
+    ? `<details class="group cursor-pointer text-xs"><summary class="font-semibold text-gray-500 hover:text-gray-700 select-none outline-none flex items-center"><span class="mr-1">▶</span> Cancelled (${cancelledLeaves.length})</summary><div class="grid gap-2 mt-2 opacity-70 cursor-default">${buildAgendaHtml(cancelledLeaves, true)}</div></details>`
     : '';
 }
 
@@ -243,7 +283,7 @@ function triggerEdit(id) {
   if (isEvent) {
     document.getElementById('form-event-name').value = l.LeaveType;
     document.getElementById('form-event-remarks').value = l.Remarks || '';
-    document.getElementById('form-event-repeat').value = l.HalfDay || 'NONE'; // HalfDay holds Recurrence for events
+    document.getElementById('form-event-repeat').value = l.HalfDay || 'NONE'; 
     document.getElementById('submit-event-btn').innerText = "Update Event";
     document.getElementById('cancel-edit-event-btn').classList.remove('hidden-view');
   } else {
@@ -256,7 +296,6 @@ function triggerEdit(id) {
     document.getElementById('cancel-edit-leave-btn').classList.remove('hidden-view');
     toggleOverseasFields();
     
-    // Restore Leave AM/PM logic
     let start = 'AM', end = 'PM';
     if (l.HalfDay === 'AM') end = 'AM';
     else if (l.HalfDay === 'PM') start = 'PM';
@@ -313,16 +352,14 @@ function toggleOverseasFields() {
 
 async function submitForm(ctx) {
   showLoader(true);
-  
   if (ctx === 'leave') {
     const coverInput = document.getElementById('form-leave-cover').value.trim();
     if (!validContactNames.includes(coverInput.toLowerCase())) {
-      alert("Please select a valid Covering Person from the dropdown company list.");
+      alert("Please select a valid Covering Person from the dropdown list.");
       showLoader(false); return;
     }
   }
 
-  // Adjust local dates to local ISO String bypassing timezone shifts
   const toLocalISO = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 19);
   const sDate = toLocalISO(appData[ctx].startD);
   const eDate = toLocalISO(appData[ctx].endD);
@@ -339,7 +376,7 @@ async function submitForm(ctx) {
       else if (appData.leave.endAMPM === 'AM') calculatedHalfDay = 'End AM';
     }
   } else {
-    calculatedHalfDay = document.getElementById('form-event-repeat').value; // Repurpose HalfDay column for Recurrence
+    calculatedHalfDay = document.getElementById('form-event-repeat').value; 
   }
 
   const payload = {
@@ -364,7 +401,7 @@ async function submitForm(ctx) {
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) { alert("Error: " + err.message); }
+  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) {}
   showLoader(false);
 }
 
@@ -396,7 +433,6 @@ function closePicker() {
 }
 
 function confirmPicker() {
-  // Extract values from wheels
   const wheels = document.getElementById('picker-wheels-wrapper').children;
   let d=1, m=0, y=2024, h=0, min=0;
   
@@ -406,7 +442,6 @@ function confirmPicker() {
     const centerIdx = Math.round(wheels[i].scrollTop / 40);
     const activeItem = items[centerIdx];
     if(!activeItem) continue;
-    
     const val = parseInt(activeItem.dataset.val);
     const type = wheels[i].dataset.type;
     
@@ -419,16 +454,13 @@ function confirmPicker() {
 
   const finalDate = new Date(y, m, d, h, min, 0);
   appData[activePicker.ctx][activePicker.field + 'D'] = finalDate;
-  updateButtonLabels();
-  closePicker();
+  updateButtonLabels(); closePicker();
 }
 
 function buildWheels() {
   const wrapper = document.getElementById('picker-wheels-wrapper');
-  wrapper.innerHTML = '<div class="wheel-highlight"></div>'; // clear and add highlight
-
+  wrapper.innerHTML = '<div class="wheel-highlight"></div>'; 
   const cv = activePicker.currentVal;
-  // Arrays
   const days = Array.from({length: 31}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') }));
   const months = mos.map((l, i) => ({ val: i, label: l }));
   const years = Array.from({length: 15}, (_, i) => ({ val: 2024+i, label: 2024+i }));
@@ -438,7 +470,6 @@ function buildWheels() {
   createWheel(wrapper, 'day', days, cv.getDate());
   createWheel(wrapper, 'month', months, cv.getMonth());
   createWheel(wrapper, 'year', years, cv.getFullYear());
-
   if (activePicker.type === 'datetime') {
     createWheel(wrapper, 'hour', hours, cv.getHours());
     createWheel(wrapper, 'min', mins, cv.getMinutes());
@@ -450,45 +481,27 @@ function createWheel(parent, type, dataArr, currentVal) {
   container.className = 'wheel-container flex-1 h-48 overflow-y-auto text-center mx-1 relative z-10';
   container.dataset.type = type;
 
-  // Duplicate data array heavily to simulate infinite scrolling (50 repeats)
-  const loops = 50; 
-  let html = '';
-  // Add padding elements at the top so index 0 can be centered
-  html += `<div style="height: 76px;"></div>`; 
-  
+  const loops = 50; let html = `<div style="height: 76px;"></div>`; 
   let targetScrollIndex = 0;
   for (let loop = 0; loop < loops; loop++) {
     dataArr.forEach(item => {
-      // Find the middle loop to set initial scroll
       if (loop === Math.floor(loops/2) && item.val === currentVal) targetScrollIndex = (loop * dataArr.length) + dataArr.indexOf(item);
       html += `<div class="wheel-item text-lg cursor-pointer select-none" data-val="${item.val}">${item.label}</div>`;
     });
   }
-  // Add padding at bottom
   html += `<div style="height: 76px;"></div>`;
-  
-  container.innerHTML = html;
-  parent.appendChild(container);
+  container.innerHTML = html; parent.appendChild(container);
 
-  // Initial center alignment
-  setTimeout(() => {
-    container.scrollTop = targetScrollIndex * 40;
-    updateActiveItem(container);
-  }, 10);
+  setTimeout(() => { container.scrollTop = targetScrollIndex * 40; updateActiveItem(container); }, 10);
 
-  // Scroll listener for snapping and updating active class
   let scrollTimeout;
   container.addEventListener('scroll', () => {
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
-      // Recenter logic if hitting absolute edges to simulate infinite
-      const totalItems = dataArr.length * loops;
       const currentIdx = Math.round(container.scrollTop / 40);
-      
-      if (currentIdx < dataArr.length * 5 || currentIdx > totalItems - (dataArr.length * 5)) {
-        const valObj = dataArr[currentIdx % dataArr.length];
+      if (currentIdx < dataArr.length * 5 || currentIdx > (dataArr.length * loops) - (dataArr.length * 5)) {
         const middleBase = Math.floor(loops/2) * dataArr.length;
-        container.style.scrollBehavior = 'auto'; // disable smooth momentarily
+        container.style.scrollBehavior = 'auto'; 
         container.scrollTop = (middleBase + (currentIdx % dataArr.length)) * 40;
         setTimeout(() => container.style.scrollBehavior = 'smooth', 50);
       }
