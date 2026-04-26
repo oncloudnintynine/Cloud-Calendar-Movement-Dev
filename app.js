@@ -9,8 +9,8 @@ let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
-let tempLeaveTypes =[];
-let adminKAHList =[];
+let tempLeaveTypes = [];
+let adminKAHList = [];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
 
@@ -122,10 +122,8 @@ async function handleLogin() {
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
     showApp();
-  } catch (err) { 
-    alertError('login-alert', err.message); 
-    showLoader(false); 
-  }
+  } catch (err) { alertError('login-alert', err.message); }
+  finally { showLoader(false); }
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
@@ -133,8 +131,8 @@ const TAB_NAMES = {
   'dashboard': 'Dashboard',
   'parade-state': 'Parade State',
   'my-leaves': 'My Calendar',
-  'submit-leave': 'Update Leave/MC/OIL',
-  'submit-event': 'Update Event',
+  'submit-leave': 'Add Leave/MC/OIL',
+  'submit-event': 'Add Event',
   'admin': 'Admin Settings'
 };
 const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event'];
@@ -199,7 +197,6 @@ async function showApp() {
       const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
       applyMenuOrder(mOrder);
       
-      // Load the data entirely before switching tab so parade state resolves instantly
       await loadLeavesData();
       switchTab(mOrder[0]); 
 
@@ -224,7 +221,11 @@ function switchTab(tabId) {
   if(activeMenu) activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
   
   const titleEl = document.getElementById('active-tab-title');
-  if (titleEl) titleEl.innerText = TAB_NAMES[tabId] || '';
+  if (titleEl) {
+    if (currentEditId && tabId === 'submit-event') titleEl.innerText = "Update Event";
+    else if (currentEditId && tabId === 'submit-leave') titleEl.innerText = "Update Record";
+    else titleEl.innerText = TAB_NAMES[tabId] || '';
+  }
   
   const deptNav = document.getElementById('dash-dept-nav');
   if (deptNav) {
@@ -458,7 +459,6 @@ function renderParadeState() {
         
         const sDate = new Date(l.StartDate);
         const eDate = new Date(l.EndDate);
-        // Bump EndDate to 23:59:59 to accurately encompass the entire final day for leave checks
         eDate.setHours(23, 59, 59, 999);
         
         return sDate <= now && eDate >= now;
