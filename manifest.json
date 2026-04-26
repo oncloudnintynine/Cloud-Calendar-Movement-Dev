@@ -1,6 +1,6 @@
 {
-  "name": "Company Leave Tracker",
-  "short_name": "LeaveTracker",
+  "name": "Team Admin Manager",
+  "short_name": "Team Admin Manager",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
