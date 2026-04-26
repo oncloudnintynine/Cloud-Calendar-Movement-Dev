@@ -1,252 +1,205 @@
-// --- Global State ---
-let user = JSON.parse(localStorage.getItem('user')) || null;
-let allLeaves =[];
-
-// --- Init & Theme ---
-if(localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-  document.documentElement.classList.add('dark');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (ENV === 'Dev') {
-    document.getElementById('dev-banner').classList.remove('hidden');
-  }
-
-  if (user) showApp();
-  else showLogin();
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Team Admin Manager</title>
   
-  document.getElementById('login-pass').addEventListener('keypress', e => e.key === 'Enter' && handleLogin());
-});
-
-function toggleTheme() {
-  document.documentElement.classList.toggle('dark');
-  localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-}
-
-// Swaps input type and SVG icon based on current state
-function togglePassword(id, btnElement) {
-  const el = document.getElementById(id);
-  const isPassword = el.type === 'password';
+  <!-- Manifest & Styles -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
   
-  el.type = isPassword ? 'text' : 'password';
-  
-  if (btnElement) {
-    // If it WAS a password, we are now showing text -> Show "Eye Slash" icon
-    // If it WAS text, we are now hiding text -> Show "Eye" icon
-    btnElement.innerHTML = isPassword 
-      ? `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
-      : `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
-  }
-}
+  <!-- External Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen flex flex-col">
 
-// --- Auth ---
-function showLogin() {
-  document.getElementById('login-view').classList.remove('hidden-view');
-  document.getElementById('app-view').classList.add('hidden-view');
-  document.getElementById('nav-user-name').innerText = '';
-  document.getElementById('logout-btn').classList.add('hidden');
-}
+  <!-- Dev Mode Banner -->
+  <div id="dev-banner" class="bg-red-600 text-white text-center py-1 text-sm font-bold tracking-widest hidden">DEV MODE</div>
 
-async function handleLogin() {
-  const pass = document.getElementById('login-pass').value;
-  if(!pass) return alertError('login-alert', 'Please enter your password');
-  
-  showLoader(true);
-  try {
-    user = await apiCall('login', { password: pass });
-    localStorage.setItem('user', JSON.stringify(user));
-    document.getElementById('login-pass').value = '';
-    showApp();
-  } catch (err) {
-    alertError('login-alert', err.message);
-  }
-  showLoader(false);
-}
-
-function logout() {
-  localStorage.removeItem('user');
-  user = null;
-  showLogin();
-}
-
-// --- App Core ---
-async function showApp() {
-  document.getElementById('login-view').classList.add('hidden-view');
-  document.getElementById('app-view').classList.remove('hidden-view');
-  document.getElementById('nav-user-name').innerText = user.name;
-  document.getElementById('logout-btn').classList.remove('hidden');
-  
-  if (user.role === 'admin') {
-    // Show Admin UI
-    document.getElementById('tab-dashboard').classList.add('hidden');
-    document.getElementById('tab-my-leaves').classList.add('hidden');
-    document.getElementById('tab-submit-leave').classList.add('hidden');
-    document.getElementById('tab-admin').classList.remove('hidden');
-    
-    switchTab('admin');
-    if (typeof loadAdminSettings === 'function') loadAdminSettings();
-  } else {
-    // Show User UI
-    document.getElementById('tab-dashboard').classList.remove('hidden');
-    document.getElementById('tab-my-leaves').classList.remove('hidden');
-    document.getElementById('tab-submit-leave').classList.remove('hidden');
-    document.getElementById('tab-admin').classList.add('hidden');
-    
-    switchTab('dashboard');
-    loadLeavesData();
-    
-    // Setup background static data for form dropdowns
-    try {
-      const settings = await apiCall('getSettings', { adminPass: null }); 
-      const select = document.getElementById('form-type');
-      select.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-      
-      const deptSelect = document.getElementById('dash-dept');
-      deptSelect.innerHTML = '<option value="">All Departments</option>' + user.departments.map(d => `<option value="${d}">${d}</option>`).join('');
-    } catch(e){}
-  }
-}
-
-function switchTab(tabId) {
-  document.querySelectorAll('.tab-content').forEach(el => {
-    el.classList.add('hidden-view');
-    el.classList.remove('flex'); // Prevent dashboard from breaking flex rules
-  });
-  
-  const view = document.getElementById(`view-${tabId}`);
-  view.classList.remove('hidden-view');
-  if(tabId === 'dashboard') view.classList.add('flex'); // Restore flex
-  
-  document.querySelectorAll('#app-view button[id^="tab-"]').forEach(btn => {
-    btn.classList.remove('border-blue-600', 'text-blue-600');
-    btn.classList.add('text-gray-500', 'border-transparent');
-  });
-  const activeBtn = document.getElementById(`tab-${tabId}`);
-  activeBtn.classList.add('border-blue-600', 'text-blue-600');
-  activeBtn.classList.remove('text-gray-500', 'border-transparent');
-}
-
-async function loadLeavesData() {
-  showLoader(true);
-  try {
-    allLeaves = await apiCall('getLeaves');
-    renderDashboard();
-    renderMyLeaves();
-  } catch (err) { console.error(err); }
-  showLoader(false);
-}
-
-// --- Dashboard & Filtering ---
-function renderDashboard() {
-  filterDashboard(); 
-}
-
-function filterDashboard() {
-  const q = document.getElementById('dash-search').value.toLowerCase();
-  const d = document.getElementById('dash-dept').value;
-  const tbody = document.getElementById('dash-body');
-  
-  let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
-  if (d) filtered = filtered.filter(l => l.Department.includes(d));
-  
-  if (q) {
-    const fuse = new Fuse(filtered, { keys:['Name', 'LeaveType'] });
-    filtered = fuse.search(q).map(res => res.item);
-  }
-
-  tbody.innerHTML = filtered.map(l => `
-    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-      <td class="p-3">${l.Name}</td>
-      <td class="p-3">${l.Department}</td>
-      <td class="p-3">${l.LeaveType} ${l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</td>
-      <td class="p-3">${new Date(l.StartDate).toLocaleDateString()} - ${new Date(l.EndDate).toLocaleDateString()}</td>
-      <td class="p-3 text-${l.Status.includes('Pending') ? 'orange' : 'green'}-600 font-medium">${l.Status}</td>
-    </tr>
-  `).join('');
-}
-
-function renderMyLeaves() {
-  const my = allLeaves.filter(l => l.Phone == user.phone);
-  document.getElementById('my-leaves-container').innerHTML = my.length ? my.map(l => `
-    <div class="border dark:border-gray-700 p-4 rounded shadow-sm bg-white dark:bg-gray-800">
-      <div class="flex justify-between items-start mb-2">
-        <h3 class="font-bold text-lg">${l.LeaveType}</h3>
-        <span class="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 font-bold">${l.Status}</span>
-      </div>
-      <p class="text-sm"><strong>Dates:</strong> ${new Date(l.StartDate).toLocaleDateString()} - ${new Date(l.EndDate).toLocaleDateString()} ${l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</p>
-      <p class="text-sm"><strong>Covering:</strong> ${l.CoveringPerson}</p>
-      ${l.Status !== 'Cancelled' ? `<button onclick="cancelLeave('${l.ID}')" class="mt-3 text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded transition">Cancel Leave</button>` : ''}
+  <!-- Navbar -->
+  <nav class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
+    <div class="font-bold text-lg text-blue-600 dark:text-blue-400">Team Admin Manager</div>
+    <div class="flex items-center space-x-3">
+      <span id="nav-user-name" class="text-sm font-medium hidden md:block"></span>
+      <button onclick="toggleTheme()" class="text-xl px-2">🌗</button>
+      <button onclick="updateApp()" class="text-sm bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-md shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition">Update App</button>
+      <button id="logout-btn" onclick="logout()" class="text-sm text-red-500 font-medium hidden">Logout</button>
     </div>
-  `).reverse().join('') : '<p class="text-gray-500">No leaves submitted yet.</p>';
-}
+  </nav>
 
-// --- Form Actions ---
-function toggleOverseasFields() {
-  const type = document.getElementById('form-type').value;
-  const el = document.getElementById('overseas-fields');
-  const countryInput = document.getElementById('form-country');
-  if (type === 'Overseas Leave' || type === 'Official Trip') {
-    el.classList.remove('hidden-view');
-    countryInput.required = true;
-  } else {
-    el.classList.add('hidden-view');
-    countryInput.required = false;
-    countryInput.value = '';
-    document.getElementById('form-state').value = '';
-  }
-}
+  <!-- Main Content Container -->
+  <main class="flex-grow flex flex-col p-4 w-full max-w-5xl mx-auto relative">
+    
+    <!-- Loader Overlay -->
+    <div id="loader" class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-40 flex-col items-center justify-center hidden">
+      <div class="spinner mb-2"></div><p class="text-sm font-medium">Processing...</p>
+    </div>
 
-async function submitLeaveForm() {
-  showLoader(true);
-  const payload = {
-    name: user.name, phone: user.phone, departments: user.departments,
-    leaveType: document.getElementById('form-type').value,
-    startDate: document.getElementById('form-start').value,
-    endDate: document.getElementById('form-end').value,
-    halfDay: document.getElementById('form-half').value,
-    coveringPerson: document.getElementById('form-cover').value,
-    country: document.getElementById('form-country').value,
-    state: document.getElementById('form-state').value,
-    remarks: document.getElementById('form-remarks').value
-  };
+    <!-- Login View -->
+    <section id="login-view" class="flex flex-col items-center justify-center flex-grow">
+      <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-sm border dark:border-gray-700">
+        <h2 class="text-2xl font-bold mb-2 text-center">Welcome</h2>
+        <p class="text-center text-sm text-gray-500 mb-6">Enter your password to continue</p>
+        <div id="login-alert" class="hidden bg-red-100 text-red-700 text-sm p-2 rounded mb-4 text-center"></div>
+        
+        <div class="mb-6 relative">
+          <label class="block text-sm font-medium mb-1">Password</label>
+          <input type="password" id="login-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all pr-10">
+          <button onclick="togglePassword('login-pass', this)" class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+          </button>
+        </div>
+        <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow transition">Login</button>
+      </div>
+    </section>
 
-  try {
-    const res = await apiCall('submitLeave', payload);
-    alert(res.status === 'Approved' ? "Leave successfully submitted and approved!" : "Leave submitted but marked as Pending due to KAH limits. Admin notified.");
-    document.getElementById('leave-form').reset();
-    toggleOverseasFields();
-    loadLeavesData();
-    switchTab('my-leaves');
-  } catch (err) { alert("Error: " + err.message); }
-  showLoader(false);
-}
+    <!-- App / Tabs View -->
+    <section id="app-view" class="hidden-view flex-col flex-grow">
+      <!-- Tabs -->
+      <div class="flex space-x-1 mb-6 border-b dark:border-gray-700 overflow-x-auto">
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600 whitespace-nowrap hidden">Dashboard</button>
+        <button onclick="switchTab('my-leaves')" id="tab-my-leaves" class="px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent whitespace-nowrap hidden">My Leaves</button>
+        <button onclick="switchTab('submit-leave')" id="tab-submit-leave" class="px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent whitespace-nowrap hidden">Submit Leave</button>
+        <button onclick="switchTab('admin')" id="tab-admin" class="px-4 py-2 text-sm font-medium text-gray-500 border-b-2 border-transparent whitespace-nowrap hidden">Admin Settings</button>
+      </div>
 
-async function cancelLeave(id) {
-  if(!confirm("Are you sure you want to cancel this leave? This will remove it from the Calendar.")) return;
-  showLoader(true);
-  try {
-    await apiCall('cancelLeave', { id: id, phone: user.phone });
-    loadLeavesData();
-  } catch (err) { alert("Error: " + err.message); }
-  showLoader(false);
-}
+      <!-- Dashboard Tab -->
+      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col">
+        <div class="flex flex-col md:flex-row justify-between mb-4 gap-3">
+          <input type="text" id="dash-search" placeholder="Search names..." class="w-full md:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" onkeyup="filterDashboard()">
+          <select id="dash-dept" class="w-full md:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" onchange="filterDashboard()">
+            <option value="">All Departments</option>
+          </select>
+        </div>
+        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
+          <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-gray-100 dark:bg-gray-700">
+              <tr><th class="p-3">Name</th><th class="p-3">Dept</th><th class="p-3">Type</th><th class="p-3">Dates</th><th class="p-3">Status</th></tr>
+            </thead>
+            <tbody id="dash-body" class="divide-y dark:divide-gray-700"></tbody>
+          </table>
+        </div>
+      </div>
 
-// --- PWA Service Worker & Update logic ---
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed: ', err));
-  });
-}
+      <!-- My Leaves Tab -->
+      <div id="view-my-leaves" class="tab-content hidden-view">
+        <div class="grid gap-4" id="my-leaves-container"></div>
+      </div>
 
-function updateApp() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      for(let registration of registrations) { registration.unregister(); }
-      caches.keys().then(function(names) {
-        for (let name of names) caches.delete(name);
-      }).then(() => window.location.reload(true));
-    });
-  } else {
-    window.location.reload(true);
-  }
-}
+      <!-- Submit Form Tab -->
+      <div id="view-submit-leave" class="tab-content hidden-view max-w-xl mx-auto w-full">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border dark:border-gray-700">
+          <form id="leave-form" onsubmit="event.preventDefault(); submitLeaveForm();" class="space-y-5">
+            <div>
+              <label class="block text-sm font-semibold mb-1">Leave Type</label>
+              <select id="form-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" onchange="toggleOverseasFields()" required></select>
+            </div>
+            
+            <div class="space-y-4">
+              <!-- Start Date with AM/PM Slider -->
+              <div class="flex items-end space-x-3">
+                <div class="flex-grow">
+                  <label class="block text-sm font-semibold mb-1">Start Date</label>
+                  <input type="date" id="form-start" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" required>
+                </div>
+                <div class="w-24 shrink-0">
+                  <label class="block text-sm font-semibold mb-1 text-center">Time</label>
+                  <div class="relative flex bg-gray-200 dark:bg-gray-600 rounded-lg p-1 h-[46px] cursor-pointer select-none" onclick="toggleTime('start')">
+                    <div id="start-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded-md transition-transform duration-300"></div>
+                    <div class="relative z-10 flex-1 flex items-center justify-center text-sm font-bold text-white transition-colors" id="start-am-text">AM</div>
+                    <div class="relative z-10 flex-1 flex items-center justify-center text-sm font-bold text-gray-500 dark:text-gray-300 transition-colors" id="start-pm-text">PM</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- End Date with AM/PM Slider -->
+              <div class="flex items-end space-x-3">
+                <div class="flex-grow">
+                  <label class="block text-sm font-semibold mb-1">End Date</label>
+                  <input type="date" id="form-end" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" required>
+                </div>
+                <div class="w-24 shrink-0">
+                  <label class="block text-sm font-semibold mb-1 text-center">Time</label>
+                  <div class="relative flex bg-gray-200 dark:bg-gray-600 rounded-lg p-1 h-[46px] cursor-pointer select-none" onclick="toggleTime('end')">
+                    <div id="end-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded-md transition-transform duration-300 translate-x-full"></div>
+                    <div class="relative z-10 flex-1 flex items-center justify-center text-sm font-bold text-gray-500 dark:text-gray-300 transition-colors" id="end-am-text">AM</div>
+                    <div class="relative z-10 flex-1 flex items-center justify-center text-sm font-bold text-white transition-colors" id="end-pm-text">PM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold mb-1">Covering Person</label>
+              <input type="text" id="form-cover" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" required>
+            </div>
+            
+            <div id="overseas-fields" class="hidden-view grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-gray-200 dark:border-gray-600">
+              <div>
+                <label class="block text-sm font-semibold mb-1">Country <span class="text-xs text-red-500">(Req)</span></label>
+                <input type="text" id="form-country" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold mb-1">State <span class="text-xs text-gray-400">(Opt)</span></label>
+                <input type="text" id="form-state" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-semibold mb-1">Remarks</label>
+              <textarea id="form-remarks" rows="2" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow transition">Submit Forecast</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Admin Settings Tab -->
+      <div id="view-admin" class="tab-content hidden-view max-w-xl mx-auto w-full">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border dark:border-gray-700 space-y-5">
+          <h2 class="text-xl font-bold border-b pb-2 dark:border-gray-700">Global Configuration</h2>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Change Admin Password</label>
+            <div class="relative">
+              <input type="password" id="set-admin-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all placeholder-gray-400" placeholder="Leave blank to keep current">
+              <button onclick="togglePassword('set-admin-pass', this)" class="absolute right-3 top-3.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Leave Types (Comma separated)</label>
+            <input type="text" id="set-leave-types" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">KAH Limit Percentage (%)</label>
+            <input type="number" id="set-kah-limit" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">Approving Authority Email</label>
+            <input type="email" id="set-appr-email" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1">KAH Personnel Search (Fuzzy)</label>
+            <input type="text" id="kah-search" placeholder="Type name to add..." class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all mb-2" onkeyup="searchKAH()">
+            <div id="kah-results" class="bg-gray-100 dark:bg-gray-700 max-h-32 overflow-y-auto text-sm rounded-lg"></div>
+            <div class="mt-3 text-sm font-bold">Current KAH List:</div>
+            <ul id="kah-selected-list" class="space-y-1 text-sm bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border-2 dark:border-gray-700 min-h-[50px] mt-1"></ul>
+          </div>
+          <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow transition mt-4">Save Settings</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Split Application Scripts -->
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+  <script src="admin.js"></script>
+
+</body>
+</html>
