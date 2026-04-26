@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <script>
     tailwind.config = { 
       darkMode: 'class',
@@ -93,8 +94,7 @@
 
     <!-- App Views -->
     <section id="app-view" class="hidden-view flex-col h-full overflow-hidden">
-      <!-- Tabs structure removed, using hamburger menu only -->
-
+      
       <!-- Dashboard Tab -->
       <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-4">
         <div class="flex flex-col md:flex-row justify-between gap-3 shrink-0">
@@ -275,7 +275,6 @@
             </div>
           </div>
 
-          <!-- Menu Reordering block -->
           <div>
             <label class="block font-semibold mb-2 text-base">App Menu Order</label>
             <div id="menu-order-list" class="space-y-2 bg-gray-50 dark:bg-darkinput p-3 rounded-xl border-2 border-gray-200 dark:border-darkborder"></div>
