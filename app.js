@@ -433,24 +433,28 @@ function closePicker() {
 }
 
 function confirmPicker() {
-  const wheels = document.getElementById('picker-wheels-wrapper').children;
-  let d=1, m=0, y=2024, h=0, min=0;
+  const wrapper = document.getElementById('picker-wheels-wrapper');
+  if(!wrapper) return;
+  const wheels = Array.from(wrapper.children).filter(c => c.classList.contains('wheel-container'));
   
-  for(let i=0; i<wheels.length; i++) {
-    if(!wheels[i].classList.contains('wheel-container')) continue;
-    const items = Array.from(wheels[i].querySelectorAll('.wheel-item'));
-    const centerIdx = Math.round(wheels[i].scrollTop / 40);
-    const activeItem = items[centerIdx];
-    if(!activeItem) continue;
-    const val = parseInt(activeItem.dataset.val);
-    const type = wheels[i].dataset.type;
-    
-    if(type === 'day') d = val;
-    if(type === 'month') m = val;
-    if(type === 'year') y = val;
-    if(type === 'hour') h = val;
-    if(type === 'min') min = val;
-  }
+  const getVal = (wheel) => {
+    if(!wheel) return null;
+    const items = wheel.querySelectorAll('.wheel-item');
+    const centerIdx = Math.round(wheel.scrollTop / 40);
+    return items[centerIdx] ? parseInt(items[centerIdx].dataset.val) : null;
+  };
+
+  const dayWheel = wheels.find(w => w.dataset.type === 'day');
+  const monthWheel = wheels.find(w => w.dataset.type === 'month');
+  const yearWheel = wheels.find(w => w.dataset.type === 'year');
+  const hourWheel = wheels.find(w => w.dataset.type === 'hour');
+  const minWheel = wheels.find(w => w.dataset.type === 'min');
+
+  const d = getVal(dayWheel) || 1;
+  const m = getVal(monthWheel) || 0;
+  const y = getVal(yearWheel) || 2024;
+  const h = hourWheel ? getVal(hourWheel) : 0;
+  const min = minWheel ? getVal(minWheel) : 0;
 
   const finalDate = new Date(y, m, d, h, min, 0);
   appData[activePicker.ctx][activePicker.field + 'D'] = finalDate;
@@ -461,27 +465,29 @@ function buildWheels() {
   const wrapper = document.getElementById('picker-wheels-wrapper');
   wrapper.innerHTML = '<div class="wheel-highlight"></div>'; 
   const cv = activePicker.currentVal;
-  const days = Array.from({length: 31}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') }));
+  
+  const initialMaxDays = new Date(cv.getFullYear(), cv.getMonth() + 1, 0).getDate();
+  const days = Array.from({length: initialMaxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') }));
   const months = mos.map((l, i) => ({ val: i, label: l }));
   const years = Array.from({length: 15}, (_, i) => ({ val: 2024+i, label: 2024+i }));
   const hours = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
   const mins = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
 
-  createWheel(wrapper, 'day', days, cv.getDate());
+  const dw = createWheel(wrapper, 'day', days, cv.getDate());
+  dw.dataset.maxDays = initialMaxDays;
   createWheel(wrapper, 'month', months, cv.getMonth());
   createWheel(wrapper, 'year', years, cv.getFullYear());
+  
   if (activePicker.type === 'datetime') {
     createWheel(wrapper, 'hour', hours, cv.getHours());
     createWheel(wrapper, 'min', mins, cv.getMinutes());
   }
 }
 
-function createWheel(parent, type, dataArr, currentVal) {
-  const container = document.createElement('div');
-  container.className = 'wheel-container flex-1 h-48 overflow-y-auto text-center mx-1 relative z-10';
-  container.dataset.type = type;
-
-  const loops = 50; let html = `<div style="height: 76px;"></div>`; 
+function populateWheel(container, dataArr, currentVal) {
+  container.dataset.len = dataArr.length;
+  const loops = 50; 
+  let html = `<div style="height: 76px;"></div>`; 
   let targetScrollIndex = 0;
   for (let loop = 0; loop < loops; loop++) {
     dataArr.forEach(item => {
@@ -490,24 +496,71 @@ function createWheel(parent, type, dataArr, currentVal) {
     });
   }
   html += `<div style="height: 76px;"></div>`;
-  container.innerHTML = html; parent.appendChild(container);
+  container.innerHTML = html; 
+  container.style.scrollBehavior = 'auto';
+  container.scrollTop = targetScrollIndex * 40;
+  setTimeout(() => { container.style.scrollBehavior = 'smooth'; updateActiveItem(container); }, 10);
+}
 
-  setTimeout(() => { container.scrollTop = targetScrollIndex * 40; updateActiveItem(container); }, 10);
+function createWheel(parent, type, dataArr, currentVal) {
+  const container = document.createElement('div');
+  container.className = 'wheel-container flex-1 h-48 overflow-y-auto text-center mx-1 relative z-10';
+  container.dataset.type = type;
+
+  populateWheel(container, dataArr, currentVal);
+  parent.appendChild(container);
 
   let scrollTimeout;
   container.addEventListener('scroll', () => {
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
+      const len = parseInt(container.dataset.len);
+      const loops = 50;
       const currentIdx = Math.round(container.scrollTop / 40);
-      if (currentIdx < dataArr.length * 5 || currentIdx > (dataArr.length * loops) - (dataArr.length * 5)) {
-        const middleBase = Math.floor(loops/2) * dataArr.length;
+      if (currentIdx < len * 5 || currentIdx > (len * loops) - (len * 5)) {
+        const middleBase = Math.floor(loops/2) * len;
         container.style.scrollBehavior = 'auto'; 
-        container.scrollTop = (middleBase + (currentIdx % dataArr.length)) * 40;
+        container.scrollTop = (middleBase + (currentIdx % len)) * 40;
         setTimeout(() => container.style.scrollBehavior = 'smooth', 50);
       }
       updateActiveItem(container);
+      if (type === 'month' || type === 'year') adjustDaysWheel();
     }, 100);
   });
+  return container;
+}
+
+function adjustDaysWheel() {
+  const wrapper = document.getElementById('picker-wheels-wrapper');
+  if (!wrapper) return;
+  const wheels = Array.from(wrapper.children).filter(c => c.classList.contains('wheel-container'));
+  const dayWheel = wheels.find(w => w.dataset.type === 'day');
+  const monthWheel = wheels.find(w => w.dataset.type === 'month');
+  const yearWheel = wheels.find(w => w.dataset.type === 'year');
+  
+  if (!dayWheel || !monthWheel || !yearWheel) return;
+
+  const getVal = (wheel) => {
+    const items = wheel.querySelectorAll('.wheel-item');
+    const centerIdx = Math.round(wheel.scrollTop / 40);
+    return items[centerIdx] ? parseInt(items[centerIdx].dataset.val) : null;
+  };
+
+  const m = getVal(monthWheel);
+  const y = getVal(yearWheel);
+  const d = getVal(dayWheel);
+  
+  if (m === null || y === null || d === null) return;
+
+  const maxDays = new Date(y, m + 1, 0).getDate();
+  const currentMax = parseInt(dayWheel.dataset.maxDays || '31');
+  
+  if (currentMax !== maxDays) {
+    dayWheel.dataset.maxDays = maxDays;
+    const daysArr = Array.from({length: maxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') }));
+    const newVal = Math.min(d, maxDays);
+    populateWheel(dayWheel, daysArr, newVal);
+  }
 }
 
 function updateActiveItem(container) {
