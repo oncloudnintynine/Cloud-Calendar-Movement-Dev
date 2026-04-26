@@ -2,20 +2,22 @@
 let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
-let fuseAllContacts = null;
+
+let companyContacts = [];
 let validContactNames =[];
+let fuseAllContacts = null;
+let fuseAttendees = null;
 
-// Admin State
+// Form & Admin State
 let tempLeaveTypes = [];
-let adminKAHList =[];
+let adminKAHList = [];
+let eventAttendees =[]; // { id, name, dept, type: 'contact' | 'group' }
 
-// Form Data State
 let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
   event: { startD: new Date(), endD: new Date() }
 };
 
-// Calendar Navigation State
 let dashDate = new Date(); dashDate.setHours(0,0,0,0);
 let myDate = new Date(); myDate.setHours(0,0,0,0);
 let dashMonth = new Date(dashDate.getFullYear(), dashDate.getMonth(), 1);
@@ -29,9 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('login-pass').addEventListener('keypress', e => e.key === 'Enter' && handleLogin());
   
   document.addEventListener('click', function(e) {
-    if(!e.target.closest('#form-leave-cover') && !e.target.closest('#cover-results')) {
-      const resC = document.getElementById('cover-results');
-      if(resC) resC.classList.add('hidden-view');
+    if(!e.target.closest('#form-leave-cover') && !e.target.closest('#cover-results-leave')) {
+      const resCL = document.getElementById('cover-results-leave');
+      if(resCL) resCL.classList.add('hidden-view');
+    }
+    if(!e.target.closest('#form-event-attendee-search') && !e.target.closest('#attendees-results')) {
+      const resA = document.getElementById('attendees-results');
+      if(resA) resA.classList.add('hidden-view');
     }
     if(!e.target.closest('#kah-search') && !e.target.closest('#kah-results')) {
       const resK = document.getElementById('kah-results');
@@ -48,11 +54,8 @@ function toggleMenu() {
   if (menu.classList.contains('hidden-view')) {
     menu.classList.remove('hidden-view');
     setTimeout(() => { panel.classList.remove('-translate-x-full'); }, 10);
-  } else {
-    closeMenu();
-  }
+  } else closeMenu();
 }
-
 function closeMenu() {
   const menu = document.getElementById('slide-menu');
   const panel = document.getElementById('slide-menu-panel');
@@ -64,15 +67,14 @@ function toggleTheme() {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 }
-
 function togglePassword(id, btnElement) {
   const el = document.getElementById(id);
   const isPassword = el.type === 'password';
   el.type = isPassword ? 'text' : 'password';
   if (btnElement) {
     btnElement.innerHTML = isPassword 
-      ? `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
-      : `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
+      ? `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
+      : `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
   }
 }
 
@@ -90,7 +92,6 @@ function initDates() {
   appData.event.startD = new Date(now); appData.event.endD = new Date(now);
   updateButtonLabels();
 }
-
 function updateButtonLabels() {
   document.getElementById('btn-leave-start').innerText = formatDisplayDate(appData.leave.startD);
   document.getElementById('btn-leave-end').innerText = formatDisplayDate(appData.leave.endD);
@@ -128,24 +129,36 @@ async function showApp() {
   document.getElementById('active-tab-title').classList.remove('hidden');
   
   if (user.role === 'admin') {
-    document.getElementById('nav-user-name').innerText = "Administrator";['menu-dashboard','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    document.getElementById('nav-user-name').innerText = "Administrator";['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('menu-admin').classList.remove('hidden'); 
-    switchTab('admin');
-    loadAdminSettings();
+    switchTab('admin'); loadAdminSettings();
   } else {
-    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;['menu-dashboard','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('menu-admin').classList.add('hidden'); 
     switchTab('dashboard');
     loadLeavesData();
+    
     try {
       const settings = await apiCall('getSettings', { adminPass: null }); 
       window.appLeaveTypes = settings.leaveTypes; 
       document.getElementById('form-leave-type').innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-      document.getElementById('dash-dept').innerHTML = '<option value="">All Departments</option>' + user.departments.map(d => `<option value="${d}">${d}</option>`).join('');
-      if(settings.allContacts) {
-        const uniqueNames =[...new Set(settings.allContacts.map(c => c.name))];
+      
+      if (settings.allContacts) {
+        companyContacts = settings.allContacts;
+        const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
         validContactNames = uniqueNames.map(n => n.toLowerCase());
-        fuseAllContacts = new Fuse(settings.allContacts, { keys:['name'], threshold: 0.3 }); // Full object fuse
+        
+        const uniqueDepts =[...new Set(companyContacts.map(c => c.dept))];
+        document.getElementById('dash-dept').innerHTML = '<option value="">All Departments</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+        
+        fuseAllContacts = new Fuse(companyContacts, { keys:['name'], threshold: 0.3 });
+        
+        // Build Attendees Dropdown objects: Contact or Dept Group
+        let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
+        uniqueDepts.forEach(dept => {
+          attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group' });
+        });
+        fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
     } catch(e){}
   }
@@ -153,6 +166,7 @@ async function showApp() {
 
 const TAB_NAMES = {
   'dashboard': 'Dashboard',
+  'parade-state': 'Parade State',
   'my-leaves': 'My Calendar',
   'submit-leave': 'Update Leave/MC/OIL',
   'submit-event': 'Update Event',
@@ -162,109 +176,24 @@ const TAB_NAMES = {
 function switchTab(tabId) {
   closeMenu();
   document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('flex'); });
-  
   const view = document.getElementById(`view-${tabId}`);
   view.classList.remove('hidden-view');
-  if(tabId === 'dashboard' || tabId === 'my-leaves') view.classList.add('flex');
+  if(['dashboard','my-leaves','parade-state'].includes(tabId)) view.classList.add('flex');
   
   document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
     btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
   });
   const activeMenu = document.getElementById(`menu-${tabId}`);
   if(activeMenu) activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
-  
   document.getElementById('active-tab-title').innerText = TAB_NAMES[tabId] || '';
-}
-
-// --- Admin Setup Logic ---
-async function loadAdminSettings() {
-  showLoader(true);
-  try {
-    const settings = await apiCall('getSettings', { adminPass: user.pass });
-    document.getElementById('set-kah-limit').value = settings.kahLimit;
-    document.getElementById('set-appr-email').value = settings.approvingAuthority;
-    
-    tempLeaveTypes = settings.leaveTypes ||[];
-    renderLeaveTypes();
-    
-    adminKAHList = settings.kahList ||[];
-    renderKAHSelected();
-    
-    if(settings.allContacts) {
-      fuseAllContacts = new Fuse(settings.allContacts, { keys:['name'], threshold: 0.3 });
-    }
-  } catch (err) { alertError('login-alert', err.message); }
-  showLoader(false);
-}
-
-function renderLeaveTypes() {
-  document.getElementById('leave-types-list').innerHTML = tempLeaveTypes.map((t, i) => `
-    <div class="flex items-center space-x-2">
-      <input type="text" value="${t}" onchange="updateLeaveType(${i}, this.value)" class="flex-grow border-2 border-gray-300 dark:border-darkborder rounded-lg py-1 px-2 bg-white dark:bg-darkinput outline-none shadow-sm">
-      <button type="button" onclick="removeLeaveType(${i})" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 p-1.5 rounded-lg transition" title="Remove Type"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-    </div>
-  `).join('');
-}
-function addLeaveType() {
-  const input = document.getElementById('new-leave-type');
-  if(input.value.trim()) { tempLeaveTypes.push(input.value.trim()); input.value = ''; renderLeaveTypes(); }
-}
-function removeLeaveType(i) { tempLeaveTypes.splice(i, 1); renderLeaveTypes(); }
-function updateLeaveType(i, val) { tempLeaveTypes[i] = val.trim(); }
-
-function searchKAH() {
-  const q = document.getElementById('kah-search').value;
-  const resC = document.getElementById('kah-results');
-  if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
-  const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
-  if(results.length > 0) {
-    resC.innerHTML = results.map(c => `
-      <div class="p-2 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover text-sm" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} (${c.dept})</div>
-    `).join('');
-    resC.classList.remove('hidden-view');
-  } else {
-    resC.innerHTML = `<div class="p-2 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
-  }
-}
-function addKAH(phone, name, dept) {
-  if(!adminKAHList.some(k => k.phone === phone)) {
-    adminKAHList.push({ phone, name, dept }); renderKAHSelected();
-  }
-  document.getElementById('kah-search').value = '';
-  document.getElementById('kah-results').classList.add('hidden-view');
-}
-function removeKAH(phone) { adminKAHList = adminKAHList.filter(k => k.phone !== phone); renderKAHSelected(); }
-function renderKAHSelected() {
-  document.getElementById('kah-selected-list').innerHTML = adminKAHList.map(k => `
-    <li class="flex justify-between items-center border-b dark:border-darkborder py-1">
-      <span>${k.name} <span class="text-xs text-gray-500 dark:text-darkmuted">(${k.dept})</span></span>
-      <button onclick="removeKAH('${k.phone}')" class="text-red-500 font-bold px-2">&times;</button>
-    </li>
-  `).join('');
-}
-
-async function saveAdminSettings() {
-  showLoader(true);
-  const newPass = document.getElementById('set-admin-pass').value || null;
-  const payload = {
-    adminPass: user.pass, newAdminPass: newPass,
-    leaveTypes: tempLeaveTypes.filter(Boolean),
-    kahLimit: document.getElementById('set-kah-limit').value,
-    approvingAuthority: document.getElementById('set-appr-email').value,
-    kahList: adminKAHList
-  };
-  try {
-    await apiCall('saveSettings', payload);
-    alert("Settings successfully saved!");
-    if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
-  } catch (err) { alert("Error: " + err.message); }
-  showLoader(false);
+  
+  if (tabId === 'parade-state') renderParadeState();
 }
 
 // --- General App logic ---
 async function loadLeavesData() {
   showLoader(true);
-  try { allLeaves = await apiCall('getLeaves'); renderDashboard(); renderMyLeaves(); } catch (err) {}
+  try { allLeaves = await apiCall('getLeaves'); renderDashboard(); renderMyLeaves(); if(!document.getElementById('view-parade-state').classList.contains('hidden-view')) renderParadeState(); } catch (err) {}
   showLoader(false);
 }
 
@@ -280,8 +209,7 @@ function selectDate(ctx, y, m, d) {
 function buildCalendarHTML(ctx, monthDate, selDate, data) {
   const y = monthDate.getFullYear(); const m = monthDate.getMonth();
   const firstDay = new Date(y, m, 1).getDay(); const daysInMonth = new Date(y, m + 1, 0).getDate();
-  let html = '';
-  for(let i=0; i<firstDay; i++) html += `<div></div>`;
+  let html = ''; for(let i=0; i<firstDay; i++) html += `<div></div>`;
 
   for(let d=1; d<=daysInMonth; d++) {
     const current = new Date(y, m, d); current.setHours(0,0,0,0);
@@ -295,13 +223,13 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
       return current >= s && current <= e;
     });
 
-    let baseClass = "w-8 h-8 flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
+    let baseClass = "w-9 h-9 flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
     if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
     else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-bold ";
     else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
-    const dot = hasEvent && !isSelected ? `<div class="absolute bottom-0 w-1 h-1 bg-blue-500 rounded-full"></div>` : '';
-    const selDot = hasEvent && isSelected ? `<div class="absolute bottom-0 w-1 h-1 bg-white rounded-full"></div>` : '';
+    const dot = hasEvent && !isSelected ? `<div class="absolute bottom-1 w-1.5 h-1.5 bg-blue-500 rounded-full"></div>` : '';
+    const selDot = hasEvent && isSelected ? `<div class="absolute bottom-1 w-1.5 h-1.5 bg-white rounded-full"></div>` : '';
 
     html += `<div class="${baseClass}" onclick="selectDate('${ctx}', ${y}, ${m}, ${d})">${d}${dot}${selDot}</div>`;
   }
@@ -315,7 +243,7 @@ function getBadgeClass(status) {
 }
 
 function buildAgendaHtml(items, isMyCalendar) {
-  if (items.length === 0) return `<p class="text-gray-500 dark:text-darkmuted text-center mt-4">No records for this date.</p>`;
+  if (items.length === 0) return `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records for this date.</p>`;
   return items.map(l => {
     const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
     const startStr = isEvent ? formatDisplayDateTime(new Date(l.StartDate)) : formatDisplayDate(new Date(l.StartDate));
@@ -323,18 +251,21 @@ function buildAgendaHtml(items, isMyCalendar) {
     let actionBtns = '';
     
     if (isMyCalendar && l.Status !== 'Cancelled') {
-      actionBtns = `<div class="flex space-x-2 mt-2 pt-2 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-semibold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-3 py-1 rounded transition">Edit</button><button onclick="cancelLeave('${l.ID}')" class="font-semibold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-3 py-1 rounded transition">Cancel</button></div>`;
+      actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
     }
 
     return `
-    <div class="border border-gray-200 dark:border-darkborder p-2.5 rounded-lg shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
-      <div class="flex justify-between items-start mb-1">
-        <h3 class="font-bold">${isMyCalendar ? l.LeaveType : l.Name + ' <span class="font-normal text-gray-500 dark:text-darkmuted">(' + l.Department + ')</span>'}</h3>
-        <span class="text-[10px] font-bold px-2 py-0.5 rounded ${getBadgeClass(l.Status)}">${l.Status.replace('Approved', 'Cal Updated')}</span>
+    <div class="border border-gray-200 dark:border-darkborder p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
+      <div class="flex justify-between items-start mb-2">
+        <h3 class="font-bold text-base">${isMyCalendar ? l.LeaveType : l.Name + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-sm">(' + l.Department + ')</span>'}</h3>
+        <span class="text-[11px] font-bold px-2 py-1 rounded ${getBadgeClass(l.Status)}">${l.Status.replace('Approved', 'Cal Updated')}</span>
       </div>
-      <p class="font-medium text-gray-700 dark:text-darktext text-xs">${isMyCalendar ? '' : l.LeaveType + ' '}${l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
-      <p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
-      ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
+      <p class="font-medium text-gray-700 dark:text-darktext">${isMyCalendar ? '' : l.LeaveType + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
+      <p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
+      ${isEvent && l.Location ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
+      ${!isEvent && l.Country ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${l.Country} ${l.State ? `(${l.State})` : ''}</p>` : ''}
+      ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
+      ${l.Remarks ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
       ${actionBtns}
     </div>`;
   }).join('');
@@ -364,7 +295,7 @@ function renderDashboard() {
 }
 
 function renderMyLeaves() {
-  const my = allLeaves.filter(l => l.Phone == user.phone);
+  const my = allLeaves.filter(l => l.Phone == user.phone || (l.Attendees && l.Attendees.includes(user.phone)));
   document.getElementById('my-cal-month').innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
   document.getElementById('my-cal-grid').innerHTML = buildCalendarHTML('my', myMonth, myDate, my);
   document.getElementById('my-agenda-title').innerText = formatDisplayDate(myDate);
@@ -379,21 +310,155 @@ function renderMyLeaves() {
   document.getElementById('my-agenda').innerHTML = buildAgendaHtml(itemsForDate, true);
 
   const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
-  
   document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
-    ? `<details class="group cursor-pointer text-xs">
-         <summary class="font-semibold text-gray-700 dark:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
-           <svg class="w-4 h-4 mr-1 transition-transform duration-200 transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    ? `<details class="group cursor-pointer text-sm">
+         <summary class="font-bold text-gray-500 dark:text-darkmuted hover:text-gray-700 dark:hover:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
+           <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
            Cancelled (${cancelledLeaves.length})
          </summary>
-         <div class="grid gap-2 mt-2 cursor-default pl-5">${buildAgendaHtml(cancelledLeaves, true)}</div>
+         <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true)}</div>
        </details>`
     : '';
 }
 
+// --- Parade State Logic ---
+function renderParadeState() {
+  if (!companyContacts.length) return;
+  const now = new Date();
+  
+  let inOfficeGlobal = 0;
+  let totalGlobal = companyContacts.length;
+  let deptMap = {};
+
+  companyContacts.forEach(contact => {
+    if (!deptMap[contact.dept]) deptMap[contact.dept] = { members:[], total:0, inOffice:0 };
+    
+    // Find active record affecting this user right now
+    const activeRecords = allLeaves.filter(l => 
+      l.Status !== 'Cancelled' && 
+      new Date(l.StartDate) <= now && 
+      new Date(l.EndDate) >= now && 
+      (l.Phone == contact.phone || (l.Attendees && l.Attendees.includes(contact.phone)))
+    );
+    
+    let isOffice = true;
+    let locationStr = 'Office';
+
+    if (activeRecords.length > 0) {
+      // Prioritize the first applicable record
+      const r = activeRecords[0];
+      const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(r.LeaveType);
+      
+      if (isEvent) {
+        locationStr = r.Location || 'Event';
+        isOffice = locationStr.toLowerCase() === 'office';
+      } else {
+        locationStr = r.LeaveType;
+        if (r.Country) locationStr += ` (${r.Country})`;
+        isOffice = false;
+      }
+    }
+
+    deptMap[contact.dept].total++;
+    if (isOffice) { deptMap[contact.dept].inOffice++; inOfficeGlobal++; }
+    
+    deptMap[contact.dept].members.push({
+      name: contact.name,
+      isOffice: isOffice,
+      location: locationStr
+    });
+  });
+
+  document.getElementById('parade-state-header').innerText = `Overall Parade State: (${inOfficeGlobal} / ${totalGlobal})`;
+
+  // Sorting Logic: HQ first, then alphanumeric
+  const isHQ = (str) => str.toLowerCase() === 'hq';
+  const deptKeys = Object.keys(deptMap).sort((a, b) => {
+    if (isHQ(a) && !isHQ(b)) return -1;
+    if (!isHQ(a) && isHQ(b)) return 1;
+    return a.localeCompare(b);
+  });
+
+  let html = '';
+  deptKeys.forEach(dept => {
+    const d = deptMap[dept];
+    // Sort members: In office first, then Not in Office, then alphanumeric
+    d.members.sort((a, b) => {
+      if (a.isOffice && !b.isOffice) return -1;
+      if (!a.isOffice && b.isOffice) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    html += `
+      <div class="mb-6 border-l-4 border-blue-500 pl-4">
+        <h3 class="font-bold text-lg mb-2 text-gray-800 dark:text-gray-100">${dept} <span class="text-sm font-semibold text-gray-500 dark:text-darkmuted">(${d.inOffice} / ${d.total})</span></h3>
+        <div class="space-y-1.5 text-[15px]">
+          ${d.members.map((m, i) => `
+            <div class="flex items-start">
+              <span class="w-6 shrink-0 text-right mr-3 text-gray-400 dark:text-darkmuted font-medium">${i+1}.</span>
+              <div>
+                <span class="font-semibold ${m.isOffice ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-darkmuted'}">${m.name}</span>
+                ${!m.isOffice ? `<span class="italic text-gray-500 dark:text-darkmuted ml-1">(${m.location})</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('parade-state-body').innerHTML = html;
+}
+
+
+// --- Attendees Form Logic ---
+function searchAttendees() {
+  const q = document.getElementById('form-event-attendee-search').value;
+  const resC = document.getElementById('attendees-results');
+  if(!q || !fuseAttendees) { resC.classList.add('hidden-view'); return; }
+  
+  const results = fuseAttendees.search(q).slice(0, 6).map(r => r.item);
+  if (results.length > 0) {
+    resC.innerHTML = results.map(item => `
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="selectAttendee('${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}')">
+        <span class="font-semibold">${item.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${item.dept})</span>
+      </div>
+    `).join('');
+    resC.classList.remove('hidden-view');
+  } else {
+    resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
+  }
+}
+
+function selectAttendee(id, name, dept, type) {
+  if (!eventAttendees.some(a => a.id === id)) {
+    eventAttendees.push({ id, name, dept, type });
+    renderAttendees();
+  }
+  document.getElementById('form-event-attendee-search').value = '';
+  document.getElementById('attendees-results').classList.add('hidden-view');
+}
+
+function removeAttendee(id) {
+  eventAttendees = eventAttendees.filter(a => a.id !== id);
+  renderAttendees();
+}
+
+function renderAttendees() {
+  const c = document.getElementById('attendees-chip-container');
+  c.innerHTML = eventAttendees.map(a => `
+    <div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-full px-3 py-1 text-sm font-semibold">
+      ${a.name}
+      <button type="button" onclick="removeAttendee('${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
+    </div>
+  `).join('');
+}
+
+
+// --- Covering Person Form Logic ---
 function searchCovering() {
   const q = document.getElementById('form-leave-cover').value;
-  const resC = document.getElementById('cover-results');
+  const resC = document.getElementById('cover-results-leave');
   if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
   
   const uniques =[...new Set(fuseAllContacts._docs.map(d=>d.name))];
@@ -401,14 +466,16 @@ function searchCovering() {
   
   const results = quickFuse.search(q).slice(0, 5).map(r => r.item.name);
   if (results.length > 0) {
-    resC.innerHTML = results.map(n => `<div class="p-2 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="selectCovering('${n.replace(/'/g, "\\'")}')">${n}</div>`).join('');
+    resC.innerHTML = results.map(n => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover font-medium" onclick="selectCovering('${n.replace(/'/g, "\\'")}')">${n}</div>`).join('');
     resC.classList.remove('hidden-view');
   } else {
-    resC.innerHTML = `<div class="p-2 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
+    resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
   }
 }
-function selectCovering(name) { document.getElementById('form-leave-cover').value = name; document.getElementById('cover-results').classList.add('hidden-view'); }
+function selectCovering(name) { document.getElementById('form-leave-cover').value = name; document.getElementById('cover-results-leave').classList.add('hidden-view'); }
 
+
+// --- Form Submission & Edits ---
 function triggerEdit(id) {
   const l = allLeaves.find(x => x.ID === id);
   if(!l) return;
@@ -422,8 +489,21 @@ function triggerEdit(id) {
 
   if (isEvent) {
     document.getElementById('form-event-name').value = l.LeaveType;
+    document.getElementById('form-event-location').value = l.Location || 'Office';
     document.getElementById('form-event-remarks').value = l.Remarks || '';
     document.getElementById('form-event-repeat').value = l.HalfDay || 'NONE'; 
+    
+    // Reconstruct Attendees
+    eventAttendees =[];
+    if(l.Attendees) {
+      const savedPhones = l.Attendees.split(',');
+      savedPhones.forEach(ph => {
+        const contact = companyContacts.find(c => c.phone === ph);
+        if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, dept: contact.dept, type: 'contact' });
+      });
+    }
+    renderAttendees();
+    
     document.getElementById('submit-event-btn').innerText = "Update Event";
     document.getElementById('cancel-edit-event-btn').classList.remove('hidden-view');
   } else {
@@ -447,7 +527,6 @@ function triggerEdit(id) {
   }
   switchTab(`submit-${ctx}`);
   
-  // Trigger auto-expand UI fix for textareas
   setTimeout(() => {
     ['form-leave-remarks', 'form-event-remarks'].forEach(id => {
       const el = document.getElementById(id);
@@ -458,13 +537,14 @@ function triggerEdit(id) {
 
 function cancelEditMode() {
   currentEditId = null; initDates();
-  document.getElementById('leave-form').reset(); document.getElementById('event-form').reset();
-  
-  ['form-leave-remarks', 'form-event-remarks'].forEach(id => { const el = document.getElementById(id); if(el) el.style.height='auto'; });
+  document.getElementById('leave-form').reset(); document.getElementById('event-form').reset();['form-leave-remarks', 'form-event-remarks'].forEach(id => { const el = document.getElementById(id); if(el) el.style.height='auto'; });
 
   appData.leave.startAMPM = 'AM'; appData.leave.endAMPM = 'PM';
   updateTimeSliderVisual('start', 'AM'); updateTimeSliderVisual('end', 'PM');
   toggleOverseasFields();
+  
+  eventAttendees =[]; renderAttendees();
+
   document.getElementById('submit-leave-btn').innerText = "Save Record";
   document.getElementById('cancel-edit-leave-btn').classList.add('hidden-view');
   document.getElementById('submit-event-btn').innerText = "Save Event";
@@ -516,6 +596,10 @@ async function submitForm(ctx) {
   const eDate = toLocalISO(appData[ctx].endD);
   
   let calculatedHalfDay = 'None';
+  let loc = '';
+  let finalAttendeesStr = '';
+  let finalDepts = new Set(user.departments);
+
   if (ctx === 'leave') {
     const isSameDay = appData.leave.startD.toDateString() === appData.leave.endD.toDateString();
     if (isSameDay) {
@@ -528,16 +612,32 @@ async function submitForm(ctx) {
     }
   } else {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
+    loc = document.getElementById('form-event-location').value;
+    
+    // Resolve Attendees payload
+    let resolvedPhones = new Set();
+    eventAttendees.forEach(a => {
+      if (a.type === 'contact') {
+        resolvedPhones.add(a.id);
+        finalDepts.add(a.dept);
+      } else if (a.type === 'group') {
+        finalDepts.add(a.dept);
+        companyContacts.filter(c => c.dept === a.dept).forEach(c => resolvedPhones.add(c.phone));
+      }
+    });
+    finalAttendeesStr = Array.from(resolvedPhones).join(',');
   }
 
   const payload = {
-    id: currentEditId, name: user.name, phone: user.phone, departments: user.departments,
+    id: currentEditId, name: user.name, phone: user.phone, departments: Array.from(finalDepts),
     leaveType: ctx === 'leave' ? document.getElementById('form-leave-type').value : document.getElementById('form-event-name').value,
     startDate: sDate, endDate: eDate, halfDay: calculatedHalfDay, 
     coveringPerson: ctx === 'leave' ? document.getElementById('form-leave-cover').value.trim() : 'N/A',
     country: ctx === 'leave' ? document.getElementById('form-leave-country').value : '',
     state: ctx === 'leave' ? document.getElementById('form-leave-state').value : '',
-    remarks: document.getElementById(`form-${ctx}-remarks`).value
+    remarks: document.getElementById(`form-${ctx}-remarks`).value,
+    location: loc,
+    attendees: finalAttendeesStr
   };
 
   try {
@@ -630,9 +730,8 @@ function buildWheels() {
   createWheel(wrapper, 'year', years, cv.getFullYear());
   
   if (activePicker.type === 'datetime') {
-    // Add Separator Line
     const sep = document.createElement('div');
-    sep.className = 'w-px bg-gray-300 dark:bg-darkborder mx-1 h-3/4 my-auto relative z-20';
+    sep.className = 'w-px bg-gray-300 dark:bg-darkborder mx-2 h-3/4 my-auto relative z-20';
     wrapper.appendChild(sep);
 
     createWheel(wrapper, 'hour', hours, cv.getHours());
@@ -648,7 +747,7 @@ function populateWheel(container, dataArr, currentVal) {
   for (let loop = 0; loop < loops; loop++) {
     dataArr.forEach(item => {
       if (loop === Math.floor(loops/2) && item.val === currentVal) targetScrollIndex = (loop * dataArr.length) + dataArr.indexOf(item);
-      html += `<div class="wheel-item text-lg cursor-pointer select-none" data-val="${item.val}">${item.label}</div>`;
+      html += `<div class="wheel-item text-xl cursor-pointer select-none" data-val="${item.val}">${item.label}</div>`;
     });
   }
   html += `<div style="height: 76px;"></div>`;
@@ -669,7 +768,7 @@ function createWheel(parent, type, dataArr, currentVal) {
   
   if(type === 'hour' || type === 'min') {
       const lbl = document.createElement('div');
-      lbl.className = 'absolute top-1 text-[10px] font-bold text-gray-400 dark:text-darkmuted z-30 pointer-events-none w-full text-center bg-gradient-to-b from-gray-50 dark:from-darkinput to-transparent pb-2 pt-1';
+      lbl.className = 'absolute top-1 text-[11px] font-bold text-gray-400 dark:text-darkmuted z-30 pointer-events-none w-full text-center bg-gradient-to-b from-gray-50 dark:from-darkinput to-transparent pb-3 pt-1';
       lbl.innerText = type === 'hour' ? 'HH' : 'MM';
       wrapperDiv.appendChild(lbl);
   }
@@ -740,4 +839,89 @@ function updateActiveItem(container) {
   items.forEach(el => el.classList.remove('active'));
   const centerIdx = Math.round(container.scrollTop / 40);
   if(items[centerIdx]) items[centerIdx].classList.add('active');
+}
+
+// --- Admin Sub-methods ---
+async function loadAdminSettings() {
+  showLoader(true);
+  try {
+    const settings = await apiCall('getSettings', { adminPass: user.pass });
+    document.getElementById('set-kah-limit').value = settings.kahLimit;
+    document.getElementById('set-appr-email').value = settings.approvingAuthority;
+    
+    tempLeaveTypes = settings.leaveTypes ||[];
+    renderLeaveTypes();
+    
+    adminKAHList = settings.kahList ||[];
+    renderKAHSelected();
+    
+    if(settings.allContacts) {
+      fuseAllContacts = new Fuse(settings.allContacts, { keys:['name'], threshold: 0.3 });
+    }
+  } catch (err) { alertError('login-alert', err.message); }
+  showLoader(false);
+}
+
+function renderLeaveTypes() {
+  document.getElementById('leave-types-list').innerHTML = tempLeaveTypes.map((t, i) => `
+    <div class="flex items-center space-x-3">
+      <input type="text" value="${t}" onchange="updateLeaveType(${i}, this.value)" class="flex-grow border-2 border-gray-300 dark:border-darkborder rounded-xl py-2 px-4 bg-white dark:bg-darkinput outline-none shadow-sm focus:border-blue-500 transition">
+      <button type="button" onclick="removeLeaveType(${i})" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 p-2.5 rounded-xl transition" title="Remove Type"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+    </div>
+  `).join('');
+}
+function addLeaveType() {
+  const input = document.getElementById('new-leave-type');
+  if(input.value.trim()) { tempLeaveTypes.push(input.value.trim()); input.value = ''; renderLeaveTypes(); }
+}
+function removeLeaveType(i) { tempLeaveTypes.splice(i, 1); renderLeaveTypes(); }
+function updateLeaveType(i, val) { tempLeaveTypes[i] = val.trim(); }
+
+function searchKAH() {
+  const q = document.getElementById('kah-search').value;
+  const resC = document.getElementById('kah-results');
+  if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
+  const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
+  if(results.length > 0) {
+    resC.innerHTML = results.map(c => `
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} <span class="text-xs text-gray-500 ml-1">(${c.dept})</span></div>
+    `).join('');
+    resC.classList.remove('hidden-view');
+  } else {
+    resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
+  }
+}
+function addKAH(phone, name, dept) {
+  if(!adminKAHList.some(k => k.phone === phone)) {
+    adminKAHList.push({ phone, name, dept }); renderKAHSelected();
+  }
+  document.getElementById('kah-search').value = '';
+  document.getElementById('kah-results').classList.add('hidden-view');
+}
+function removeKAH(phone) { adminKAHList = adminKAHList.filter(k => k.phone !== phone); renderKAHSelected(); }
+function renderKAHSelected() {
+  document.getElementById('kah-selected-list').innerHTML = adminKAHList.map(k => `
+    <li class="flex justify-between items-center border-b dark:border-darkborder py-2">
+      <span class="font-medium">${k.name} <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${k.dept})</span></span>
+      <button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button>
+    </li>
+  `).join('');
+}
+
+async function saveAdminSettings() {
+  showLoader(true);
+  const newPass = document.getElementById('set-admin-pass').value || null;
+  const payload = {
+    adminPass: user.pass, newAdminPass: newPass,
+    leaveTypes: tempLeaveTypes.filter(Boolean),
+    kahLimit: document.getElementById('set-kah-limit').value,
+    approvingAuthority: document.getElementById('set-appr-email').value,
+    kahList: adminKAHList
+  };
+  try {
+    await apiCall('saveSettings', payload);
+    alert("Settings successfully saved!");
+    if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
+  } catch (err) { alert("Error: " + err.message); }
+  showLoader(false);
 }
