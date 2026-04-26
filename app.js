@@ -3,20 +3,13 @@ let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let formTimeStart = 'AM';
 let formTimeEnd = 'PM';
+let currentEditId = null;
 
-// --- Init & Theme ---
-if(localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-  document.documentElement.classList.add('dark');
-}
+if(localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (ENV === 'Dev') {
-    document.getElementById('dev-banner').classList.remove('hidden');
-  }
-
-  if (user) showApp();
-  else showLogin();
-  
+  if (ENV === 'Dev') document.getElementById('dev-banner').classList.remove('hidden');
+  if (user) showApp(); else showLogin();
   document.getElementById('login-pass').addEventListener('keypress', e => e.key === 'Enter' && handleLogin());
 });
 
@@ -25,13 +18,10 @@ function toggleTheme() {
   localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 }
 
-// Swaps input type and SVG icon based on current state
 function togglePassword(id, btnElement) {
   const el = document.getElementById(id);
   const isPassword = el.type === 'password';
-  
   el.type = isPassword ? 'text' : 'password';
-  
   if (btnElement) {
     btnElement.innerHTML = isPassword 
       ? `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
@@ -39,94 +29,67 @@ function togglePassword(id, btnElement) {
   }
 }
 
-// Formats a Date Object or String into DD Mmm YYYY (e.g. 26 Apr 2026)
 function formatDate(dateString) {
   const date = new Date(dateString);
-  if (isNaN(date)) return dateString; // fallback
+  if (isNaN(date)) return dateString; 
   const months =['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const d = String(date.getDate()).padStart(2, '0');
-  const m = months[date.getMonth()];
-  const y = date.getFullYear();
-  return `${d} ${m} ${y}`;
+  return `${String(date.getDate()).padStart(2, '0')} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-// --- Auth ---
 function showLogin() {
   document.getElementById('login-view').classList.remove('hidden-view');
   document.getElementById('app-view').classList.add('hidden-view');
-  document.getElementById('nav-user-name').innerText = '';
   document.getElementById('logout-btn').classList.add('hidden');
 }
 
 async function handleLogin() {
   const pass = document.getElementById('login-pass').value;
   if(!pass) return alertError('login-alert', 'Please enter your password');
-  
   showLoader(true);
   try {
     user = await apiCall('login', { password: pass });
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
     showApp();
-  } catch (err) {
-    alertError('login-alert', err.message);
-  }
+  } catch (err) { alertError('login-alert', err.message); }
   showLoader(false);
 }
 
-function logout() {
-  localStorage.removeItem('user');
-  user = null;
-  showLogin();
-}
+function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
-// --- App Core ---
 async function showApp() {
   document.getElementById('login-view').classList.add('hidden-view');
   document.getElementById('app-view').classList.remove('hidden-view');
-  document.getElementById('nav-user-name').innerText = user.name;
   document.getElementById('logout-btn').classList.remove('hidden');
   
   if (user.role === 'admin') {
-    // Show Admin UI
-    document.getElementById('tab-dashboard').classList.add('hidden');
-    document.getElementById('tab-my-leaves').classList.add('hidden');
-    document.getElementById('tab-submit-leave').classList.add('hidden');
+    document.getElementById('nav-user-name').innerText = "Administrator";
+    ['tab-dashboard','tab-my-leaves','tab-submit-leave'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('tab-admin').classList.remove('hidden');
-    
     switchTab('admin');
     if (typeof loadAdminSettings === 'function') loadAdminSettings();
   } else {
-    // Show User UI
-    document.getElementById('tab-dashboard').classList.remove('hidden');
-    document.getElementById('tab-my-leaves').classList.remove('hidden');
-    document.getElementById('tab-submit-leave').classList.remove('hidden');
-    document.getElementById('tab-admin').classList.add('hidden');
+    // Top Nav name formatting "Name [Dept]"
+    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;
     
+    ['tab-dashboard','tab-my-leaves','tab-submit-leave'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+    document.getElementById('tab-admin').classList.add('hidden');
     switchTab('dashboard');
     loadLeavesData();
     
-    // Setup background static data for form dropdowns
     try {
       const settings = await apiCall('getSettings', { adminPass: null }); 
-      const select = document.getElementById('form-type');
-      select.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-      
-      const deptSelect = document.getElementById('dash-dept');
-      deptSelect.innerHTML = '<option value="">All Departments</option>' + user.departments.map(d => `<option value="${d}">${d}</option>`).join('');
+      document.getElementById('form-type').innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+      document.getElementById('dash-dept').innerHTML = '<option value="">All Departments</option>' + user.departments.map(d => `<option value="${d}">${d}</option>`).join('');
     } catch(e){}
   }
 }
 
 function switchTab(tabId) {
-  document.querySelectorAll('.tab-content').forEach(el => {
-    el.classList.add('hidden-view');
-    el.classList.remove('flex'); // Prevent dashboard from breaking flex rules
-  });
-  
+  document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('flex'); });
   const view = document.getElementById(`view-${tabId}`);
   view.classList.remove('hidden-view');
-  if(tabId === 'dashboard') view.classList.add('flex'); // Restore flex
+  if(tabId === 'dashboard') view.classList.add('flex');
   
   document.querySelectorAll('#app-view button[id^="tab-"]').forEach(btn => {
     btn.classList.remove('border-blue-600', 'text-blue-600');
@@ -147,32 +110,42 @@ async function loadLeavesData() {
   showLoader(false);
 }
 
-// --- Dashboard & Filtering ---
-function renderDashboard() {
-  filterDashboard(); 
-}
+function renderDashboard() { filterDashboard(); }
 
 function filterDashboard() {
   const q = document.getElementById('dash-search').value.toLowerCase();
   const d = document.getElementById('dash-dept').value;
-  const tbody = document.getElementById('dash-body');
+  const tDesktop = document.getElementById('dash-body-desktop');
+  const tMobile = document.getElementById('dash-body-mobile');
   
   let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
   if (d) filtered = filtered.filter(l => l.Department.includes(d));
-  
   if (q) {
     const fuse = new Fuse(filtered, { keys:['Name', 'LeaveType'] });
     filtered = fuse.search(q).map(res => res.item);
   }
 
-  tbody.innerHTML = filtered.map(l => `
-    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-      <td class="p-3">${l.Name}</td>
-      <td class="p-3">${l.Department}</td>
-      <td class="p-3">${l.LeaveType} ${l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</td>
+  // Desktop Table (Name column uses purely l.Name)
+  tDesktop.innerHTML = filtered.map(l => `
+    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 border-b dark:border-gray-700 last:border-0">
+      <td class="p-3 font-medium">${l.Name}</td>
+      <td class="p-3 text-gray-500 dark:text-gray-400">${l.Department}</td>
+      <td class="p-3">${l.LeaveType} ${l.HalfDay !== 'None' ? '<span class="text-xs ml-1 bg-gray-200 dark:bg-gray-600 px-1 rounded">('+l.HalfDay+')</span>' : ''}</td>
       <td class="p-3">${formatDate(l.StartDate)} - ${formatDate(l.EndDate)}</td>
-      <td class="p-3 text-${l.Status.includes('Pending') ? 'orange' : 'green'}-600 font-medium">${l.Status}</td>
+      <td class="p-3 text-${l.Status.includes('Pending') ? 'orange' : 'green'}-600 font-semibold">${l.Status}</td>
     </tr>
+  `).join('');
+
+  // Mobile Cards 
+  tMobile.innerHTML = filtered.map(l => `
+    <div class="border border-gray-200 dark:border-gray-700 p-4 rounded-xl shadow-sm bg-white dark:bg-gray-800 flex flex-col">
+      <div class="flex justify-between items-start mb-1">
+        <h3 class="font-bold text-base">${l.Name} <span class="text-xs font-normal text-gray-500 ml-1">(${l.Department})</span></h3>
+        <span class="text-xs font-bold px-2 py-1 rounded bg-${l.Status.includes('Pending') ? 'orange' : 'green'}-100 text-${l.Status.includes('Pending') ? 'orange' : 'green'}-700">${l.Status.includes('Pending') ? 'Pending' : 'Approved'}</span>
+      </div>
+      <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">${l.LeaveType} ${l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</p>
+      <p class="text-xs text-gray-500"><span class="font-semibold">Dates:</span> ${formatDate(l.StartDate)} to ${formatDate(l.EndDate)}</p>
+    </div>
   `).join('');
 }
 
@@ -186,42 +159,75 @@ function renderMyLeaves() {
       </div>
       <p class="text-sm"><strong>Dates:</strong> ${formatDate(l.StartDate)} - ${formatDate(l.EndDate)} ${l.HalfDay !== 'None' ? '('+l.HalfDay+')' : ''}</p>
       <p class="text-sm"><strong>Covering:</strong> ${l.CoveringPerson}</p>
-      ${l.Status !== 'Cancelled' ? `<button onclick="cancelLeave('${l.ID}')" class="mt-3 text-sm font-semibold bg-red-100 hover:bg-red-200 text-red-700 px-4 py-1.5 rounded transition">Cancel Leave</button>` : ''}
+      ${l.Status !== 'Cancelled' ? `
+        <div class="flex space-x-2 mt-4">
+          <button onclick="triggerEdit('${l.ID}')" class="text-sm font-semibold bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-1.5 rounded transition">Edit</button>
+          <button onclick="cancelLeave('${l.ID}')" class="text-sm font-semibold bg-red-100 hover:bg-red-200 text-red-700 px-4 py-1.5 rounded transition">Cancel</button>
+        </div>` : ''}
     </div>
   `).reverse().join('') : '<p class="text-gray-500">No leaves submitted yet.</p>';
 }
 
-// --- Form Actions & Custom Toggles ---
+function triggerEdit(id) {
+  const l = allLeaves.find(x => x.ID === id);
+  if(!l) return;
+  currentEditId = id;
+  
+  document.getElementById('form-type').value = l.LeaveType;
+  document.getElementById('form-start').value = new Date(l.StartDate).toISOString().split('T')[0];
+  document.getElementById('form-end').value = new Date(l.EndDate).toISOString().split('T')[0];
+  document.getElementById('form-cover').value = l.CoveringPerson;
+  document.getElementById('form-country').value = l.Country || '';
+  document.getElementById('form-state').value = l.State || '';
+  document.getElementById('form-remarks').value = l.Remarks || '';
+
+  // Setup sliders logic reverse
+  let start = 'AM', end = 'PM';
+  if (l.HalfDay === 'AM') end = 'AM';
+  else if (l.HalfDay === 'PM') start = 'PM';
+  else if (l.HalfDay === 'Start PM, End AM') { start = 'PM'; end = 'AM'; }
+  else if (l.HalfDay === 'Start PM') start = 'PM';
+  else if (l.HalfDay === 'End AM') end = 'AM';
+
+  formTimeStart = start; updateTimeSlider('start', start);
+  formTimeEnd = end; updateTimeSlider('end', end);
+
+  toggleOverseasFields();
+  document.getElementById('submit-btn-text').innerText = "Update Forecast";
+  document.getElementById('cancel-edit-btn').classList.remove('hidden-view');
+  switchTab('submit-leave');
+}
+
+function cancelEditMode() {
+  currentEditId = null;
+  document.getElementById('leave-form').reset();
+  formTimeStart = 'AM'; updateTimeSlider('start', 'AM');
+  formTimeEnd = 'PM'; updateTimeSlider('end', 'PM');
+  toggleOverseasFields();
+  document.getElementById('submit-btn-text').innerText = "Submit Forecast";
+  document.getElementById('cancel-edit-btn').classList.add('hidden-view');
+  switchTab('my-leaves');
+}
+
 function toggleTime(type) {
-  if (type === 'start') {
-    formTimeStart = formTimeStart === 'AM' ? 'PM' : 'AM';
-    updateTimeSlider('start', formTimeStart);
-  } else {
-    formTimeEnd = formTimeEnd === 'AM' ? 'PM' : 'AM';
-    updateTimeSlider('end', formTimeEnd);
-  }
+  if (type === 'start') { formTimeStart = formTimeStart === 'AM' ? 'PM' : 'AM'; updateTimeSlider('start', formTimeStart); }
+  else { formTimeEnd = formTimeEnd === 'AM' ? 'PM' : 'AM'; updateTimeSlider('end', formTimeEnd); }
 }
 
 function updateTimeSlider(type, val) {
   const slider = document.getElementById(`${type}-slider`);
-  const textAM = document.getElementById(`${type}-am-text`);
-  const textPM = document.getElementById(`${type}-pm-text`);
-  
-  const activeClass = 'text-white';
-  const inactiveClasses =['text-gray-500', 'dark:text-gray-300'];
+  const tAM = document.getElementById(`${type}-am-text`);
+  const tPM = document.getElementById(`${type}-pm-text`);
+  const act = 'text-white', inact =['text-gray-500', 'dark:text-gray-300'];
 
   if (val === 'PM') {
     slider.classList.add('translate-x-full');
-    textAM.classList.remove(activeClass);
-    textAM.classList.add(...inactiveClasses);
-    textPM.classList.remove(...inactiveClasses);
-    textPM.classList.add(activeClass);
+    tAM.classList.remove(act); tAM.classList.add(...inact);
+    tPM.classList.remove(...inact); tPM.classList.add(act);
   } else {
     slider.classList.remove('translate-x-full');
-    textAM.classList.remove(...inactiveClasses);
-    textAM.classList.add(activeClass);
-    textPM.classList.remove(activeClass);
-    textPM.classList.add(...inactiveClasses);
+    tAM.classList.remove(...inact); tAM.classList.add(act);
+    tPM.classList.remove(act); tPM.classList.add(...inact);
   }
 }
 
@@ -235,22 +241,18 @@ function toggleOverseasFields() {
   } else {
     el.classList.add('hidden-view');
     countryInput.required = false;
-    countryInput.value = '';
-    document.getElementById('form-state').value = '';
+    countryInput.value = ''; document.getElementById('form-state').value = '';
   }
 }
 
 async function submitLeaveForm() {
   showLoader(true);
-  
-  // Calculate Half-Day logic string from Start/End toggles
   let calculatedHalfDay = 'None';
   const isSameDay = document.getElementById('form-start').value === document.getElementById('form-end').value;
 
   if (isSameDay) {
     if (formTimeStart === 'AM' && formTimeEnd === 'AM') calculatedHalfDay = 'AM';
     else if (formTimeStart === 'PM' && formTimeEnd === 'PM') calculatedHalfDay = 'PM';
-    // if Start AM and End PM -> Full day (None)
   } else {
     if (formTimeStart === 'PM' && formTimeEnd === 'AM') calculatedHalfDay = 'Start PM, End AM';
     else if (formTimeStart === 'PM') calculatedHalfDay = 'Start PM';
@@ -258,6 +260,7 @@ async function submitLeaveForm() {
   }
 
   const payload = {
+    id: currentEditId,
     name: user.name, phone: user.phone, departments: user.departments,
     leaveType: document.getElementById('form-type').value,
     startDate: document.getElementById('form-start').value,
@@ -270,17 +273,11 @@ async function submitLeaveForm() {
   };
 
   try {
-    const res = await apiCall('submitLeave', payload);
-    alert(res.status === 'Approved' ? "Leave successfully submitted and approved!" : "Leave submitted but marked as Pending due to constraints. Admin notified.");
-    
-    // Reset Form & Sliders manually
-    document.getElementById('leave-form').reset();
-    formTimeStart = 'AM'; updateTimeSlider('start', 'AM');
-    formTimeEnd = 'PM'; updateTimeSlider('end', 'PM');
-    
-    toggleOverseasFields();
+    const action = currentEditId ? 'editLeave' : 'submitLeave';
+    const res = await apiCall(action, payload);
+    alert(res.status === 'Approved' ? `Leave successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Leave marked as Pending due to constraints. Admin notified.");
+    cancelEditMode();
     loadLeavesData();
-    switchTab('my-leaves');
   } catch (err) { alert("Error: " + err.message); }
   showLoader(false);
 }
@@ -295,22 +292,14 @@ async function cancelLeave(id) {
   showLoader(false);
 }
 
-// --- PWA Service Worker & Update logic ---
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed: ', err));
-  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed: ', err)));
 }
-
 function updateApp() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      for(let registration of registrations) { registration.unregister(); }
-      caches.keys().then(function(names) {
-        for (let name of names) caches.delete(name);
-      }).then(() => window.location.reload(true));
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+      for(let reg of regs) { reg.unregister(); }
+      caches.keys().then(names => { for (let name of names) caches.delete(name); }).then(() => window.location.reload(true));
     });
-  } else {
-    window.location.reload(true);
-  }
+  } else window.location.reload(true);
 }
