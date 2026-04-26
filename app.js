@@ -3,14 +3,14 @@ let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
 
-let companyContacts =[];
+let companyContacts = [];
 let validContactNames =[];
 let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
 let tempLeaveTypes = [];
-let adminKAHList =[];
+let adminKAHList = [];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
 
@@ -106,7 +106,9 @@ function showLogin() {
   document.getElementById('logout-btn').classList.add('hidden');
   document.getElementById('menu-btn').classList.add('hidden');
   document.getElementById('active-tab-title').classList.add('hidden');
-  document.getElementById('dash-dept-nav').classList.add('hidden');
+  
+  const deptNav = document.getElementById('dash-dept-nav');
+  if (deptNav) deptNav.classList.add('hidden');
 }
 
 async function handleLogin() {
@@ -118,7 +120,8 @@ async function handleLogin() {
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
     showApp();
-  } catch (err) { alertError('login-alert', err.message); showLoader(false); }
+  } catch (err) { alertError('login-alert', err.message); }
+  showLoader(false);
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
@@ -136,11 +139,13 @@ function applyMenuOrder(orderArr) {
   const menuContainer = document.getElementById('slide-menu-items');
   const adminBtn = document.getElementById('menu-admin');
   
-  orderArr.forEach(id => {
-    const btn = document.getElementById(`menu-${id}`);
-    if (btn) menuContainer.appendChild(btn);
-  });
-  if (adminBtn) menuContainer.appendChild(adminBtn); 
+  if(menuContainer) {
+    orderArr.forEach(id => {
+      const btn = document.getElementById(`menu-${id}`);
+      if (btn) menuContainer.appendChild(btn);
+    });
+    if (adminBtn) menuContainer.appendChild(adminBtn); 
+  }
 }
 
 async function showApp() {
@@ -159,16 +164,20 @@ async function showApp() {
     document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name}` : user.name;['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('menu-admin').classList.add('hidden'); 
     
+    // We initially switch to whichever tab is natively first before settings load
+    switchTab('dashboard'); 
     await loadLeavesData();
     
     try {
       const settings = await apiCall('getSettings', { adminPass: null }); 
       window.appLeaveTypes = settings.leaveTypes; 
-      document.getElementById('form-leave-type').innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+      
+      const formLeaveType = document.getElementById('form-leave-type');
+      if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
       
       const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
       applyMenuOrder(mOrder);
-      switchTab(mOrder[0]); 
+      switchTab(mOrder[0]); // force start on the configured first menu item
       
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
@@ -176,8 +185,12 @@ async function showApp() {
         validContactNames = uniqueNames.map(n => n.toLowerCase());
         
         const uniqueDepts =[...new Set(companyContacts.map(c => c.dept))];
-        document.getElementById('dash-dept').innerHTML = '<option value="">All Departments</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
-        document.getElementById('dash-dept-nav').innerHTML = '<option value="">All Depts</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+        const deptNav = document.getElementById('dash-dept-nav');
+        
+        // Populate the navigation dropdown correctly
+        if (deptNav) {
+          deptNav.innerHTML = '<option value="">All Depts</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+        }
         
         fuseAllContacts = new Fuse(companyContacts, { keys:['name', 'dept'], threshold: 0.3 });
         
@@ -187,29 +200,34 @@ async function showApp() {
         });
         fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
-    } catch(e){}
+    } catch(e) {
+      console.error("Error loading settings: ", e);
+    }
   }
   showLoader(false);
 }
+
 
 function switchTab(tabId) {
   closeMenu();
   document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('flex'); });
   const view = document.getElementById(`view-${tabId}`);
-  view.classList.remove('hidden-view');
-  if(['dashboard','my-leaves','parade-state'].includes(tabId)) view.classList.add('flex');
+  if (view) view.classList.remove('hidden-view');
+  if(['dashboard','my-leaves','parade-state'].includes(tabId) && view) view.classList.add('flex');
   
   document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
     btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
   });
   const activeMenu = document.getElementById(`menu-${tabId}`);
   if(activeMenu) activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
-  document.getElementById('active-tab-title').innerText = TAB_NAMES[tabId] || '';
   
-  if (tabId === 'dashboard') {
-    document.getElementById('dash-dept-nav').classList.remove('hidden');
-  } else {
-    document.getElementById('dash-dept-nav').classList.add('hidden');
+  const titleEl = document.getElementById('active-tab-title');
+  if (titleEl) titleEl.innerText = TAB_NAMES[tabId] || '';
+  
+  const deptNav = document.getElementById('dash-dept-nav');
+  if (deptNav) {
+    if (tabId === 'dashboard') deptNav.classList.remove('hidden');
+    else deptNav.classList.add('hidden');
   }
   
   if (tabId === 'parade-state') renderParadeState();
@@ -217,7 +235,16 @@ function switchTab(tabId) {
 
 // --- General App logic ---
 async function loadLeavesData() {
-  try { allLeaves = await apiCall('getLeaves'); renderDashboard(); renderMyLeaves(); if(!document.getElementById('view-parade-state').classList.contains('hidden-view')) renderParadeState(); } catch (err) {}
+  try { 
+    allLeaves = await apiCall('getLeaves'); 
+    renderDashboard(); 
+    renderMyLeaves(); 
+    
+    const paradeView = document.getElementById('view-parade-state');
+    if(paradeView && !paradeView.classList.contains('hidden-view')) renderParadeState(); 
+  } catch (err) {
+    console.error("Error loading leaves data: ", err);
+  }
 }
 
 function changeMonth(ctx, offset) {
@@ -295,8 +322,12 @@ function buildAgendaHtml(items, isMyCalendar) {
 }
 
 function renderDashboard() {
-  const q = document.getElementById('dash-search').value.toLowerCase();
-  const d = document.getElementById('dash-dept-nav').value || document.getElementById('dash-dept').value;
+  const searchEl = document.getElementById('dash-search');
+  const q = searchEl ? searchEl.value.toLowerCase() : '';
+  
+  const deptNav = document.getElementById('dash-dept-nav');
+  const d = deptNav ? deptNav.value : '';
+  
   let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
   if (d) filtered = filtered.filter(l => l.Department.includes(d));
   if (q) {
@@ -304,9 +335,14 @@ function renderDashboard() {
     filtered = fuse.search(q).map(res => res.item);
   }
 
-  document.getElementById('dash-cal-month').innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
-  document.getElementById('dash-cal-grid').innerHTML = buildCalendarHTML('dash', dashMonth, dashDate, filtered);
-  document.getElementById('dash-agenda-title').innerText = formatDisplayDate(dashDate);
+  const monthEl = document.getElementById('dash-cal-month');
+  if (monthEl) monthEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
+  
+  const gridEl = document.getElementById('dash-cal-grid');
+  if (gridEl) gridEl.innerHTML = buildCalendarHTML('dash', dashMonth, dashDate, filtered);
+  
+  const titleEl = document.getElementById('dash-agenda-title');
+  if (titleEl) titleEl.innerText = formatDisplayDate(dashDate);
 
   const dashTarget = new Date(dashDate); dashTarget.setHours(0,0,0,0);
   const itemsForDate = filtered.filter(l => {
@@ -314,14 +350,22 @@ function renderDashboard() {
     const e = new Date(l.EndDate); e.setHours(0,0,0,0);
     return dashTarget >= s && dashTarget <= e;
   });
-  document.getElementById('dash-agenda').innerHTML = buildAgendaHtml(itemsForDate, false);
+  
+  const agendaEl = document.getElementById('dash-agenda');
+  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, false);
 }
 
 function renderMyLeaves() {
   const my = allLeaves.filter(l => l.Phone == user.phone || (l.Attendees && l.Attendees.includes(user.phone)));
-  document.getElementById('my-cal-month').innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
-  document.getElementById('my-cal-grid').innerHTML = buildCalendarHTML('my', myMonth, myDate, my);
-  document.getElementById('my-agenda-title').innerText = formatDisplayDate(myDate);
+  
+  const monthEl = document.getElementById('my-cal-month');
+  if (monthEl) monthEl.innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
+  
+  const gridEl = document.getElementById('my-cal-grid');
+  if (gridEl) gridEl.innerHTML = buildCalendarHTML('my', myMonth, myDate, my);
+  
+  const titleEl = document.getElementById('my-agenda-title');
+  if (titleEl) titleEl.innerText = formatDisplayDate(myDate);
 
   const myTarget = new Date(myDate); myTarget.setHours(0,0,0,0);
   const itemsForDate = my.filter(l => {
@@ -330,18 +374,24 @@ function renderMyLeaves() {
     const e = new Date(l.EndDate); e.setHours(0,0,0,0);
     return myTarget >= s && myTarget <= e;
   });
-  document.getElementById('my-agenda').innerHTML = buildAgendaHtml(itemsForDate, true);
+  
+  const agendaEl = document.getElementById('my-agenda');
+  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, true);
 
   const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
-  document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
-    ? `<details class="group cursor-pointer text-sm">
-         <summary class="font-bold text-gray-700 dark:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
-           <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90 text-gray-700 dark:text-darktext" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-           <span class="text-gray-700 dark:text-darktext">Cancelled (${cancelledLeaves.length})</span>
-         </summary>
-         <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true)}</div>
-       </details>`
-    : '';
+  const cancelContainer = document.getElementById('cancelled-leaves-container');
+  
+  if (cancelContainer) {
+    cancelContainer.innerHTML = cancelledLeaves.length 
+      ? `<details class="group cursor-pointer text-sm">
+           <summary class="font-bold text-gray-700 dark:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
+             <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90 text-gray-700 dark:text-darktext" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+             <span class="text-gray-700 dark:text-darktext">Cancelled (${cancelledLeaves.length})</span>
+           </summary>
+           <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true)}</div>
+         </details>`
+      : '';
+  }
 }
 
 // --- Parade State Logic ---
@@ -390,7 +440,8 @@ function renderParadeState() {
     });
   });
 
-  document.getElementById('parade-state-header').innerText = `Overall Parade State: (${inOfficeGlobal} / ${totalGlobal})`;
+  const paradeHeader = document.getElementById('parade-state-header');
+  if (paradeHeader) paradeHeader.innerText = `Overall Parade State: (${inOfficeGlobal} / ${totalGlobal})`;
 
   const isHQ = (str) => str.toLowerCase() === 'hq';
   const deptKeys = Object.keys(deptMap).sort((a, b) => {
@@ -426,7 +477,8 @@ function renderParadeState() {
     `;
   });
 
-  document.getElementById('parade-state-body').innerHTML = html;
+  const paradeBody = document.getElementById('parade-state-body');
+  if (paradeBody) paradeBody.innerHTML = html;
 }
 
 // --- Attendees Form Logic ---
@@ -455,12 +507,14 @@ function selectAttendee(id, name, dept, type) {
 function removeAttendee(id) { eventAttendees = eventAttendees.filter(a => a.id !== id); renderAttendees(); }
 function renderAttendees() {
   const c = document.getElementById('attendees-chip-container');
-  c.innerHTML = eventAttendees.map(a => `
-    <div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-full px-3 py-1 text-sm font-semibold">
-      ${a.name}
-      <button type="button" onclick="removeAttendee('${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
-    </div>
-  `).join('');
+  if(c) {
+    c.innerHTML = eventAttendees.map(a => `
+      <div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-full px-3 py-1 text-sm font-semibold">
+        ${a.name}
+        <button type="button" onclick="removeAttendee('${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
+      </div>
+    `).join('');
+  }
 }
 
 // --- Covering Person Form Logic ---
@@ -650,15 +704,13 @@ async function submitForm(ctx) {
     const res = await apiCall(action, payload);
     alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
     cancelEditMode(); loadLeavesData();
-  } catch (err) { alert("Error: " + err.message); }
-  showLoader(false);
+  } catch (err) { alert("Error: " + err.message); showLoader(false); }
 }
 
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) {}
-  showLoader(false);
+  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) { showLoader(false); }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
@@ -870,6 +922,7 @@ async function loadAdminSettings() {
 
 function renderMenuOrder() {
   const list = document.getElementById('menu-order-list');
+  if(!list) return;
   list.innerHTML = tempMenuOrder.map((id) => `
     <div data-id="${id}" class="flex justify-between items-center bg-white dark:bg-darksurface p-3 rounded-lg border dark:border-darkborder shadow-sm cursor-grab">
       <div class="flex items-center space-x-3 w-full">
@@ -891,7 +944,9 @@ function renderMenuOrder() {
 }
 
 function renderLeaveTypes() {
-  document.getElementById('leave-types-list').innerHTML = tempLeaveTypes.map((t, i) => `
+  const list = document.getElementById('leave-types-list');
+  if(!list) return;
+  list.innerHTML = tempLeaveTypes.map((t, i) => `
     <div class="flex items-center space-x-3">
       <input type="text" value="${t}" onchange="updateLeaveType(${i}, this.value)" class="flex-grow border-2 border-gray-300 dark:border-darkborder rounded-xl py-2 px-4 bg-white dark:bg-darkinput outline-none shadow-sm focus:border-blue-500 transition">
       <button type="button" onclick="removeLeaveType(${i})" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 p-2.5 rounded-xl transition" title="Remove Type"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
@@ -900,7 +955,7 @@ function renderLeaveTypes() {
 }
 function addLeaveType() {
   const input = document.getElementById('new-leave-type');
-  if(input.value.trim()) { tempLeaveTypes.push(input.value.trim()); input.value = ''; renderLeaveTypes(); }
+  if(input && input.value.trim()) { tempLeaveTypes.push(input.value.trim()); input.value = ''; renderLeaveTypes(); }
 }
 function removeLeaveType(i) { tempLeaveTypes.splice(i, 1); renderLeaveTypes(); }
 function updateLeaveType(i, val) { tempLeaveTypes[i] = val.trim(); }
@@ -928,7 +983,9 @@ function addKAH(phone, name, dept) {
 }
 function removeKAH(phone) { adminKAHList = adminKAHList.filter(k => k.phone !== phone); renderKAHSelected(); }
 function renderKAHSelected() {
-  document.getElementById('kah-selected-list').innerHTML = adminKAHList.map(k => `
+  const list = document.getElementById('kah-selected-list');
+  if(!list) return;
+  list.innerHTML = adminKAHList.map(k => `
     <li class="flex justify-between items-center border-b dark:border-darkborder py-2">
       <span class="font-medium">${k.name} <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${k.dept})</span></span>
       <button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button>
