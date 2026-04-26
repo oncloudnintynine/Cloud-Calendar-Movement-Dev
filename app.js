@@ -3,15 +3,15 @@ let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
 
-let companyContacts = [];
+let companyContacts =[];
 let validContactNames =[];
 let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
-let tempLeaveTypes =[];
+let tempLeaveTypes = [];
 let adminKAHList = [];
-let tempMenuOrder = [];
+let tempMenuOrder =[];
 let eventAttendees =[]; 
 
 let appData = {
@@ -210,8 +210,10 @@ function switchTab(tabId) {
   closeMenu();
   document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('flex'); });
   const view = document.getElementById(`view-${tabId}`);
-  if (view) view.classList.remove('hidden-view');
-  if(['dashboard','my-leaves','parade-state'].includes(tabId) && view) view.classList.add('flex');
+  if (view) {
+    view.classList.remove('hidden-view');
+    view.classList.add('flex'); // Apply flex constraint to all tabs natively
+  }
   
   document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
     btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
