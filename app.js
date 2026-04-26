@@ -10,7 +10,7 @@ let fuseAttendees = null;
 
 // Form & Admin State
 let tempLeaveTypes =[];
-let adminKAHList = [];
+let adminKAHList =[];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
 
@@ -122,7 +122,10 @@ async function handleLogin() {
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
     showApp();
-  } catch (err) { alertError('login-alert', err.message); showLoader(false); }
+  } catch (err) { 
+    alertError('login-alert', err.message); 
+    showLoader(false); 
+  }
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
@@ -172,9 +175,6 @@ async function showApp() {
       const formLeaveType = document.getElementById('form-leave-type');
       if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
       
-      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-      applyMenuOrder(mOrder);
-      
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
         const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -196,6 +196,10 @@ async function showApp() {
         fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
 
+      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+      applyMenuOrder(mOrder);
+      
+      // Load the data entirely before switching tab so parade state resolves instantly
       await loadLeavesData();
       switchTab(mOrder[0]); 
 
@@ -205,7 +209,6 @@ async function showApp() {
   }
   showLoader(false);
 }
-
 
 function switchTab(tabId) {
   closeMenu();
@@ -455,6 +458,7 @@ function renderParadeState() {
         
         const sDate = new Date(l.StartDate);
         const eDate = new Date(l.EndDate);
+        // Bump EndDate to 23:59:59 to accurately encompass the entire final day for leave checks
         eDate.setHours(23, 59, 59, 999);
         
         return sDate <= now && eDate >= now;
@@ -727,8 +731,15 @@ async function submitForm(ctx) {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
     loc = document.getElementById('form-event-location').value;
     
+    let resolvedPhones = new Set();
     eventAttendees.forEach(a => {
-      finalDepts.add(a.dept);
+      if (a.type === 'contact') {
+        resolvedPhones.add(a.id);
+        finalDepts.add(a.dept);
+      } else if (a.type === 'group') {
+        finalDepts.add(a.dept);
+        companyContacts.filter(c => c.dept === a.dept).forEach(c => resolvedPhones.add(c.phone));
+      }
     });
     finalAttendeesStr = JSON.stringify(eventAttendees);
   }
@@ -749,14 +760,26 @@ async function submitForm(ctx) {
     const action = currentEditId ? 'editLeave' : 'submitLeave';
     const res = await apiCall(action, payload);
     alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
-    cancelEditMode(); loadLeavesData();
-  } catch (err) { alert("Error: " + err.message); showLoader(false); }
+    cancelEditMode(); 
+    await loadLeavesData();
+  } catch (err) { 
+    alert("Error: " + err.message); 
+  } finally {
+    showLoader(false); 
+  }
 }
 
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) { showLoader(false); }
+  try { 
+    await apiCall('cancelLeave', { id: id, phone: user.phone }); 
+    await loadLeavesData(); 
+  } catch (err) {
+    alert("Error: " + err.message);
+  } finally {
+    showLoader(false); 
+  }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
@@ -1013,53 +1036,4 @@ function searchKAH() {
   const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
   if(results.length > 0) {
     resC.innerHTML = results.map(c => `
-      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} <span class="text-xs text-gray-500 ml-1">(${c.dept})</span></div>
-    `).join('');
-    resC.classList.remove('hidden-view');
-  } else {
-    resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
-  }
-}
-function addKAH(phone, name, dept) {
-  if(!adminKAHList.some(k => k.phone === phone)) {
-    adminKAHList.push({ phone, name, dept }); renderKAHSelected();
-  }
-  document.getElementById('kah-search').value = '';
-  document.getElementById('kah-results').classList.add('hidden-view');
-}
-function removeKAH(phone) { adminKAHList = adminKAHList.filter(k => k.phone !== phone); renderKAHSelected(); }
-
-function renderKAHSelected() {
-  const list = document.getElementById('kah-selected-list');
-  if(!list) return;
-  if (adminKAHList.length === 0) {
-    list.innerHTML = `<li class="text-gray-500 dark:text-darkmuted text-sm text-center italic py-2">No KAH personnel added yet.</li>`;
-    return;
-  }
-  list.innerHTML = adminKAHList.map(k => `
-    <li class="flex justify-between items-center border-b dark:border-darkborder py-2 last:border-0">
-      <span class="font-medium">${k.name} <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${k.dept})</span></span>
-      <button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button>
-    </li>
-  `).join('');
-}
-
-async function saveAdminSettings() {
-  showLoader(true);
-  const newPass = document.getElementById('set-admin-pass').value || null;
-  const payload = {
-    adminPass: user.pass, newAdminPass: newPass,
-    menuOrder: tempMenuOrder,
-    leaveTypes: tempLeaveTypes.filter(Boolean),
-    kahLimit: document.getElementById('set-kah-limit').value,
-    approvingAuthority: document.getElementById('set-appr-email').value,
-    kahList: adminKAHList
-  };
-  try {
-    await apiCall('saveSettings', payload);
-    alert("Settings successfully saved!");
-    if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
-    applyMenuOrder(tempMenuOrder); 
-  } catch (err) { alert("Error: " + err.message); }
-  showLoader(false);
-}
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} <span class="text-xs text-gray-500 ml-1">(${c.dept})<
