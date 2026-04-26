@@ -9,8 +9,8 @@ let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
-let tempLeaveTypes =[];
-let adminKAHList = [];
+let tempLeaveTypes = [];
+let adminKAHList =[];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
 
@@ -81,9 +81,11 @@ function togglePassword(id, btnElement) {
 
 const mos =['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function formatDisplayDate(dateObj) {
+  if (isNaN(dateObj)) return '';
   return `${String(dateObj.getDate()).padStart(2,'0')} ${mos[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
 }
 function formatDisplayDateTime(dateObj) {
+  if (isNaN(dateObj)) return '';
   return `${formatDisplayDate(dateObj)} ${String(dateObj.getHours()).padStart(2,'0')}:${String(dateObj.getMinutes()).padStart(2,'0')}`;
 }
 
@@ -170,6 +172,9 @@ async function showApp() {
       const formLeaveType = document.getElementById('form-leave-type');
       if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
       
+      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+      applyMenuOrder(mOrder);
+      
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
         const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -191,10 +196,6 @@ async function showApp() {
         fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
 
-      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-      applyMenuOrder(mOrder);
-      
-      // Load the data entirely before switching tab so parade state resolves instantly
       await loadLeavesData();
       switchTab(mOrder[0]); 
 
@@ -284,13 +285,14 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
 }
 
 function getBadgeClass(status) {
-  if(status.includes('Pending')) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
-  if(status.includes('Cancelled')) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+  const safeStatus = String(status || '');
+  if(safeStatus.includes('Pending')) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+  if(safeStatus.includes('Cancelled')) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
   return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
 }
 
 function buildAgendaHtml(items, isMyCalendar) {
-  if (items.length === 0) return `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records for this date.</p>`;
+  if (!items || items.length === 0) return `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records for this date.</p>`;
   return items.map(l => {
     const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
     const startStr = isEvent ? formatDisplayDateTime(new Date(l.StartDate)) : formatDisplayDate(new Date(l.StartDate));
@@ -304,10 +306,10 @@ function buildAgendaHtml(items, isMyCalendar) {
     return `
     <div class="border border-gray-200 dark:border-darkborder p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
       <div class="flex justify-between items-start mb-2">
-        <h3 class="font-bold text-base">${isMyCalendar ? l.LeaveType : l.Name + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-sm">(' + l.Department + ')</span>'}</h3>
-        <span class="text-[11px] font-bold px-2 py-1 rounded ${getBadgeClass(l.Status)}">${l.Status.replace('Approved', 'Cal Updated')}</span>
+        <h3 class="font-bold text-base">${isMyCalendar ? (l.LeaveType||'') : (l.Name||'') + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-sm">(' + (l.Department||'') + ')</span>'}</h3>
+        <span class="text-[11px] font-bold px-2 py-1 rounded ${getBadgeClass(l.Status)}">${String(l.Status||'').replace('Approved', 'Cal Updated')}</span>
       </div>
-      <p class="font-medium text-gray-700 dark:text-darktext">${isMyCalendar ? '' : l.LeaveType + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
+      <p class="font-medium text-gray-700 dark:text-darktext">${isMyCalendar ? '' : (l.LeaveType||'') + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
       <p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
       ${isEvent && l.Location ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
       ${!isEvent && l.Country ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${l.Country} ${l.State ? `(${l.State})` : ''}</p>` : ''}
@@ -326,7 +328,7 @@ function renderDashboard() {
   const d = deptNav ? deptNav.value : '';
   
   let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
-  if (d) filtered = filtered.filter(l => l.Department.includes(d));
+  if (d) filtered = filtered.filter(l => String(l.Department||'').includes(d));
   if (q) {
     const fuse = new Fuse(filtered, { keys:['Name', 'LeaveType'] });
     filtered = fuse.search(q).map(res => res.item);
@@ -353,7 +355,7 @@ function renderDashboard() {
 }
 
 function renderMyLeaves() {
-  const my = allLeaves.filter(l => l.Phone == user.phone || (l.Attendees && l.Attendees.includes(user.phone)));
+  const my = allLeaves.filter(l => l.Phone == user.phone || (l.Attendees && String(l.Attendees).includes(user.phone)));
   
   const monthEl = document.getElementById('my-cal-month');
   if (monthEl) monthEl.innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
@@ -398,95 +400,105 @@ function renderParadeState() {
 
   if (!companyContacts || companyContacts.length === 0) {
     if(paradeHeader) paradeHeader.innerText = `Overall Parade State`;
-    if(paradeBody) paradeBody.innerHTML = `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">Loading personnel data...</p>`;
+    if(paradeBody) paradeBody.innerHTML = `<div class="flex items-center justify-center h-32"><p class="text-gray-500 dark:text-darkmuted italic">Loading personnel data or no contacts found...</p></div>`;
     return;
   }
 
   const now = new Date();
-  
   let inOfficeGlobal = 0;
   let totalGlobal = companyContacts.length;
   let deptMap = {};
 
-  companyContacts.forEach(contact => {
-    if (!deptMap[contact.dept]) deptMap[contact.dept] = { members:[], total:0, inOffice:0 };
-    
-    const activeRecords = allLeaves.filter(l => {
-      if (l.Status === 'Cancelled') return false;
-      if (l.Phone != contact.phone && !(l.Attendees && l.Attendees.includes(contact.phone))) return false;
+  try {
+    companyContacts.forEach(contact => {
+      const contactDept = String(contact.dept || 'Unassigned');
+      if (!deptMap[contactDept]) deptMap[contactDept] = { members:[], total:0, inOffice:0 };
       
-      const sDate = new Date(l.StartDate);
-      const eDate = new Date(l.EndDate);
-      // Bump EndDate to 23:59:59 to accurately encompass the entire final day for leave checks
-      eDate.setHours(23, 59, 59, 999);
+      const activeRecords = allLeaves.filter(l => {
+        if (l.Status === 'Cancelled') return false;
+        
+        const attendeesStr = String(l.Attendees || '');
+        const phoneStr = String(l.Phone || '');
+        const contactPhoneStr = String(contact.phone || '');
+        
+        if (phoneStr !== contactPhoneStr && !attendeesStr.includes(contactPhoneStr)) return false;
+        
+        const sDate = new Date(l.StartDate);
+        const eDate = new Date(l.EndDate);
+        // Bump EndDate to 23:59:59 to accurately encompass the entire final day for leave checks
+        eDate.setHours(23, 59, 59, 999);
+        
+        return sDate <= now && eDate >= now;
+      });
       
-      return sDate <= now && eDate >= now;
-    });
-    
-    let isOffice = true;
-    let locationStr = 'Office';
+      let isOffice = true;
+      let locationStr = 'Office';
 
-    if (activeRecords.length > 0) {
-      const r = activeRecords[0];
-      const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(r.LeaveType);
-      
-      if (isEvent) {
-        locationStr = r.Location || 'Event';
-        isOffice = locationStr.toLowerCase() === 'office';
-      } else {
-        locationStr = r.LeaveType;
-        if (r.Country) locationStr += ` (${r.Country})`;
-        isOffice = false;
+      if (activeRecords.length > 0) {
+        const r = activeRecords[0];
+        const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(r.LeaveType);
+        
+        if (isEvent) {
+          locationStr = r.Location || 'Event';
+          isOffice = String(locationStr).toLowerCase() === 'office';
+        } else {
+          locationStr = r.LeaveType || 'Leave';
+          if (r.Country) locationStr += ` (${r.Country})`;
+          isOffice = false;
+        }
       }
-    }
 
-    deptMap[contact.dept].total++;
-    if (isOffice) { deptMap[contact.dept].inOffice++; inOfficeGlobal++; }
-    
-    deptMap[contact.dept].members.push({
-      name: contact.name,
-      isOffice: isOffice,
-      location: locationStr
-    });
-  });
-
-  if (paradeHeader) paradeHeader.innerText = `Overall Parade State: (${inOfficeGlobal} / ${totalGlobal})`;
-
-  const isHQ = (str) => str.toLowerCase() === 'hq';
-  const deptKeys = Object.keys(deptMap).sort((a, b) => {
-    if (isHQ(a) && !isHQ(b)) return -1;
-    if (!isHQ(a) && isHQ(b)) return 1;
-    return a.localeCompare(b);
-  });
-
-  let html = '';
-  deptKeys.forEach(dept => {
-    const d = deptMap[dept];
-    d.members.sort((a, b) => {
-      if (a.isOffice && !b.isOffice) return -1;
-      if (!a.isOffice && b.isOffice) return 1;
-      return a.name.localeCompare(b.name);
+      deptMap[contactDept].total++;
+      if (isOffice) { deptMap[contactDept].inOffice++; inOfficeGlobal++; }
+      
+      deptMap[contactDept].members.push({
+        name: contact.name || 'Unknown',
+        isOffice: isOffice,
+        location: locationStr
+      });
     });
 
-    html += `
-      <div class="mb-6 border-l-4 border-blue-500 pl-4">
-        <h3 class="font-bold text-lg mb-2 text-gray-800 dark:text-gray-100">${dept} <span class="text-sm font-semibold text-gray-500 dark:text-darkmuted">(${d.inOffice} / ${d.total})</span></h3>
-        <div class="space-y-1.5 text-[15px]">
-          ${d.members.map((m, i) => `
-            <div class="flex items-start">
-              <span class="w-6 shrink-0 text-right mr-3 text-gray-400 dark:text-darkmuted font-medium">${i+1}.</span>
-              <div>
-                <span class="font-semibold ${m.isOffice ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-darkmuted'}">${m.name}</span>
-                ${!m.isOffice ? `<span class="italic text-gray-500 dark:text-darkmuted ml-1">(${m.location})</span>` : ''}
+    if (paradeHeader) paradeHeader.innerText = `Overall Parade State: (${inOfficeGlobal} / ${totalGlobal})`;
+
+    const isHQ = (str) => str && String(str).toLowerCase() === 'hq';
+    const deptKeys = Object.keys(deptMap).sort((a, b) => {
+      if (isHQ(a) && !isHQ(b)) return -1;
+      if (!isHQ(a) && isHQ(b)) return 1;
+      return String(a).localeCompare(String(b));
+    });
+
+    let html = '';
+    deptKeys.forEach(dept => {
+      const d = deptMap[dept];
+      d.members.sort((a, b) => {
+        if (a.isOffice && !b.isOffice) return -1;
+        if (!a.isOffice && b.isOffice) return 1;
+        return String(a.name).localeCompare(String(b.name));
+      });
+
+      html += `
+        <div class="mb-6 border-l-4 border-blue-500 pl-4">
+          <h3 class="font-bold text-lg mb-2 text-gray-800 dark:text-gray-100">${dept} <span class="text-sm font-semibold text-gray-500 dark:text-darkmuted">(${d.inOffice} / ${d.total})</span></h3>
+          <div class="space-y-1.5 text-[15px]">
+            ${d.members.map((m, i) => `
+              <div class="flex items-start">
+                <span class="w-6 shrink-0 text-right mr-3 text-gray-400 dark:text-darkmuted font-medium">${i+1}.</span>
+                <div>
+                  <span class="font-semibold ${m.isOffice ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-darkmuted'}">${m.name}</span>
+                  ${!m.isOffice ? `<span class="italic text-gray-500 dark:text-darkmuted ml-1">(${m.location})</span>` : ''}
+                </div>
               </div>
-            </div>
-          `).join('')}
+            `).join('')}
+          </div>
         </div>
-      </div>
-    `;
-  });
+      `;
+    });
 
-  if (paradeBody) paradeBody.innerHTML = html;
+    if (paradeBody) paradeBody.innerHTML = html || `<p class="text-center text-gray-500">No departments to display.</p>`;
+  } catch(err) {
+    console.error('Parade State Render Error:', err);
+    if (paradeBody) paradeBody.innerHTML = `<p class="text-red-500 text-center p-4">Error generating parade state. Please check console.</p>`;
+  }
 }
 
 // --- Attendees Form Logic ---
@@ -565,9 +577,9 @@ function triggerEdit(id) {
     
     eventAttendees =[];
     if(l.Attendees) {
-      const savedPhones = l.Attendees.split(',');
+      const savedPhones = String(l.Attendees).split(',');
       savedPhones.forEach(ph => {
-        const contact = companyContacts.find(c => c.phone === ph);
+        const contact = companyContacts.find(c => String(c.phone) === String(ph));
         if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, dept: contact.dept, type: 'contact' });
       });
     }
