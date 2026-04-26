@@ -63,16 +63,12 @@ async function showApp() {
   document.getElementById('logout-btn').classList.remove('hidden');
   
   if (user.role === 'admin') {
-    document.getElementById('nav-user-name').innerText = "Administrator";
-    ['tab-dashboard','tab-my-leaves','tab-submit-leave'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    document.getElementById('nav-user-name').innerText = "Administrator";['tab-dashboard','tab-my-leaves','tab-submit-leave'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('tab-admin').classList.remove('hidden');
     switchTab('admin');
     if (typeof loadAdminSettings === 'function') loadAdminSettings();
   } else {
-    // Top Nav name formatting "Name [Dept]"
-    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;
-    
-    ['tab-dashboard','tab-my-leaves','tab-submit-leave'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;['tab-dashboard','tab-my-leaves','tab-submit-leave'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('tab-admin').classList.add('hidden');
     switchTab('dashboard');
     loadLeavesData();
@@ -125,7 +121,6 @@ function filterDashboard() {
     filtered = fuse.search(q).map(res => res.item);
   }
 
-  // Desktop Table (Name column uses purely l.Name)
   tDesktop.innerHTML = filtered.map(l => `
     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 border-b dark:border-gray-700 last:border-0">
       <td class="p-3 font-medium">${l.Name}</td>
@@ -136,7 +131,6 @@ function filterDashboard() {
     </tr>
   `).join('');
 
-  // Mobile Cards 
   tMobile.innerHTML = filtered.map(l => `
     <div class="border border-gray-200 dark:border-gray-700 p-4 rounded-xl shadow-sm bg-white dark:bg-gray-800 flex flex-col">
       <div class="flex justify-between items-start mb-1">
@@ -181,7 +175,6 @@ function triggerEdit(id) {
   document.getElementById('form-state').value = l.State || '';
   document.getElementById('form-remarks').value = l.Remarks || '';
 
-  // Setup sliders logic reverse
   let start = 'AM', end = 'PM';
   if (l.HalfDay === 'AM') end = 'AM';
   else if (l.HalfDay === 'PM') start = 'PM';
@@ -292,14 +285,26 @@ async function cancelLeave(id) {
   showLoader(false);
 }
 
+// --- PWA Service Worker & Deep Update logic ---
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed: ', err)));
 }
-function updateApp() {
+
+function animateAndUpdate(btn) {
+  const icon = btn.querySelector('svg');
+  if (icon) icon.classList.add('animate-spin'); // Apply spinning visual
+  setTimeout(() => { updateApp(); }, 300); // Small visual delay before hard refresh sequence
+}
+
+async function updateApp() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(regs) {
-      for(let reg of regs) { reg.unregister(); }
-      caches.keys().then(names => { for (let name of names) caches.delete(name); }).then(() => window.location.reload(true));
-    });
-  } else window.location.reload(true);
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (let reg of regs) await reg.unregister(); // Delete all active workers
+      const names = await caches.keys();
+      for (let name of names) await caches.delete(name); // Purge absolutely all saved assets
+    } catch(err) { console.error('Cache clearance error', err); }
+  }
+  // Force hard reload bypassing cache using query string to guarantee the newest version is pulled
+  window.location.href = window.location.pathname + '?v=' + new Date().getTime();
 }
