@@ -33,6 +33,26 @@ document.addEventListener('DOMContentLoaded', () => {
   initDates();
 });
 
+// --- Menu UI Logic ---
+function toggleMenu() {
+  const menu = document.getElementById('slide-menu');
+  const panel = document.getElementById('slide-menu-panel');
+  if (menu.classList.contains('hidden-view')) {
+    menu.classList.remove('hidden-view');
+    // slight delay for the CSS transition to catch
+    setTimeout(() => { panel.classList.remove('-translate-x-full'); }, 10);
+  } else {
+    closeMenu();
+  }
+}
+
+function closeMenu() {
+  const menu = document.getElementById('slide-menu');
+  const panel = document.getElementById('slide-menu-panel');
+  panel.classList.add('-translate-x-full');
+  setTimeout(() => { menu.classList.add('hidden-view'); }, 300); // match transition duration
+}
+
 function toggleTheme() {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
@@ -75,6 +95,8 @@ function showLogin() {
   document.getElementById('login-view').classList.remove('hidden-view');
   document.getElementById('app-view').classList.add('hidden-view');
   document.getElementById('logout-btn').classList.add('hidden');
+  document.getElementById('menu-btn').classList.add('hidden');
+  document.getElementById('active-tab-title').classList.add('hidden');
 }
 
 async function handleLogin() {
@@ -95,14 +117,18 @@ async function showApp() {
   document.getElementById('login-view').classList.add('hidden-view');
   document.getElementById('app-view').classList.remove('hidden-view');
   document.getElementById('logout-btn').classList.remove('hidden');
+  document.getElementById('menu-btn').classList.remove('hidden');
+  document.getElementById('active-tab-title').classList.remove('hidden');
   
   if (user.role === 'admin') {
-    document.getElementById('nav-user-name').innerText = "Administrator";['tab-dashboard','tab-my-leaves','tab-submit-leave','tab-submit-event'].forEach(id => document.getElementById(id).classList.add('hidden'));
-    document.getElementById('tab-admin').classList.remove('hidden'); switchTab('admin');
+    document.getElementById('nav-user-name').innerText = "Administrator";['menu-dashboard','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    document.getElementById('menu-admin').classList.remove('hidden'); 
+    switchTab('admin');
     if (typeof loadAdminSettings === 'function') loadAdminSettings();
   } else {
-    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name}[${user.departments[0]}]` : user.name;['tab-dashboard','tab-my-leaves','tab-submit-leave','tab-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-    document.getElementById('tab-admin').classList.add('hidden'); switchTab('dashboard');
+    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name}[${user.departments[0]}]` : user.name;['menu-dashboard','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+    document.getElementById('menu-admin').classList.add('hidden'); 
+    switchTab('dashboard');
     loadLeavesData();
     try {
       const settings = await apiCall('getSettings', { adminPass: null }); 
@@ -118,18 +144,31 @@ async function showApp() {
   }
 }
 
+const TAB_NAMES = {
+  'dashboard': 'Dashboard',
+  'my-leaves': 'My Calendar',
+  'submit-leave': 'Update Leave/MC/OIL',
+  'submit-event': 'Update Event',
+  'admin': 'Admin Settings'
+};
+
 function switchTab(tabId) {
+  closeMenu();
   document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('flex'); });
+  
   const view = document.getElementById(`view-${tabId}`);
   view.classList.remove('hidden-view');
   if(tabId === 'dashboard' || tabId === 'my-leaves') view.classList.add('flex');
-  document.querySelectorAll('#app-view button[id^="tab-"]').forEach(btn => {
-    btn.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
-    btn.classList.add('text-gray-500', 'border-transparent');
+  
+  // Highlight active menu item (for Desktop users if they happen to see it, and mobile styling)
+  document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
+    btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
   });
-  const activeBtn = document.getElementById(`tab-${tabId}`);
-  activeBtn.classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
-  activeBtn.classList.remove('text-gray-500', 'border-transparent');
+  const activeMenu = document.getElementById(`menu-${tabId}`);
+  if(activeMenu) activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+  
+  // Set subtitle below app title
+  document.getElementById('active-tab-title').innerText = TAB_NAMES[tabId] || '';
 }
 
 async function loadLeavesData() {
@@ -250,8 +289,16 @@ function renderMyLeaves() {
   document.getElementById('my-agenda').innerHTML = buildAgendaHtml(itemsForDate, true);
 
   const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
+  
+  // Using an SVG chevron that rotates on group-open via Tailwind classes
   document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
-    ? `<details class="group cursor-pointer text-xs"><summary class="font-semibold text-gray-500 hover:text-gray-700 select-none outline-none flex items-center"><span class="mr-1">▶</span> Cancelled (${cancelledLeaves.length})</summary><div class="grid gap-2 mt-2 opacity-70 cursor-default">${buildAgendaHtml(cancelledLeaves, true)}</div></details>`
+    ? `<details class="group cursor-pointer text-xs">
+         <summary class="font-semibold text-gray-500 hover:text-gray-700 select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
+           <svg class="w-4 h-4 mr-1 transition-transform duration-200 transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+           Cancelled (${cancelledLeaves.length})
+         </summary>
+         <div class="grid gap-2 mt-2 opacity-70 cursor-default pl-5">${buildAgendaHtml(cancelledLeaves, true)}</div>
+       </details>`
     : '';
 }
 
@@ -496,10 +543,17 @@ function populateWheel(container, dataArr, currentVal) {
     });
   }
   html += `<div style="height: 76px;"></div>`;
+  
+  container.style.scrollBehavior = 'auto'; // Prevent smooth animation on load
   container.innerHTML = html; 
-  container.style.scrollBehavior = 'auto';
-  container.scrollTop = targetScrollIndex * 40;
-  setTimeout(() => { container.style.scrollBehavior = 'smooth'; updateActiveItem(container); }, 10);
+  
+  // Use requestAnimationFrame to ensure the scroll jump happens instantly before browser repaints
+  requestAnimationFrame(() => {
+    container.scrollTop = targetScrollIndex * 40;
+    updateActiveItem(container);
+    // Re-enable smooth scrolling for user interaction after a brief delay
+    setTimeout(() => { container.style.scrollBehavior = 'smooth'; }, 100);
+  });
 }
 
 function createWheel(parent, type, dataArr, currentVal) {
@@ -507,8 +561,8 @@ function createWheel(parent, type, dataArr, currentVal) {
   container.className = 'wheel-container flex-1 h-48 overflow-y-auto text-center mx-1 relative z-10';
   container.dataset.type = type;
 
+  parent.appendChild(container); // Must append before populating so heights are calculable
   populateWheel(container, dataArr, currentVal);
-  parent.appendChild(container);
 
   let scrollTimeout;
   container.addEventListener('scroll', () => {
