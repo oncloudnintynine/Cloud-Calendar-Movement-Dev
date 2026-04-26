@@ -1036,4 +1036,53 @@ function searchKAH() {
   const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
   if(results.length > 0) {
     resC.innerHTML = results.map(c => `
-      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} <span class="text-xs text-gray-500 ml-1">(${c.dept})<
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} <span class="text-xs text-gray-500 ml-1">(${c.dept})</span></div>
+    `).join('');
+    resC.classList.remove('hidden-view');
+  } else {
+    resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
+  }
+}
+function addKAH(phone, name, dept) {
+  if(!adminKAHList.some(k => k.phone === phone)) {
+    adminKAHList.push({ phone, name, dept }); renderKAHSelected();
+  }
+  document.getElementById('kah-search').value = '';
+  document.getElementById('kah-results').classList.add('hidden-view');
+}
+function removeKAH(phone) { adminKAHList = adminKAHList.filter(k => k.phone !== phone); renderKAHSelected(); }
+
+function renderKAHSelected() {
+  const list = document.getElementById('kah-selected-list');
+  if(!list) return;
+  if (adminKAHList.length === 0) {
+    list.innerHTML = `<li class="text-gray-500 dark:text-darkmuted text-sm text-center italic py-2">No KAH personnel added yet.</li>`;
+    return;
+  }
+  list.innerHTML = adminKAHList.map(k => `
+    <li class="flex justify-between items-center border-b dark:border-darkborder py-2 last:border-0">
+      <span class="font-medium">${k.name} <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${k.dept})</span></span>
+      <button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button>
+    </li>
+  `).join('');
+}
+
+async function saveAdminSettings() {
+  showLoader(true);
+  const newPass = document.getElementById('set-admin-pass').value || null;
+  const payload = {
+    adminPass: user.pass, newAdminPass: newPass,
+    menuOrder: tempMenuOrder,
+    leaveTypes: tempLeaveTypes.filter(Boolean),
+    kahLimit: document.getElementById('set-kah-limit').value,
+    approvingAuthority: document.getElementById('set-appr-email').value,
+    kahList: adminKAHList
+  };
+  try {
+    await apiCall('saveSettings', payload);
+    alert("Settings successfully saved!");
+    if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
+    applyMenuOrder(tempMenuOrder); 
+  } catch (err) { alert("Error: " + err.message); }
+  showLoader(false);
+}
