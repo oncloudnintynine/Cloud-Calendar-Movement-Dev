@@ -11,7 +11,8 @@ let fuseAttendees = null;
 // Form & Admin State
 let tempLeaveTypes = [];
 let adminKAHList = [];
-let eventAttendees =[]; // { id, name, dept, type: 'contact' | 'group' }
+let tempMenuOrder = [];
+let eventAttendees =[]; 
 
 let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
@@ -121,6 +122,29 @@ async function handleLogin() {
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
+const TAB_NAMES = {
+  'dashboard': 'Dashboard',
+  'parade-state': 'Parade State',
+  'my-leaves': 'My Calendar',
+  'submit-leave': 'Update Leave/MC/OIL',
+  'submit-event': 'Update Event',
+  'admin': 'Admin Settings'
+};
+
+const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event'];
+
+function applyMenuOrder(orderArr) {
+  const menuContainer = document.getElementById('slide-menu-items');
+  const adminBtn = document.getElementById('menu-admin');
+  
+  orderArr.forEach(id => {
+    const btn = document.getElementById(`menu-${id}`);
+    if (btn) menuContainer.appendChild(btn);
+  });
+  
+  if (adminBtn) menuContainer.appendChild(adminBtn); // keep admin at bottom
+}
+
 async function showApp() {
   document.getElementById('login-view').classList.add('hidden-view');
   document.getElementById('app-view').classList.remove('hidden-view');
@@ -135,13 +159,19 @@ async function showApp() {
   } else {
     document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('menu-admin').classList.add('hidden'); 
-    switchTab('dashboard');
+    
+    // We initially switch to whichever tab is natively first before settings load
+    switchTab('dashboard'); 
     loadLeavesData();
     
     try {
       const settings = await apiCall('getSettings', { adminPass: null }); 
       window.appLeaveTypes = settings.leaveTypes; 
       document.getElementById('form-leave-type').innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+      
+      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+      applyMenuOrder(mOrder);
+      switchTab(mOrder[0]); // force start on the configured first menu item
       
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
@@ -153,7 +183,6 @@ async function showApp() {
         
         fuseAllContacts = new Fuse(companyContacts, { keys:['name'], threshold: 0.3 });
         
-        // Build Attendees Dropdown objects: Contact or Dept Group
         let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
         uniqueDepts.forEach(dept => {
           attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group' });
@@ -164,14 +193,6 @@ async function showApp() {
   }
 }
 
-const TAB_NAMES = {
-  'dashboard': 'Dashboard',
-  'parade-state': 'Parade State',
-  'my-leaves': 'My Calendar',
-  'submit-leave': 'Update Leave/MC/OIL',
-  'submit-event': 'Update Event',
-  'admin': 'Admin Settings'
-};
 
 function switchTab(tabId) {
   closeMenu();
@@ -313,8 +334,8 @@ function renderMyLeaves() {
   document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
     ? `<details class="group cursor-pointer text-sm">
          <summary class="font-bold text-gray-500 dark:text-darkmuted hover:text-gray-700 dark:hover:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
-           <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-           Cancelled (${cancelledLeaves.length})
+           <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+           <span class="text-white">Cancelled (${cancelledLeaves.length})</span>
          </summary>
          <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true)}</div>
        </details>`
@@ -333,7 +354,6 @@ function renderParadeState() {
   companyContacts.forEach(contact => {
     if (!deptMap[contact.dept]) deptMap[contact.dept] = { members:[], total:0, inOffice:0 };
     
-    // Find active record affecting this user right now
     const activeRecords = allLeaves.filter(l => 
       l.Status !== 'Cancelled' && 
       new Date(l.StartDate) <= now && 
@@ -345,7 +365,6 @@ function renderParadeState() {
     let locationStr = 'Office';
 
     if (activeRecords.length > 0) {
-      // Prioritize the first applicable record
       const r = activeRecords[0];
       const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(r.LeaveType);
       
@@ -371,7 +390,6 @@ function renderParadeState() {
 
   document.getElementById('parade-state-header').innerText = `Overall Parade State: (${inOfficeGlobal} / ${totalGlobal})`;
 
-  // Sorting Logic: HQ first, then alphanumeric
   const isHQ = (str) => str.toLowerCase() === 'hq';
   const deptKeys = Object.keys(deptMap).sort((a, b) => {
     if (isHQ(a) && !isHQ(b)) return -1;
@@ -382,7 +400,6 @@ function renderParadeState() {
   let html = '';
   deptKeys.forEach(dept => {
     const d = deptMap[dept];
-    // Sort members: In office first, then Not in Office, then alphanumeric
     d.members.sort((a, b) => {
       if (a.isOffice && !b.isOffice) return -1;
       if (!a.isOffice && b.isOffice) return 1;
@@ -493,7 +510,6 @@ function triggerEdit(id) {
     document.getElementById('form-event-remarks').value = l.Remarks || '';
     document.getElementById('form-event-repeat').value = l.HalfDay || 'NONE'; 
     
-    // Reconstruct Attendees
     eventAttendees =[];
     if(l.Attendees) {
       const savedPhones = l.Attendees.split(',');
@@ -614,7 +630,6 @@ async function submitForm(ctx) {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
     loc = document.getElementById('form-event-location').value;
     
-    // Resolve Attendees payload
     let resolvedPhones = new Set();
     eventAttendees.forEach(a => {
       if (a.type === 'contact') {
@@ -841,7 +856,7 @@ function updateActiveItem(container) {
   if(items[centerIdx]) items[centerIdx].classList.add('active');
 }
 
-// --- Admin Sub-methods ---
+// --- Admin Settings Sub-methods ---
 async function loadAdminSettings() {
   showLoader(true);
   try {
@@ -849,6 +864,9 @@ async function loadAdminSettings() {
     document.getElementById('set-kah-limit').value = settings.kahLimit;
     document.getElementById('set-appr-email').value = settings.approvingAuthority;
     
+    tempMenuOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+    renderMenuOrder();
+
     tempLeaveTypes = settings.leaveTypes ||[];
     renderLeaveTypes();
     
@@ -860,6 +878,27 @@ async function loadAdminSettings() {
     }
   } catch (err) { alertError('login-alert', err.message); }
   showLoader(false);
+}
+
+function renderMenuOrder() {
+  const list = document.getElementById('menu-order-list');
+  list.innerHTML = tempMenuOrder.map((id, index) => `
+    <div class="flex justify-between items-center bg-white dark:bg-darksurface p-3 rounded-lg border dark:border-darkborder shadow-sm">
+      <span class="font-bold text-gray-700 dark:text-darktext">${TAB_NAMES[id]}</span>
+      <div class="flex space-x-2">
+        <button type="button" onclick="moveMenuItem(${index}, -1)" class="p-2 bg-gray-100 dark:bg-darkhover rounded-lg hover:bg-gray-200 dark:hover:bg-[#333] transition ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}" ${index === 0 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg></button>
+        <button type="button" onclick="moveMenuItem(${index}, 1)" class="p-2 bg-gray-100 dark:bg-darkhover rounded-lg hover:bg-gray-200 dark:hover:bg-[#333] transition ${index === tempMenuOrder.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}" ${index === tempMenuOrder.length - 1 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function moveMenuItem(index, dir) {
+  if (index + dir < 0 || index + dir >= tempMenuOrder.length) return;
+  const temp = tempMenuOrder[index];
+  tempMenuOrder[index] = tempMenuOrder[index + dir];
+  tempMenuOrder[index + dir] = temp;
+  renderMenuOrder();
 }
 
 function renderLeaveTypes() {
@@ -913,6 +952,7 @@ async function saveAdminSettings() {
   const newPass = document.getElementById('set-admin-pass').value || null;
   const payload = {
     adminPass: user.pass, newAdminPass: newPass,
+    menuOrder: tempMenuOrder,
     leaveTypes: tempLeaveTypes.filter(Boolean),
     kahLimit: document.getElementById('set-kah-limit').value,
     approvingAuthority: document.getElementById('set-appr-email').value,
@@ -922,6 +962,7 @@ async function saveAdminSettings() {
     await apiCall('saveSettings', payload);
     alert("Settings successfully saved!");
     if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
+    applyMenuOrder(tempMenuOrder); // Reflect changes immediately
   } catch (err) { alert("Error: " + err.message); }
   showLoader(false);
 }
