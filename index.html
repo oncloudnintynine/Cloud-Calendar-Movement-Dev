@@ -108,9 +108,10 @@
             <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 dark:text-darkmuted mb-1"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
             <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-1 text-sm font-medium"></div>
           </div>
-          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-3">
+          <!-- min-h-0 is required to allow the child to scroll properly in a flex container -->
+          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-3 min-h-0">
             <h3 id="dash-agenda-title" class="font-bold border-b dark:border-darkborder pb-2 mb-2 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0"></h3>
-            <div id="dash-agenda" class="overflow-y-auto space-y-2 pr-1 h-full"></div>
+            <div id="dash-agenda" class="overflow-y-auto space-y-2 pr-1 h-full min-h-0"></div>
           </div>
         </div>
       </div>
@@ -127,10 +128,10 @@
             <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 dark:text-darkmuted mb-1"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
             <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-1 text-sm font-medium"></div>
           </div>
-          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-3">
+          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-3 min-h-0">
             <h3 id="my-agenda-title" class="font-bold border-b dark:border-darkborder pb-2 mb-2 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0"></h3>
-            <div class="overflow-y-auto pr-1 h-full flex flex-col">
-              <div id="my-agenda" class="space-y-2 flex-grow"></div>
+            <div class="overflow-y-auto pr-1 h-full flex flex-col min-h-0 pb-4">
+              <div id="my-agenda" class="space-y-2"></div>
               <div id="cancelled-leaves-container" class="mt-4 pt-3 border-t dark:border-darkborder"></div>
             </div>
           </div>
@@ -182,7 +183,10 @@
               <div><label class="block font-semibold mb-0.5">Country <span class="text-red-500">*</span></label><input type="text" id="form-leave-country" class="w-full border-2 border-gray-300 dark:border-darkborder rounded-lg py-1 px-2 bg-white dark:bg-darksurface outline-none"></div>
               <div><label class="block font-semibold mb-0.5 text-gray-500 dark:text-darkmuted">State</label><input type="text" id="form-leave-state" class="w-full border-2 border-gray-300 dark:border-darkborder rounded-lg py-1 px-2 bg-white dark:bg-darksurface outline-none"></div>
             </div>
-            <div><label class="block font-semibold mb-0.5">Remarks</label><textarea id="form-leave-remarks" rows="1" class="w-full border-2 border-gray-300 dark:border-darkborder rounded-lg py-1 px-2 bg-white dark:bg-darkinput outline-none shadow-sm"></textarea></div>
+            <div>
+              <label class="block font-semibold mb-0.5">Remarks</label>
+              <textarea id="form-leave-remarks" rows="1" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-darkborder rounded-lg py-1.5 px-3 bg-white dark:bg-darkinput outline-none shadow-sm overflow-hidden resize-none"></textarea>
+            </div>
             <button type="submit" id="submit-leave-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg shadow">Save Record</button>
             <button type="button" id="cancel-edit-leave-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-1.5 rounded-lg shadow hidden-view mt-1">Cancel Edit</button>
           </form>
@@ -222,7 +226,10 @@
                 <option value="WEEKDAY">Every weekday (Mon-Fri)</option>
               </select>
             </div>
-            <div><label class="block font-semibold mb-0.5">Remarks</label><textarea id="form-event-remarks" rows="1" class="w-full border-2 border-gray-300 dark:border-darkborder rounded-lg py-1 px-2 bg-white dark:bg-darkinput outline-none shadow-sm"></textarea></div>
+            <div>
+              <label class="block font-semibold mb-0.5">Remarks</label>
+              <textarea id="form-event-remarks" rows="1" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-darkborder rounded-lg py-1.5 px-3 bg-white dark:bg-darkinput outline-none shadow-sm overflow-hidden resize-none"></textarea>
+            </div>
             <button type="submit" id="submit-event-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg shadow">Save Event</button>
             <button type="button" id="cancel-edit-event-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-1.5 rounded-lg shadow hidden-view mt-1">Cancel Edit</button>
           </form>
