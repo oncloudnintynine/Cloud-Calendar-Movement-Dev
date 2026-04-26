@@ -1,4 +1,4 @@
-const CACHE_NAME = 'leave-tracker-v2';
+const CACHE_NAME = 'leave-tracker-v3';
 const urlsToCache =[
   './index.html',
   './manifest.json',
