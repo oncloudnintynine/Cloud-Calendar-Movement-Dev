@@ -3,14 +3,14 @@ let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
 
-let companyContacts =[];
+let companyContacts = [];
 let validContactNames =[];
 let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
-let tempLeaveTypes = [];
-let adminKAHList =[];
+let tempLeaveTypes =[];
+let adminKAHList = [];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
 
@@ -120,8 +120,7 @@ async function handleLogin() {
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
     showApp();
-  } catch (err) { alertError('login-alert', err.message); }
-  showLoader(false);
+  } catch (err) { alertError('login-alert', err.message); showLoader(false); }
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
@@ -164,19 +163,12 @@ async function showApp() {
     document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name}` : user.name;['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('menu-admin').classList.add('hidden'); 
     
-    switchTab('dashboard'); 
-    await loadLeavesData();
-    
     try {
       const settings = await apiCall('getSettings', { adminPass: null }); 
       window.appLeaveTypes = settings.leaveTypes; 
       
       const formLeaveType = document.getElementById('form-leave-type');
       if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-      
-      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-      applyMenuOrder(mOrder);
-      switchTab(mOrder[0]); 
       
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
@@ -198,11 +190,20 @@ async function showApp() {
         });
         fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
-    } catch(e) {}
+
+      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+      applyMenuOrder(mOrder);
+      
+      // Load the data entirely before switching tab so parade state resolves instantly
+      await loadLeavesData();
+      switchTab(mOrder[0]); 
+
+    } catch(e) {
+      console.error("Error loading settings: ", e);
+    }
   }
   showLoader(false);
 }
-
 
 function switchTab(tabId) {
   closeMenu();
@@ -238,7 +239,9 @@ async function loadLeavesData() {
     
     const paradeView = document.getElementById('view-parade-state');
     if(paradeView && !paradeView.classList.contains('hidden-view')) renderParadeState(); 
-  } catch (err) {}
+  } catch (err) {
+    console.error("Error loading leaves data: ", err);
+  }
 }
 
 function changeMonth(ctx, offset) {
@@ -390,7 +393,15 @@ function renderMyLeaves() {
 
 // --- Parade State Logic ---
 function renderParadeState() {
-  if (!companyContacts.length) return;
+  const paradeHeader = document.getElementById('parade-state-header');
+  const paradeBody = document.getElementById('parade-state-body');
+
+  if (!companyContacts || companyContacts.length === 0) {
+    if(paradeHeader) paradeHeader.innerText = `Overall Parade State`;
+    if(paradeBody) paradeBody.innerHTML = `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">Loading personnel data...</p>`;
+    return;
+  }
+
   const now = new Date();
   
   let inOfficeGlobal = 0;
@@ -400,12 +411,17 @@ function renderParadeState() {
   companyContacts.forEach(contact => {
     if (!deptMap[contact.dept]) deptMap[contact.dept] = { members:[], total:0, inOffice:0 };
     
-    const activeRecords = allLeaves.filter(l => 
-      l.Status !== 'Cancelled' && 
-      new Date(l.StartDate) <= now && 
-      new Date(l.EndDate) >= now && 
-      (l.Phone == contact.phone || (l.Attendees && l.Attendees.includes(contact.phone)))
-    );
+    const activeRecords = allLeaves.filter(l => {
+      if (l.Status === 'Cancelled') return false;
+      if (l.Phone != contact.phone && !(l.Attendees && l.Attendees.includes(contact.phone))) return false;
+      
+      const sDate = new Date(l.StartDate);
+      const eDate = new Date(l.EndDate);
+      // Bump EndDate to 23:59:59 to accurately encompass the entire final day for leave checks
+      eDate.setHours(23, 59, 59, 999);
+      
+      return sDate <= now && eDate >= now;
+    });
     
     let isOffice = true;
     let locationStr = 'Office';
@@ -434,7 +450,6 @@ function renderParadeState() {
     });
   });
 
-  const paradeHeader = document.getElementById('parade-state-header');
   if (paradeHeader) paradeHeader.innerText = `Overall Parade State: (${inOfficeGlobal} / ${totalGlobal})`;
 
   const isHQ = (str) => str.toLowerCase() === 'hq';
@@ -471,7 +486,6 @@ function renderParadeState() {
     `;
   });
 
-  const paradeBody = document.getElementById('parade-state-body');
   if (paradeBody) paradeBody.innerHTML = html;
 }
 
@@ -698,15 +712,13 @@ async function submitForm(ctx) {
     const res = await apiCall(action, payload);
     alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
     cancelEditMode(); loadLeavesData();
-  } catch (err) { alert("Error: " + err.message); }
-  showLoader(false);
+  } catch (err) { alert("Error: " + err.message); showLoader(false); }
 }
 
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) {}
-  showLoader(false);
+  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) { showLoader(false); }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
@@ -963,53 +975,4 @@ function searchKAH() {
   const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
   if(results.length > 0) {
     resC.innerHTML = results.map(c => `
-      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} <span class="text-xs text-gray-500 ml-1">(${c.dept})</span></div>
-    `).join('');
-    resC.classList.remove('hidden-view');
-  } else {
-    resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
-  }
-}
-function addKAH(phone, name, dept) {
-  if(!adminKAHList.some(k => k.phone === phone)) {
-    adminKAHList.push({ phone, name, dept }); renderKAHSelected();
-  }
-  document.getElementById('kah-search').value = '';
-  document.getElementById('kah-results').classList.add('hidden-view');
-}
-function removeKAH(phone) { adminKAHList = adminKAHList.filter(k => k.phone !== phone); renderKAHSelected(); }
-
-function renderKAHSelected() {
-  const list = document.getElementById('kah-selected-list');
-  if(!list) return;
-  if (adminKAHList.length === 0) {
-    list.innerHTML = `<li class="text-gray-500 dark:text-darkmuted text-sm text-center italic py-2">No KAH personnel added yet.</li>`;
-    return;
-  }
-  list.innerHTML = adminKAHList.map(k => `
-    <li class="flex justify-between items-center border-b dark:border-darkborder py-2 last:border-0">
-      <span class="font-medium">${k.name} <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${k.dept})</span></span>
-      <button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button>
-    </li>
-  `).join('');
-}
-
-async function saveAdminSettings() {
-  showLoader(true);
-  const newPass = document.getElementById('set-admin-pass').value || null;
-  const payload = {
-    adminPass: user.pass, newAdminPass: newPass,
-    menuOrder: tempMenuOrder,
-    leaveTypes: tempLeaveTypes.filter(Boolean),
-    kahLimit: document.getElementById('set-kah-limit').value,
-    approvingAuthority: document.getElementById('set-appr-email').value,
-    kahList: adminKAHList
-  };
-  try {
-    await apiCall('saveSettings', payload);
-    alert("Settings successfully saved!");
-    if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
-    applyMenuOrder(tempMenuOrder); 
-  } catch (err) { alert("Error: " + err.message); }
-  showLoader(false);
-}
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g,
