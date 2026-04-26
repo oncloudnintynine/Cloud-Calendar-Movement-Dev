@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Company Leave & Event Tracker</title>
+  <title>Team Admin Manager</title>
   
   <!-- Manifest & Styles -->
   <link rel="manifest" href="manifest.json">
@@ -21,7 +21,7 @@
 
   <!-- Navbar -->
   <nav class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
-    <div class="font-bold text-lg text-blue-600 dark:text-blue-400">LeaveTracker</div>
+    <div class="font-bold text-lg text-blue-600 dark:text-blue-400">Team Admin Manager</div>
     <div class="flex items-center space-x-3">
       <span id="nav-user-name" class="text-sm font-medium hidden md:block"></span>
       <button onclick="toggleTheme()" class="text-xl px-2">🌗</button>
@@ -47,8 +47,8 @@
         
         <div class="mb-6 relative">
           <label class="block text-sm font-medium mb-1">Password</label>
-          <input type="password" id="login-pass" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none pr-10" placeholder="e.g. 87678453peace">
-          <button onclick="togglePassword('login-pass')" class="absolute right-2 top-8 text-gray-500">
+          <input type="password" id="login-pass" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none pr-10">
+          <button onclick="togglePassword('login-pass', this)" class="absolute right-2 top-8 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
         </div>
@@ -146,7 +146,9 @@
             <label class="block text-sm font-medium mb-1">Change Admin Password</label>
             <div class="relative">
               <input type="password" id="set-admin-pass" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent placeholder-gray-400" placeholder="Leave blank to keep current">
-              <button onclick="togglePassword('set-admin-pass')" class="absolute right-2 top-2.5 text-gray-500"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+              <button onclick="togglePassword('set-admin-pass', this)" class="absolute right-2 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              </button>
             </div>
           </div>
           <div>
