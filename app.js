@@ -191,7 +191,7 @@ async function loadAdminSettings() {
     renderKAHSelected();
     
     if(settings.allContacts) {
-      fuseAllContacts = new Fuse(settings.allContacts, { keys: ['name'], threshold: 0.3 });
+      fuseAllContacts = new Fuse(settings.allContacts, { keys:['name'], threshold: 0.3 });
     }
   } catch (err) { alertError('login-alert', err.message); }
   showLoader(false);
@@ -379,13 +379,14 @@ function renderMyLeaves() {
   document.getElementById('my-agenda').innerHTML = buildAgendaHtml(itemsForDate, true);
 
   const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
+  
   document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
     ? `<details class="group cursor-pointer text-xs">
-         <summary class="font-semibold text-gray-500 dark:text-darkmuted hover:text-gray-700 dark:hover:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
+         <summary class="font-semibold text-gray-700 dark:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
            <svg class="w-4 h-4 mr-1 transition-transform duration-200 transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
            Cancelled (${cancelledLeaves.length})
          </summary>
-         <div class="grid gap-2 mt-2 opacity-70 cursor-default pl-5">${buildAgendaHtml(cancelledLeaves, true)}</div>
+         <div class="grid gap-2 mt-2 cursor-default pl-5">${buildAgendaHtml(cancelledLeaves, true)}</div>
        </details>`
     : '';
 }
@@ -395,7 +396,6 @@ function searchCovering() {
   const resC = document.getElementById('cover-results');
   if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
   
-  // Create a quick unique list array dynamically for covering search
   const uniques =[...new Set(fuseAllContacts._docs.map(d=>d.name))];
   const quickFuse = new Fuse(uniques.map(name => ({name})), {keys:['name'], threshold: 0.3});
   
@@ -446,11 +446,22 @@ function triggerEdit(id) {
     updateTimeSliderVisual('start', start); updateTimeSliderVisual('end', end);
   }
   switchTab(`submit-${ctx}`);
+  
+  // Trigger auto-expand UI fix for textareas
+  setTimeout(() => {
+    ['form-leave-remarks', 'form-event-remarks'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+    });
+  }, 50);
 }
 
 function cancelEditMode() {
   currentEditId = null; initDates();
   document.getElementById('leave-form').reset(); document.getElementById('event-form').reset();
+  
+  ['form-leave-remarks', 'form-event-remarks'].forEach(id => { const el = document.getElementById(id); if(el) el.style.height='auto'; });
+
   appData.leave.startAMPM = 'AM'; appData.leave.endAMPM = 'PM';
   updateTimeSliderVisual('start', 'AM'); updateTimeSliderVisual('end', 'PM');
   toggleOverseasFields();
@@ -575,7 +586,7 @@ function closePicker() {
 function confirmPicker() {
   const wrapper = document.getElementById('picker-wheels-wrapper');
   if(!wrapper) return;
-  const wheels = Array.from(wrapper.children).filter(c => c.classList.contains('wheel-container'));
+  const wheels = Array.from(wrapper.querySelectorAll('.wheel-container'));
   
   const getVal = (wheel) => {
     if(!wheel) return null;
@@ -619,6 +630,11 @@ function buildWheels() {
   createWheel(wrapper, 'year', years, cv.getFullYear());
   
   if (activePicker.type === 'datetime') {
+    // Add Separator Line
+    const sep = document.createElement('div');
+    sep.className = 'w-px bg-gray-300 dark:bg-darkborder mx-1 h-3/4 my-auto relative z-20';
+    wrapper.appendChild(sep);
+
     createWheel(wrapper, 'hour', hours, cv.getHours());
     createWheel(wrapper, 'min', mins, cv.getMinutes());
   }
@@ -648,12 +664,23 @@ function populateWheel(container, dataArr, currentVal) {
 }
 
 function createWheel(parent, type, dataArr, currentVal) {
+  const wrapperDiv = document.createElement('div');
+  wrapperDiv.className = 'flex flex-col items-center flex-1 h-full relative z-10 min-w-0';
+  
+  if(type === 'hour' || type === 'min') {
+      const lbl = document.createElement('div');
+      lbl.className = 'absolute top-1 text-[10px] font-bold text-gray-400 dark:text-darkmuted z-30 pointer-events-none w-full text-center bg-gradient-to-b from-gray-50 dark:from-darkinput to-transparent pb-2 pt-1';
+      lbl.innerText = type === 'hour' ? 'HH' : 'MM';
+      wrapperDiv.appendChild(lbl);
+  }
+
   const container = document.createElement('div');
-  container.className = 'wheel-container flex-1 h-48 overflow-y-auto text-center mx-1 relative z-10';
+  container.className = 'wheel-container w-full h-full overflow-y-auto text-center px-1 relative';
   container.dataset.type = type;
 
-  parent.appendChild(container); 
+  parent.appendChild(wrapperDiv); 
   populateWheel(container, dataArr, currentVal);
+  wrapperDiv.appendChild(container); 
 
   let scrollTimeout;
   container.addEventListener('scroll', () => {
@@ -678,7 +705,7 @@ function createWheel(parent, type, dataArr, currentVal) {
 function adjustDaysWheel() {
   const wrapper = document.getElementById('picker-wheels-wrapper');
   if (!wrapper) return;
-  const wheels = Array.from(wrapper.children).filter(c => c.classList.contains('wheel-container'));
+  const wheels = Array.from(wrapper.querySelectorAll('.wheel-container'));
   const dayWheel = wheels.find(w => w.dataset.type === 'day');
   const monthWheel = wheels.find(w => w.dataset.type === 'month');
   const yearWheel = wheels.find(w => w.dataset.type === 'year');
