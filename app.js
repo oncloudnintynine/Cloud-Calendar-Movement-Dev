@@ -5,6 +5,10 @@ let currentEditId = null;
 let fuseAllContacts = null;
 let validContactNames =[];
 
+// Admin State
+let tempLeaveTypes = [];
+let adminKAHList =[];
+
 // Form Data State
 let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
@@ -29,6 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const resC = document.getElementById('cover-results');
       if(resC) resC.classList.add('hidden-view');
     }
+    if(!e.target.closest('#kah-search') && !e.target.closest('#kah-results')) {
+      const resK = document.getElementById('kah-results');
+      if(resK) resK.classList.add('hidden-view');
+    }
   });
   initDates();
 });
@@ -39,7 +47,6 @@ function toggleMenu() {
   const panel = document.getElementById('slide-menu-panel');
   if (menu.classList.contains('hidden-view')) {
     menu.classList.remove('hidden-view');
-    // slight delay for the CSS transition to catch
     setTimeout(() => { panel.classList.remove('-translate-x-full'); }, 10);
   } else {
     closeMenu();
@@ -50,7 +57,7 @@ function closeMenu() {
   const menu = document.getElementById('slide-menu');
   const panel = document.getElementById('slide-menu-panel');
   panel.classList.add('-translate-x-full');
-  setTimeout(() => { menu.classList.add('hidden-view'); }, 300); // match transition duration
+  setTimeout(() => { menu.classList.add('hidden-view'); }, 300); 
 }
 
 function toggleTheme() {
@@ -124,9 +131,9 @@ async function showApp() {
     document.getElementById('nav-user-name').innerText = "Administrator";['menu-dashboard','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('menu-admin').classList.remove('hidden'); 
     switchTab('admin');
-    if (typeof loadAdminSettings === 'function') loadAdminSettings();
+    loadAdminSettings();
   } else {
-    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name}[${user.departments[0]}]` : user.name;['menu-dashboard','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;['menu-dashboard','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('menu-admin').classList.add('hidden'); 
     switchTab('dashboard');
     loadLeavesData();
@@ -138,7 +145,7 @@ async function showApp() {
       if(settings.allContacts) {
         const uniqueNames =[...new Set(settings.allContacts.map(c => c.name))];
         validContactNames = uniqueNames.map(n => n.toLowerCase());
-        fuseAllContacts = new Fuse(uniqueNames.map(name => ({name})), { keys: ['name'], threshold: 0.3 });
+        fuseAllContacts = new Fuse(settings.allContacts, { keys:['name'], threshold: 0.3 }); // Full object fuse
       }
     } catch(e){}
   }
@@ -160,24 +167,107 @@ function switchTab(tabId) {
   view.classList.remove('hidden-view');
   if(tabId === 'dashboard' || tabId === 'my-leaves') view.classList.add('flex');
   
-  // Highlight active menu item (for Desktop users if they happen to see it, and mobile styling)
   document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
-    btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+    btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
   });
   const activeMenu = document.getElementById(`menu-${tabId}`);
-  if(activeMenu) activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+  if(activeMenu) activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
   
-  // Set subtitle below app title
   document.getElementById('active-tab-title').innerText = TAB_NAMES[tabId] || '';
 }
 
+// --- Admin Setup Logic ---
+async function loadAdminSettings() {
+  showLoader(true);
+  try {
+    const settings = await apiCall('getSettings', { adminPass: user.pass });
+    document.getElementById('set-kah-limit').value = settings.kahLimit;
+    document.getElementById('set-appr-email').value = settings.approvingAuthority;
+    
+    tempLeaveTypes = settings.leaveTypes ||[];
+    renderLeaveTypes();
+    
+    adminKAHList = settings.kahList ||[];
+    renderKAHSelected();
+    
+    if(settings.allContacts) {
+      fuseAllContacts = new Fuse(settings.allContacts, { keys: ['name'], threshold: 0.3 });
+    }
+  } catch (err) { alertError('login-alert', err.message); }
+  showLoader(false);
+}
+
+function renderLeaveTypes() {
+  document.getElementById('leave-types-list').innerHTML = tempLeaveTypes.map((t, i) => `
+    <div class="flex items-center space-x-2">
+      <input type="text" value="${t}" onchange="updateLeaveType(${i}, this.value)" class="flex-grow border-2 border-gray-300 dark:border-darkborder rounded-lg py-1 px-2 bg-white dark:bg-darkinput outline-none shadow-sm">
+      <button type="button" onclick="removeLeaveType(${i})" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 p-1.5 rounded-lg transition" title="Remove Type"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+    </div>
+  `).join('');
+}
+function addLeaveType() {
+  const input = document.getElementById('new-leave-type');
+  if(input.value.trim()) { tempLeaveTypes.push(input.value.trim()); input.value = ''; renderLeaveTypes(); }
+}
+function removeLeaveType(i) { tempLeaveTypes.splice(i, 1); renderLeaveTypes(); }
+function updateLeaveType(i, val) { tempLeaveTypes[i] = val.trim(); }
+
+function searchKAH() {
+  const q = document.getElementById('kah-search').value;
+  const resC = document.getElementById('kah-results');
+  if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
+  const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
+  if(results.length > 0) {
+    resC.innerHTML = results.map(c => `
+      <div class="p-2 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover text-sm" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} (${c.dept})</div>
+    `).join('');
+    resC.classList.remove('hidden-view');
+  } else {
+    resC.innerHTML = `<div class="p-2 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
+  }
+}
+function addKAH(phone, name, dept) {
+  if(!adminKAHList.some(k => k.phone === phone)) {
+    adminKAHList.push({ phone, name, dept }); renderKAHSelected();
+  }
+  document.getElementById('kah-search').value = '';
+  document.getElementById('kah-results').classList.add('hidden-view');
+}
+function removeKAH(phone) { adminKAHList = adminKAHList.filter(k => k.phone !== phone); renderKAHSelected(); }
+function renderKAHSelected() {
+  document.getElementById('kah-selected-list').innerHTML = adminKAHList.map(k => `
+    <li class="flex justify-between items-center border-b dark:border-darkborder py-1">
+      <span>${k.name} <span class="text-xs text-gray-500 dark:text-darkmuted">(${k.dept})</span></span>
+      <button onclick="removeKAH('${k.phone}')" class="text-red-500 font-bold px-2">&times;</button>
+    </li>
+  `).join('');
+}
+
+async function saveAdminSettings() {
+  showLoader(true);
+  const newPass = document.getElementById('set-admin-pass').value || null;
+  const payload = {
+    adminPass: user.pass, newAdminPass: newPass,
+    leaveTypes: tempLeaveTypes.filter(Boolean),
+    kahLimit: document.getElementById('set-kah-limit').value,
+    approvingAuthority: document.getElementById('set-appr-email').value,
+    kahList: adminKAHList
+  };
+  try {
+    await apiCall('saveSettings', payload);
+    alert("Settings successfully saved!");
+    if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
+  } catch (err) { alert("Error: " + err.message); }
+  showLoader(false);
+}
+
+// --- General App logic ---
 async function loadLeavesData() {
   showLoader(true);
   try { allLeaves = await apiCall('getLeaves'); renderDashboard(); renderMyLeaves(); } catch (err) {}
   showLoader(false);
 }
 
-// --- Navigation & Matrix ---
 function changeMonth(ctx, offset) {
   if (ctx === 'dash') { dashMonth.setMonth(dashMonth.getMonth() + offset); renderDashboard(); } 
   else { myMonth.setMonth(myMonth.getMonth() + offset); renderMyLeaves(); }
@@ -208,7 +298,7 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
     let baseClass = "w-8 h-8 flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
     if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
     else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-bold ";
-    else baseClass += "hover:bg-gray-200 dark:hover:bg-gray-700 ";
+    else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
     const dot = hasEvent && !isSelected ? `<div class="absolute bottom-0 w-1 h-1 bg-blue-500 rounded-full"></div>` : '';
     const selDot = hasEvent && isSelected ? `<div class="absolute bottom-0 w-1 h-1 bg-white rounded-full"></div>` : '';
@@ -225,7 +315,7 @@ function getBadgeClass(status) {
 }
 
 function buildAgendaHtml(items, isMyCalendar) {
-  if (items.length === 0) return `<p class="text-gray-500 text-center mt-4">No records for this date.</p>`;
+  if (items.length === 0) return `<p class="text-gray-500 dark:text-darkmuted text-center mt-4">No records for this date.</p>`;
   return items.map(l => {
     const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
     const startStr = isEvent ? formatDisplayDateTime(new Date(l.StartDate)) : formatDisplayDate(new Date(l.StartDate));
@@ -233,18 +323,18 @@ function buildAgendaHtml(items, isMyCalendar) {
     let actionBtns = '';
     
     if (isMyCalendar && l.Status !== 'Cancelled') {
-      actionBtns = `<div class="flex space-x-2 mt-2 pt-2 border-t dark:border-gray-600"><button onclick="triggerEdit('${l.ID}')" class="font-semibold bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded transition">Edit</button><button onclick="cancelLeave('${l.ID}')" class="font-semibold bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded transition">Cancel</button></div>`;
+      actionBtns = `<div class="flex space-x-2 mt-2 pt-2 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-semibold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-3 py-1 rounded transition">Edit</button><button onclick="cancelLeave('${l.ID}')" class="font-semibold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-3 py-1 rounded transition">Cancel</button></div>`;
     }
 
     return `
-    <div class="border border-gray-200 dark:border-gray-700 p-2.5 rounded-lg shadow-sm bg-gray-50 dark:bg-gray-700/50 flex flex-col">
+    <div class="border border-gray-200 dark:border-darkborder p-2.5 rounded-lg shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
       <div class="flex justify-between items-start mb-1">
-        <h3 class="font-bold">${isMyCalendar ? l.LeaveType : l.Name + ' <span class="font-normal text-gray-500">(' + l.Department + ')</span>'}</h3>
+        <h3 class="font-bold">${isMyCalendar ? l.LeaveType : l.Name + ' <span class="font-normal text-gray-500 dark:text-darkmuted">(' + l.Department + ')</span>'}</h3>
         <span class="text-[10px] font-bold px-2 py-0.5 rounded ${getBadgeClass(l.Status)}">${l.Status.replace('Approved', 'Cal Updated')}</span>
       </div>
-      <p class="font-medium text-gray-700 dark:text-gray-300 text-xs">${isMyCalendar ? '' : l.LeaveType + ' '}${l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
-      <p class="text-xs text-gray-500 mt-0.5"><span class="font-semibold">Time:</span> ${startStr} to ${endStr}</p>
-      ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-xs text-gray-500 mt-0.5"><span class="font-semibold">Covering:</span> ${l.CoveringPerson}</p>` : ''}
+      <p class="font-medium text-gray-700 dark:text-darktext text-xs">${isMyCalendar ? '' : l.LeaveType + ' '}${l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
+      <p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
+      ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
       ${actionBtns}
     </div>`;
   }).join('');
@@ -289,11 +379,9 @@ function renderMyLeaves() {
   document.getElementById('my-agenda').innerHTML = buildAgendaHtml(itemsForDate, true);
 
   const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
-  
-  // Using an SVG chevron that rotates on group-open via Tailwind classes
   document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
     ? `<details class="group cursor-pointer text-xs">
-         <summary class="font-semibold text-gray-500 hover:text-gray-700 select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
+         <summary class="font-semibold text-gray-500 dark:text-darkmuted hover:text-gray-700 dark:hover:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
            <svg class="w-4 h-4 mr-1 transition-transform duration-200 transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
            Cancelled (${cancelledLeaves.length})
          </summary>
@@ -306,9 +394,14 @@ function searchCovering() {
   const q = document.getElementById('form-leave-cover').value;
   const resC = document.getElementById('cover-results');
   if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
-  const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item.name);
+  
+  // Create a quick unique list array dynamically for covering search
+  const uniques =[...new Set(fuseAllContacts._docs.map(d=>d.name))];
+  const quickFuse = new Fuse(uniques.map(name => ({name})), {keys:['name'], threshold: 0.3});
+  
+  const results = quickFuse.search(q).slice(0, 5).map(r => r.item.name);
   if (results.length > 0) {
-    resC.innerHTML = results.map(n => `<div class="p-2 border-b dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onclick="selectCovering('${n.replace(/'/g, "\\'")}')">${n}</div>`).join('');
+    resC.innerHTML = results.map(n => `<div class="p-2 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="selectCovering('${n.replace(/'/g, "\\'")}')">${n}</div>`).join('');
     resC.classList.remove('hidden-view');
   } else {
     resC.innerHTML = `<div class="p-2 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
@@ -377,7 +470,7 @@ function updateTimeSliderVisual(type, val) {
   const slider = document.getElementById(`${type}-leave-slider`);
   const tAM = document.getElementById(`${type}-leave-am`);
   const tPM = document.getElementById(`${type}-leave-pm`);
-  const act = 'text-white', inact =['text-gray-500', 'dark:text-gray-300'];
+  const act = 'text-white', inact =['text-gray-500', 'dark:text-darkmuted'];
   if (val === 'PM') {
     slider.classList.add('translate-x-full');
     tAM.classList.remove(act); tAM.classList.add(...inact);
@@ -544,14 +637,12 @@ function populateWheel(container, dataArr, currentVal) {
   }
   html += `<div style="height: 76px;"></div>`;
   
-  container.style.scrollBehavior = 'auto'; // Prevent smooth animation on load
+  container.style.scrollBehavior = 'auto';
   container.innerHTML = html; 
   
-  // Use requestAnimationFrame to ensure the scroll jump happens instantly before browser repaints
   requestAnimationFrame(() => {
     container.scrollTop = targetScrollIndex * 40;
     updateActiveItem(container);
-    // Re-enable smooth scrolling for user interaction after a brief delay
     setTimeout(() => { container.style.scrollBehavior = 'smooth'; }, 100);
   });
 }
@@ -561,7 +652,7 @@ function createWheel(parent, type, dataArr, currentVal) {
   container.className = 'wheel-container flex-1 h-48 overflow-y-auto text-center mx-1 relative z-10';
   container.dataset.type = type;
 
-  parent.appendChild(container); // Must append before populating so heights are calculable
+  parent.appendChild(container); 
   populateWheel(container, dataArr, currentVal);
 
   let scrollTimeout;
