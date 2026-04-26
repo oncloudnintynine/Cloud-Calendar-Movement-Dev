@@ -3,14 +3,14 @@ let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
 
-let companyContacts = [];
+let companyContacts =[];
 let validContactNames =[];
 let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
 let tempLeaveTypes = [];
-let adminKAHList = [];
+let adminKAHList =[];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
 
@@ -130,7 +130,6 @@ const TAB_NAMES = {
   'submit-event': 'Update Event',
   'admin': 'Admin Settings'
 };
-
 const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event'];
 
 function applyMenuOrder(orderArr) {
@@ -141,8 +140,7 @@ function applyMenuOrder(orderArr) {
     const btn = document.getElementById(`menu-${id}`);
     if (btn) menuContainer.appendChild(btn);
   });
-  
-  if (adminBtn) menuContainer.appendChild(adminBtn); // keep admin at bottom
+  if (adminBtn) menuContainer.appendChild(adminBtn); 
 }
 
 async function showApp() {
@@ -160,7 +158,6 @@ async function showApp() {
     document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('menu-admin').classList.add('hidden'); 
     
-    // We initially switch to whichever tab is natively first before settings load
     switchTab('dashboard'); 
     loadLeavesData();
     
@@ -171,7 +168,7 @@ async function showApp() {
       
       const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
       applyMenuOrder(mOrder);
-      switchTab(mOrder[0]); // force start on the configured first menu item
+      switchTab(mOrder[0]); 
       
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
@@ -192,7 +189,6 @@ async function showApp() {
     } catch(e){}
   }
 }
-
 
 function switchTab(tabId) {
   closeMenu();
@@ -333,9 +329,9 @@ function renderMyLeaves() {
   const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
   document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
     ? `<details class="group cursor-pointer text-sm">
-         <summary class="font-bold text-gray-500 dark:text-darkmuted hover:text-gray-700 dark:hover:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
-           <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-           <span class="text-white">Cancelled (${cancelledLeaves.length})</span>
+         <summary class="font-bold text-gray-700 dark:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
+           <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+           Cancelled (${cancelledLeaves.length})
          </summary>
          <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true)}</div>
        </details>`
@@ -427,7 +423,6 @@ function renderParadeState() {
   document.getElementById('parade-state-body').innerHTML = html;
 }
 
-
 // --- Attendees Form Logic ---
 function searchAttendees() {
   const q = document.getElementById('form-event-attendee-search').value;
@@ -446,21 +441,12 @@ function searchAttendees() {
     resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
   }
 }
-
 function selectAttendee(id, name, dept, type) {
-  if (!eventAttendees.some(a => a.id === id)) {
-    eventAttendees.push({ id, name, dept, type });
-    renderAttendees();
-  }
+  if (!eventAttendees.some(a => a.id === id)) { eventAttendees.push({ id, name, dept, type }); renderAttendees(); }
   document.getElementById('form-event-attendee-search').value = '';
   document.getElementById('attendees-results').classList.add('hidden-view');
 }
-
-function removeAttendee(id) {
-  eventAttendees = eventAttendees.filter(a => a.id !== id);
-  renderAttendees();
-}
-
+function removeAttendee(id) { eventAttendees = eventAttendees.filter(a => a.id !== id); renderAttendees(); }
 function renderAttendees() {
   const c = document.getElementById('attendees-chip-container');
   c.innerHTML = eventAttendees.map(a => `
@@ -470,7 +456,6 @@ function renderAttendees() {
     </div>
   `).join('');
 }
-
 
 // --- Covering Person Form Logic ---
 function searchCovering() {
@@ -543,8 +528,7 @@ function triggerEdit(id) {
   }
   switchTab(`submit-${ctx}`);
   
-  setTimeout(() => {
-    ['form-leave-remarks', 'form-event-remarks'].forEach(id => {
+  setTimeout(() => {['form-leave-remarks', 'form-event-remarks'].forEach(id => {
       const el = document.getElementById(id);
       if(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
     });
@@ -882,23 +866,24 @@ async function loadAdminSettings() {
 
 function renderMenuOrder() {
   const list = document.getElementById('menu-order-list');
-  list.innerHTML = tempMenuOrder.map((id, index) => `
-    <div class="flex justify-between items-center bg-white dark:bg-darksurface p-3 rounded-lg border dark:border-darkborder shadow-sm">
-      <span class="font-bold text-gray-700 dark:text-darktext">${TAB_NAMES[id]}</span>
-      <div class="flex space-x-2">
-        <button type="button" onclick="moveMenuItem(${index}, -1)" class="p-2 bg-gray-100 dark:bg-darkhover rounded-lg hover:bg-gray-200 dark:hover:bg-[#333] transition ${index === 0 ? 'opacity-30 cursor-not-allowed' : ''}" ${index === 0 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg></button>
-        <button type="button" onclick="moveMenuItem(${index}, 1)" class="p-2 bg-gray-100 dark:bg-darkhover rounded-lg hover:bg-gray-200 dark:hover:bg-[#333] transition ${index === tempMenuOrder.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}" ${index === tempMenuOrder.length - 1 ? 'disabled' : ''}><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></button>
+  list.innerHTML = tempMenuOrder.map((id) => `
+    <div data-id="${id}" class="flex justify-between items-center bg-white dark:bg-darksurface p-3 rounded-lg border dark:border-darkborder shadow-sm cursor-grab">
+      <div class="flex items-center space-x-3 w-full">
+        <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted handle cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+        <span class="font-bold text-gray-700 dark:text-darktext">${TAB_NAMES[id]}</span>
       </div>
     </div>
   `).join('');
-}
 
-function moveMenuItem(index, dir) {
-  if (index + dir < 0 || index + dir >= tempMenuOrder.length) return;
-  const temp = tempMenuOrder[index];
-  tempMenuOrder[index] = tempMenuOrder[index + dir];
-  tempMenuOrder[index + dir] = temp;
-  renderMenuOrder();
+  if(window.menuSortable) window.menuSortable.destroy();
+  window.menuSortable = new Sortable(list, {
+    animation: 150,
+    handle: '.handle',
+    ghostClass: 'opacity-50',
+    onEnd: function () {
+      tempMenuOrder = Array.from(list.children).map(el => el.dataset.id);
+    }
+  });
 }
 
 function renderLeaveTypes() {
@@ -962,7 +947,7 @@ async function saveAdminSettings() {
     await apiCall('saveSettings', payload);
     alert("Settings successfully saved!");
     if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
-    applyMenuOrder(tempMenuOrder); // Reflect changes immediately
+    applyMenuOrder(tempMenuOrder); 
   } catch (err) { alert("Error: " + err.message); }
   showLoader(false);
 }
