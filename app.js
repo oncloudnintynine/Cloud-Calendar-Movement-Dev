@@ -9,8 +9,8 @@ let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
-let tempLeaveTypes = [];
-let adminKAHList =[];
+let tempLeaveTypes =[];
+let adminKAHList = [];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
 
@@ -206,6 +206,7 @@ async function showApp() {
   showLoader(false);
 }
 
+
 function switchTab(tabId) {
   closeMenu();
   document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('flex'); });
@@ -303,6 +304,16 @@ function buildAgendaHtml(items, isMyCalendar) {
       actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
     }
 
+    let attendeesDisplay = '';
+    if (l.Attendees) {
+      try {
+        const attArr = JSON.parse(l.Attendees);
+        if (attArr && attArr.length > 0) {
+           attendeesDisplay = attArr.map(a => a.type === 'group' ? a.name.replace('zz ', '') : a.name).join(', ');
+        }
+      } catch(e) {}
+    }
+
     return `
     <div class="border border-gray-200 dark:border-darkborder p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
       <div class="flex justify-between items-start mb-2">
@@ -314,6 +325,7 @@ function buildAgendaHtml(items, isMyCalendar) {
       ${isEvent && l.Location ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
       ${!isEvent && l.Country ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${l.Country} ${l.State ? `(${l.State})` : ''}</p>` : ''}
       ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
+      ${attendeesDisplay ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
       ${l.Remarks ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
       ${actionBtns}
     </div>`;
@@ -355,7 +367,18 @@ function renderDashboard() {
 }
 
 function renderMyLeaves() {
-  const my = allLeaves.filter(l => l.Phone == user.phone || (l.Attendees && String(l.Attendees).includes(user.phone)));
+  const my = allLeaves.filter(l => {
+    if (l.Phone == user.phone) return true;
+    if (l.Attendees) {
+      try {
+        const att = JSON.parse(l.Attendees);
+        return att.some(a => (a.type === 'contact' && a.id == user.phone) || (a.type === 'group' && user.departments.includes(a.dept)));
+      } catch(e) {
+        return String(l.Attendees).includes(user.phone);
+      }
+    }
+    return false;
+  });
   
   const monthEl = document.getElementById('my-cal-month');
   if (monthEl) monthEl.innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
@@ -417,15 +440,21 @@ function renderParadeState() {
       const activeRecords = allLeaves.filter(l => {
         if (l.Status === 'Cancelled') return false;
         
-        const attendeesStr = String(l.Attendees || '');
-        const phoneStr = String(l.Phone || '');
-        const contactPhoneStr = String(contact.phone || '');
-        
-        if (phoneStr !== contactPhoneStr && !attendeesStr.includes(contactPhoneStr)) return false;
+        let isTarget = false;
+        if (l.Phone == contact.phone) {
+          isTarget = true;
+        } else if (l.Attendees) {
+          try {
+            const att = JSON.parse(l.Attendees);
+            isTarget = att.some(a => (a.type === 'contact' && a.id == contact.phone) || (a.type === 'group' && a.dept === contact.dept));
+          } catch(e) {
+            isTarget = String(l.Attendees).includes(contact.phone);
+          }
+        }
+        if (!isTarget) return false;
         
         const sDate = new Date(l.StartDate);
         const eDate = new Date(l.EndDate);
-        // Bump EndDate to 23:59:59 to accurately encompass the entire final day for leave checks
         eDate.setHours(23, 59, 59, 999);
         
         return sDate <= now && eDate >= now;
@@ -577,11 +606,15 @@ function triggerEdit(id) {
     
     eventAttendees =[];
     if(l.Attendees) {
-      const savedPhones = String(l.Attendees).split(',');
-      savedPhones.forEach(ph => {
-        const contact = companyContacts.find(c => String(c.phone) === String(ph));
-        if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, dept: contact.dept, type: 'contact' });
-      });
+      try {
+        eventAttendees = JSON.parse(l.Attendees);
+      } catch(e) {
+        const savedPhones = String(l.Attendees).split(',');
+        savedPhones.forEach(ph => {
+          const contact = companyContacts.find(c => String(c.phone) === String(ph));
+          if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, dept: contact.dept, type: 'contact' });
+        });
+      }
     }
     renderAttendees();
     
@@ -694,17 +727,10 @@ async function submitForm(ctx) {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
     loc = document.getElementById('form-event-location').value;
     
-    let resolvedPhones = new Set();
     eventAttendees.forEach(a => {
-      if (a.type === 'contact') {
-        resolvedPhones.add(a.id);
-        finalDepts.add(a.dept);
-      } else if (a.type === 'group') {
-        finalDepts.add(a.dept);
-        companyContacts.filter(c => c.dept === a.dept).forEach(c => resolvedPhones.add(c.phone));
-      }
+      finalDepts.add(a.dept);
     });
-    finalAttendeesStr = Array.from(resolvedPhones).join(',');
+    finalAttendeesStr = JSON.stringify(eventAttendees);
   }
 
   const payload = {
