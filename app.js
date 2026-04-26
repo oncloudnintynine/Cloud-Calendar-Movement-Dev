@@ -122,8 +122,7 @@ async function handleLogin() {
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
     showApp();
-  } catch (err) { alertError('login-alert', err.message); }
-  showLoader(false); 
+  } catch (err) { alertError('login-alert', err.message); showLoader(false); }
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
@@ -131,8 +130,8 @@ const TAB_NAMES = {
   'dashboard': 'Dashboard',
   'parade-state': 'Parade State',
   'my-leaves': 'My Calendar',
-  'submit-leave': 'Update Leave/MC/OIL',
-  'submit-event': 'Update Event',
+  'submit-leave': 'Add Leave/MC/OIL',
+  'submit-event': 'Add Event',
   'admin': 'Admin Settings'
 };
 const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event'];
@@ -173,6 +172,9 @@ async function showApp() {
       const formLeaveType = document.getElementById('form-leave-type');
       if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
       
+      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+      applyMenuOrder(mOrder);
+      
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
         const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -194,9 +196,6 @@ async function showApp() {
         fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
 
-      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-      applyMenuOrder(mOrder);
-      
       await loadLeavesData();
       switchTab(mOrder[0]); 
 
@@ -278,7 +277,7 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
 
     let baseClass = "w-7 h-7 text-xs flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
     if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
-    else if (isToday) baseClass += "ring-2 ring-blue-500 text-blue-700 dark:text-blue-300 font-bold bg-blue-50 dark:bg-blue-900/40 shadow-sm ";
+    else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
     else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
     const dot = hasEvent && !isSelected ? `<div class="absolute bottom-0.5 w-1 h-1 bg-blue-500 rounded-full"></div>` : '';
