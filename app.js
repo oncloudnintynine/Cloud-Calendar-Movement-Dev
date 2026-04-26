@@ -3,15 +3,15 @@ let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
 
-let companyContacts =[];
+let companyContacts = [];
 let validContactNames =[];
 let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
-let tempLeaveTypes = [];
+let tempLeaveTypes =[];
 let adminKAHList = [];
-let tempMenuOrder =[];
+let tempMenuOrder = [];
 let eventAttendees =[]; 
 
 let appData = {
@@ -121,8 +121,12 @@ async function handleLogin() {
     user = await apiCall('login', { password: pass });
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
-    showApp();
-  } catch (err) { alertError('login-alert', err.message); showLoader(false); }
+    await showApp();
+  } catch (err) { 
+    alertError('login-alert', err.message); 
+  } finally {
+    showLoader(false);
+  }
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
@@ -172,9 +176,6 @@ async function showApp() {
       const formLeaveType = document.getElementById('form-leave-type');
       if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
       
-      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-      applyMenuOrder(mOrder);
-      
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
         const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -196,6 +197,9 @@ async function showApp() {
         fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
 
+      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+      applyMenuOrder(mOrder);
+      
       await loadLeavesData();
       switchTab(mOrder[0]); 
 
@@ -212,7 +216,7 @@ function switchTab(tabId) {
   const view = document.getElementById(`view-${tabId}`);
   if (view) {
     view.classList.remove('hidden-view');
-    view.classList.add('flex'); // Apply flex constraint to all tabs natively
+    view.classList.add('flex'); 
   }
   
   document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
@@ -701,11 +705,13 @@ function toggleOverseasFields() {
 
 async function submitForm(ctx) {
   showLoader(true);
+  
   if (ctx === 'leave') {
     const coverInput = document.getElementById('form-leave-cover').value.trim();
     if (!validContactNames.includes(coverInput.toLowerCase())) {
       alert("Please select a valid Covering Person from the dropdown list.");
-      showLoader(false); return;
+      showLoader(false); 
+      return;
     }
   }
 
@@ -732,15 +738,8 @@ async function submitForm(ctx) {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
     loc = document.getElementById('form-event-location').value;
     
-    let resolvedPhones = new Set();
     eventAttendees.forEach(a => {
-      if (a.type === 'contact') {
-        resolvedPhones.add(a.id);
-        finalDepts.add(a.dept);
-      } else if (a.type === 'group') {
-        finalDepts.add(a.dept);
-        companyContacts.filter(c => c.dept === a.dept).forEach(c => resolvedPhones.add(c.phone));
-      }
+      finalDepts.add(a.dept);
     });
     finalAttendeesStr = JSON.stringify(eventAttendees);
   }
@@ -761,14 +760,26 @@ async function submitForm(ctx) {
     const action = currentEditId ? 'editLeave' : 'submitLeave';
     const res = await apiCall(action, payload);
     alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
-    cancelEditMode(); loadLeavesData();
-  } catch (err) { alert("Error: " + err.message); showLoader(false); }
+    cancelEditMode(); 
+    await loadLeavesData();
+  } catch (err) { 
+    alert("Error: " + err.message); 
+  } finally {
+    showLoader(false); 
+  }
 }
 
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) { showLoader(false); }
+  try { 
+    await apiCall('cancelLeave', { id: id, phone: user.phone }); 
+    await loadLeavesData(); 
+  } catch (err) { 
+    alert("Error: " + err.message); 
+  } finally {
+    showLoader(false); 
+  }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
@@ -1072,6 +1083,9 @@ async function saveAdminSettings() {
     alert("Settings successfully saved!");
     if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); document.getElementById('set-admin-pass').value = ''; }
     applyMenuOrder(tempMenuOrder); 
-  } catch (err) { alert("Error: " + err.message); }
-  showLoader(false);
+  } catch (err) { 
+    alert("Error: " + err.message); 
+  } finally {
+    showLoader(false);
+  }
 }
