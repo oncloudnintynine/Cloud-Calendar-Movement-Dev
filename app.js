@@ -106,6 +106,7 @@ function showLogin() {
   document.getElementById('logout-btn').classList.add('hidden');
   document.getElementById('menu-btn').classList.add('hidden');
   document.getElementById('active-tab-title').classList.add('hidden');
+  document.getElementById('dash-dept-nav').classList.add('hidden');
 }
 
 async function handleLogin() {
@@ -117,8 +118,7 @@ async function handleLogin() {
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
     showApp();
-  } catch (err) { alertError('login-alert', err.message); }
-  showLoader(false);
+  } catch (err) { alertError('login-alert', err.message); showLoader(false); }
 }
 function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
 
@@ -144,6 +144,7 @@ function applyMenuOrder(orderArr) {
 }
 
 async function showApp() {
+  showLoader(true);
   document.getElementById('login-view').classList.add('hidden-view');
   document.getElementById('app-view').classList.remove('hidden-view');
   document.getElementById('logout-btn').classList.remove('hidden');
@@ -153,13 +154,12 @@ async function showApp() {
   if (user.role === 'admin') {
     document.getElementById('nav-user-name').innerText = "Administrator";['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('menu-admin').classList.remove('hidden'); 
-    switchTab('admin'); loadAdminSettings();
+    switchTab('admin'); await loadAdminSettings();
   } else {
-    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name} [${user.departments[0]}]` : user.name;['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name}` : user.name;['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
     document.getElementById('menu-admin').classList.add('hidden'); 
     
-    switchTab('dashboard'); 
-    loadLeavesData();
+    await loadLeavesData();
     
     try {
       const settings = await apiCall('getSettings', { adminPass: null }); 
@@ -177,8 +177,9 @@ async function showApp() {
         
         const uniqueDepts =[...new Set(companyContacts.map(c => c.dept))];
         document.getElementById('dash-dept').innerHTML = '<option value="">All Departments</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+        document.getElementById('dash-dept-nav').innerHTML = '<option value="">All Depts</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
         
-        fuseAllContacts = new Fuse(companyContacts, { keys:['name'], threshold: 0.3 });
+        fuseAllContacts = new Fuse(companyContacts, { keys:['name', 'dept'], threshold: 0.3 });
         
         let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
         uniqueDepts.forEach(dept => {
@@ -188,6 +189,7 @@ async function showApp() {
       }
     } catch(e){}
   }
+  showLoader(false);
 }
 
 function switchTab(tabId) {
@@ -204,14 +206,18 @@ function switchTab(tabId) {
   if(activeMenu) activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
   document.getElementById('active-tab-title').innerText = TAB_NAMES[tabId] || '';
   
+  if (tabId === 'dashboard') {
+    document.getElementById('dash-dept-nav').classList.remove('hidden');
+  } else {
+    document.getElementById('dash-dept-nav').classList.add('hidden');
+  }
+  
   if (tabId === 'parade-state') renderParadeState();
 }
 
 // --- General App logic ---
 async function loadLeavesData() {
-  showLoader(true);
   try { allLeaves = await apiCall('getLeaves'); renderDashboard(); renderMyLeaves(); if(!document.getElementById('view-parade-state').classList.contains('hidden-view')) renderParadeState(); } catch (err) {}
-  showLoader(false);
 }
 
 function changeMonth(ctx, offset) {
@@ -240,13 +246,13 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
       return current >= s && current <= e;
     });
 
-    let baseClass = "w-9 h-9 flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
+    let baseClass = "w-7 h-7 text-xs flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
     if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
     else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 font-bold ";
     else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
-    const dot = hasEvent && !isSelected ? `<div class="absolute bottom-1 w-1.5 h-1.5 bg-blue-500 rounded-full"></div>` : '';
-    const selDot = hasEvent && isSelected ? `<div class="absolute bottom-1 w-1.5 h-1.5 bg-white rounded-full"></div>` : '';
+    const dot = hasEvent && !isSelected ? `<div class="absolute bottom-0.5 w-1 h-1 bg-blue-500 rounded-full"></div>` : '';
+    const selDot = hasEvent && isSelected ? `<div class="absolute bottom-0.5 w-1 h-1 bg-white rounded-full"></div>` : '';
 
     html += `<div class="${baseClass}" onclick="selectDate('${ctx}', ${y}, ${m}, ${d})">${d}${dot}${selDot}</div>`;
   }
@@ -290,7 +296,7 @@ function buildAgendaHtml(items, isMyCalendar) {
 
 function renderDashboard() {
   const q = document.getElementById('dash-search').value.toLowerCase();
-  const d = document.getElementById('dash-dept').value;
+  const d = document.getElementById('dash-dept-nav').value || document.getElementById('dash-dept').value;
   let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
   if (d) filtered = filtered.filter(l => l.Department.includes(d));
   if (q) {
@@ -330,8 +336,8 @@ function renderMyLeaves() {
   document.getElementById('cancelled-leaves-container').innerHTML = cancelledLeaves.length 
     ? `<details class="group cursor-pointer text-sm">
          <summary class="font-bold text-gray-700 dark:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
-           <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-           Cancelled (${cancelledLeaves.length})
+           <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90 text-gray-700 dark:text-darktext" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+           <span class="text-gray-700 dark:text-darktext">Cancelled (${cancelledLeaves.length})</span>
          </summary>
          <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true)}</div>
        </details>`
@@ -842,7 +848,6 @@ function updateActiveItem(container) {
 
 // --- Admin Settings Sub-methods ---
 async function loadAdminSettings() {
-  showLoader(true);
   try {
     const settings = await apiCall('getSettings', { adminPass: user.pass });
     document.getElementById('set-kah-limit').value = settings.kahLimit;
@@ -858,10 +863,9 @@ async function loadAdminSettings() {
     renderKAHSelected();
     
     if(settings.allContacts) {
-      fuseAllContacts = new Fuse(settings.allContacts, { keys:['name'], threshold: 0.3 });
+      fuseAllContacts = new Fuse(settings.allContacts, { keys:['name', 'dept'], threshold: 0.3 });
     }
   } catch (err) { alertError('login-alert', err.message); }
-  showLoader(false);
 }
 
 function renderMenuOrder() {
