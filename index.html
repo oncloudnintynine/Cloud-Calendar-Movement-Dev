@@ -101,7 +101,7 @@
     <section id="app-view" class="hidden-view flex-col h-full overflow-hidden">
       
       <!-- Dashboard Tab -->
-      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-3">
+      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-4">
         <div class="shrink-0 w-full md:w-1/2">
           <input type="text" id="dash-search" placeholder="Search Names or Activities..." class="w-full border-2 border-gray-300 dark:border-darkborder rounded-xl py-2 px-4 bg-white dark:bg-darkinput outline-none shadow-sm focus:border-blue-500 transition" onkeyup="renderDashboard()">
         </div>
@@ -203,7 +203,7 @@
             </div>
             <div class="pt-2">
               <button type="submit" id="submit-leave-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md text-lg transition">Save Record</button>
-              <button type="button" id="cancel-edit-leave-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 rounded-xl shadow hidden-view mt-3 transition">Cancel Edit</button>
+              <button type="button" id="cancel-edit-leave-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 rounded-xl shadow mt-3 hidden-view transition">Cancel Edit</button>
             </div>
           </form>
         </div>
@@ -279,6 +279,7 @@
             </div>
           </div>
 
+          <!-- Menu Reordering block -->
           <div>
             <label class="block font-semibold mb-2 text-base">App Menu Order</label>
             <div id="menu-order-list" class="space-y-2 bg-gray-50 dark:bg-darkinput p-3 rounded-xl border-2 border-gray-200 dark:border-darkborder"></div>
@@ -298,10 +299,13 @@
           
           <div>
             <label class="block font-semibold mb-1 text-base">KAH Personnel Search</label>
-            <input type="text" id="kah-search" placeholder="Type name to add..." class="w-full border-2 border-gray-300 dark:border-darkborder rounded-xl py-2 px-4 bg-white dark:bg-darkinput outline-none mb-2 placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" autocomplete="off" onkeyup="searchKAH()">
-            <div id="kah-results" class="bg-white dark:bg-darksurface border-x-2 border-b-2 border-gray-300 dark:border-darkborder max-h-40 overflow-y-auto rounded-b-xl hidden-view shadow-xl absolute w-full max-w-xl z-20 -mt-2"></div>
-            <div class="mt-4 font-bold text-base">Current KAH List:</div>
-            <ul id="kah-selected-list" class="space-y-2 bg-gray-50 dark:bg-darkinput p-3 rounded-xl border-2 border-gray-200 dark:border-darkborder min-h-[50px] mt-2"></ul>
+            <div class="relative">
+              <input type="text" id="kah-search" placeholder="Type name to add..." class="w-full border-2 border-gray-300 dark:border-darkborder rounded-xl py-2.5 px-4 bg-white dark:bg-darkinput outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" autocomplete="off" onkeyup="searchKAH()">
+              <div id="kah-results" class="absolute z-50 w-full bg-white dark:bg-darksurface border-2 border-gray-300 dark:border-darkborder rounded-xl shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
+            </div>
+            
+            <div class="mt-4 font-bold text-base mb-2">Current KAH List:</div>
+            <ul id="kah-selected-list" class="space-y-2 bg-gray-50 dark:bg-darkinput p-3 rounded-xl border-2 border-gray-200 dark:border-darkborder min-h-[50px] empty:hidden"></ul>
           </div>
           
           <div class="pt-3">
