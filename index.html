@@ -32,17 +32,17 @@
   <div id="dev-banner" class="bg-red-600 text-white text-center py-1 text-xs font-bold tracking-widest hidden">DEV MODE</div>
 
   <nav class="bg-white dark:bg-darksurface shadow-sm border-b dark:border-darkborder px-4 py-3 flex justify-between items-center z-40 shrink-0">
-    <div class="flex items-center space-x-3">
-      <button id="menu-btn" onclick="toggleMenu()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-darkhover text-gray-600 dark:text-darktext hidden transition">
+    <div class="flex items-center space-x-3 min-w-0 flex-1">
+      <button id="menu-btn" onclick="toggleMenu()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-darkhover text-gray-600 dark:text-darktext hidden transition shrink-0">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
       </button>
-      <div class="flex flex-col">
-        <div class="font-bold text-lg text-blue-600 dark:text-blue-400 leading-tight">Team Admin Manager</div>
-        <div id="active-tab-title" class="text-xs font-semibold text-gray-500 dark:text-darkmuted hidden mt-0.5"></div>
+      <div class="flex flex-col min-w-0 flex-1">
+        <div class="font-bold text-lg md:text-xl text-blue-600 dark:text-blue-400 leading-tight truncate">Team Admin Manager</div>
+        <div id="active-tab-title" class="text-xs font-semibold text-gray-500 dark:text-darkmuted hidden mt-0.5 truncate"></div>
       </div>
     </div>
     
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center space-x-2 shrink-0">
       <span id="nav-user-name" class="font-semibold hidden md:block mr-2 text-sm"></span>
       <button onclick="toggleTheme()" class="text-xl p-2 rounded-full hover:bg-gray-100 dark:hover:bg-darkhover transition">🌗</button>
       <button onclick="animateAndUpdate(this)" class="p-2 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition" title="Clear Cache">
@@ -54,14 +54,13 @@
     </div>
   </nav>
 
-  <!-- slide menu dismiss on background tap -->
   <div id="slide-menu" class="fixed inset-0 bg-black/60 z-50 hidden-view" onclick="if(event.target.id === 'slide-menu') closeMenu()">
     <div id="slide-menu-panel" class="bg-white dark:bg-darksurface w-72 h-full shadow-2xl flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out">
       <div class="p-5 border-b dark:border-darkborder flex justify-between items-center">
         <span class="font-bold text-blue-600 dark:text-blue-400 text-xl">Menu</span>
         <button onclick="closeMenu()" class="text-gray-500 dark:text-darkmuted p-2 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full transition"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
       </div>
-      <div class="flex flex-col py-2 overflow-y-auto">
+      <div class="flex flex-col py-2 overflow-y-auto flex-grow" id="slide-menu-items">
         <button onclick="switchTab('dashboard')" id="menu-dashboard" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">Dashboard</button>
         <button onclick="switchTab('parade-state')" id="menu-parade-state" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">Parade State</button>
         <button onclick="switchTab('my-leaves')" id="menu-my-leaves" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">My Calendar</button>
@@ -94,9 +93,10 @@
 
     <!-- App Views -->
     <section id="app-view" class="hidden-view flex-col h-full overflow-hidden">
-      
+      <!-- Tabs structure removed, using hamburger menu only -->
+
       <!-- Dashboard Tab -->
-      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden space-y-4">
+      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-4">
         <div class="flex flex-col md:flex-row justify-between gap-3 shrink-0">
           <input type="text" id="dash-search" placeholder="Search..." class="w-full md:w-1/3 border-2 border-gray-300 dark:border-darkborder rounded-xl py-2 px-4 bg-white dark:bg-darkinput outline-none shadow-sm focus:border-blue-500 transition" onkeyup="renderDashboard()">
           <select id="dash-dept" class="w-full md:w-1/3 border-2 border-gray-300 dark:border-darkborder rounded-xl py-2 px-4 bg-white dark:bg-darkinput outline-none shadow-sm focus:border-blue-500 transition" onchange="renderDashboard()"><option value="">All Departments</option></select>
@@ -111,23 +111,23 @@
             <div class="grid grid-cols-7 text-center text-xs font-bold text-gray-400 dark:text-darkmuted mb-2"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
             <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-2 text-base font-medium"></div>
           </div>
-          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-5 min-h-0">
+          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-5 min-h-0 h-full">
             <h3 id="dash-agenda-title" class="font-bold text-lg border-b dark:border-darkborder pb-3 mb-3 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0"></h3>
-            <div id="dash-agenda" class="overflow-y-auto space-y-3 pr-2 h-full min-h-0 pb-4"></div>
+            <div id="dash-agenda" class="flex-1 overflow-y-auto space-y-3 pr-2 pb-4"></div>
           </div>
         </div>
       </div>
 
       <!-- Parade State Tab -->
-      <div id="view-parade-state" class="tab-content hidden-view flex-grow flex-col overflow-hidden">
-        <div class="bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-5 flex-grow flex flex-col min-h-0">
+      <div id="view-parade-state" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full">
+        <div class="bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-5 flex-grow flex flex-col min-h-0 h-full">
           <h2 id="parade-state-header" class="text-xl font-bold border-b dark:border-darkborder pb-3 mb-4 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0 text-blue-600 dark:text-blue-400">Overall Parade State</h2>
-          <div id="parade-state-body" class="overflow-y-auto space-y-6 pr-2 h-full min-h-0 pb-4"></div>
+          <div id="parade-state-body" class="flex-1 overflow-y-auto space-y-6 pr-2 pb-4"></div>
         </div>
       </div>
 
       <!-- My Calendar Tab -->
-      <div id="view-my-leaves" class="tab-content hidden-view flex-grow flex-col overflow-hidden">
+      <div id="view-my-leaves" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full">
         <div class="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
           <div class="w-full md:w-80 shrink-0 bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-4 h-fit">
             <div class="flex justify-between items-center mb-4">
@@ -138,11 +138,11 @@
             <div class="grid grid-cols-7 text-center text-xs font-bold text-gray-400 dark:text-darkmuted mb-2"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
             <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-2 text-base font-medium"></div>
           </div>
-          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-5 min-h-0">
+          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-5 min-h-0 h-full">
             <h3 id="my-agenda-title" class="font-bold text-lg border-b dark:border-darkborder pb-3 mb-3 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0"></h3>
-            <div class="overflow-y-auto pr-2 h-full flex flex-col min-h-0 pb-6">
-              <div id="my-agenda" class="space-y-3"></div>
-              <div id="cancelled-leaves-container" class="mt-6 pt-4 border-t dark:border-darkborder"></div>
+            <div class="flex-1 overflow-y-auto pr-2 flex flex-col pb-6">
+              <div id="my-agenda" class="space-y-3 shrink-0"></div>
+              <div id="cancelled-leaves-container" class="mt-6 pt-4 border-t dark:border-darkborder shrink-0"></div>
             </div>
           </div>
         </div>
@@ -264,7 +264,7 @@
       
       <!-- Admin Tab -->
       <div id="view-admin" class="tab-content hidden-view max-w-2xl mx-auto w-full overflow-y-auto h-full pb-6">
-        <div class="bg-white dark:bg-darksurface p-5 rounded-2xl shadow border dark:border-darkborder space-y-5">
+        <div class="bg-white dark:bg-darksurface p-5 rounded-2xl shadow border dark:border-darkborder space-y-6">
           <h2 class="text-xl font-bold border-b dark:border-darkborder pb-3 text-blue-600 dark:text-blue-400">Global Configuration</h2>
           
           <div>
@@ -273,6 +273,12 @@
               <input type="password" id="set-admin-pass" class="w-full border-2 border-gray-300 dark:border-darkborder rounded-xl py-2 px-4 bg-white dark:bg-darkinput outline-none placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" placeholder="Leave blank to keep current">
               <button onclick="togglePassword('set-admin-pass', this)" class="absolute right-3 top-3 text-gray-500 dark:text-darkmuted"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
             </div>
+          </div>
+
+          <!-- Menu Reordering block -->
+          <div>
+            <label class="block font-semibold mb-2 text-base">App Menu Order</label>
+            <div id="menu-order-list" class="space-y-2 bg-gray-50 dark:bg-darkinput p-3 rounded-xl border-2 border-gray-200 dark:border-darkborder"></div>
           </div>
           
           <div>
