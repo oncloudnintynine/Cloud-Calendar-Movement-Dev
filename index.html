@@ -10,11 +10,11 @@
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
   <script>tailwind.config = { darkMode: 'class' }</script>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 min-h-screen flex flex-col text-sm">
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 h-screen flex flex-col text-sm overflow-hidden">
 
-  <div id="dev-banner" class="bg-red-600 text-white text-center py-0.5 text-xs font-bold tracking-widest hidden">DEV MODE</div>
+  <div id="dev-banner" class="bg-red-600 text-white text-center py-0.5 text-[10px] font-bold tracking-widest hidden">DEV MODE</div>
 
-  <nav class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-3 py-1 flex justify-between items-center sticky top-0 z-40">
+  <nav class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-3 py-1 flex justify-between items-center z-40 shrink-0">
     <div class="font-bold text-base text-blue-600 dark:text-blue-400">Team Admin Manager</div>
     <div class="flex items-center space-x-1 md:space-x-2">
       <span id="nav-user-name" class="font-semibold hidden md:block mr-2"></span>
@@ -28,13 +28,13 @@
     </div>
   </nav>
 
-  <main class="flex-grow flex flex-col p-2 w-full max-w-5xl mx-auto relative">
-    <div id="loader" class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-40 flex-col items-center justify-center hidden">
+  <main class="flex-grow flex flex-col p-2 w-full max-w-6xl mx-auto relative overflow-hidden">
+    <div id="loader" class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 z-50 flex-col items-center justify-center hidden">
       <div class="spinner mb-2"></div><p class="font-medium">Processing...</p>
     </div>
 
     <!-- Login View -->
-    <section id="login-view" class="flex flex-col items-center justify-center flex-grow">
+    <section id="login-view" class="flex flex-col items-center justify-center h-full">
       <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg w-full max-w-sm border dark:border-gray-700">
         <h2 class="text-xl font-bold mb-1 text-center">Welcome</h2>
         <p class="text-center text-xs text-gray-500 mb-4">Enter your password to continue</p>
@@ -49,38 +49,74 @@
     </section>
 
     <!-- App Views -->
-    <section id="app-view" class="hidden-view flex-col flex-grow">
-      <div class="flex space-x-1 mb-2 border-b dark:border-gray-700 overflow-x-auto pb-1">
+    <section id="app-view" class="hidden-view flex-col h-full overflow-hidden">
+      <!-- Tabs -->
+      <div class="flex space-x-1 mb-2 border-b dark:border-gray-700 overflow-x-auto pb-1 shrink-0">
         <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-2 py-1 font-semibold border-b-2 border-blue-600 text-blue-600 whitespace-nowrap hidden">Dashboard</button>
-        <button onclick="switchTab('my-leaves')" id="tab-my-leaves" class="px-2 py-1 font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap hidden">My Leave/MC/OIL</button>
+        <button onclick="switchTab('my-leaves')" id="tab-my-leaves" class="px-2 py-1 font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap hidden">My Calendar</button>
         <button onclick="switchTab('submit-leave')" id="tab-submit-leave" class="px-2 py-1 font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap hidden">Update Leave/MC/OIL</button>
         <button onclick="switchTab('submit-event')" id="tab-submit-event" class="px-2 py-1 font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap hidden">Update Event</button>
         <button onclick="switchTab('admin')" id="tab-admin" class="px-2 py-1 font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap hidden">Admin Settings</button>
       </div>
 
       <!-- Dashboard Tab -->
-      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col">
-        <div class="flex flex-col md:flex-row justify-between mb-2 gap-2">
-          <input type="text" id="dash-search" placeholder="Search..." class="w-full md:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2 bg-white dark:bg-gray-700 outline-none shadow-sm" onkeyup="filterDashboard()">
-          <select id="dash-dept" class="w-full md:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2 bg-white dark:bg-gray-700 outline-none shadow-sm" onchange="filterDashboard()"><option value="">All Departments</option></select>
+      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden">
+        <div class="flex flex-col md:flex-row justify-between mb-2 gap-2 shrink-0">
+          <input type="text" id="dash-search" placeholder="Search..." class="w-full md:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2 bg-white dark:bg-gray-700 outline-none shadow-sm" onkeyup="renderDashboard()">
+          <select id="dash-dept" class="w-full md:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2 bg-white dark:bg-gray-700 outline-none shadow-sm" onchange="renderDashboard()"><option value="">All Departments</option></select>
         </div>
-        <div class="hidden md:block overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
-          <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-gray-100 dark:bg-gray-700"><tr><th class="px-2 py-1">Name</th><th class="px-2 py-1">Dept</th><th class="px-2 py-1">Type</th><th class="px-2 py-1">Dates</th><th class="px-2 py-1">Status</th></tr></thead>
-            <tbody id="dash-body-desktop" class="divide-y dark:divide-gray-700"></tbody>
-          </table>
+        
+        <div class="flex flex-col md:flex-row gap-3 flex-grow overflow-hidden">
+          <!-- Calendar Numerical View -->
+          <div class="w-full md:w-72 shrink-0 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-3 h-fit">
+            <div class="flex justify-between items-center mb-2">
+              <button onclick="changeMonth('dash', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full font-bold">◀</button>
+              <div id="dash-cal-month" class="font-bold"></div>
+              <button onclick="changeMonth('dash', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full font-bold">▶</button>
+            </div>
+            <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 mb-1">
+              <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+            </div>
+            <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-1 text-sm font-medium"></div>
+          </div>
+          
+          <!-- Agenda View -->
+          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-3">
+            <h3 id="dash-agenda-title" class="font-bold border-b dark:border-gray-700 pb-2 mb-2 sticky top-0 bg-white dark:bg-gray-800 z-10 shrink-0"></h3>
+            <div id="dash-agenda" class="overflow-y-auto space-y-2 pr-1 h-full"></div>
+          </div>
         </div>
-        <div class="md:hidden grid gap-2" id="dash-body-mobile"></div>
       </div>
 
-      <!-- My Leaves Tab -->
-      <div id="view-my-leaves" class="tab-content hidden-view flex-col">
-        <div id="active-leaves-container" class="grid gap-2"></div>
-        <div id="cancelled-leaves-container" class="mt-2"></div>
+      <!-- My Calendar Tab -->
+      <div id="view-my-leaves" class="tab-content hidden-view flex-grow flex-col overflow-hidden">
+        <div class="flex flex-col md:flex-row gap-3 flex-grow overflow-hidden">
+          <!-- Calendar Numerical View -->
+          <div class="w-full md:w-72 shrink-0 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-3 h-fit">
+            <div class="flex justify-between items-center mb-2">
+              <button onclick="changeMonth('my', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full font-bold">◀</button>
+              <div id="my-cal-month" class="font-bold"></div>
+              <button onclick="changeMonth('my', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full font-bold">▶</button>
+            </div>
+            <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 mb-1">
+              <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+            </div>
+            <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-1 text-sm font-medium"></div>
+          </div>
+          
+          <!-- Agenda View & Cancelled Section -->
+          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-3">
+            <h3 id="my-agenda-title" class="font-bold border-b dark:border-gray-700 pb-2 mb-2 sticky top-0 bg-white dark:bg-gray-800 z-10 shrink-0"></h3>
+            <div class="overflow-y-auto pr-1 h-full flex flex-col">
+              <div id="my-agenda" class="space-y-2 flex-grow"></div>
+              <div id="cancelled-leaves-container" class="mt-4 pt-3 border-t dark:border-gray-700"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Submit Leave Tab -->
-      <div id="view-submit-leave" class="tab-content hidden-view max-w-xl mx-auto w-full">
+      <div id="view-submit-leave" class="tab-content hidden-view max-w-xl mx-auto w-full overflow-y-auto h-full">
         <div class="bg-white dark:bg-gray-800 p-3 rounded-xl shadow border dark:border-gray-700">
           <form id="leave-form" onsubmit="event.preventDefault(); submitForm('leave');" class="space-y-3">
             <div>
@@ -132,7 +168,7 @@
       </div>
 
       <!-- Submit Event Tab -->
-      <div id="view-submit-event" class="tab-content hidden-view max-w-xl mx-auto w-full">
+      <div id="view-submit-event" class="tab-content hidden-view max-w-xl mx-auto w-full overflow-y-auto h-full">
         <div class="bg-white dark:bg-gray-800 p-3 rounded-xl shadow border dark:border-gray-700">
           <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="space-y-3">
             <div>
@@ -140,15 +176,12 @@
               <input type="text" id="form-event-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-white dark:bg-gray-700 outline-none shadow-sm" placeholder="e.g. Planning Seminar" required>
             </div>
             
-            <!-- Timeline Indicator Block -->
             <div class="relative pl-6 py-1 border-l-2 border-gray-200 dark:border-gray-600 ml-2 space-y-4">
-              <!-- Start Time -->
               <div class="relative">
                 <div class="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-blue-500 ring-4 ring-white dark:ring-gray-800"></div>
                 <label class="block font-semibold text-xs text-gray-500 uppercase tracking-wider mb-0.5">Start</label>
                 <button type="button" id="btn-event-start" onclick="openPicker('datetime', 'event', 'start')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-white dark:bg-gray-700 text-left outline-none font-medium">Select Date & Time</button>
               </div>
-              <!-- End Time -->
               <div class="relative">
                 <div class="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-red-500 ring-4 ring-white dark:ring-gray-800"></div>
                 <label class="block font-semibold text-xs text-gray-500 uppercase tracking-wider mb-0.5">End</label>
@@ -175,7 +208,7 @@
       </div>
       
       <!-- Admin Tab -->
-      <div id="view-admin" class="tab-content hidden-view max-w-xl mx-auto w-full">
+      <div id="view-admin" class="tab-content hidden-view max-w-xl mx-auto w-full overflow-y-auto h-full">
         <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow border dark:border-gray-700 space-y-2">
           <h2 class="text-lg font-bold border-b pb-1 dark:border-gray-700">Global Configuration</h2>
           <div>
@@ -210,7 +243,6 @@
       </div>
       <div class="relative h-48 bg-gray-50 dark:bg-gray-900 overflow-hidden flex justify-center w-full" id="picker-wheels-wrapper">
         <div class="wheel-highlight"></div>
-        <!-- Wheels Injected via JS -->
       </div>
     </div>
   </div>
