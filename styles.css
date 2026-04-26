@@ -1,18 +1,38 @@
-body { 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+.hidden-view { display: none !important; }
+.spinner { border: 3px solid rgba(0,0,0,.1); width: 24px; height: 24px; border-radius: 50%; border-left-color: #3b82f6; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+
+/* Custom Rolodex Wheel CSS */
+.wheel-container {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
 }
-.hidden-view { 
-  display: none !important; 
+.wheel-container::-webkit-scrollbar { display: none; }
+.wheel-item {
+  height: 40px;
+  line-height: 40px;
+  scroll-snap-align: center;
+  transition: opacity 0.2s;
+  opacity: 0.3;
 }
-.spinner { 
-  border: 3px solid rgba(0,0,0,.1); 
-  width: 24px; 
-  height: 24px; 
-  border-radius: 50%; 
-  border-left-color: #3b82f6; 
-  animation: spin 1s linear infinite; 
-}
-@keyframes spin { 
-  0% { transform: rotate(0deg); } 
-  100% { transform: rotate(360deg); } 
+.wheel-item.active { opacity: 1; font-weight: bold; color: #111827; }
+.dark .wheel-item.active { color: #f9fafb; }
+.wheel-highlight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 40px;
+  left: 0;
+  right: 0;
+  border-top: 2px solid #3b82f6;
+  border-bottom: 2px solid #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  pointer-events: none;
+  border-radius: 6px;
 }
