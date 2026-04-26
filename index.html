@@ -47,12 +47,12 @@
         
         <div class="mb-6 relative">
           <label class="block text-sm font-medium mb-1">Password</label>
-          <input type="password" id="login-pass" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none pr-10">
-          <button onclick="togglePassword('login-pass', this)" class="absolute right-2 top-8 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
+          <input type="password" id="login-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all pr-10">
+          <button onclick="togglePassword('login-pass', this)" class="absolute right-3 top-9 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
         </div>
-        <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">Login</button>
+        <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow transition">Login</button>
       </div>
     </section>
 
@@ -68,14 +68,14 @@
 
       <!-- Dashboard Tab -->
       <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col">
-        <div class="flex flex-col md:flex-row justify-between mb-4 gap-2">
-          <input type="text" id="dash-search" placeholder="Search names..." class="border dark:border-gray-600 p-2 rounded bg-transparent outline-none focus:ring-1 focus:ring-blue-500" onkeyup="filterDashboard()">
-          <select id="dash-dept" class="border dark:border-gray-600 p-2 rounded bg-transparent outline-none focus:ring-1 focus:ring-blue-500" onchange="filterDashboard()">
+        <div class="flex flex-col md:flex-row justify-between mb-4 gap-3">
+          <input type="text" id="dash-search" placeholder="Search names..." class="w-full md:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" onkeyup="filterDashboard()">
+          <select id="dash-dept" class="w-full md:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" onchange="filterDashboard()">
             <option value="">All Departments</option>
           </select>
         </div>
-        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded shadow-sm border dark:border-gray-700">
-          <table class="w-full text-left text-sm">
+        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700">
+          <table class="w-full text-left text-sm whitespace-nowrap">
             <thead class="bg-gray-100 dark:bg-gray-700">
               <tr><th class="p-3">Name</th><th class="p-3">Dept</th><th class="p-3">Type</th><th class="p-3">Dates</th><th class="p-3">Status</th></tr>
             </thead>
@@ -91,86 +91,105 @@
 
       <!-- Submit Form Tab -->
       <div id="view-submit-leave" class="tab-content hidden-view max-w-xl mx-auto w-full">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow border dark:border-gray-700">
-          <form id="leave-form" onsubmit="event.preventDefault(); submitLeaveForm();" class="space-y-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border dark:border-gray-700">
+          <form id="leave-form" onsubmit="event.preventDefault(); submitLeaveForm();" class="space-y-5">
             <div>
-              <label class="block text-sm font-medium mb-1">Leave Type</label>
-              <select id="form-type" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent" onchange="toggleOverseasFields()" required></select>
+              <label class="block text-sm font-semibold mb-1">Leave Type</label>
+              <select id="form-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" onchange="toggleOverseasFields()" required></select>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            
+            <div class="space-y-4">
+              <!-- Start Date with AM/PM Slider -->
+              <div class="flex items-end space-x-3">
+                <div class="flex-grow">
+                  <label class="block text-sm font-semibold mb-1">Start Date</label>
+                  <input type="date" id="form-start" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" required>
+                </div>
+                <div class="w-24 shrink-0">
+                  <label class="block text-sm font-semibold mb-1 text-center">Time</label>
+                  <div class="relative flex bg-gray-200 dark:bg-gray-600 rounded-lg p-1 h-[46px] cursor-pointer select-none" onclick="toggleTime('start')">
+                    <div id="start-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded-md transition-transform duration-300"></div>
+                    <div class="relative z-10 flex-1 flex items-center justify-center text-sm font-bold text-white transition-colors" id="start-am-text">AM</div>
+                    <div class="relative z-10 flex-1 flex items-center justify-center text-sm font-bold text-gray-500 dark:text-gray-300 transition-colors" id="start-pm-text">PM</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- End Date with AM/PM Slider -->
+              <div class="flex items-end space-x-3">
+                <div class="flex-grow">
+                  <label class="block text-sm font-semibold mb-1">End Date</label>
+                  <input type="date" id="form-end" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" required>
+                </div>
+                <div class="w-24 shrink-0">
+                  <label class="block text-sm font-semibold mb-1 text-center">Time</label>
+                  <div class="relative flex bg-gray-200 dark:bg-gray-600 rounded-lg p-1 h-[46px] cursor-pointer select-none" onclick="toggleTime('end')">
+                    <div id="end-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded-md transition-transform duration-300 translate-x-full"></div>
+                    <div class="relative z-10 flex-1 flex items-center justify-center text-sm font-bold text-gray-500 dark:text-gray-300 transition-colors" id="end-am-text">AM</div>
+                    <div class="relative z-10 flex-1 flex items-center justify-center text-sm font-bold text-white transition-colors" id="end-pm-text">PM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold mb-1">Covering Person</label>
+              <input type="text" id="form-cover" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all" required>
+            </div>
+            
+            <div id="overseas-fields" class="hidden-view grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-gray-200 dark:border-gray-600">
               <div>
-                <label class="block text-sm font-medium mb-1">Start Date</label>
-                <input type="date" id="form-start" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent" required>
+                <label class="block text-sm font-semibold mb-1">Country <span class="text-xs text-red-500">(Req)</span></label>
+                <input type="text" id="form-country" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-1">End Date</label>
-                <input type="date" id="form-end" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent" required>
+                <label class="block text-sm font-semibold mb-1">State <span class="text-xs text-gray-400">(Opt)</span></label>
+                <input type="text" id="form-state" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
               </div>
             </div>
+            
             <div>
-              <label class="block text-sm font-medium mb-1">Half Day?</label>
-              <select id="form-half" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
-                <option value="None">No (Full Day)</option>
-                <option value="AM">AM (First Half)</option>
-                <option value="PM">PM (Second Half)</option>
-              </select>
+              <label class="block text-sm font-semibold mb-1">Remarks</label>
+              <textarea id="form-remarks" rows="2" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all"></textarea>
             </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Covering Person</label>
-              <input type="text" id="form-cover" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent" required>
-            </div>
-            <div id="overseas-fields" class="hidden-view grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded border dark:border-gray-600">
-              <div>
-                <label class="block text-sm font-medium mb-1">Country (Compulsory)</label>
-                <input type="text" id="form-country" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
-              </div>
-              <div>
-                <label class="block text-sm font-medium mb-1">State (Optional)</label>
-                <input type="text" id="form-state" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Remarks</label>
-              <textarea id="form-remarks" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent"></textarea>
-            </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit Forecast</button>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow transition">Submit Forecast</button>
           </form>
         </div>
       </div>
 
       <!-- Admin Settings Tab -->
       <div id="view-admin" class="tab-content hidden-view max-w-xl mx-auto w-full">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow border dark:border-gray-700 space-y-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border dark:border-gray-700 space-y-5">
           <h2 class="text-xl font-bold border-b pb-2 dark:border-gray-700">Global Configuration</h2>
           <div>
-            <label class="block text-sm font-medium mb-1">Change Admin Password</label>
+            <label class="block text-sm font-semibold mb-1">Change Admin Password</label>
             <div class="relative">
-              <input type="password" id="set-admin-pass" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent placeholder-gray-400" placeholder="Leave blank to keep current">
-              <button onclick="togglePassword('set-admin-pass', this)" class="absolute right-2 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
+              <input type="password" id="set-admin-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all placeholder-gray-400" placeholder="Leave blank to keep current">
+              <button onclick="togglePassword('set-admin-pass', this)" class="absolute right-3 top-3.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
               </button>
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Leave Types (Comma separated)</label>
-            <input type="text" id="set-leave-types" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+            <label class="block text-sm font-semibold mb-1">Leave Types (Comma separated)</label>
+            <input type="text" id="set-leave-types" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">KAH Limit Percentage (%)</label>
-            <input type="number" id="set-kah-limit" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+            <label class="block text-sm font-semibold mb-1">KAH Limit Percentage (%)</label>
+            <input type="number" id="set-kah-limit" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Approving Authority Email</label>
-            <input type="email" id="set-appr-email" class="w-full border dark:border-gray-600 rounded p-2 bg-transparent">
+            <label class="block text-sm font-semibold mb-1">Approving Authority Email</label>
+            <input type="email" id="set-appr-email" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">KAH Personnel Search (Fuzzy)</label>
-            <input type="text" id="kah-search" placeholder="Type name to add..." class="w-full border dark:border-gray-600 rounded p-2 bg-transparent mb-2" onkeyup="searchKAH()">
-            <div id="kah-results" class="bg-gray-100 dark:bg-gray-700 max-h-32 overflow-y-auto text-sm rounded"></div>
-            <div class="mt-2 text-sm font-semibold">Current KAH List:</div>
-            <ul id="kah-selected-list" class="space-y-1 text-sm bg-gray-50 dark:bg-gray-900 p-2 rounded border dark:border-gray-700 min-h-[50px]"></ul>
+            <label class="block text-sm font-semibold mb-1">KAH Personnel Search (Fuzzy)</label>
+            <input type="text" id="kah-search" placeholder="Type name to add..." class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition-all mb-2" onkeyup="searchKAH()">
+            <div id="kah-results" class="bg-gray-100 dark:bg-gray-700 max-h-32 overflow-y-auto text-sm rounded-lg"></div>
+            <div class="mt-3 text-sm font-bold">Current KAH List:</div>
+            <ul id="kah-selected-list" class="space-y-1 text-sm bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border-2 dark:border-gray-700 min-h-[50px] mt-1"></ul>
           </div>
-          <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded mt-4 transition">Save Settings</button>
+          <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow transition mt-4">Save Settings</button>
         </div>
       </div>
     </section>
