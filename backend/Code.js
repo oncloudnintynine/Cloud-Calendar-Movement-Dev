@@ -1,5 +1,5 @@
 // ==========================================
-// Code.gs - Apps Script Backend 
+// Code.gs - Apps Script Backend
 // ==========================================
 
 function INITIAL_SETUP() {
@@ -137,26 +137,44 @@ function getSettings(data) {
 
   var cg = getContactsAndGroups();
   var allContacts =[];
+  var phoneToDepts = {};
+
   cg.connections.forEach(function(person) {
     var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.phoneNumbers[0].value.replace(/\D/g, '').slice(-8) : "";
     if (phone && person.names && person.names.length > 0) {
       var name = cleanName(person.names[0].displayName);
       if (person.memberships) {
+        var depts =[];
         person.memberships.forEach(function(m) {
           if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
             var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
-            if (gName) allContacts.push({ name: name, phone: phone, dept: gName });
+            if (gName) depts.push(gName);
           }
         });
+        if (depts.length > 0) {
+          var deptsStr = depts.join(',');
+          phoneToDepts[phone] = deptsStr;
+          allContacts.push({ name: name, phone: phone, dept: deptsStr });
+        }
       }
     }
   });
+
+  // Auto-sync KAH List departments in background to fix mismatches if user moves department
+  var rawKahList = JSON.parse(props.getProperty('kahList') || "[]");
+  var syncedKahList = rawKahList.map(function(k) {
+    if (phoneToDepts[k.phone] && phoneToDepts[k.phone] !== k.dept) {
+      k.dept = phoneToDepts[k.phone];
+    }
+    return k;
+  });
+  props.setProperty('kahList', JSON.stringify(syncedKahList));
 
   return {
     kahLimit: props.getProperty('kahLimit'),
     leaveTypes: JSON.parse(props.getProperty('leaveTypes') || "[]"),
     approvingAuthority: props.getProperty('approvingAuthority'),
-    kahList: JSON.parse(props.getProperty('kahList') || "[]"),
+    kahList: syncedKahList,
     menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
     allContacts: allContacts
   };
@@ -180,7 +198,7 @@ function submitLeave(data) {
   var headers = verifySchema(sheet);
   
   var id = Utilities.getUuid();
-  var status = checkKahLimit(data, props, sheet) ? "Pending Approval (KAH Limit Reached)" : "Cal Updated";
+  var status = checkKahLimit(data, props, sheet) ? "Cal Updated (KAH Limit Reached)" : "Cal Updated";
   var eventIds = createGCalEvents(data, props);
 
   var row = new Array(headers.length).fill('');
@@ -224,7 +242,7 @@ function editLeave(data) {
         } catch(e) {}
       });
 
-      var status = checkKahLimit(data, props, sheet, data.id) ? "Pending Approval (KAH Limit Reached)" : "Cal Updated";
+      var status = checkKahLimit(data, props, sheet, data.id) ? "Cal Updated (KAH Limit Reached)" : "Cal Updated";
       var newEventIds = createGCalEvents(data, props);
 
       var newRow = new Array(headers.length).fill('');
@@ -336,25 +354,54 @@ function cancelLeave(data) {
 
 function checkKahLimit(data, props, sheet, skipId) {
   if (data.leaveType !== 'Overseas Leave' && data.leaveType !== 'Official Trip') return false;
+  
   var headers = verifySchema(sheet);
   var kahList = JSON.parse(props.getProperty('kahList') || "[]");
   var limit = parseInt(props.getProperty('kahLimit') || "50");
-  if (!kahList.some(function(k) { return k.phone === data.phone; })) return false;
+  
+  var userKAHData = kahList.filter(function(k) { return k.phone === data.phone; });
+  if (userKAHData.length === 0) return false;
 
-  var totalKahInDept = kahList.filter(function(k) { return data.departments.indexOf(k.dept) !== -1; }).length;
+  var limitExceeded = false;
   var rows = sheet.getDataRange().getValues();
-  var overlappingKAHs = 0;
-  
-  for (var i = 1; i < rows.length; i++) {
-    var rId = rows[i][headers.indexOf('ID')], rType = rows[i][headers.indexOf('LeaveType')], rStart = new Date(rows[i][headers.indexOf('StartDate')]), rEnd = new Date(rows[i][headers.indexOf('EndDate')]), rPhone = rows[i][headers.indexOf('Phone')], rStatus = rows[i][headers.indexOf('Status')];
-    if (rStatus === 'Cancelled' || rId === skipId) continue;
-    if ((rType === 'Overseas Leave' || rType === 'Official Trip') && kahList.some(function(k) { return k.phone == rPhone && data.departments.indexOf(k.dept) !== -1; })) {
-      var dStart = new Date(data.startDate), dEnd = new Date(data.endDate);
-      if (dStart <= rEnd && dEnd >= rStart) overlappingKAHs++;
+
+  // Evaluate the limit for each department the user is a KAH for
+  userKAHData.forEach(function(userKAH) {
+    var dept = userKAH.dept;
+    var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
+    
+    // Store unique phone numbers of KAHs who are away
+    var overlappingKAHPhones = [String(data.phone)];
+    
+    for (var i = 1; i < rows.length; i++) {
+      var rId = rows[i][headers.indexOf('ID')];
+      var rType = rows[i][headers.indexOf('LeaveType')];
+      var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
+      var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
+      var rPhone = rows[i][headers.indexOf('Phone')];
+      var rStatus = rows[i][headers.indexOf('Status')];
+
+      if (rStatus === 'Cancelled' || rId === skipId) continue;
+      
+      if (rType === 'Overseas Leave' || rType === 'Official Trip') {
+        var isKAHForDept = kahList.some(function(k) { return k.phone == rPhone && k.dept === dept; });
+        if (isKAHForDept) {
+          var dStart = new Date(data.startDate), dEnd = new Date(data.endDate);
+          if (dStart <= rEnd && dEnd >= rStart) {
+            if (overlappingKAHPhones.indexOf(String(rPhone)) === -1) {
+              overlappingKAHPhones.push(String(rPhone));
+            }
+          }
+        }
+      }
     }
-  }
-  
-  if (((overlappingKAHs + 1) / totalKahInDept) * 100 > limit) {
+    
+    if (((overlappingKAHPhones.length) / totalKahInDept) * 100 > limit) {
+      limitExceeded = true;
+    }
+  });
+
+  if (limitExceeded) {
     MailApp.sendEmail(props.getProperty('approvingAuthority'), "Leave Requires Approval: KAH Limit Exceeded", "User " + data.name + " applied for " + data.leaveType + " but KAH limit was exceeded.");
     return true;
   }
@@ -392,7 +439,6 @@ function createGCalEvents(data, props) {
     var opts = {};
     if (isEvent && data.location) opts.location = data.location;
     
-    // Format location explicitly into the description for Overseas leave
     if (!isEvent && data.leaveType === 'Overseas Leave' && data.country) {
       opts.description = "Location: " + data.country + (data.state ? " (" + data.state + ")" : "");
     }
