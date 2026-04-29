@@ -292,17 +292,9 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
 
 function getBadgeClass(status) {
   const safeStatus = String(status || '');
-  if(safeStatus.includes('KAH Limit') || safeStatus.includes('Pending')) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+  if(safeStatus.includes('Pending')) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
   if(safeStatus.includes('Cancelled')) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
   return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-}
-
-function formatStatusBadge(status) {
-  let s = String(status || '').replace('Approved', 'Cal Updated');
-  if (s.includes('KAH Limit Reached')) {
-    return `Cal Updated<br><span class="text-[9px] font-bold opacity-90 tracking-tight leading-none block mt-0.5">(KAH Limit Reached)</span>`;
-  }
-  return s;
 }
 
 function buildAgendaHtml(items, isMyCalendar) {
@@ -331,7 +323,7 @@ function buildAgendaHtml(items, isMyCalendar) {
     <div class="border border-gray-200 dark:border-darkborder p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
       <div class="flex justify-between items-start mb-2">
         <h3 class="font-bold text-base">${isMyCalendar ? (l.LeaveType||'') : (l.Name||'') + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-sm">(' + (l.Department||'') + ')</span>'}</h3>
-        <span class="text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
+        <span class="text-[11px] font-bold px-2 py-1 rounded ${getBadgeClass(l.Status)}">${String(l.Status||'').replace('Approved', 'Cal Updated')}</span>
       </div>
       <p class="font-medium text-gray-700 dark:text-darktext">${isMyCalendar ? '' : (l.LeaveType||'') + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
       <p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
@@ -468,7 +460,6 @@ function renderParadeState() {
         
         const sDate = new Date(l.StartDate);
         const eDate = new Date(l.EndDate);
-        // Bump EndDate to 23:59:59 to accurately encompass the entire final day for leave checks
         eDate.setHours(23, 59, 59, 999);
         
         return sDate <= now && eDate >= now;
@@ -710,6 +701,7 @@ function toggleOverseasFields() {
 
 async function submitForm(ctx) {
   showLoader(true);
+  
   if (ctx === 'leave') {
     const coverInput = document.getElementById('form-leave-cover').value.trim();
     if (!validContactNames.includes(coverInput.toLowerCase())) {
@@ -741,15 +733,8 @@ async function submitForm(ctx) {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
     loc = document.getElementById('form-event-location').value;
     
-    let resolvedPhones = new Set();
     eventAttendees.forEach(a => {
-      if (a.type === 'contact') {
-        resolvedPhones.add(a.id);
-        finalDepts.add(a.dept);
-      } else if (a.type === 'group') {
-        finalDepts.add(a.dept);
-        companyContacts.filter(c => c.dept === a.dept).forEach(c => resolvedPhones.add(c.phone));
-      }
+      finalDepts.add(a.dept);
     });
     finalAttendeesStr = JSON.stringify(eventAttendees);
   }
@@ -769,24 +754,15 @@ async function submitForm(ctx) {
   try {
     const action = currentEditId ? 'editLeave' : 'submitLeave';
     const res = await apiCall(action, payload);
-    if (res.status.includes('KAH Limit')) {
-      alert(`Record successfully ${currentEditId ? 'updated' : 'submitted'}, but KAH Limit was reached! Admin notified.`);
-    } else {
-      alert(`Record successfully ${currentEditId ? 'updated' : 'submitted'}!`);
-    }
+    alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
     cancelEditMode(); loadLeavesData();
-  } catch (err) { 
-    alert("Error: " + err.message); 
-  } finally { 
-    showLoader(false); 
-  }
+  } catch (err) { alert("Error: " + err.message); showLoader(false); }
 }
 
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) {}
-  finally { showLoader(false); }
+  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) { showLoader(false); }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
@@ -841,7 +817,24 @@ function confirmPicker() {
   const min = minWheel ? getVal(minWheel) : 0;
 
   const finalDate = new Date(y, m, d, h, min, 0);
+
+  // VALIDATION: Prevent End Date from being before Start Date
+  if (activePicker.field === 'end') {
+    if (finalDate < appData[activePicker.ctx].startD) {
+      alert("End date/time cannot be earlier than the Start date/time.");
+      return; 
+    }
+  }
+
   appData[activePicker.ctx][activePicker.field + 'D'] = finalDate;
+
+  // AUTO-SYNC: If Start Date is pushed past End Date, bump End Date forward to match
+  if (activePicker.field === 'start') {
+    if (finalDate > appData[activePicker.ctx].endD) {
+      appData[activePicker.ctx].endD = new Date(finalDate);
+    }
+  }
+
   updateButtonLabels(); closePicker();
 }
 
@@ -880,7 +873,7 @@ function populateWheel(container, dataArr, currentVal) {
   for (let loop = 0; loop < loops; loop++) {
     dataArr.forEach(item => {
       if (loop === Math.floor(loops/2) && item.val === currentVal) targetScrollIndex = (loop * dataArr.length) + dataArr.indexOf(item);
-      html += `<div class="wheel-item text-xl cursor-pointer select-none" data-val="${item.val}">${item.label}</div>`;
+      html += `<div class="wheel-item text-xl cursor-pointer select-none flex items-center justify-center h-[40px]" data-val="${item.val}">${item.label}</div>`;
     });
   }
   html += `<div style="height: 76px;"></div>`;
@@ -915,12 +908,21 @@ function createWheel(parent, type, dataArr, currentVal) {
   wrapperDiv.appendChild(container); 
 
   let scrollTimeout;
+  let lastCenterIdx = -1;
+
   container.addEventListener('scroll', () => {
+    const currentIdx = Math.round(container.scrollTop / 40);
+
+    // Haptic Feedback Tick
+    if (lastCenterIdx !== -1 && lastCenterIdx !== currentIdx) {
+      if (navigator.vibrate) navigator.vibrate(3);
+    }
+    lastCenterIdx = currentIdx;
+
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
       const len = parseInt(container.dataset.len);
       const loops = 50;
-      const currentIdx = Math.round(container.scrollTop / 40);
       if (currentIdx < len * 5 || currentIdx > (len * loops) - (len * 5)) {
         const middleBase = Math.floor(loops/2) * len;
         container.style.scrollBehavior = 'auto'; 
