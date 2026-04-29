@@ -1,0 +1,39 @@
+name: Deploy Backend to Google Apps Script
+
+on:
+  push:
+    branches:
+      - main # (If your default branch is named 'master', change this to master)
+    paths:
+      - 'backend/**' # Only runs when files inside the backend folder are edited
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Clasp
+        run: npm install -g @google/clasp
+
+      - name: Generate Clasp Configuration
+        run: |
+          # 1. Inject the credentials file
+          echo '${{ secrets.CLASP_CREDS }}' > ~/.clasprc.json
+          
+          # 2. Tell clasp which script to target and to only upload the backend folder
+          echo '{"scriptId":"${{ secrets.SCRIPT_ID }}","rootDir":"backend"}' > .clasp.json
+
+      - name: Push Code and Deploy New Version
+        run: |
+          # Push the code (overwrites what is in the GAS editor)
+          clasp push --force
+          
+          # Deploy a new version to the EXACT SAME deployment ID
+          clasp deploy -i ${{ secrets.DEPLOYMENT_ID }} -d "Auto-deployed via GitHub Web UI"
