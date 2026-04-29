@@ -733,8 +733,15 @@ async function submitForm(ctx) {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
     loc = document.getElementById('form-event-location').value;
     
+    let resolvedPhones = new Set();
     eventAttendees.forEach(a => {
-      finalDepts.add(a.dept);
+      if (a.type === 'contact') {
+        resolvedPhones.add(a.id);
+        finalDepts.add(a.dept);
+      } else if (a.type === 'group') {
+        finalDepts.add(a.dept);
+        companyContacts.filter(c => c.dept === a.dept).forEach(c => resolvedPhones.add(c.phone));
+      }
     });
     finalAttendeesStr = JSON.stringify(eventAttendees);
   }
@@ -755,14 +762,26 @@ async function submitForm(ctx) {
     const action = currentEditId ? 'editLeave' : 'submitLeave';
     const res = await apiCall(action, payload);
     alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
-    cancelEditMode(); loadLeavesData();
-  } catch (err) { alert("Error: " + err.message); showLoader(false); }
+    cancelEditMode(); 
+    await loadLeavesData();
+  } catch (err) { 
+    alert("Error: " + err.message); 
+  } finally {
+    showLoader(false); 
+  }
 }
 
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) { showLoader(false); }
+  try { 
+    await apiCall('cancelLeave', { id: id, phone: user.phone }); 
+    await loadLeavesData(); 
+  } catch (err) {
+    alert("Error: " + err.message);
+  } finally {
+    showLoader(false); 
+  }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
@@ -817,18 +836,10 @@ function confirmPicker() {
   const min = minWheel ? getVal(minWheel) : 0;
 
   const finalDate = new Date(y, m, d, h, min, 0);
-
-  // VALIDATION: Prevent End Date from being before Start Date
-  if (activePicker.field === 'end') {
-    if (finalDate < appData[activePicker.ctx].startD) {
-      alert("End date/time cannot be earlier than the Start date/time.");
-      return; 
-    }
-  }
-
+  
   appData[activePicker.ctx][activePicker.field + 'D'] = finalDate;
 
-  // AUTO-SYNC: If Start Date is pushed past End Date, bump End Date forward to match
+  // Auto-sync start to end
   if (activePicker.field === 'start') {
     if (finalDate > appData[activePicker.ctx].endD) {
       appData[activePicker.ctx].endD = new Date(finalDate);
@@ -843,25 +854,63 @@ function buildWheels() {
   wrapper.innerHTML = '<div class="wheel-highlight"></div>'; 
   const cv = activePicker.currentVal;
   
+  let minY = 2024, minM = 0, minD = 1, minH = 0, minMin = 0;
+  
+  // Boundary constraints for end date
+  if (activePicker.field === 'end') {
+      const startD = appData[activePicker.ctx].startD;
+      minY = startD.getFullYear();
+      if (cv.getFullYear() < minY) cv.setFullYear(minY);
+      
+      if (cv.getFullYear() === minY) {
+          minM = startD.getMonth();
+          if (cv.getMonth() < minM) cv.setMonth(minM);
+          
+          if (cv.getMonth() === minM) {
+              minD = startD.getDate();
+              if (cv.getDate() < minD) cv.setDate(minD);
+              
+              if (activePicker.type === 'datetime' && cv.getDate() === minD) {
+                  minH = startD.getHours();
+                  if (cv.getHours() < minH) cv.setHours(minH);
+                  
+                  if (cv.getHours() === minH) {
+                      minMin = startD.getMinutes();
+                      if (cv.getMinutes() < minMin) cv.setMinutes(minMin);
+                  }
+              }
+          }
+      }
+  }
+
   const initialMaxDays = new Date(cv.getFullYear(), cv.getMonth() + 1, 0).getDate();
-  const days = Array.from({length: initialMaxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') }));
-  const months = mos.map((l, i) => ({ val: i, label: l }));
-  const years = Array.from({length: 15}, (_, i) => ({ val: 2024+i, label: 2024+i }));
-  const hours = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
-  const mins = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
+  
+  const days = Array.from({length: initialMaxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') })).filter(x => x.val >= minD);
+  const months = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
+  const years = Array.from({length: 15}, (_, i) => ({ val: Math.max(2024, minY)+i, label: Math.max(2024, minY)+i }));
+  const hours = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH);
+  const mins = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minMin);
 
   const dw = createWheel(wrapper, 'day', days, cv.getDate());
   dw.dataset.maxDays = initialMaxDays;
-  createWheel(wrapper, 'month', months, cv.getMonth());
-  createWheel(wrapper, 'year', years, cv.getFullYear());
+  dw.dataset.minVal = minD;
+  
+  const mw = createWheel(wrapper, 'month', months, cv.getMonth());
+  mw.dataset.minVal = minM;
+  
+  const yw = createWheel(wrapper, 'year', years, cv.getFullYear());
+  yw.dataset.minVal = minY;
   
   if (activePicker.type === 'datetime') {
     const sep = document.createElement('div');
     sep.className = 'w-px bg-gray-300 dark:bg-darkborder mx-2 h-3/4 my-auto relative z-20';
     wrapper.appendChild(sep);
 
-    createWheel(wrapper, 'hour', hours, cv.getHours());
-    createWheel(wrapper, 'min', mins, cv.getMinutes());
+    const hw = createWheel(wrapper, 'hour', hours, cv.getHours());
+    hw.dataset.minVal = minH;
+    
+    const minw = createWheel(wrapper, 'min', mins, cv.getMinutes());
+    minw.dataset.minVal = minMin;
   }
 }
 
@@ -912,10 +961,9 @@ function createWheel(parent, type, dataArr, currentVal) {
 
   container.addEventListener('scroll', () => {
     const currentIdx = Math.round(container.scrollTop / 40);
-
-    // Haptic Feedback Tick
+    
     if (lastCenterIdx !== -1 && lastCenterIdx !== currentIdx) {
-      if (navigator.vibrate) navigator.vibrate(3);
+      if (navigator.vibrate) navigator.vibrate(6);
     }
     lastCenterIdx = currentIdx;
 
@@ -930,42 +978,103 @@ function createWheel(parent, type, dataArr, currentVal) {
         setTimeout(() => container.style.scrollBehavior = 'smooth', 50);
       }
       updateActiveItem(container);
-      if (type === 'month' || type === 'year') adjustDaysWheel();
+      if (type !== 'min') adjustWheels();
     }, 100);
   });
   return container;
 }
 
-function adjustDaysWheel() {
+function adjustWheels() {
   const wrapper = document.getElementById('picker-wheels-wrapper');
   if (!wrapper) return;
   const wheels = Array.from(wrapper.querySelectorAll('.wheel-container'));
   const dayWheel = wheels.find(w => w.dataset.type === 'day');
   const monthWheel = wheels.find(w => w.dataset.type === 'month');
   const yearWheel = wheels.find(w => w.dataset.type === 'year');
+  const hourWheel = wheels.find(w => w.dataset.type === 'hour');
+  const minWheel = wheels.find(w => w.dataset.type === 'min');
   
   if (!dayWheel || !monthWheel || !yearWheel) return;
 
   const getVal = (wheel) => {
+    if(!wheel) return null;
     const items = wheel.querySelectorAll('.wheel-item');
     const centerIdx = Math.round(wheel.scrollTop / 40);
     return items[centerIdx] ? parseInt(items[centerIdx].dataset.val) : null;
   };
 
-  const m = getVal(monthWheel);
-  const y = getVal(yearWheel);
-  const d = getVal(dayWheel);
+  let y = getVal(yearWheel);
+  let m = getVal(monthWheel);
+  let d = getVal(dayWheel);
+  let h = hourWheel ? getVal(hourWheel) : 0;
+  let min = minWheel ? getVal(minWheel) : 0;
   
   if (m === null || y === null || d === null) return;
 
-  const maxDays = new Date(y, m + 1, 0).getDate();
-  const currentMax = parseInt(dayWheel.dataset.maxDays || '31');
+  let minM = 0, minD = 1, minH = 0, minMin = 0;
   
-  if (currentMax !== maxDays) {
-    dayWheel.dataset.maxDays = maxDays;
-    const daysArr = Array.from({length: maxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') }));
-    const newVal = Math.min(d, maxDays);
-    populateWheel(dayWheel, daysArr, newVal);
+  if (activePicker.field === 'end') {
+      const startD = appData[activePicker.ctx].startD;
+      if (y === startD.getFullYear()) {
+          minM = startD.getMonth();
+          if (m <= minM) {
+              m = minM;
+              minD = startD.getDate();
+              if (d <= minD) {
+                  d = minD;
+                  if (hourWheel) {
+                      minH = startD.getHours();
+                      if (h <= minH) {
+                          h = minH;
+                          minMin = startD.getMinutes();
+                      }
+                  }
+              }
+          }
+      }
+  }
+
+  // Adjust Month
+  const currentMinM = parseInt(monthWheel.dataset.minVal || '0');
+  if (currentMinM !== minM) {
+      monthWheel.dataset.minVal = minM;
+      const monthsArr = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
+      populateWheel(monthWheel, monthsArr, Math.max(m, minM));
+  }
+  m = Math.max(m, minM); 
+
+  // Adjust Day
+  const maxDays = new Date(y, m + 1, 0).getDate();
+  const currentMinD = parseInt(dayWheel.dataset.minVal || '1');
+  const currentMaxD = parseInt(dayWheel.dataset.maxDays || '31');
+  
+  if (currentMinD !== minD || currentMaxD !== maxDays) {
+      dayWheel.dataset.minVal = minD;
+      dayWheel.dataset.maxDays = maxDays;
+      const daysArr = Array.from({length: maxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') })).filter(x => x.val >= minD);
+      populateWheel(dayWheel, daysArr, Math.max(d, minD));
+  }
+  d = Math.max(d, minD);
+
+  // Adjust Hour
+  if (hourWheel) {
+      const currentMinH = parseInt(hourWheel.dataset.minVal || '0');
+      if (currentMinH !== minH) {
+          hourWheel.dataset.minVal = minH;
+          const hoursArr = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH);
+          populateWheel(hourWheel, hoursArr, Math.max(h, minH));
+      }
+      h = Math.max(h, minH);
+  }
+
+  // Adjust Min
+  if (minWheel) {
+      const currentMinMin = parseInt(minWheel.dataset.minVal || '0');
+      if (currentMinMin !== minMin) {
+          minWheel.dataset.minVal = minMin;
+          const minsArr = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minMin);
+          populateWheel(minWheel, minsArr, Math.max(min, minMin));
+      }
   }
 }
 
