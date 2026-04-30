@@ -1,3 +1,12 @@
+
+3. app.js
+
+Changes: Re-engineered activePicker boundary logic to strictly limit end
+dates/times dynamically as the start changes. Increased vibrate to 24.
+Implemented InfoAll frontend payload injection and integrated the new Dashboard
+logic to visually surface "Info All" global events into their own independent
+container.
+
 // --- Global State ---
 let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
@@ -13,10 +22,12 @@ let tempLeaveTypes =[];
 let adminKAHList = [];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
+let isInfoAll = false;
 
 let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
-  event: { startD: new Date(), endD: new Date() }
+  event: { startD: new Date(), endD: new Date() },
+  parade: { targetD: new Date() }
 };
 
 let dashDate = new Date(); dashDate.setHours(0,0,0,0);
@@ -47,6 +58,18 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   initDates();
 });
+
+function toggleInfoAll(forceState) {
+  isInfoAll = forceState !== undefined ? forceState : !isInfoAll;
+  const btn = document.getElementById('form-event-infoall-btn');
+  if(isInfoAll) {
+      btn.classList.add('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border-blue-300', 'dark:border-blue-600');
+      btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-400', 'dark:border-gray-500');
+  } else {
+      btn.classList.remove('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border-blue-300', 'dark:border-blue-600');
+      btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-400', 'dark:border-gray-500');
+  }
+}
 
 // --- Menu UI Logic ---
 function toggleMenu() {
@@ -93,6 +116,7 @@ function initDates() {
   const now = new Date();
   appData.leave.startD = new Date(now); appData.leave.endD = new Date(now);
   appData.event.startD = new Date(now); appData.event.endD = new Date(now);
+  appData.parade.targetD = new Date(now);
   updateButtonLabels();
 }
 function updateButtonLabels() {
@@ -100,6 +124,9 @@ function updateButtonLabels() {
   document.getElementById('btn-leave-end').innerText = formatDisplayDate(appData.leave.endD);
   document.getElementById('btn-event-start').innerText = formatDisplayDateTime(appData.event.startD);
   document.getElementById('btn-event-end').innerText = formatDisplayDateTime(appData.event.endD);
+  
+  const paradeBtn = document.getElementById('btn-parade-target');
+  if(paradeBtn) paradeBtn.innerText = formatDisplayDateTime(appData.parade.targetD);
 }
 
 function showLogin() {
@@ -172,6 +199,9 @@ async function showApp() {
       const formLeaveType = document.getElementById('form-leave-type');
       if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
       
+      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+      applyMenuOrder(mOrder);
+      
       if (settings.allContacts) {
         companyContacts = settings.allContacts;
         const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -193,9 +223,6 @@ async function showApp() {
         fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
       }
 
-      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-      applyMenuOrder(mOrder);
-      
       await loadLeavesData();
       switchTab(mOrder[0]); 
 
@@ -297,8 +324,16 @@ function getBadgeClass(status) {
   return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
 }
 
-function buildAgendaHtml(items, isMyCalendar) {
-  if (!items || items.length === 0) return `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records for this date.</p>`;
+function formatStatusBadge(status) {
+  let s = String(status || '').replace('Approved', 'Cal Updated');
+  if (s.includes('KAH Limit Reached')) {
+    return `Cal Updated<br><span class="text-[9px] font-bold opacity-90 tracking-tight leading-none block mt-0.5">(KAH Limit Reached)</span>`;
+  }
+  return s;
+}
+
+function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
+  if (!items || items.length === 0) return isCompactInfoAll ? '' : `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records for this date.</p>`;
   return items.map(l => {
     const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
     const startStr = isEvent ? formatDisplayDateTime(new Date(l.StartDate)) : formatDisplayDate(new Date(l.StartDate));
@@ -319,11 +354,22 @@ function buildAgendaHtml(items, isMyCalendar) {
       } catch(e) {}
     }
 
+    if (isCompactInfoAll) {
+        return `
+        <div class="border border-blue-200 dark:border-blue-900/50 p-3 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
+          <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${l.LeaveType}</h3>
+          <p class="text-xs text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
+          ${l.Location ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
+          ${attendeesDisplay ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
+          ${l.Remarks ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
+        </div>`;
+    }
+
     return `
     <div class="border border-gray-200 dark:border-darkborder p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
       <div class="flex justify-between items-start mb-2">
         <h3 class="font-bold text-base">${isMyCalendar ? (l.LeaveType||'') : (l.Name||'') + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-sm">(' + (l.Department||'') + ')</span>'}</h3>
-        <span class="text-[11px] font-bold px-2 py-1 rounded ${getBadgeClass(l.Status)}">${String(l.Status||'').replace('Approved', 'Cal Updated')}</span>
+        <span class="text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
       </div>
       <p class="font-medium text-gray-700 dark:text-darktext">${isMyCalendar ? '' : (l.LeaveType||'') + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
       <p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
@@ -361,14 +407,29 @@ function renderDashboard() {
   if (titleEl) titleEl.innerText = formatDisplayDate(dashDate);
 
   const dashTarget = new Date(dashDate); dashTarget.setHours(0,0,0,0);
+  
+  // Separate Info All events for this day
+  const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && new Date(l.StartDate) <= new Date(dashTarget.getTime() + 86399999) && new Date(l.EndDate) >= dashTarget);
+  const infoAllContainer = document.getElementById('dash-infoall-container');
+  const infoAllList = document.getElementById('dash-infoall-list');
+  
+  if (infoAllEvents.length > 0 && infoAllContainer && infoAllList) {
+      infoAllList.innerHTML = buildAgendaHtml(infoAllEvents, false, true);
+      infoAllContainer.classList.remove('hidden-view');
+  } else if (infoAllContainer) {
+      infoAllContainer.classList.add('hidden-view');
+  }
+
+  // Standard Events for this day
   const itemsForDate = filtered.filter(l => {
+    if (l.InfoAll === 'TRUE') return false; // Already handled above
     const s = new Date(l.StartDate); s.setHours(0,0,0,0);
     const e = new Date(l.EndDate); e.setHours(0,0,0,0);
     return dashTarget >= s && dashTarget <= e;
   });
   
   const agendaEl = document.getElementById('dash-agenda');
-  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, false);
+  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, false, false);
 }
 
 function renderMyLeaves() {
@@ -403,7 +464,7 @@ function renderMyLeaves() {
   });
   
   const agendaEl = document.getElementById('my-agenda');
-  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, true);
+  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, true, false);
 
   const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
   const cancelContainer = document.getElementById('cancelled-leaves-container');
@@ -415,7 +476,7 @@ function renderMyLeaves() {
              <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90 text-gray-700 dark:text-darktext" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
              <span class="text-gray-700 dark:text-darktext">Cancelled (${cancelledLeaves.length})</span>
            </summary>
-           <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true)}</div>
+           <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true, false)}</div>
          </details>`
       : '';
   }
@@ -432,7 +493,7 @@ function renderParadeState() {
     return;
   }
 
-  const now = new Date();
+  const now = appData.parade.targetD || new Date();
   let inOfficeGlobal = 0;
   let totalGlobal = companyContacts.length;
   let deptMap = {};
@@ -460,7 +521,13 @@ function renderParadeState() {
         
         const sDate = new Date(l.StartDate);
         const eDate = new Date(l.EndDate);
-        eDate.setHours(23, 59, 59, 999);
+        
+        // Exact logic for time boundaries
+        const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
+        if (!isEvent) {
+          // If it's a leave type, eDate natively is just the starting midnight of the final day. Bump to 23:59:59.
+          eDate.setHours(23, 59, 59, 999);
+        }
         
         return sDate <= now && eDate >= now;
       });
@@ -514,15 +581,17 @@ function renderParadeState() {
         <div class="mb-6 border-l-4 border-blue-500 pl-4">
           <h3 class="font-bold text-lg mb-2 text-gray-800 dark:text-gray-100">${dept} <span class="text-sm font-semibold text-gray-500 dark:text-darkmuted">(${d.inOffice} / ${d.total})</span></h3>
           <div class="space-y-1.5 text-[15px]">
-            ${d.members.map((m, i) => `
+            ${d.members.map((m, i) => {
+              const colorClass = m.isOffice ? 'text-gray-800 dark:text-gray-200' : 'text-orange-600 dark:text-orange-500';
+              return `
               <div class="flex items-start">
                 <span class="w-6 shrink-0 text-right mr-3 text-gray-400 dark:text-darkmuted font-medium">${i+1}.</span>
                 <div>
-                  <span class="font-semibold ${m.isOffice ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-darkmuted'}">${m.name}</span>
-                  ${!m.isOffice ? `<span class="italic text-gray-500 dark:text-darkmuted ml-1">(${m.location})</span>` : ''}
+                  <span class="font-semibold ${colorClass}">${m.name}</span>
+                  ${!m.isOffice ? `<span class="italic ${colorClass} ml-1">(${m.location})</span>` : ''}
                 </div>
-              </div>
-            `).join('')}
+              </div>`;
+            }).join('')}
           </div>
         </div>
       `;
@@ -608,6 +677,7 @@ function triggerEdit(id) {
     document.getElementById('form-event-location').value = l.Location || 'Office';
     document.getElementById('form-event-remarks').value = l.Remarks || '';
     document.getElementById('form-event-repeat').value = l.HalfDay || 'NONE'; 
+    toggleInfoAll(l.InfoAll === 'TRUE');
     
     eventAttendees =[];
     if(l.Attendees) {
@@ -660,6 +730,7 @@ function cancelEditMode() {
   appData.leave.startAMPM = 'AM'; appData.leave.endAMPM = 'PM';
   updateTimeSliderVisual('start', 'AM'); updateTimeSliderVisual('end', 'PM');
   toggleOverseasFields();
+  toggleInfoAll(false);
   
   eventAttendees =[]; renderAttendees();
 
@@ -718,6 +789,7 @@ async function submitForm(ctx) {
   let loc = '';
   let finalAttendeesStr = '';
   let finalDepts = new Set(user.departments);
+  let finalInfoAll = false;
 
   if (ctx === 'leave') {
     const isSameDay = appData.leave.startD.toDateString() === appData.leave.endD.toDateString();
@@ -732,16 +804,10 @@ async function submitForm(ctx) {
   } else {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
     loc = document.getElementById('form-event-location').value;
+    finalInfoAll = isInfoAll;
     
-    let resolvedPhones = new Set();
     eventAttendees.forEach(a => {
-      if (a.type === 'contact') {
-        resolvedPhones.add(a.id);
-        finalDepts.add(a.dept);
-      } else if (a.type === 'group') {
-        finalDepts.add(a.dept);
-        companyContacts.filter(c => c.dept === a.dept).forEach(c => resolvedPhones.add(c.phone));
-      }
+      finalDepts.add(a.dept);
     });
     finalAttendeesStr = JSON.stringify(eventAttendees);
   }
@@ -755,33 +821,24 @@ async function submitForm(ctx) {
     state: ctx === 'leave' ? document.getElementById('form-leave-state').value : '',
     remarks: document.getElementById(`form-${ctx}-remarks`).value,
     location: loc,
-    attendees: finalAttendeesStr
+    attendees: finalAttendeesStr,
+    infoAll: finalInfoAll
   };
 
   try {
     const action = currentEditId ? 'editLeave' : 'submitLeave';
     const res = await apiCall(action, payload);
     alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
-    cancelEditMode(); 
-    await loadLeavesData();
-  } catch (err) { 
-    alert("Error: " + err.message); 
-  } finally {
-    showLoader(false); 
-  }
+    cancelEditMode(); loadLeavesData();
+  } catch (err) { alert("Error: " + err.message); }
+  finally { showLoader(false); }
 }
 
 async function cancelLeave(id) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
-  try { 
-    await apiCall('cancelLeave', { id: id, phone: user.phone }); 
-    await loadLeavesData(); 
-  } catch (err) {
-    alert("Error: " + err.message);
-  } finally {
-    showLoader(false); 
-  }
+  try { await apiCall('cancelLeave', { id: id, phone: user.phone }); loadLeavesData(); } catch (err) {}
+  finally { showLoader(false); }
 }
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
@@ -836,14 +893,15 @@ function confirmPicker() {
   const min = minWheel ? getVal(minWheel) : 0;
 
   const finalDate = new Date(y, m, d, h, min, 0);
-  
   appData[activePicker.ctx][activePicker.field + 'D'] = finalDate;
 
-  // Auto-sync start to end
-  if (activePicker.field === 'start') {
-    if (finalDate > appData[activePicker.ctx].endD) {
-      appData[activePicker.ctx].endD = new Date(finalDate);
-    }
+  // Auto-sync start to end or validate end
+  if (activePicker.ctx === 'parade') {
+      renderParadeState();
+  } else {
+      if (activePicker.field === 'start') {
+        if (finalDate > appData[activePicker.ctx].endD) appData[activePicker.ctx].endD = new Date(finalDate);
+      }
   }
 
   updateButtonLabels(); closePicker();
@@ -856,8 +914,8 @@ function buildWheels() {
   
   let minY = 2024, minM = 0, minD = 1, minH = 0, minMin = 0;
   
-  // Boundary constraints for end date
-  if (activePicker.field === 'end') {
+  // Boundary constraints for end date (Ignore Parade State target constraint)
+  if (activePicker.field === 'end' && activePicker.ctx !== 'parade') {
       const startD = appData[activePicker.ctx].startD;
       minY = startD.getFullYear();
       if (cv.getFullYear() < minY) cv.setFullYear(minY);
@@ -961,9 +1019,10 @@ function createWheel(parent, type, dataArr, currentVal) {
 
   container.addEventListener('scroll', () => {
     const currentIdx = Math.round(container.scrollTop / 40);
-    
+
+    // Haptic Feedback Tick - Now drastically stronger (24ms)
     if (lastCenterIdx !== -1 && lastCenterIdx !== currentIdx) {
-      if (navigator.vibrate) navigator.vibrate(6);
+      if (navigator.vibrate) navigator.vibrate(24);
     }
     lastCenterIdx = currentIdx;
 
@@ -1013,7 +1072,7 @@ function adjustWheels() {
 
   let minM = 0, minD = 1, minH = 0, minMin = 0;
   
-  if (activePicker.field === 'end') {
+  if (activePicker.field === 'end' && activePicker.ctx !== 'parade') {
       const startD = appData[activePicker.ctx].startD;
       if (y === startD.getFullYear()) {
           minM = startD.getMonth();
@@ -1034,7 +1093,6 @@ function adjustWheels() {
       }
   }
 
-  // Adjust Month
   const currentMinM = parseInt(monthWheel.dataset.minVal || '0');
   if (currentMinM !== minM) {
       monthWheel.dataset.minVal = minM;
@@ -1043,7 +1101,6 @@ function adjustWheels() {
   }
   m = Math.max(m, minM); 
 
-  // Adjust Day
   const maxDays = new Date(y, m + 1, 0).getDate();
   const currentMinD = parseInt(dayWheel.dataset.minVal || '1');
   const currentMaxD = parseInt(dayWheel.dataset.maxDays || '31');
@@ -1056,7 +1113,6 @@ function adjustWheels() {
   }
   d = Math.max(d, minD);
 
-  // Adjust Hour
   if (hourWheel) {
       const currentMinH = parseInt(hourWheel.dataset.minVal || '0');
       if (currentMinH !== minH) {
@@ -1067,7 +1123,6 @@ function adjustWheels() {
       h = Math.max(h, minH);
   }
 
-  // Adjust Min
   if (minWheel) {
       const currentMinMin = parseInt(minWheel.dataset.minVal || '0');
       if (currentMinMin !== minMin) {
@@ -1135,7 +1190,7 @@ function renderLeaveTypes() {
   if(!list) return;
   list.innerHTML = tempLeaveTypes.map((t, i) => `
     <div class="flex items-center space-x-3">
-      <input type="text" value="${t}" onchange="updateLeaveType(${i}, this.value)" class="flex-grow border-2 border-gray-300 dark:border-darkborder rounded-xl py-2 px-4 bg-white dark:bg-darkinput outline-none shadow-sm focus:border-blue-500 transition">
+      <input type="text" value="${t}" onchange="updateLeaveType(${i}, this.value)" class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition">
       <button type="button" onclick="removeLeaveType(${i})" class="text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-900/20 p-2.5 rounded-xl transition" title="Remove Type"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
     </div>
   `).join('');
