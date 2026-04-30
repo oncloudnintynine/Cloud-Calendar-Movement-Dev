@@ -9,6 +9,7 @@ function INITIAL_SETUP() {
     CalendarApp.getAllCalendars();
     MailApp.getRemainingDailyQuota();
     DriveApp.getFiles(1);
+    DocumentApp.create('dummy'); // Added to trigger Google Docs OAuth Scope
   } catch(e) {}
 
   var props = PropertiesService.getScriptProperties();
@@ -54,6 +55,7 @@ function doPost(e) {
     else if (action === 'editLeave') responseData = editLeave(data);
     else if (action === 'getLeaves') responseData = getLeaves(data);
     else if (action === 'cancelLeave') responseData = cancelLeave(data);
+    else if (action === 'backupCode') responseData = backupCode(data);
 
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
@@ -176,6 +178,8 @@ function getSettings(data) {
     approvingAuthority: props.getProperty('approvingAuthority'),
     kahList: syncedKahList,
     menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
+    githubRepo: props.getProperty('githubRepo') || '',
+    backupFolder: props.getProperty('backupFolder') || '',
     allContacts: allContacts
   };
 }
@@ -189,7 +193,43 @@ function saveSettings(data) {
   props.setProperty('approvingAuthority', data.approvingAuthority);
   props.setProperty('kahList', JSON.stringify(data.kahList));
   if(data.menuOrder) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
+  
+  if (data.githubRepo !== undefined) props.setProperty('githubRepo', data.githubRepo);
+  if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
+  
   return { updated: true };
+}
+
+function backupCode(data) {
+  var folder;
+  try {
+    folder = DriveApp.getFolderById(data.folderId);
+  } catch(e) {
+    throw new Error("Could not access Google Drive folder. Please verify the Folder ID/URL and ensure the admin account has Editor access to it.");
+  }
+
+  var docName = "Cloud Moves Code Backup - " + Utilities.formatDate(new Date(), "Asia/Singapore", "yyyy-MM-dd HH:mm");
+  var doc = DocumentApp.create(docName);
+  
+  // Move to folder
+  var docFile = DriveApp.getFileById(doc.getId());
+  docFile.moveTo(folder);
+
+  var body = doc.getBody();
+  body.appendParagraph("#####*****");
+  body.appendParagraph("Full File Hierarchy");
+  body.appendParagraph("#####*****");
+  body.appendParagraph(data.hierarchy);
+
+  data.files.forEach(function(file) {
+    body.appendParagraph("#####*****");
+    body.appendParagraph(file.url);
+    body.appendParagraph("#####*****");
+    body.appendParagraph(file.content);
+  });
+
+  doc.saveAndClose();
+  return { url: doc.getUrl() };
 }
 
 function submitLeave(data) {
@@ -370,7 +410,7 @@ function checkKahLimit(data, props, sheet, skipId) {
   userKAHData.forEach(function(userKAH) {
     var dept = userKAH.dept;
     var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
-    var overlappingKAHPhones = [String(data.phone)];
+    var overlappingKAHPhones =[String(data.phone)];
     
     for (var i = 1; i < rows.length; i++) {
       var rId = rows[i][headers.indexOf('ID')];
