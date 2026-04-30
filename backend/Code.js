@@ -23,7 +23,7 @@ function INITIAL_SETUP() {
   if (!dbId) {
     var ss = SpreadsheetApp.create("Company_Leaves_DB");
     var sheet = ss.getActiveSheet();
-    sheet.appendRow(['ID', 'Timestamp', 'Phone', 'Name', 'Department', 'LeaveType', 'StartDate', 'EndDate', 'HalfDay', 'CoveringPerson', 'Country', 'State', 'Remarks', 'Status', 'EventIDs', 'Location', 'Attendees']);
+    sheet.appendRow(['ID', 'Timestamp', 'Phone', 'Name', 'Department', 'LeaveType', 'StartDate', 'EndDate', 'HalfDay', 'CoveringPerson', 'Country', 'State', 'Remarks', 'Status', 'EventIDs', 'Location', 'Attendees', 'InfoAll']);
     props.setProperty('dbSheetId', ss.getId());
   } else {
     verifySchema(SpreadsheetApp.openById(dbId).getActiveSheet());
@@ -34,6 +34,7 @@ function verifySchema(sheet) {
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   if (headers.indexOf('Location') === -1) { sheet.getRange(1, headers.length + 1).setValue('Location'); headers.push('Location'); }
   if (headers.indexOf('Attendees') === -1) { sheet.getRange(1, headers.length + 1).setValue('Attendees'); headers.push('Attendees'); }
+  if (headers.indexOf('InfoAll') === -1) { sheet.getRange(1, headers.length + 1).setValue('InfoAll'); headers.push('InfoAll'); }
   return headers;
 }
 
@@ -160,7 +161,6 @@ function getSettings(data) {
     }
   });
 
-  // Auto-sync KAH List departments in background to fix mismatches if user moves department
   var rawKahList = JSON.parse(props.getProperty('kahList') || "[]");
   var syncedKahList = rawKahList.map(function(k) {
     if (phoneToDepts[k.phone] && phoneToDepts[k.phone] !== k.dept) {
@@ -219,6 +219,7 @@ function submitLeave(data) {
   row[headers.indexOf('EventIDs')] = eventIds.join(',');
   row[headers.indexOf('Location')] = data.location || '';
   row[headers.indexOf('Attendees')] = data.attendees || '';
+  row[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
 
   sheet.appendRow(row);
   return { status: status };
@@ -263,6 +264,7 @@ function editLeave(data) {
       newRow[headers.indexOf('EventIDs')] = newEventIds.join(',');
       newRow[headers.indexOf('Location')] = data.location || '';
       newRow[headers.indexOf('Attendees')] = data.attendees || '';
+      newRow[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
 
       sheet.getRange(i + 1, 1, 1, headers.length).setValues([newRow]);
       return { status: status };
@@ -365,12 +367,9 @@ function checkKahLimit(data, props, sheet, skipId) {
   var limitExceeded = false;
   var rows = sheet.getDataRange().getValues();
 
-  // Evaluate the limit for each department the user is a KAH for
   userKAHData.forEach(function(userKAH) {
     var dept = userKAH.dept;
     var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
-    
-    // Store unique phone numbers of KAHs who are away
     var overlappingKAHPhones = [String(data.phone)];
     
     for (var i = 1; i < rows.length; i++) {
