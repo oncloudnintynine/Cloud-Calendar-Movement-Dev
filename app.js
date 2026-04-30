@@ -3,7 +3,7 @@ let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
 
-let companyContacts = [];
+let companyContacts =[];
 let validContactNames =[];
 let fuseAllContacts = null;
 let fuseAttendees = null;
@@ -11,7 +11,7 @@ let fuseAttendees = null;
 // Form & Admin State
 let tempLeaveTypes =[];
 let adminKAHList = [];
-let tempMenuOrder = [];
+let tempMenuOrder =[];
 let eventAttendees =[]; 
 let isInfoAll = false;
 
@@ -399,7 +399,6 @@ function renderDashboard() {
 
   const dashTarget = new Date(dashDate); dashTarget.setHours(0,0,0,0);
   
-  // Separate Info All events for this day
   const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && new Date(l.StartDate) <= new Date(dashTarget.getTime() + 86399999) && new Date(l.EndDate) >= dashTarget);
   const infoAllContainer = document.getElementById('dash-infoall-container');
   const infoAllList = document.getElementById('dash-infoall-list');
@@ -411,9 +410,8 @@ function renderDashboard() {
       infoAllContainer.classList.add('hidden-view');
   }
 
-  // Standard Events for this day
   const itemsForDate = filtered.filter(l => {
-    if (l.InfoAll === 'TRUE') return false; // Already handled above
+    if (l.InfoAll === 'TRUE') return false; 
     const s = new Date(l.StartDate); s.setHours(0,0,0,0);
     const e = new Date(l.EndDate); e.setHours(0,0,0,0);
     return dashTarget >= s && dashTarget <= e;
@@ -513,10 +511,8 @@ function renderParadeState() {
         const sDate = new Date(l.StartDate);
         const eDate = new Date(l.EndDate);
         
-        // Exact logic for time boundaries
         const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
         if (!isEvent) {
-          // If it's a leave type, eDate natively is just the starting midnight of the final day. Bump to 23:59:59.
           eDate.setHours(23, 59, 59, 999);
         }
         
@@ -763,7 +759,6 @@ function toggleOverseasFields() {
 
 async function submitForm(ctx) {
   showLoader(true);
-  
   if (ctx === 'leave') {
     const coverInput = document.getElementById('form-leave-cover').value.trim();
     if (!validContactNames.includes(coverInput.toLowerCase())) {
@@ -886,12 +881,14 @@ function confirmPicker() {
   const finalDate = new Date(y, m, d, h, min, 0);
   appData[activePicker.ctx][activePicker.field + 'D'] = finalDate;
 
-  // Auto-sync start to end or validate end
+  // Auto-sync start to end
   if (activePicker.ctx === 'parade') {
       renderParadeState();
   } else {
       if (activePicker.field === 'start') {
-        if (finalDate > appData[activePicker.ctx].endD) appData[activePicker.ctx].endD = new Date(finalDate);
+        if (finalDate > appData[activePicker.ctx].endD) {
+          appData[activePicker.ctx].endD = new Date(finalDate);
+        }
       }
   }
 
@@ -903,63 +900,25 @@ function buildWheels() {
   wrapper.innerHTML = '<div class="wheel-highlight"></div>'; 
   const cv = activePicker.currentVal;
   
-  let minY = 2024, minM = 0, minD = 1, minH = 0, minMin = 0;
-  
-  // Boundary constraints for end date (Ignore Parade State target constraint)
-  if (activePicker.field === 'end' && activePicker.ctx !== 'parade') {
-      const startD = appData[activePicker.ctx].startD;
-      minY = startD.getFullYear();
-      if (cv.getFullYear() < minY) cv.setFullYear(minY);
-      
-      if (cv.getFullYear() === minY) {
-          minM = startD.getMonth();
-          if (cv.getMonth() < minM) cv.setMonth(minM);
-          
-          if (cv.getMonth() === minM) {
-              minD = startD.getDate();
-              if (cv.getDate() < minD) cv.setDate(minD);
-              
-              if (activePicker.type === 'datetime' && cv.getDate() === minD) {
-                  minH = startD.getHours();
-                  if (cv.getHours() < minH) cv.setHours(minH);
-                  
-                  if (cv.getHours() === minH) {
-                      minMin = startD.getMinutes();
-                      if (cv.getMinutes() < minMin) cv.setMinutes(minMin);
-                  }
-              }
-          }
-      }
-  }
-
   const initialMaxDays = new Date(cv.getFullYear(), cv.getMonth() + 1, 0).getDate();
-  
-  const days = Array.from({length: initialMaxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') })).filter(x => x.val >= minD);
-  const months = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
-  const years = Array.from({length: 15}, (_, i) => ({ val: Math.max(2024, minY)+i, label: Math.max(2024, minY)+i }));
-  const hours = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH);
-  const mins = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minMin);
+  const days = Array.from({length: initialMaxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') }));
+  const months = mos.map((l, i) => ({ val: i, label: l }));
+  const years = Array.from({length: 15}, (_, i) => ({ val: 2024+i, label: 2024+i }));
+  const hours = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
+  const mins = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
 
   const dw = createWheel(wrapper, 'day', days, cv.getDate());
   dw.dataset.maxDays = initialMaxDays;
-  dw.dataset.minVal = minD;
-  
-  const mw = createWheel(wrapper, 'month', months, cv.getMonth());
-  mw.dataset.minVal = minM;
-  
-  const yw = createWheel(wrapper, 'year', years, cv.getFullYear());
-  yw.dataset.minVal = minY;
+  createWheel(wrapper, 'month', months, cv.getMonth());
+  createWheel(wrapper, 'year', years, cv.getFullYear());
   
   if (activePicker.type === 'datetime') {
     const sep = document.createElement('div');
     sep.className = 'w-px bg-gray-300 dark:bg-darkborder mx-2 h-3/4 my-auto relative z-20';
     wrapper.appendChild(sep);
 
-    const hw = createWheel(wrapper, 'hour', hours, cv.getHours());
-    hw.dataset.minVal = minH;
-    
-    const minw = createWheel(wrapper, 'min', mins, cv.getMinutes());
-    minw.dataset.minVal = minMin;
+    createWheel(wrapper, 'hour', hours, cv.getHours());
+    createWheel(wrapper, 'min', mins, cv.getMinutes());
   }
 }
 
@@ -1011,9 +970,8 @@ function createWheel(parent, type, dataArr, currentVal) {
   container.addEventListener('scroll', () => {
     const currentIdx = Math.round(container.scrollTop / 40);
 
-    // Haptic Feedback Tick - Now drastically stronger (24ms)
     if (lastCenterIdx !== -1 && lastCenterIdx !== currentIdx) {
-      if (navigator.vibrate) navigator.vibrate(24);
+      if (navigator.vibrate) navigator.vibrate(6);
     }
     lastCenterIdx = currentIdx;
 
@@ -1061,22 +1019,49 @@ function adjustWheels() {
   
   if (m === null || y === null || d === null) return;
 
+  // Active validation engine
   let minM = 0, minD = 1, minH = 0, minMin = 0;
   
   if (activePicker.field === 'end' && activePicker.ctx !== 'parade') {
       const startD = appData[activePicker.ctx].startD;
+      
+      // Check if user scrolled Year before start year
+      if (y < startD.getFullYear()) {
+          y = startD.getFullYear();
+          populateWheel(yearWheel, Array.from({length: 15}, (_, i) => ({ val: Math.max(2024, y)+i, label: Math.max(2024, y)+i })), y);
+      }
+      
       if (y === startD.getFullYear()) {
           minM = startD.getMonth();
-          if (m <= minM) {
+          if (m < minM) {
               m = minM;
+              const monthsArr = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
+              monthWheel.dataset.minVal = minM;
+              populateWheel(monthWheel, monthsArr, m);
+          }
+          
+          if (m === minM) {
               minD = startD.getDate();
-              if (d <= minD) {
-                  d = minD;
-                  if (hourWheel) {
-                      minH = startD.getHours();
-                      if (h <= minH) {
-                          h = minH;
-                          minMin = startD.getMinutes();
+              if (d < minD) d = minD;
+              
+              if (activePicker.type === 'datetime' && d === minD) {
+                  minH = startD.getHours();
+                  if (h < minH) {
+                      h = minH;
+                      if(hourWheel) {
+                        hourWheel.dataset.minVal = minH;
+                        populateWheel(hourWheel, Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH), h);
+                      }
+                  }
+                  
+                  if (h === minH) {
+                      minMin = startD.getMinutes();
+                      if (min < minMin) {
+                          min = minMin;
+                          if(minWheel) {
+                            minWheel.dataset.minVal = minMin;
+                            populateWheel(minWheel, Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minMin), min);
+                          }
                       }
                   }
               }
@@ -1084,14 +1069,22 @@ function adjustWheels() {
       }
   }
 
+  // Restore non-constrained boundaries dynamically if scrolled past the restricted zones
+  if (activePicker.field === 'end' && activePicker.ctx !== 'parade') {
+      const startD = appData[activePicker.ctx].startD;
+      if (y > startD.getFullYear() || m > startD.getMonth()) minD = 1;
+      if (y > startD.getFullYear() || m > startD.getMonth() || d > startD.getDate()) minH = 0;
+      if (y > startD.getFullYear() || m > startD.getMonth() || d > startD.getDate() || h > startD.getHours()) minMin = 0;
+  }
+
+  // Dynamically reset wheels if their restrictions are lifted by scrolling
   const currentMinM = parseInt(monthWheel.dataset.minVal || '0');
   if (currentMinM !== minM) {
       monthWheel.dataset.minVal = minM;
       const monthsArr = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
       populateWheel(monthWheel, monthsArr, Math.max(m, minM));
   }
-  m = Math.max(m, minM); 
-
+  
   const maxDays = new Date(y, m + 1, 0).getDate();
   const currentMinD = parseInt(dayWheel.dataset.minVal || '1');
   const currentMaxD = parseInt(dayWheel.dataset.maxDays || '31');
@@ -1102,7 +1095,6 @@ function adjustWheels() {
       const daysArr = Array.from({length: maxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') })).filter(x => x.val >= minD);
       populateWheel(dayWheel, daysArr, Math.max(d, minD));
   }
-  d = Math.max(d, minD);
 
   if (hourWheel) {
       const currentMinH = parseInt(hourWheel.dataset.minVal || '0');
@@ -1111,7 +1103,6 @@ function adjustWheels() {
           const hoursArr = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH);
           populateWheel(hourWheel, hoursArr, Math.max(h, minH));
       }
-      h = Math.max(h, minH);
   }
 
   if (minWheel) {
@@ -1137,6 +1128,9 @@ async function loadAdminSettings() {
     const settings = await apiCall('getSettings', { adminPass: user.pass });
     document.getElementById('set-kah-limit').value = settings.kahLimit;
     document.getElementById('set-appr-email').value = settings.approvingAuthority;
+    
+    document.getElementById('set-github-repo').value = settings.githubRepo || '';
+    document.getElementById('set-backup-folder').value = settings.backupFolder || '';
     
     tempMenuOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
     renderMenuOrder();
@@ -1240,7 +1234,9 @@ async function saveAdminSettings() {
     leaveTypes: tempLeaveTypes.filter(Boolean),
     kahLimit: document.getElementById('set-kah-limit').value,
     approvingAuthority: document.getElementById('set-appr-email').value,
-    kahList: adminKAHList
+    kahList: adminKAHList,
+    githubRepo: document.getElementById('set-github-repo').value.trim(),
+    backupFolder: document.getElementById('set-backup-folder').value.trim()
   };
   try {
     await apiCall('saveSettings', payload);
@@ -1250,3 +1246,34 @@ async function saveAdminSettings() {
   } catch (err) { alert("Error: " + err.message); }
   finally { showLoader(false); }
 }
+
+async function triggerCodeBackup() {
+  const repo = document.getElementById('set-github-repo').value.trim();
+  const folderInput = document.getElementById('set-backup-folder').value.trim();
+  
+  if (!repo || !folderInput) {
+      alert('Please fill out the GitHub Repo and Backup Drive Folder fields, and click "Save Settings" before backing up.');
+      return;
+  }
+
+  let folderId = folderInput;
+  if (folderInput.includes('drive.google.com')) {
+      const match = folderInput.match(/folders\/([a-zA-Z0-9_-]+)/);
+      if (match) folderId = match[1];
+  }
+
+  showLoader(true);
+  try {
+      const repoRes = await fetch(`https://api.github.com/repos/${repo}`);
+      if (!repoRes.ok) throw new Error("GitHub repository not found or not public.");
+      const repoInfo = await repoRes.json();
+      const defaultBranch = repoInfo.default_branch || 'main';
+
+      const treeRes = await fetch(`https://api.github.com/repos/${repo}/git/trees/${defaultBranch}?recursive=1`);
+      if (!treeRes.ok) throw new Error("Failed to fetch repository file tree.");
+      const treeData = await treeRes.json();
+      
+      const files = treeData.tree.filter(item => item.type === 'blob');
+      const hierarchy = files.map(f => f.path).join('\n');
+      
+      const fileContents =
