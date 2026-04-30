@@ -1265,7 +1265,7 @@ async function triggerCodeBackup() {
   showLoader(true);
   try {
       const repoRes = await fetch(`https://api.github.com/repos/${repo}`);
-      if (!repoRes.ok) throw new Error("GitHub repository not found or not public.");
+      if (!repoRes.ok) throw new Error("GitHub repository not found or not public. Ensure the format is 'owner/repo'.");
       const repoInfo = await repoRes.json();
       const defaultBranch = repoInfo.default_branch || 'main';
 
@@ -1273,7 +1273,36 @@ async function triggerCodeBackup() {
       if (!treeRes.ok) throw new Error("Failed to fetch repository file tree.");
       const treeData = await treeRes.json();
       
-      const files = treeData.tree.filter(item => item.type === 'blob');
-      const hierarchy = files.map(f => f.path).join('\n');
+      const fileNodes = treeData.tree.filter(item => item.type === 'blob');
+      const hierarchy = fileNodes.map(f => f.path).join('\n');
       
-      const fileContents =
+      let compiledFiles =[];
+      
+      // Fetch the raw content of every file in the repo
+      for (const file of fileNodes) {
+          const rawUrl = `https://raw.githubusercontent.com/${repo}/${defaultBranch}/${file.path}`;
+          const fileRes = await fetch(rawUrl);
+          const content = await fileRes.text();
+          
+          compiledFiles.push({
+              url: `https://github.com/${repo}/blob/${defaultBranch}/${file.path}`,
+              content: content
+          });
+      }
+
+      const payload = {
+          folderId: folderId,
+          hierarchy: hierarchy,
+          files: compiledFiles
+      };
+
+      // Send to Google Apps Script to build the Doc
+      const res = await apiCall('backupCode', payload);
+      alert(`Code successfully backed up to Google Drive!\n\nDocument URL:\n${res.url}`);
+      
+  } catch (err) { 
+      alert("Backup Error: " + err.message); 
+  } finally { 
+      showLoader(false); 
+  }
+}
