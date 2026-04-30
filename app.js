@@ -1,12 +1,3 @@
-
-3. app.js
-
-Changes: Re-engineered activePicker boundary logic to strictly limit end
-dates/times dynamically as the start changes. Increased vibrate to 24.
-Implemented InfoAll frontend payload injection and integrated the new Dashboard
-logic to visually surface "Info All" global events into their own independent
-container.
-
 // --- Global State ---
 let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
