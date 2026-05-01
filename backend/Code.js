@@ -58,6 +58,7 @@ function doPost(e) {
     else if (action === 'getLeaves') responseData = getLeaves(data);
     else if (action === 'cancelLeave') responseData = cancelLeave(data);
     else if (action === 'backupCode') responseData = backupCode(data);
+    else if (action === 'registerUser') responseData = registerUser(data);
 
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
