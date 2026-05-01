@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cloud-moves-v12';
+const CACHE_NAME = 'cloud-moves-v13';
 
 const urlsToCache =[
   './',
@@ -16,6 +16,8 @@ const urlsToCache =[
   './picker.js',
   './admin.js',
   './app.js',
+  './icon-192.png',
+  './icon-512.png',
   'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2',
   'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js'
