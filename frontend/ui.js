@@ -122,6 +122,8 @@ function initDates() {
   appData.parade.targetD = new Date(now);
   appData.register.birthdayD = new Date(2000, 0, 1);
   appData.adminRegister.birthdayD = new Date(2000, 0, 1);
+  appData.register.birthdaySelected = false;
+  appData.adminRegister.birthdaySelected = false;
   updateButtonLabels();
 }
 
@@ -144,8 +146,8 @@ function updateButtonLabels() {
   
   if(lblParade) lblParade.innerText = formatDisplayDateTime(appData.parade.targetD);
   
-  if(lblRegBday) lblRegBday.innerText = formatDisplayDate(appData.register.birthdayD);
-  if(lblAdminRegBday) lblAdminRegBday.innerText = formatDisplayDate(appData.adminRegister.birthdayD);
+  if(lblRegBday) lblRegBday.innerText = appData.register.birthdaySelected ? formatDisplayDate(appData.register.birthdayD) : "Select...";
+  if(lblAdminRegBday) lblAdminRegBday.innerText = appData.adminRegister.birthdaySelected ? formatDisplayDate(appData.adminRegister.birthdayD) : "Select...";
 }
 
 // --- App Updates (PWA/Cache) ---
