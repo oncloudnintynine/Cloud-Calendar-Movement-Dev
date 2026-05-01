@@ -128,12 +128,16 @@ function updateButtonLabels() {
   const lblLEnd = document.getElementById('btn-leave-end');
   const lblEStart = document.getElementById('btn-event-start');
   const lblEEnd = document.getElementById('btn-event-end');
+  const lblEUntil = document.getElementById('btn-event-until');
   const lblParade = document.getElementById('btn-parade-target');
 
   if(lblLStart) lblLStart.innerText = formatDisplayDate(appData.leave.startD);
   if(lblLEnd) lblLEnd.innerText = formatDisplayDate(appData.leave.endD);
-  if(lblEStart) lblEStart.innerText = formatDisplayDateTime(appData.event.startD);
-  if(lblEEnd) lblEEnd.innerText = formatDisplayDateTime(appData.event.endD);
+  
+  if(lblEStart) lblEStart.innerText = appData.event.isAllDay ? formatDisplayDate(appData.event.startD) : formatDisplayDateTime(appData.event.startD);
+  if(lblEEnd) lblEEnd.innerText = appData.event.isAllDay ? formatDisplayDate(appData.event.endD) : formatDisplayDateTime(appData.event.endD);
+  if(lblEUntil) lblEUntil.innerText = formatDisplayDate(appData.event.untilD);
+  
   if(lblParade) lblParade.innerText = formatDisplayDateTime(appData.parade.targetD);
 }
 
