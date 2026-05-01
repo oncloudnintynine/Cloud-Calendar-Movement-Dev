@@ -369,4 +369,32 @@
       <div id="picker-modal" class="fixed inset-0 bg-black/70 z-[60] hidden-view flex-col items-center justify-end md:justify-center p-3 sm:p-0">
         <div class="bg-white dark:bg-darksurface w-full md:w-[400px] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up md:animate-none">
           
-          <div class="flex justify-between items-center p-4 border-b dark:border-darkborder bg-gray-
+          <div class="flex justify-between items-center p-4 border-b dark:border-darkborder bg-gray-50 dark:bg-darkinput">
+            <button onclick="closePicker()" class="text-blue-600 dark:text-blue-400 font-bold px-3 py-1.5 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-xl transition">Cancel</button>
+            <span id="picker-title" class="font-bold text-gray-800 dark:text-darktext text-lg">Select Date</span>
+            <button onclick="confirmPicker()" class="text-blue-600 dark:text-blue-400 font-bold px-3 py-1.5 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-xl transition">Done</button>
+          </div>
+          
+          <div class="relative h-[200px] bg-white dark:bg-darksurface flex justify-center items-center px-2 py-4" id="picker-wheels-wrapper">
+             <!-- Wheels will be injected here by picker.js -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Extracted modular JS files loaded in dependency order -->
+  <script src="config.js"></script>
+  <script src="state.js"></script>
+  <script src="api.js"></script>
+  <script src="auth.js"></script>
+  <script src="ui.js"></script>
+  <script src="calendar.js"></script>
+  <script src="parade.js"></script>
+  <script src="forms.js"></script>
+  <script src="picker.js"></script>
+  <script src="admin.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
