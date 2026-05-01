@@ -84,6 +84,14 @@ async function showApp() {
           deptNav.innerHTML = '<option value="">All Depts</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
         }
         
+        // Also pre-populate the registration dropdowns
+        const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+        const regUnit = document.getElementById('reg-unit');
+        const adminRegUnit = document.getElementById('admin-reg-unit');
+        if (regUnit) regUnit.innerHTML = regOptions;
+        if (adminRegUnit) adminRegUnit.innerHTML = regOptions;
+        unitsLoaded = true; // Mark as loaded for auth.js
+        
         fuseAllContacts = new Fuse(companyContacts, { keys:['name', 'dept'], threshold: 0.3 });
         
         let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
