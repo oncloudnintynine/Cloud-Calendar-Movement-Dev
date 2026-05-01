@@ -1,6 +1,8 @@
 // ==========================================
-// Authentication Logic
+// Authentication & Registration Logic
 // ==========================================
+
+let unitsLoaded = false;
 
 function showLogin() {
   document.getElementById('login-view').classList.remove('hidden-view');
@@ -17,6 +19,25 @@ function toggleRegisterView(show) {
   if (show) {
     document.getElementById('login-form-container').classList.add('hidden-view');
     document.getElementById('register-form-container').classList.remove('hidden-view');
+    
+    if (!unitsLoaded) {
+      // Fetch available units for the dropdown without requiring auth
+      apiCall('getSettings', { adminPass: null }).then(settings => {
+        if (settings && settings.allContacts) {
+          const uniqueDepts =[...new Set(settings.allContacts.map(c => c.dept))];
+          const options = '<option value="" disabled selected>Select...</option>' + 
+                          uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+          
+          const regUnit = document.getElementById('reg-unit');
+          const adminRegUnit = document.getElementById('admin-reg-unit');
+          
+          if (regUnit) regUnit.innerHTML = options;
+          if (adminRegUnit) adminRegUnit.innerHTML = options;
+          
+          unitsLoaded = true;
+        }
+      }).catch(e => console.error("Error loading units", e));
+    }
   } else {
     document.getElementById('login-form-container').classList.remove('hidden-view');
     document.getElementById('register-form-container').classList.add('hidden-view');
@@ -45,10 +66,15 @@ async function handleRegister(context) {
   
   const name = document.getElementById(prefix + 'name').value.trim();
   const mobile = document.getElementById(prefix + 'mobile').value.trim();
-  const unit = document.getElementById(prefix + 'unit').value.trim();
+  const unit = document.getElementById(prefix + 'unit').value;
   
   if (!name || !mobile || !unit) {
-    alertError(context === 'admin' ? 'admin-alert' : 'register-alert', 'Please fill in all fields.');
+    alertError(context === 'admin' ? 'admin-alert' : 'register-alert', 'Please fill in all fields including the Unit.');
+    return;
+  }
+  
+  if (!appData[ctxObj].birthdaySelected) {
+    alertError(context === 'admin' ? 'admin-alert' : 'register-alert', 'Please select a Birthday.');
     return;
   }
   
@@ -60,20 +86,22 @@ async function handleRegister(context) {
     await apiCall('registerUser', {
       fullName: name,
       mobile: mobile,
-      unit: unit.toUpperCase(),
+      unit: unit,
       birthday: bdayStr
     });
     
-    alert('User successfully registered! You can now log in.');
+    alert('User successfully registered!');
     
     if (context === 'self') {
       toggleRegisterView(false);
     }
     
+    // Clear inputs after successful registration
     document.getElementById(prefix + 'name').value = '';
     document.getElementById(prefix + 'mobile').value = '';
     document.getElementById(prefix + 'unit').value = '';
     initDates(); // Reset birthday picker
+    
   } catch(e) {
     alertError(context === 'admin' ? 'admin-alert' : 'register-alert', e.message);
   } finally {
