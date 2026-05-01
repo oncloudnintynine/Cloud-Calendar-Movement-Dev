@@ -49,7 +49,18 @@ function editLeave(data) {
         if (!calAndEvt) return;
         try {
           var parts = calAndEvt.split('|');
-          if (parts.length === 2) CalendarApp.getCalendarById(parts[0]).getEventById(parts[1]).deleteEvent();
+          if (parts.length === 2) {
+            var cal = CalendarApp.getCalendarById(parts[0]);
+            if (cal) {
+              var evt = cal.getEventById(parts[1]);
+              if (evt) {
+                evt.deleteEvent();
+              } else {
+                var series = cal.getEventSeriesById(parts[1]);
+                if (series) series.deleteEventSeries();
+              }
+            }
+          }
         } catch(e) {}
       });
 
@@ -122,7 +133,8 @@ function getLeaves(data) {
       if (firstEvtId.length === 2) {
         try {
           var cal = CalendarApp.getCalendarById(firstEvtId[0]);
-          var evt = cal ? cal.getEventById(firstEvtId[1]) : null;
+          // Check if it exists as an Event OR an Event Series
+          var evt = cal ? (cal.getEventById(firstEvtId[1]) || cal.getEventSeriesById(firstEvtId[1])) : null;
           if (!evt) {
             obj.Status = 'Cancelled';
             sheet.getRange(i + 2, headers.indexOf('Status') + 1).setValue('Cancelled');
@@ -155,7 +167,18 @@ function cancelLeave(data) {
         if (!calAndEvt) return;
         try {
           var parts = calAndEvt.split('|');
-          if(parts.length === 2) CalendarApp.getCalendarById(parts[0]).getEventById(parts[1]).deleteEvent();
+          if(parts.length === 2) {
+            var cal = CalendarApp.getCalendarById(parts[0]);
+            if (cal) {
+              var evt = cal.getEventById(parts[1]);
+              if (evt) {
+                evt.deleteEvent();
+              } else {
+                var series = cal.getEventSeriesById(parts[1]);
+                if (series) series.deleteEventSeries();
+              }
+            }
+          }
         } catch(e) {}
       });
       return { success: true };
