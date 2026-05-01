@@ -30,6 +30,8 @@ function submitLeave(data) {
   row[headers.indexOf('Location')] = data.location || '';
   row[headers.indexOf('Attendees')] = data.attendees || '';
   row[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
+  row[headers.indexOf('IsAllDay')] = data.isAllDay ? 'TRUE' : 'FALSE';
+  row[headers.indexOf('UntilDate')] = data.untilDate || '';
 
   sheet.appendRow(row);
   return { status: status };
@@ -86,6 +88,8 @@ function editLeave(data) {
       newRow[headers.indexOf('Location')] = data.location || '';
       newRow[headers.indexOf('Attendees')] = data.attendees || '';
       newRow[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
+      newRow[headers.indexOf('IsAllDay')] = data.isAllDay ? 'TRUE' : 'FALSE';
+      newRow[headers.indexOf('UntilDate')] = data.untilDate || '';
 
       sheet.getRange(i + 1, 1, 1, headers.length).setValues([newRow]);
       return { status: status };
@@ -133,7 +137,6 @@ function getLeaves(data) {
       if (firstEvtId.length === 2) {
         try {
           var cal = CalendarApp.getCalendarById(firstEvtId[0]);
-          // Check if it exists as an Event OR an Event Series
           var evt = cal ? (cal.getEventById(firstEvtId[1]) || cal.getEventSeriesById(firstEvtId[1])) : null;
           if (!evt) {
             obj.Status = 'Cancelled';
