@@ -92,18 +92,57 @@
 
   <main class="flex-grow flex flex-col p-3 md:p-5 w-full max-w-6xl mx-auto relative overflow-hidden">
     
-    <!-- Login View -->
+<!-- Login View -->
     <section id="login-view" class="flex flex-col items-center justify-center h-full">
       <div class="bg-white dark:bg-darksurface p-6 rounded-2xl shadow-xl w-full max-w-sm border dark:border-darkborder">
-        <h2 class="text-2xl font-bold mb-1 text-center">Welcome</h2>
-        <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-6">Enter your password to continue</p>
-        <div id="login-alert" class="hidden bg-red-100 text-red-700 text-sm p-3 rounded-xl mb-4 text-center"></div>
-        <div class="mb-6 relative">
-          <label class="block font-medium mb-2">Password</label>
-          <input type="password" id="login-pass" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-3 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 pr-12 transition">
-          <button onclick="togglePassword('login-pass', this)" class="absolute right-3 top-9 text-gray-500 dark:text-darkmuted p-1"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+        
+        <!-- Login Form -->
+        <div id="login-form-container" class="w-full transition-opacity duration-300">
+          <h2 class="text-2xl font-bold mb-1 text-center">Welcome</h2>
+          <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-6">Enter your password to continue</p>
+          <div id="login-alert" class="hidden bg-red-100 text-red-700 text-sm p-3 rounded-xl mb-4 text-center"></div>
+          
+          <div class="mb-6 relative">
+            <label class="block font-medium mb-2">Password</label>
+            <input type="password" id="login-pass" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-3 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 pr-12 transition">
+            <button onclick="togglePassword('login-pass', this)" class="absolute right-3 top-9 text-gray-500 dark:text-darkmuted p-1"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+          </div>
+          <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition text-lg">Login</button>
+          
+          <div class="mt-5 text-center">
+            <button onclick="toggleRegisterView(true)" class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">New user? Register here</button>
+          </div>
         </div>
-        <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition text-lg">Login</button>
+
+        <!-- Self Register Form -->
+        <div id="register-form-container" class="w-full hidden-view transition-opacity duration-300">
+          <h2 class="text-xl font-bold mb-1 text-center">Self Registration</h2>
+          <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-4">Create your account</p>
+          <div id="register-alert" class="hidden bg-red-100 text-red-700 text-sm p-3 rounded-xl mb-4 text-center"></div>
+          
+          <div class="space-y-3 mb-6">
+            <div>
+              <label class="block font-medium mb-1 text-sm">Full Name</label>
+              <input type="text" id="reg-name" placeholder="e.g. Sasidharan Sadil" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black outline-none focus:border-blue-500 transition">
+            </div>
+            <div>
+              <label class="block font-medium mb-1 text-sm">Mobile No</label>
+              <input type="tel" id="reg-mobile" placeholder="e.g. 96745345" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black outline-none focus:border-blue-500 transition">
+            </div>
+            <div>
+              <label class="block font-medium mb-1 text-sm">Unit</label>
+              <input type="text" id="reg-unit" placeholder="e.g. COU" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black outline-none focus:border-blue-500 transition uppercase">
+            </div>
+            <div>
+              <label class="block font-medium mb-1 text-sm">Birthday</label>
+              <button type="button" id="btn-register-birthday" onclick="openPicker('date', 'register', 'birthday')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-gray-900 dark:text-white">Select Date</button>
+            </div>
+          </div>
+          
+          <button onclick="handleRegister('self')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition text-lg mb-3">Register</button>
+          <button onclick="toggleRegisterView(false)" class="w-full bg-gray-200 dark:bg-darkborder hover:bg-gray-300 dark:hover:bg-gray-600 font-bold py-2 px-4 rounded-xl shadow-sm transition">Back to Login</button>
+        </div>
+
       </div>
     </section>
 
