@@ -1,16 +1,21 @@
 {
-  "name": "Cloud Moves",
-  "short_name": "Cloud Moves",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#2563eb",
-  "orientation": "portrait-primary",
-  "icons":[
-    {
-      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzYjgyZjYiPjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0wIDE4Yy00LjQxIDAtOC0zLjU5LTgtOHMzLjU5LTggOC04IDggMy41OSA4IDgtMy41OSA4LTggOHoiLz48L3N2Zz4=",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    }
-  ]
+ "name": "Cloud Moves",
+ "short_name": "Cloud Moves",
+ "start_url": "./index.html",
+ "display": "standalone",
+ "background_color": "#000000",
+ "theme_color": "#2563eb",
+ "orientation": "portrait-primary",
+ "icons":[
+   {
+     "src": "./icon-192.png",
+     "sizes": "192x192",
+     "type": "image/png"
+   },
+   {
+     "src": "./icon-512.png",
+     "sizes": "512x512",
+     "type": "image/png"
+   }
+ ]
 }
