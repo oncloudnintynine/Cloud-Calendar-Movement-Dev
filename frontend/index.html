@@ -235,7 +235,7 @@
         </form>
       </div>
 
-      <!-- Add/Submit Event Tab -->
+<!-- Add/Submit Event Tab -->
       <div id="view-submit-event" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
         <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
           
@@ -252,23 +252,33 @@
               <label class="block font-semibold mb-1 text-base">Location</label>
               <input type="text" id="form-event-location" value="Office" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition" required>
             </div>
+
+            <div class="flex items-center space-x-2 mt-2">
+              <input type="checkbox" id="form-event-allday" class="w-4 h-4 cursor-pointer text-blue-600" onchange="toggleEventAllDay()">
+              <label for="form-event-allday" class="font-bold text-base cursor-pointer select-none">All Day Event</label>
+            </div>
             
-            <div class="relative pl-8 py-2 border-l-4 border-gray-200 dark:border-darkborder ml-3 space-y-6">
+            <div class="relative pl-8 py-2 border-l-4 border-gray-200 dark:border-darkborder ml-3 space-y-4">
               <div class="relative">
                 <div class="absolute -left-[42px] top-2 w-5 h-5 rounded-full bg-blue-500 ring-4 ring-white dark:ring-darksurface"></div>
                 <label class="block font-bold text-xs text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1.5">Start</label>
-                <button type="button" id="btn-event-start" onclick="openPicker('datetime', 'event', 'start')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition">Select Date & Time</button>
+                <button type="button" id="btn-event-start" onclick="openEventPicker('start')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition">Select Date & Time</button>
               </div>
               <div class="relative">
                 <div class="absolute -left-[42px] top-2 w-5 h-5 rounded-full bg-red-500 ring-4 ring-white dark:ring-darksurface"></div>
                 <label class="block font-bold text-xs text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1.5">End</label>
-                <button type="button" id="btn-event-end" onclick="openPicker('datetime', 'event', 'end')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition">Select Date & Time</button>
+                <button type="button" id="btn-event-end" onclick="openEventPicker('end')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition">Select Date & Time</button>
+              </div>
+              <div id="event-until-container" class="relative hidden-view pt-2">
+                <div class="absolute -left-[42px] top-4 w-5 h-5 rounded-full bg-purple-500 ring-4 ring-white dark:ring-darksurface"></div>
+                <label class="block font-bold text-xs text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1.5">Repeat Until</label>
+                <button type="button" id="btn-event-until" onclick="openPicker('date', 'event', 'until')" class="w-full border-2 border-purple-300 dark:border-purple-800 rounded-xl py-2.5 px-4 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-left outline-none font-medium transition text-purple-900 dark:text-purple-200">Select Date</button>
               </div>
             </div>
 
             <div>
               <label class="block font-semibold mb-1 text-base">Repeat Event</label>
-              <select id="form-event-repeat" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer">
+              <select id="form-event-repeat" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="toggleRepeatUntil()">
                 <option value="NONE">Does not repeat</option>
                 <option value="DAILY">Daily</option>
                 <option value="WEEKLY">Weekly</option>
