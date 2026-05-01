@@ -24,8 +24,8 @@ let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
   event: { startD: new Date(), endD: new Date(), untilD: new Date(), isAllDay: false },
   parade: { targetD: new Date() },
-  register: { birthdayD: new Date(2000, 0, 1) },
-  adminRegister: { birthdayD: new Date(2000, 0, 1) }
+  register: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false },
+  adminRegister: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false }
 };
 
 // Calendar Specific Dates
