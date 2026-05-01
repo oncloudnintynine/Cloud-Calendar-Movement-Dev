@@ -42,6 +42,7 @@ function confirmPicker() {
 
   const finalDate = new Date(y, m, d, h, min, 0);
   appData[activePicker.ctx][activePicker.field + 'D'] = finalDate;
+  appData[activePicker.ctx][activePicker.field + 'Selected'] = true;
 
   // Auto-sync start to end
   if (activePicker.ctx === 'parade') {
