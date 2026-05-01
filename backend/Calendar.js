@@ -41,18 +41,41 @@ function createGCalEvents(data, props) {
     if (isEvent) {
       var startDt = new Date(data.startDate); 
       var endDt = new Date(data.endDate);
+      var rec = null;
+      
+      // Determine if there is a repetition rule
       if (data.halfDay && data.halfDay !== 'NONE') {
-        var rec;
         if (data.halfDay === 'DAILY') rec = CalendarApp.newRecurrence().addDailyRule();
         else if (data.halfDay === 'WEEKLY') rec = CalendarApp.newRecurrence().addWeeklyRule();
         else if (data.halfDay === 'MONTHLY') rec = CalendarApp.newRecurrence().addMonthlyRule();
         else if (data.halfDay === 'ANNUALLY') rec = CalendarApp.newRecurrence().addYearlyRule();
         else if (data.halfDay === 'WEEKDAY') rec = CalendarApp.newRecurrence().addWeeklyRule().onlyOnWeekdays();
-        evt = cal.createEventSeries(title, startDt, endDt, rec, opts);
+        
+        if (data.untilDate) {
+           var untilDt = new Date(data.untilDate);
+           untilDt.setHours(23, 59, 59, 999);
+           rec = rec.until(untilDt);
+        }
+      }
+
+      // Create Event based on AllDay and Recurrence
+      if (data.isAllDay) {
+        if (rec) {
+          evt = cal.createAllDayEventSeries(title, startDt, rec, opts);
+        } else {
+          // If multi-day all day event, GAS requires end date to be day AFTER the last day.
+          var endDtAdjusted = new Date(endDt.getTime() + 86400000);
+          evt = cal.createAllDayEvent(title, startDt, endDtAdjusted, opts);
+        }
       } else {
-        evt = cal.createEvent(title, startDt, endDt, opts);
+        if (rec) {
+          evt = cal.createEventSeries(title, startDt, endDt, rec, opts);
+        } else {
+          evt = cal.createEvent(title, startDt, endDt, opts);
+        }
       }
     } else {
+      // Leave logic (always all day)
       evt = cal.createAllDayEvent(title, new Date(data.startDate), new Date(new Date(data.endDate).getTime() + 86400000), opts);
     }
     eventIds.push(cal.getId() + "|" + evt.getId());
