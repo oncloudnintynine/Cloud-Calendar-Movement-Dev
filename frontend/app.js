@@ -2,12 +2,21 @@
 // Main Application Initialization
 // ==========================================
 
-// Handle Dark Mode Init
-if(localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+// Handle Dark Mode Init and Status Bar Color
+const savedTheme = localStorage.getItem('theme');
+const wantsDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+if(wantsDark) {
     document.documentElement.classList.add('dark');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Set initial status bar color
+  const metaTheme = document.getElementById('theme-color-meta');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', wantsDark ? '#121212' : '#ffffff');
+  }
+
   if (ENV === 'Dev') document.getElementById('dev-banner').classList.remove('hidden');
   
   if (user) showApp(); 
