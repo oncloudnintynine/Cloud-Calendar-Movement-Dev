@@ -257,11 +257,19 @@ async function submitForm(ctx) {
   try {
     const action = currentEditId ? 'editLeave' : 'submitLeave';
     const res = await apiCall(action, payload);
-    alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${currentEditId ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
+    
+    // AWAIT the data refresh so UI is perfectly synced when transition happens
+    await loadLeavesData(); 
+    
+    const wasEdit = currentEditId;
     cancelEditMode(); 
-    loadLeavesData();
-  } catch (err) { alert("Error: " + err.message); }
-  finally { showLoader(false); }
+    
+    alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${wasEdit ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
+  } catch (err) { 
+    alert("Error: " + err.message); 
+  } finally { 
+    showLoader(false); 
+  }
 }
 
 async function cancelLeave(id) {
@@ -269,7 +277,7 @@ async function cancelLeave(id) {
   showLoader(true);
   try { 
     await apiCall('cancelLeave', { id: id, phone: user.phone }); 
-    loadLeavesData(); 
+    await loadLeavesData(); 
   } catch (err) {
     console.error(err);
   } finally { 
