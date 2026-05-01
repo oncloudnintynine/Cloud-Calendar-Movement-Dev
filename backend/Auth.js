@@ -62,9 +62,58 @@ function handleLogin(data) {
       }
     });
     
-    if (!userName) throw new Error("User phone number not found in Google Contacts.");
+    if (!userName) throw new Error("User phone number not found in Google Contacts. If you just registered, please wait a minute for Google to sync.");
     return { role: 'user', name: userName, phone: phone, departments: userDepts };
   }
   
   throw new Error("Invalid password");
+}
+
+function registerUser(data) {
+  // Create contact mapping
+  var contactPayload = {
+    names:[{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }],
+    phoneNumbers:[{ value: data.mobile, type: "mobile" }]
+  };
+  
+  if (data.birthday) {
+    var parts = data.birthday.split('-');
+    contactPayload.birthdays =[{
+      date: {
+        year: parseInt(parts[0], 10),
+        month: parseInt(parts[1], 10),
+        day: parseInt(parts[2], 10)
+      }
+    }];
+  }
+  
+  // 1. Create the base contact
+  var newContact = People.People.createContact(contactPayload);
+  var resourceName = newContact.resourceName;
+  
+  // 2. Fetch existing groups
+  var cg = getContactsAndGroups();
+  var groupId = null;
+  
+  for (var grpRes in cg.groupMap) {
+    if (cg.groupMap[grpRes].toLowerCase() === data.unit.toLowerCase()) {
+      groupId = grpRes;
+      break;
+    }
+  }
+  
+  // 3. Create the group if it doesn't exist
+  if (!groupId) {
+    var newGroup = People.ContactGroups.create({
+      contactGroup: { name: data.unit }
+    });
+    groupId = newGroup.resourceName;
+  }
+  
+  // 4. Add the new contact to the group
+  People.ContactGroups.Members.modify({
+    resourceNamesToAdd: [resourceName]
+  }, groupId);
+  
+  return { success: true, message: "User registered successfully." };
 }
