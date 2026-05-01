@@ -14,6 +14,22 @@ function toggleInfoAll(forceState) {
   }
 }
 
+function toggleEventAllDay() {
+  appData.event.isAllDay = document.getElementById('form-event-allday').checked;
+  updateButtonLabels();
+}
+
+function openEventPicker(field) {
+  openPicker(appData.event.isAllDay ? 'date' : 'datetime', 'event', field);
+}
+
+function toggleRepeatUntil() {
+  const val = document.getElementById('form-event-repeat').value;
+  const container = document.getElementById('event-until-container');
+  if(val === 'NONE') container.classList.add('hidden-view');
+  else container.classList.remove('hidden-view');
+}
+
 // --- Attendees Form Logic ---
 function searchAttendees() {
   const q = document.getElementById('form-event-attendee-search').value;
@@ -92,14 +108,17 @@ function triggerEdit(id) {
 
   appData[ctx].startD = new Date(l.StartDate);
   appData[ctx].endD = new Date(l.EndDate);
-  updateButtonLabels();
-
+  
   if (isEvent) {
+    appData.event.isAllDay = l.IsAllDay === 'TRUE';
+    appData.event.untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(l.EndDate);
+    document.getElementById('form-event-allday').checked = appData.event.isAllDay;
     document.getElementById('form-event-name').value = l.LeaveType;
     document.getElementById('form-event-location').value = l.Location || 'Office';
     document.getElementById('form-event-remarks').value = l.Remarks || '';
     document.getElementById('form-event-repeat').value = l.HalfDay || 'NONE'; 
     toggleInfoAll(l.InfoAll === 'TRUE');
+    toggleRepeatUntil();
     
     eventAttendees =[];
     if(l.Attendees) {
@@ -136,6 +155,8 @@ function triggerEdit(id) {
     appData.leave.startAMPM = start; appData.leave.endAMPM = end;
     updateTimeSliderVisual('start', start); updateTimeSliderVisual('end', end);
   }
+  
+  updateButtonLabels();
   switchTab(`submit-${ctx}`);
   
   setTimeout(() => {['form-leave-remarks', 'form-event-remarks'].forEach(id => {
@@ -155,9 +176,13 @@ function cancelEditMode() {
   });
 
   appData.leave.startAMPM = 'AM'; appData.leave.endAMPM = 'PM';
+  appData.event.isAllDay = false;
+  document.getElementById('form-event-allday').checked = false;
+  
   updateTimeSliderVisual('start', 'AM'); updateTimeSliderVisual('end', 'PM');
   toggleOverseasFields();
   toggleInfoAll(false);
+  toggleRepeatUntil();
   
   eventAttendees =[]; renderAttendees();
 
@@ -219,6 +244,8 @@ async function submitForm(ctx) {
   let finalAttendeesStr = '';
   let finalDepts = new Set(user.departments);
   let finalInfoAll = false;
+  let eventIsAllDay = false;
+  let eventUntilDate = '';
 
   if (ctx === 'leave') {
     const isSameDay = appData.leave.startD.toDateString() === appData.leave.endD.toDateString();
@@ -234,6 +261,11 @@ async function submitForm(ctx) {
     calculatedHalfDay = document.getElementById('form-event-repeat').value; 
     loc = document.getElementById('form-event-location').value;
     finalInfoAll = isInfoAll;
+    eventIsAllDay = appData.event.isAllDay;
+    
+    if (calculatedHalfDay !== 'NONE') {
+      eventUntilDate = toLocalISO(appData.event.untilD);
+    }
     
     eventAttendees.forEach(a => {
       finalDepts.add(a.dept);
@@ -251,7 +283,9 @@ async function submitForm(ctx) {
     remarks: document.getElementById(`form-${ctx}-remarks`).value,
     location: loc,
     attendees: finalAttendeesStr,
-    infoAll: finalInfoAll
+    infoAll: finalInfoAll,
+    isAllDay: eventIsAllDay,
+    untilDate: eventUntilDate
   };
 
   try {
