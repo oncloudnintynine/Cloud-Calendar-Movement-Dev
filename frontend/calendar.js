@@ -37,6 +37,42 @@ function selectDate(ctx, y, m, d) {
   }
 }
 
+function isEventOnDate(l, targetDate) {
+  if (l.Status === 'Cancelled') return false;
+  
+  const s = new Date(l.StartDate); s.setHours(0,0,0,0);
+  const e = new Date(l.EndDate); e.setHours(0,0,0,0);
+  
+  const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
+  
+  if (!isEvent || !l.HalfDay || l.HalfDay === 'NONE' || l.HalfDay === 'None') {
+      return targetDate >= s && targetDate <= e;
+  }
+  
+  // Repeating Event Logic
+  const untilStr = l.UntilDate;
+  const untilD = untilStr ? new Date(untilStr) : new Date(s.getTime() + 31536000000); 
+  untilD.setHours(23,59,59,999);
+
+  if (targetDate < s || targetDate > untilD) return false;
+
+  // Check if it falls in the original span
+  if (targetDate >= s && targetDate <= e) return true;
+
+  // Check recurrence
+  if (l.HalfDay === 'DAILY') return true;
+  if (l.HalfDay === 'WEEKDAY') return targetDate.getDay() !== 0 && targetDate.getDay() !== 6;
+  
+  const diffTime = targetDate.getTime() - s.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (l.HalfDay === 'WEEKLY') return diffDays % 7 === 0;
+  if (l.HalfDay === 'MONTHLY') return targetDate.getDate() === s.getDate();
+  if (l.HalfDay === 'ANNUALLY') return targetDate.getMonth() === s.getMonth() && targetDate.getDate() === s.getDate();
+  
+  return false;
+}
+
 function buildCalendarHTML(ctx, monthDate, selDate, data) {
   const y = monthDate.getFullYear(); 
   const m = monthDate.getMonth();
@@ -51,12 +87,7 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
     const isSelected = current.toDateString() === selDate.toDateString();
     const isToday = current.toDateString() === new Date().toDateString();
 
-    const hasEvent = data.some(l => {
-      if(l.Status === 'Cancelled') return false;
-      const s = new Date(l.StartDate); s.setHours(0,0,0,0);
-      const e = new Date(l.EndDate); e.setHours(0,0,0,0);
-      return current >= s && current <= e;
-    });
+    const hasEvent = data.some(l => isEventOnDate(l, current));
 
     let baseClass = "w-7 h-7 text-xs flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
     if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
@@ -91,10 +122,26 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
   
   return items.map(l => {
     const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
-    const startStr = isEvent ? formatDisplayDateTime(new Date(l.StartDate)) : formatDisplayDate(new Date(l.StartDate));
-    const endStr = isEvent ? formatDisplayDateTime(new Date(l.EndDate)) : formatDisplayDate(new Date(l.EndDate));
-    let actionBtns = '';
     
+    let timeStr = "";
+    if (isEvent) {
+      if (l.IsAllDay === 'TRUE') {
+        const sD = formatDisplayDate(new Date(l.StartDate));
+        const eD = formatDisplayDate(new Date(l.EndDate));
+        timeStr = sD === eD ? `${sD} (All Day)` : `${sD} to ${eD} (All Day)`;
+      } else {
+        timeStr = `${formatDisplayDateTime(new Date(l.StartDate))} to ${formatDisplayDateTime(new Date(l.EndDate))}`;
+      }
+      
+      if (l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None') {
+         timeStr += ` <span class="font-bold text-purple-600 dark:text-purple-400">↻ ${l.HalfDay}</span>`;
+         if (l.UntilDate) timeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
+      }
+    } else {
+      timeStr = `${formatDisplayDate(new Date(l.StartDate))} to ${formatDisplayDate(new Date(l.EndDate))}`;
+    }
+
+    let actionBtns = '';
     if (isMyCalendar && l.Status !== 'Cancelled') {
       actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
     }
@@ -113,7 +160,7 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
         return `
         <div class="border border-blue-200 dark:border-blue-900/50 p-3 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
           <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${l.LeaveType}</h3>
-          <p class="text-xs text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
+          <p class="text-xs text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
           ${l.Location ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
           ${attendeesDisplay ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
           ${l.Remarks ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
@@ -127,7 +174,7 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
         <span class="text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
       </div>
       <p class="font-medium text-gray-700 dark:text-darktext">${isMyCalendar ? '' : (l.LeaveType||'') + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
-      <p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${startStr} to ${endStr}</p>
+      <p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
       ${isEvent && l.Location ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
       ${!isEvent && l.Country ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${l.Country} ${l.State ? `(${l.State})` : ''}</p>` : ''}
       ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
@@ -163,7 +210,7 @@ function renderDashboard() {
 
   const dashTarget = new Date(dashDate); dashTarget.setHours(0,0,0,0);
   
-  const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && new Date(l.StartDate) <= new Date(dashTarget.getTime() + 86399999) && new Date(l.EndDate) >= dashTarget);
+  const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && isEventOnDate(l, dashTarget));
   const infoAllContainer = document.getElementById('dash-infoall-container');
   const infoAllList = document.getElementById('dash-infoall-list');
   
@@ -174,12 +221,7 @@ function renderDashboard() {
       infoAllContainer.classList.add('hidden-view');
   }
 
-  const itemsForDate = filtered.filter(l => {
-    if (l.InfoAll === 'TRUE') return false; 
-    const s = new Date(l.StartDate); s.setHours(0,0,0,0);
-    const e = new Date(l.EndDate); e.setHours(0,0,0,0);
-    return dashTarget >= s && dashTarget <= e;
-  });
+  const itemsForDate = filtered.filter(l => l.InfoAll !== 'TRUE' && isEventOnDate(l, dashTarget));
   
   const agendaEl = document.getElementById('dash-agenda');
   if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, false, false);
@@ -209,12 +251,7 @@ function renderMyLeaves() {
   if (titleEl) titleEl.innerText = formatDisplayDate(myDate);
 
   const myTarget = new Date(myDate); myTarget.setHours(0,0,0,0);
-  const itemsForDate = my.filter(l => {
-    if(l.Status === 'Cancelled') return false;
-    const s = new Date(l.StartDate); s.setHours(0,0,0,0);
-    const e = new Date(l.EndDate); e.setHours(0,0,0,0);
-    return myTarget >= s && myTarget <= e;
-  });
+  const itemsForDate = my.filter(l => isEventOnDate(l, myTarget));
   
   const agendaEl = document.getElementById('my-agenda');
   if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, true, false);
