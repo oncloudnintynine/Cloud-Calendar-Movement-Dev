@@ -1,9 +1,24 @@
-const CACHE_NAME = 'leave-tracker-v11';
+const CACHE_NAME = 'cloud-moves-v12';
+
 const urlsToCache =[
+  './',
   './index.html',
   './manifest.json',
+  './styles.css',
+  './config.js',
+  './state.js',
+  './api.js',
+  './auth.js',
+  './ui.js',
+  './calendar.js',
+  './parade.js',
+  './forms.js',
+  './picker.js',
+  './admin.js',
+  './app.js',
   'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2'
+  'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2',
+  'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js'
 ];
 
 self.addEventListener('install', event => {
