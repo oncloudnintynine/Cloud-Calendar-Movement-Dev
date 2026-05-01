@@ -87,7 +87,7 @@ function buildWheels() {
 
 function populateWheel(container, dataArr, currentVal) {
   container.dataset.len = dataArr.length;
-  const loops = 50; 
+  const loops = 15; // Decreased from 50 to drastically reduce DOM generation delay
   let html = `<div style="height: 76px;"></div>`; 
   let targetScrollIndex = 0;
   for (let loop = 0; loop < loops; loop++) {
@@ -134,14 +134,14 @@ function createWheel(parent, type, dataArr, currentVal) {
     const currentIdx = Math.round(container.scrollTop / 40);
 
     if (lastCenterIdx !== -1 && lastCenterIdx !== currentIdx) {
-      if (navigator.vibrate) navigator.vibrate(6);
+      if (navigator.vibrate) navigator.vibrate(60); // Increased from 6 to 60 for 10x stronger haptics
     }
     lastCenterIdx = currentIdx;
 
     clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
       const len = parseInt(container.dataset.len);
-      const loops = 50;
+      const loops = 15; // Decreased from 50 to match populateWheel
       if (currentIdx < len * 5 || currentIdx > (len * loops) - (len * 5)) {
         const middleBase = Math.floor(loops/2) * len;
         container.style.scrollBehavior = 'auto'; 
