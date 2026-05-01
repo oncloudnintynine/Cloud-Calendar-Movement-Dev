@@ -120,6 +120,8 @@ function initDates() {
   appData.leave.startD = new Date(now); appData.leave.endD = new Date(now);
   appData.event.startD = new Date(now); appData.event.endD = new Date(now);
   appData.parade.targetD = new Date(now);
+  appData.register.birthdayD = new Date(2000, 0, 1);
+  appData.adminRegister.birthdayD = new Date(2000, 0, 1);
   updateButtonLabels();
 }
 
@@ -130,6 +132,8 @@ function updateButtonLabels() {
   const lblEEnd = document.getElementById('btn-event-end');
   const lblEUntil = document.getElementById('btn-event-until');
   const lblParade = document.getElementById('btn-parade-target');
+  const lblRegBday = document.getElementById('btn-register-birthday');
+  const lblAdminRegBday = document.getElementById('btn-admin-register-birthday');
 
   if(lblLStart) lblLStart.innerText = formatDisplayDate(appData.leave.startD);
   if(lblLEnd) lblLEnd.innerText = formatDisplayDate(appData.leave.endD);
@@ -139,6 +143,9 @@ function updateButtonLabels() {
   if(lblEUntil) lblEUntil.innerText = formatDisplayDate(appData.event.untilD);
   
   if(lblParade) lblParade.innerText = formatDisplayDateTime(appData.parade.targetD);
+  
+  if(lblRegBday) lblRegBday.innerText = formatDisplayDate(appData.register.birthdayD);
+  if(lblAdminRegBday) lblAdminRegBday.innerText = formatDisplayDate(appData.adminRegister.birthdayD);
 }
 
 // --- App Updates (PWA/Cache) ---
