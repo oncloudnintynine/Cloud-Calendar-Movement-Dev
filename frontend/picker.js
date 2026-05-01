@@ -66,7 +66,13 @@ function buildWheels() {
   const initialMaxDays = new Date(cv.getFullYear(), cv.getMonth() + 1, 0).getDate();
   const days = Array.from({length: initialMaxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') }));
   const months = mos.map((l, i) => ({ val: i, label: l }));
-  const years = Array.from({length: 15}, (_, i) => ({ val: 2024+i, label: 2024+i }));
+  
+  // Custom Year Generation logic for birthdays (past 100 years vs future 15 years)
+  const isBirthday = activePicker.field === 'birthday';
+  const yearsLen = isBirthday ? 100 : 15;
+  const baseYear = isBirthday ? (new Date().getFullYear() - 99) : 2024;
+  const years = Array.from({length: yearsLen}, (_, i) => ({ val: baseYear+i, label: baseYear+i }));
+
   const hours = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
   const mins = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
 
