@@ -1,6 +1,8 @@
 // ==========================================
-// Admin Settings & GitHub Backup
+// Admin Settings, User Management & GitHub Backup
 // ==========================================
+
+let userToDeleteResource = null;
 
 async function loadAdminSettings() {
   try {
@@ -127,6 +129,64 @@ function renderKAHSelected() {
   `).join('');
 }
 
+// --- Manage Users Logic ---
+function searchUserToDelete() {
+  const q = document.getElementById('admin-delete-search').value;
+  const resC = document.getElementById('admin-delete-results');
+  if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
+  
+  const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
+  if(results.length > 0) {
+    resC.innerHTML = results.map(c => `
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 text-red-700 dark:text-red-400" onclick="selectUserToDelete('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">
+        <span class="font-semibold">${c.name}</span> <span class="text-xs opacity-75 ml-1">(${c.dept})</span>
+      </div>
+    `).join('');
+    resC.classList.remove('hidden-view');
+  } else {
+    resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; 
+    resC.classList.remove('hidden-view');
+  }
+}
+
+function selectUserToDelete(resourceName, name, dept) {
+  userToDeleteResource = resourceName;
+  document.getElementById('user-to-delete-name').innerText = `${name} (${dept})`;
+  document.getElementById('user-to-delete-container').classList.remove('hidden-view');
+  
+  document.getElementById('admin-delete-search').value = '';
+  document.getElementById('admin-delete-results').classList.add('hidden-view');
+}
+
+async function confirmDeleteUser() {
+  if (!userToDeleteResource) return;
+  if (!confirm("Are you sure you want to permanently remove this user from the system and Google Contacts? This cannot be undone.")) return;
+  
+  showLoader(true);
+  try {
+    await apiCall('deleteUser', { adminPass: user.pass, resourceName: userToDeleteResource });
+    alert("User successfully removed.");
+    
+    // Hide the container and clear state
+    document.getElementById('user-to-delete-container').classList.add('hidden-view');
+    userToDeleteResource = null;
+    document.getElementById('user-to-delete-name').innerText = '';
+    
+    // Refresh the contacts list
+    await loadAdminSettings();
+    
+  } catch(e) {
+    alert("Error deleting user: " + e.message);
+  } finally {
+    showLoader(false);
+  }
+}
+
+function submitAdminRegister() {
+  // Exists in auth.js, mapped here for button triggering
+  handleRegister('admin');
+}
+
 async function saveAdminSettings() {
   showLoader(true);
   const newPass = document.getElementById('set-admin-pass').value || null;
@@ -187,7 +247,8 @@ async function triggerCodeBackup() {
       const fileNodes = treeData.tree.filter(item => item.type === 'blob');
       const hierarchy = fileNodes.map(f => f.path).join('\n');
       
-      let compiledFiles =[];
+      // Bypassing the text-generation glitch by using new Array() instead of brackets
+      let compiledFiles = new Array();
       
       // Fetch the raw content of every file in the repo
       for (const file of fileNodes) {
@@ -216,8 +277,4 @@ async function triggerCodeBackup() {
   } finally { 
       showLoader(false); 
   }
-}
-
-function submitAdminRegister() {
-  handleRegister('admin');
 }
