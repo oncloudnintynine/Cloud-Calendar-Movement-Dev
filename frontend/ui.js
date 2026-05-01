@@ -83,7 +83,14 @@ function switchTab(tabId) {
 // --- Theme & Generic Toggles ---
 function toggleTheme() {
   document.documentElement.classList.toggle('dark');
-  localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  const isDark = document.documentElement.classList.contains('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  
+  // Dynamically update the mobile status bar color
+  const metaTheme = document.getElementById('theme-color-meta');
+  if (metaTheme) {
+    metaTheme.setAttribute('content', isDark ? '#121212' : '#ffffff');
+  }
 }
 
 function togglePassword(id, btnElement) {
