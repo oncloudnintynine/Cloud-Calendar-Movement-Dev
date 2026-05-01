@@ -22,7 +22,7 @@ let isInfoAll = false;
 // Date & Time Picker Target Data
 let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
-  event: { startD: new Date(), endD: new Date() },
+  event: { startD: new Date(), endD: new Date(), untilD: new Date(), isAllDay: false },
   parade: { targetD: new Date() }
 };
 
