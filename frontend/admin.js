@@ -217,3 +217,7 @@ async function triggerCodeBackup() {
       showLoader(false); 
   }
 }
+
+function submitAdminRegister() {
+  handleRegister('admin');
+}
