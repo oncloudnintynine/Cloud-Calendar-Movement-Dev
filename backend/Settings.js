@@ -25,7 +25,8 @@ function getSettings(data) {
         if (depts.length > 0) {
           var deptsStr = depts.join(',');
           phoneToDepts[phone] = deptsStr;
-          allContacts.push({ name: name, phone: phone, dept: deptsStr });
+          // Capture resourceName so frontend knows what to delete
+          allContacts.push({ name: name, phone: phone, dept: deptsStr, resourceName: person.resourceName });
         }
       }
     }
@@ -67,4 +68,19 @@ function saveSettings(data) {
   if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
   
   return { updated: true };
+}
+
+function deleteUser(data) {
+  var props = PropertiesService.getScriptProperties();
+  if (data.adminPass !== props.getProperty('adminPassword')) throw new Error("Invalid/Expired Admin Password");
+  
+  if (!data.resourceName) throw new Error("Missing contact identifier.");
+  
+  try {
+    People.People.deleteContact(data.resourceName);
+  } catch(e) {
+    throw new Error("Failed to delete user from Google Contacts: " + e.message);
+  }
+  
+  return { success: true };
 }
