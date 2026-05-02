@@ -24,6 +24,14 @@ async function loadAdminSettings() {
     
     if(settings.allContacts) {
       fuseAllContacts = new Fuse(settings.allContacts, { keys:['name', 'dept'], threshold: 0.3 });
+      
+      // Populate the Admin Register Unit dropdown dynamically
+      const uniqueDepts =[...new Set(settings.allContacts.map(c => c.dept))];
+      const regOptions = '<option value="" disabled selected>Select...</option>' + 
+                         uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+      
+      const adminRegUnit = document.getElementById('admin-reg-unit');
+      if (adminRegUnit) adminRegUnit.innerHTML = regOptions;
     }
   } catch (err) { 
     alertError('login-alert', err.message); 
