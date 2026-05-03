@@ -55,7 +55,6 @@ function addChildUnit(parent) {
   const val = input.value.trim().toUpperCase();
   if (!val) return;
   
-  // Ensure child doesn't exist anywhere
   let exists = false;
   Object.values(companyStructure).forEach(children => {
     if (children.includes(val)) exists = true;
@@ -83,21 +82,16 @@ function removeUnit(unit, isParent, parentName) {
 function renderKanbanBoard() {
   const board = document.getElementById('kanban-board');
   
-  // Clear old sortables
   kanbanSortables.forEach(s => s.destroy());
   kanbanSortables =[];
-  pendingStructureChanges = {}; 
   
-  // Map users to their expected columns
   const cols = { "UNASSIGNED":[] };
   
-  // Initialize columns from structure
   Object.keys(companyStructure).forEach(p => {
     cols[p] = [];
     companyStructure[p].forEach(c => cols[c] =[]);
   });
   
-  // Place contacts in columns
   companyContacts.forEach(contact => {
     const d = contact.dept.toUpperCase();
     if (cols[d]) {
@@ -107,7 +101,6 @@ function renderKanbanBoard() {
     }
   });
   
-  // Render HTML
   let html = '';
   Object.keys(cols).forEach(colName => {
     const isUnassigned = colName === "UNASSIGNED";
@@ -129,45 +122,55 @@ function renderKanbanBoard() {
   });
   board.innerHTML = html;
   
-  // Attach Sortable
   document.querySelectorAll('.kanban-col').forEach(el => {
     kanbanSortables.push(new Sortable(el, {
       group: 'kanban',
       animation: 150,
-      ghostClass: 'opacity-50',
-      onEnd: function (evt) {
-        const itemEl = evt.item;
-        const toCol = evt.to.dataset.unit;
-        const resName = itemEl.dataset.resourcename;
-        
-        // Track the change
-        pendingStructureChanges[resName] = toCol;
-      }
+      ghostClass: 'opacity-50'
     }));
   });
 }
 
 async function saveCompanyStructure() {
   showLoader(true);
+  
+  // Dynamically scan the DOM to find who was moved
+  const changes = {};
+  document.querySelectorAll('.kanban-col').forEach(col => {
+    const unitName = col.dataset.unit;
+    const items = col.querySelectorAll('[data-resourcename]');
+    
+    items.forEach(item => {
+      const resName = item.dataset.resourcename;
+      const originalContact = companyContacts.find(c => c.resourceName === resName);
+      
+      let originalDept = "UNASSIGNED";
+      if (originalContact && originalContact.dept) {
+         originalDept = originalContact.dept.split(',')[0].trim().toUpperCase();
+      }
+      
+      if (originalDept !== unitName) {
+        changes[resName] = unitName;
+      }
+    });
+  });
+
   try {
-    // 1. Save the structure configuration
     await apiCall('saveSettings', { 
       adminPass: user.pass, 
       companyStructure: companyStructure 
     });
     
-    // 2. If there are pending user moves, send them to the backend
-    if (Object.keys(pendingStructureChanges).length > 0) {
+    if (Object.keys(changes).length > 0) {
       await apiCall('updateUserUnits', {
         adminPass: user.pass,
-        changes: pendingStructureChanges
+        changes: changes
       });
       alert("Hierarchy and Personnel assignments successfully updated!");
     } else {
       alert("Hierarchy successfully updated!");
     }
     
-    // Hard refresh to reload data properly into arrays
     window.location.reload();
   } catch (err) {
     alert("Error saving: " + err.message);
