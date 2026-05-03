@@ -55,6 +55,7 @@
           <div class="font-bold text-lg md:text-xl text-blue-600 dark:text-blue-400 leading-tight truncate">Cloud Moves</div>
           <select id="dash-dept-nav" class="hidden max-w-[140px] md:max-w-[200px] text-sm border-2 border-blue-300 dark:border-blue-700 rounded-lg py-1 px-2 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="renderDashboard()">
             <option value="">All Depts</option>
+            <!-- My Calendar option injected here during Unified mode -->
           </select>
         </div>
         <div id="active-tab-title" class="text-xs font-semibold text-gray-500 dark:text-darkmuted hidden mt-0.5 truncate"></div>
@@ -85,7 +86,11 @@
         <button onclick="switchTab('my-leaves')" id="menu-my-leaves" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">My Calendar</button>
         <button onclick="switchTab('submit-leave')" id="menu-submit-leave" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">Add Leave/MC/OIL</button>
         <button onclick="switchTab('submit-event')" id="menu-submit-event" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">Add Event</button>
-        <button onclick="switchTab('admin')" id="menu-admin" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden border-t dark:border-darkborder mt-2 pt-2 text-base transition">Admin Settings</button>
+        
+        <div id="menu-admin-group" class="hidden border-t dark:border-darkborder mt-2 pt-2">
+            <button onclick="switchTab('admin')" id="menu-admin" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Admin Settings</button>
+            <button onclick="switchTab('admin-structure')" id="menu-admin-structure" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Company Structure</button>
+        </div>
       </div>
     </div>
   </div>
@@ -153,9 +158,13 @@
       
       <!-- Dashboard Tab -->
       <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-4">
-        <div class="shrink-0 w-full md:w-1/2">
-          <input type="text" id="dash-search" placeholder="Search Names or Activities..." class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition" onkeyup="renderDashboard()">
+        <div class="flex space-x-2 w-full shrink-0 items-center">
+          <input type="text" id="dash-search" placeholder="Search Names or Activities..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition" onkeyup="renderDashboard()">
+          <!-- Action Buttons injected dynamically during Unified Mode -->
+          <button id="unified-btn-leave" onclick="switchTab('submit-leave')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs md:text-sm shrink-0 whitespace-nowrap">Add Leave/MC</button>
+          <button id="unified-btn-event" onclick="switchTab('submit-event')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs md:text-sm shrink-0 whitespace-nowrap">Add Event</button>
         </div>
+
         <div class="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
           <div class="w-full md:w-64 shrink-0 bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-3 h-fit text-sm">
             <div class="flex justify-between items-center mb-2">
@@ -221,6 +230,15 @@
         <form id="leave-form" onsubmit="event.preventDefault(); submitForm('leave');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
           
           <div class="flex-grow overflow-y-auto p-5 space-y-5">
+            
+            <!-- ADMIN ON BEHALF OF FIELD -->
+            <div id="admin-behalf-leave" class="hidden-view relative mb-4 pb-5 border-b-2 border-dashed dark:border-darkborder">
+              <label class="block font-bold mb-1 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
+              <input type="text" id="form-leave-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-2.5 px-4 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('leave')">
+              <div id="behalf-results-leave" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-300 dark:border-emerald-700 rounded-xl shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
+              <div id="selected-behalf-leave" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-lg flex items-center justify-between empty:hidden"></div>
+            </div>
+
             <div>
               <label class="block font-semibold mb-1 text-base">Leave/MC/OIL Type</label>
               <select id="form-leave-type" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="toggleOverseasFields()" required></select>
@@ -281,6 +299,15 @@
         <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
           
           <div class="flex-grow overflow-y-auto p-5 space-y-5">
+            
+            <!-- ADMIN ON BEHALF OF FIELD -->
+            <div id="admin-behalf-event" class="hidden-view relative mb-4 pb-5 border-b-2 border-dashed dark:border-darkborder">
+              <label class="block font-bold mb-1 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
+              <input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-2.5 px-4 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
+              <div id="behalf-results-event" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-300 dark:border-emerald-700 rounded-xl shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
+              <div id="selected-behalf-event" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-lg flex items-center justify-between empty:hidden"></div>
+            </div>
+
             <div class="flex space-x-3 items-end">
               <div class="flex-grow">
                 <label class="block font-semibold mb-1 text-base">Event Title</label>
@@ -350,13 +377,28 @@
         </form>
       </div>
       
-      <!-- Admin Tab -->
+      <!-- Admin Settings Tab -->
       <div id="view-admin" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
         <div class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
           
           <div class="flex-grow overflow-y-auto p-5 space-y-6">
             <h2 class="text-xl font-bold border-b dark:border-darkborder pb-3 text-blue-600 dark:text-blue-400">Global Configuration</h2>
             
+            <!-- App Mode Selection -->
+            <div>
+              <label class="block font-semibold mb-2 text-base text-purple-600 dark:text-purple-400">App Interface Mode</label>
+              <div class="flex flex-col space-y-2 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-xl border border-purple-200 dark:border-purple-800">
+                <label class="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name="app-mode" value="separated" class="w-4 h-4 text-purple-600 focus:ring-purple-500 cursor-pointer">
+                  <span class="font-medium">Separated Mode (Classic Dashboard & My Calendar)</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name="app-mode" value="unified" class="w-4 h-4 text-purple-600 focus:ring-purple-500 cursor-pointer">
+                  <span class="font-medium">Unified Mode (Combined Dashboard with Forms)</span>
+                </label>
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block font-semibold mb-1 text-base">Admin Password</label>
@@ -373,14 +415,14 @@
             </div>
 
             <!-- Menu Reordering block -->
-            <div>
+            <div id="menu-order-container">
               <label class="block font-semibold mb-2 text-base">App Menu Order</label>
               <div id="menu-order-list" class="space-y-2 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded-xl border-2 border-gray-300 dark:border-gray-600"></div>
             </div>
             
             <div>
               <label class="block font-semibold mb-2 text-base">Leave/MC/OIL Types</label>
-              <div id="leave-types-list" class="space-y-3 mb-3"></div>
+              <div id="leave-types-list" class="space-y-2 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 mb-3"></div>
               <div class="flex space-x-3">
                 <input type="text" id="new-leave-type" class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" placeholder="Add new type...">
                 <button type="button" onclick="addLeaveType()" class="bg-gray-300 dark:bg-darkhover font-bold px-5 rounded-xl hover:bg-gray-400 dark:hover:bg-[#333] transition">Add</button>
@@ -398,7 +440,7 @@
               </div>
               
               <div class="mt-4 font-bold text-base mb-2">Current KAH List:</div>
-              <ul id="kah-selected-list" class="space-y-2 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 min-h-[50px] empty:hidden"></ul>
+              <div id="kah-selected-list" class="space-y-4 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 min-h-[50px] empty:hidden"></div>
             </div>
             
             <!-- REGISTER NEW USER SYSTEM -->
@@ -455,7 +497,6 @@
                   <select id="edit-user-unit" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition cursor-pointer">
                   </select>
                 </div>
-                <!-- NEW: Birthday Field -->
                 <div>
                   <label class="block font-semibold mb-1 text-sm">Birthday</label>
                   <button type="button" id="btn-manage-user-birthday" onclick="openPicker('date', 'manageUser', 'birthday')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-white dark:bg-black text-left outline-none font-medium transition text-gray-900 dark:text-white">Select...</button>
@@ -489,9 +530,44 @@
           </div>
 
           <div class="shrink-0 p-4 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-md transition text-lg">Save Settings</button>
+            <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-md text-lg transition">Save Settings</button>
           </div>
 
+        </div>
+      </div>
+
+      <!-- Admin Company Structure Tab -->
+      <div id="view-admin-structure" class="tab-content hidden-view flex-col max-w-6xl mx-auto w-full h-full pb-2 md:pb-6">
+        <div class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
+          
+          <div class="p-4 border-b dark:border-darkborder bg-gray-50 dark:bg-darkinput flex justify-between items-center shrink-0">
+              <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400">Company Structure & Personnel</h2>
+              <button onclick="saveCompanyStructure()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl shadow transition text-sm">Save Assignments</button>
+          </div>
+
+          <div class="flex-grow flex flex-col md:flex-row overflow-hidden min-h-0">
+              
+              <!-- Left Panel: Hierarchy Builder -->
+              <div class="w-full md:w-1/3 border-r dark:border-darkborder p-4 flex flex-col overflow-y-auto h-full min-h-0 bg-gray-50 dark:bg-darkinput">
+                 <h3 class="font-bold mb-3 text-lg border-b dark:border-darkborder pb-2">Manage Units</h3>
+                 
+                 <div class="flex space-x-2 mb-4 shrink-0">
+                   <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase">
+                   <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-lg transition">Add</button>
+                 </div>
+                 
+                 <div id="structure-builder-list" class="space-y-4 flex-grow overflow-y-auto"></div>
+              </div>
+              
+              <!-- Right Panel: Kanban Board -->
+              <div class="w-full md:w-2/3 p-4 flex flex-col overflow-hidden bg-gray-100 dark:bg-darkbase h-full min-h-0">
+                 <h3 class="font-bold mb-3 text-lg">Assign Personnel</h3>
+                 <div id="kanban-board" class="flex-grow flex space-x-4 overflow-x-auto pb-4 snap-x">
+                    <!-- Kanban columns injected here by JS -->
+                 </div>
+              </div>
+
+          </div>
         </div>
       </div>
       
@@ -526,6 +602,7 @@
   <script src="forms.js"></script>
   <script src="picker.js"></script>
   <script src="admin.js"></script>
+  <script src="structure.js"></script> <!-- New file for Kanban -->
   <script src="app.js"></script>
 </body>
 </html>
