@@ -25,7 +25,17 @@ function getSettings(data) {
         if (depts.length > 0) {
           var deptsStr = depts.join(',');
           phoneToDepts[phone] = deptsStr;
-          allContacts.push({ name: name, phone: phone, dept: deptsStr, resourceName: person.resourceName });
+          
+          // UPDATED: Extract Birthday
+          var bdayStr = "";
+          if (person.birthdays && person.birthdays.length > 0 && person.birthdays[0].date) {
+            var d = person.birthdays[0].date;
+            if (d.year && d.month && d.day) {
+              bdayStr = d.year + "-" + ('0' + d.month).slice(-2) + "-" + ('0' + d.day).slice(-2);
+            }
+          }
+          
+          allContacts.push({ name: name, phone: phone, dept: deptsStr, resourceName: person.resourceName, birthday: bdayStr });
         }
       }
     }
