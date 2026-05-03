@@ -12,29 +12,17 @@ async function loadLeavesData() {
     if(paradeView && !paradeView.classList.contains('hidden-view') && typeof renderParadeState === 'function') {
       renderParadeState(); 
     }
-  } catch (err) {
-    console.error("Error loading leaves data: ", err);
-  }
+  } catch (err) { console.error("Error loading leaves data: ", err); }
 }
 
 function changeMonth(ctx, offset) {
-  if (ctx === 'dash') { 
-    dashMonth.setMonth(dashMonth.getMonth() + offset); 
-    renderDashboard(); 
-  } else { 
-    myMonth.setMonth(myMonth.getMonth() + offset); 
-    renderMyLeaves(); 
-  }
+  if (ctx === 'dash') { dashMonth.setMonth(dashMonth.getMonth() + offset); renderDashboard(); } 
+  else { myMonth.setMonth(myMonth.getMonth() + offset); renderMyLeaves(); }
 }
 
 function selectDate(ctx, y, m, d) {
-  if (ctx === 'dash') { 
-    dashDate = new Date(y, m, d); 
-    renderDashboard(); 
-  } else { 
-    myDate = new Date(y, m, d); 
-    renderMyLeaves(); 
-  }
+  if (ctx === 'dash') { dashDate = new Date(y, m, d); renderDashboard(); } 
+  else { myDate = new Date(y, m, d); renderMyLeaves(); }
 }
 
 function isEventOnDate(l, targetDate) {
@@ -42,24 +30,17 @@ function isEventOnDate(l, targetDate) {
   
   const s = new Date(l.StartDate); s.setHours(0,0,0,0);
   const e = new Date(l.EndDate); e.setHours(0,0,0,0);
-  
   const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
   
-  if (!isEvent || !l.HalfDay || l.HalfDay === 'NONE' || l.HalfDay === 'None') {
-      return targetDate >= s && targetDate <= e;
-  }
+  if (!isEvent || !l.HalfDay || l.HalfDay === 'NONE' || l.HalfDay === 'None') return targetDate >= s && targetDate <= e;
   
-  // Repeating Event Logic
   const untilStr = l.UntilDate;
   const untilD = untilStr ? new Date(untilStr) : new Date(s.getTime() + 31536000000); 
   untilD.setHours(23,59,59,999);
 
   if (targetDate < s || targetDate > untilD) return false;
-
-  // Check if it falls in the original span
   if (targetDate >= s && targetDate <= e) return true;
 
-  // Check recurrence
   if (l.HalfDay === 'DAILY') return true;
   if (l.HalfDay === 'WEEKDAY') return targetDate.getDay() !== 0 && targetDate.getDay() !== 6;
   
@@ -74,13 +55,11 @@ function isEventOnDate(l, targetDate) {
 }
 
 function buildCalendarHTML(ctx, monthDate, selDate, data) {
-  const y = monthDate.getFullYear(); 
-  const m = monthDate.getMonth();
+  const y = monthDate.getFullYear(); const m = monthDate.getMonth();
   const firstDay = new Date(y, m, 1).getDay(); 
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   
-  let html = ''; 
-  for(let i=0; i<firstDay; i++) html += `<div></div>`;
+  let html = ''; for(let i=0; i<firstDay; i++) html += `<div></div>`;
 
   for(let d=1; d<=daysInMonth; d++) {
     const current = new Date(y, m, d); current.setHours(0,0,0,0);
@@ -111,9 +90,7 @@ function getBadgeClass(status) {
 
 function formatStatusBadge(status) {
   let s = String(status || '').replace('Approved', 'Cal Updated');
-  if (s.includes('KAH Limit Reached')) {
-    return `Cal Updated<br><span class="text-[9px] font-bold opacity-90 tracking-tight leading-none block mt-0.5">(KAH Limit Reached)</span>`;
-  }
+  if (s.includes('KAH Limit Reached')) return `Cal Updated<br><span class="text-[9px] font-bold opacity-90 tracking-tight leading-none block mt-0.5">(KAH Limit Reached)</span>`;
   return s;
 }
 
@@ -122,7 +99,6 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
   
   return items.map(l => {
     const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
-    
     let timeStr = "";
     if (isEvent) {
       if (l.IsAllDay === 'TRUE') {
@@ -132,7 +108,6 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
       } else {
         timeStr = `${formatDisplayDateTime(new Date(l.StartDate))} to ${formatDisplayDateTime(new Date(l.EndDate))}`;
       }
-      
       if (l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None') {
          timeStr += ` <span class="font-bold text-purple-600 dark:text-purple-400">↻ ${l.HalfDay}</span>`;
          if (l.UntilDate) timeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
@@ -142,23 +117,21 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
     }
 
     let actionBtns = '';
-    if (isMyCalendar && l.Status !== 'Cancelled') {
-      actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
+    // Enable edit/cancel if it's My Calendar OR if Admin
+    if ((isMyCalendar || user.role === 'admin') && l.Status !== 'Cancelled') {
+      actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
     }
 
     let attendeesDisplay = '';
     if (l.Attendees) {
       try {
         const attArr = JSON.parse(l.Attendees);
-        if (attArr && attArr.length > 0) {
-           attendeesDisplay = attArr.map(a => a.type === 'group' ? a.name.replace('zz ', '') : a.name).join(', ');
-        }
+        if (attArr && attArr.length > 0) attendeesDisplay = attArr.map(a => a.type === 'group' ? a.name.replace('zz ', '') : a.name).join(', ');
       } catch(e) {}
     }
 
     if (isCompactInfoAll) {
-        return `
-        <div class="border border-blue-200 dark:border-blue-900/50 p-3 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
+        return `<div class="border border-blue-200 dark:border-blue-900/50 p-3 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
           <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${l.LeaveType}</h3>
           <p class="text-xs text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
           ${l.Location ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
@@ -167,8 +140,7 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
         </div>`;
     }
 
-    return `
-    <div class="border border-gray-200 dark:border-darkborder p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
+    return `<div class="border border-gray-200 dark:border-darkborder p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
       <div class="flex justify-between items-start mb-2">
         <h3 class="font-bold text-base">${isMyCalendar ? (l.LeaveType||'') : (l.Name||'') + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-sm">(' + (l.Department||'') + ')</span>'}</h3>
         <span class="text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
@@ -193,7 +165,23 @@ function renderDashboard() {
   const d = deptNav ? deptNav.value : '';
   
   let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
-  if (d) filtered = filtered.filter(l => String(l.Department||'').includes(d));
+  
+  // My Calendar Unified Logic
+  if (d === 'MY_CALENDAR') {
+    filtered = filtered.filter(l => {
+      if (l.Phone == user.phone) return true;
+      if (l.Attendees) {
+        try {
+          const att = JSON.parse(l.Attendees);
+          return att.some(a => (a.type === 'contact' && a.id == user.phone) || (a.type === 'group' && user.departments.includes(a.dept)));
+        } catch(e) { return String(l.Attendees).includes(user.phone); }
+      }
+      return false;
+    });
+  } else if (d) {
+    filtered = filtered.filter(l => String(l.Department||'').includes(d));
+  }
+  
   if (q) {
     const fuse = new Fuse(filtered, { keys:['Name', 'LeaveType'] });
     filtered = fuse.search(q).map(res => res.item);
@@ -222,9 +210,8 @@ function renderDashboard() {
   }
 
   const itemsForDate = filtered.filter(l => l.InfoAll !== 'TRUE' && isEventOnDate(l, dashTarget));
-  
   const agendaEl = document.getElementById('dash-agenda');
-  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, false, false);
+  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, d === 'MY_CALENDAR', false);
 }
 
 function renderMyLeaves() {
@@ -234,9 +221,7 @@ function renderMyLeaves() {
       try {
         const att = JSON.parse(l.Attendees);
         return att.some(a => (a.type === 'contact' && a.id == user.phone) || (a.type === 'group' && user.departments.includes(a.dept)));
-      } catch(e) {
-        return String(l.Attendees).includes(user.phone);
-      }
+      } catch(e) { return String(l.Attendees).includes(user.phone); }
     }
     return false;
   });
