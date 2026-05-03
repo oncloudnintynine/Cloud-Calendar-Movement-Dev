@@ -20,6 +20,9 @@ function INITIAL_SETUP() {
   if (!props.getProperty('kahList')) props.setProperty('kahList', JSON.stringify([]));
   if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringify(['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event']));
   
+  // New Property for Dynamic User Keyword
+  if (!props.getProperty('userKeyword')) props.setProperty('userKeyword', 'peace');
+  
   var dbId = props.getProperty('dbSheetId');
   if (!dbId) {
     var ss = SpreadsheetApp.create("Company_Leaves_DB");
@@ -59,6 +62,7 @@ function doPost(e) {
     else if (action === 'cancelLeave') responseData = cancelLeave(data);
     else if (action === 'backupCode') responseData = backupCode(data);
     else if (action === 'registerUser') responseData = registerUser(data);
+    else if (action === 'updateUser') responseData = updateUser(data);
     else if (action === 'deleteUser') responseData = deleteUser(data);
 
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
