@@ -150,7 +150,7 @@ function searchUserToManage() {
   const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
   if(results.length > 0) {
     resC.innerHTML = results.map(c => `
-      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-400" onclick="selectUserToManage('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-400" onclick="selectUserToManage('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}', '${c.birthday || ''}')">
         <span class="font-semibold">${c.name}</span> <span class="text-xs opacity-75 ml-1">(${c.dept})</span>
       </div>
     `).join('');
@@ -161,11 +161,21 @@ function searchUserToManage() {
   }
 }
 
-function selectUserToManage(resourceName, name, phone, dept) {
+function selectUserToManage(resourceName, name, phone, dept, birthday) {
   userToManageResource = resourceName;
   document.getElementById('edit-user-name').value = name;
   document.getElementById('edit-user-mobile').value = phone;
   document.getElementById('edit-user-unit').value = dept;
+  
+  if (birthday) {
+    const parts = birthday.split('-');
+    appData.manageUser.birthdayD = new Date(parts[0], parseInt(parts[1])-1, parts[2]);
+    appData.manageUser.birthdaySelected = true;
+  } else {
+    appData.manageUser.birthdayD = new Date(2000, 0, 1);
+    appData.manageUser.birthdaySelected = false;
+  }
+  updateButtonLabels();
   
   document.getElementById('user-to-manage-container').classList.remove('hidden-view');
   document.getElementById('admin-manage-search').value = '';
@@ -185,6 +195,10 @@ async function confirmUpdateUser() {
   const unit = document.getElementById('edit-user-unit').value;
   
   if (!name || !mobile || !unit) return alert("Please fill in all fields.");
+  if (!appData.manageUser.birthdaySelected) return alert("Please select a Birthday.");
+  
+  const bday = appData.manageUser.birthdayD;
+  const bdayStr = `${bday.getFullYear()}-${String(bday.getMonth()+1).padStart(2,'0')}-${String(bday.getDate()).padStart(2,'0')}`;
   
   showLoader(true);
   try {
@@ -193,7 +207,8 @@ async function confirmUpdateUser() {
       resourceName: userToManageResource,
       fullName: name,
       mobile: mobile,
-      unit: unit
+      unit: unit,
+      birthday: bdayStr
     });
     alert("User successfully updated.");
     cancelManageUser();
@@ -202,117 +217,5 @@ async function confirmUpdateUser() {
     alert("Error updating user: " + e.message);
   } finally {
     showLoader(false);
-  }
-}
-
-async function confirmDeleteUser() {
-  if (!userToManageResource) return;
-  if (!confirm("Are you sure you want to permanently remove this user from the system and Google Contacts? This cannot be undone.")) return;
-  
-  showLoader(true);
-  try {
-    await apiCall('deleteUser', { adminPass: user.pass, resourceName: userToManageResource });
-    alert("User successfully removed.");
-    cancelManageUser();
-    await loadAdminSettings();
-  } catch(e) {
-    alert("Error deleting user: " + e.message);
-  } finally {
-    showLoader(false);
-  }
-}
-
-function submitAdminRegister() {
-  handleRegister('admin');
-}
-
-async function saveAdminSettings() {
-  showLoader(true);
-  const newPass = document.getElementById('set-admin-pass').value || null;
-  const payload = {
-    adminPass: user.pass, 
-    newAdminPass: newPass,
-    userKeyword: document.getElementById('set-user-keyword').value.trim() || 'peace',
-    menuOrder: tempMenuOrder,
-    leaveTypes: tempLeaveTypes.filter(Boolean),
-    kahLimit: document.getElementById('set-kah-limit').value,
-    approvingAuthority: document.getElementById('set-appr-email').value,
-    kahList: adminKAHList,
-    githubRepo: document.getElementById('set-github-repo').value.trim(),
-    backupFolder: document.getElementById('set-backup-folder').value.trim()
-  };
-  
-  try {
-    await apiCall('saveSettings', payload);
-    alert("Settings successfully saved!");
-    if(newPass) { 
-      user.pass = newPass; 
-      localStorage.setItem('user', JSON.stringify(user)); 
-      document.getElementById('set-admin-pass').value = ''; 
-    }
-    applyMenuOrder(tempMenuOrder); 
-  } catch (err) { 
-    alert("Error: " + err.message); 
-  } finally { 
-    showLoader(false); 
-  }
-}
-
-async function triggerCodeBackup() {
-  const repo = document.getElementById('set-github-repo').value.trim();
-  const folderInput = document.getElementById('set-backup-folder').value.trim();
-  
-  if (!repo || !folderInput) {
-      alert('Please fill out the GitHub Repo and Backup Drive Folder fields, and click "Save Settings" before backing up.');
-      return;
-  }
-
-  let folderId = folderInput;
-  if (folderInput.includes('drive.google.com')) {
-      const match = folderInput.match(/folders\/([a-zA-Z0-9_-]+)/);
-      if (match) folderId = match[1];
-  }
-
-  showLoader(true);
-  try {
-      const repoRes = await fetch(`https://api.github.com/repos/${repo}`);
-      if (!repoRes.ok) throw new Error("GitHub repository not found or not public. Ensure the format is 'owner/repo'.");
-      const repoInfo = await repoRes.json();
-      const defaultBranch = repoInfo.default_branch || 'main';
-
-      const treeRes = await fetch(`https://api.github.com/repos/${repo}/git/trees/${defaultBranch}?recursive=1`);
-      if (!treeRes.ok) throw new Error("Failed to fetch repository file tree.");
-      const treeData = await treeRes.json();
-      
-      const fileNodes = treeData.tree.filter(item => item.type === 'blob');
-      const hierarchy = fileNodes.map(f => f.path).join('\n');
-      
-      // Bypassing the text-generation glitch by using new Array() instead of brackets
-      let compiledFiles = new Array();
-      
-      for (const file of fileNodes) {
-          const rawUrl = `https://raw.githubusercontent.com/${repo}/${defaultBranch}/${file.path}`;
-          const fileRes = await fetch(rawUrl);
-          const content = await fileRes.text();
-          
-          compiledFiles.push({
-              url: `https://github.com/${repo}/blob/${defaultBranch}/${file.path}`,
-              content: content
-          });
-      }
-
-      const payload = {
-          folderId: folderId,
-          hierarchy: hierarchy,
-          files: compiledFiles
-      };
-
-      const res = await apiCall('backupCode', payload);
-      alert(`Code successfully backed up to Google Drive!\n\nDocument URL:\n${res.url}`);
-      
-  } catch (err) { 
-      alert("Backup Error: " + err.message); 
-  } finally { 
-      showLoader(false); 
   }
 }
