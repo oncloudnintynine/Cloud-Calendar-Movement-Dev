@@ -25,7 +25,8 @@ let appData = {
   event: { startD: new Date(), endD: new Date(), untilD: new Date(), isAllDay: false },
   parade: { targetD: new Date() },
   register: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false },
-  adminRegister: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false }
+  adminRegister: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false },
+  manageUser: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false } // Added
 };
 
 // Calendar Specific Dates
