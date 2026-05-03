@@ -20,8 +20,9 @@ function INITIAL_SETUP() {
   if (!props.getProperty('kahList')) props.setProperty('kahList', JSON.stringify([]));
   if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringify(['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event']));
   
-  // New Property for Dynamic User Keyword
   if (!props.getProperty('userKeyword')) props.setProperty('userKeyword', 'peace');
+  if (!props.getProperty('appMode')) props.setProperty('appMode', 'separated');
+  if (!props.getProperty('companyStructure')) props.setProperty('companyStructure', JSON.stringify({}));
   
   var dbId = props.getProperty('dbSheetId');
   if (!dbId) {
@@ -64,6 +65,7 @@ function doPost(e) {
     else if (action === 'registerUser') responseData = registerUser(data);
     else if (action === 'updateUser') responseData = updateUser(data);
     else if (action === 'deleteUser') responseData = deleteUser(data);
+    else if (action === 'updateUserUnits') responseData = updateUserUnits(data);
 
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
