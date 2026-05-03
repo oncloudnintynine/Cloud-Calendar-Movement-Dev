@@ -104,25 +104,26 @@ function updateUserUnits(data) {
   
   var cg = getContactsAndGroups();
   
-  // data.changes format: { "resourceNames/123": "NewUnitName", ... }
   for (var resName in data.changes) {
     var newUnit = data.changes[resName];
     var targetGroupId = null;
     
-    // Find or create group
-    for (var grpRes in cg.groupMap) {
-      if (cg.groupMap[grpRes].toUpperCase() === newUnit.toUpperCase()) {
-        targetGroupId = grpRes; break;
+    // 1. Group Logic
+    if (newUnit !== "UNASSIGNED") {
+      for (var grpRes in cg.groupMap) {
+        if (cg.groupMap[grpRes].toUpperCase() === newUnit.toUpperCase()) {
+          targetGroupId = grpRes; break;
+        }
+      }
+      if (!targetGroupId) {
+        var newGroup = People.ContactGroups.create({ contactGroup: { name: newUnit } });
+        targetGroupId = newGroup.resourceName;
+        cg.groupMap[targetGroupId] = newUnit;
       }
     }
-    if (!targetGroupId) {
-      var newGroup = People.ContactGroups.create({ contactGroup: { name: newUnit } });
-      targetGroupId = newGroup.resourceName;
-      cg.groupMap[targetGroupId] = newUnit; // update local map
-    }
 
-    // Get person to find old memberships
-    var contact = People.People.get(resName, { personFields: 'memberships' });
+    // 2. Fetch User Memberships and Names
+    var contact = People.People.get(resName, { personFields: 'names,memberships' });
     var currentGroupIds =[];
     if (contact.memberships) {
       contact.memberships.forEach(function(m) {
@@ -133,13 +134,32 @@ function updateUserUnits(data) {
     }
 
     var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId && cg.groupMap[id]; });
-    var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ? [resName] :[];
+    var toAdd = targetGroupId && currentGroupIds.indexOf(targetGroupId) === -1 ? [resName] :[];
 
     if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
     if (toRemove.length > 0) {
       toRemove.forEach(function(gId) {
-        People.ContactGroups.Members.modify({ resourceNamesToRemove: [resName] }, gId);
+        People.ContactGroups.Members.modify({ resourceNamesToRemove:[resName] }, gId);
       });
+    }
+    
+    // 3. Update Contact Name Label (e.g. Tan Ah Kow (Cloud Group : COU))
+    if (contact.names && contact.names.length > 0) {
+       var currentName = contact.names[0].displayName || contact.names[0].givenName || "";
+       var cleanName = currentName.replace(/\s*\(.*?\)\s*/g, '').trim();
+       
+       var newNameStr = cleanName;
+       if (newUnit !== "UNASSIGNED") {
+           newNameStr = cleanName + " (Cloud Group : " + newUnit + ")";
+       }
+       
+       contact.names[0].givenName = newNameStr;
+       
+       try {
+         People.People.updateContact(contact, resName, { updatePersonFields: 'names' });
+       } catch(e) {
+         console.error("Failed to update name label for " + resName, e);
+       }
     }
   }
   
