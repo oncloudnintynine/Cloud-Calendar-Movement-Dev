@@ -21,10 +21,20 @@ function toggleRegisterView(show) {
     document.getElementById('register-form-container').classList.remove('hidden-view');
     
     if (!unitsLoaded) {
-      // Fetch available units for the dropdown without requiring auth
       apiCall('getSettings', { adminPass: null }).then(settings => {
-        if (settings && settings.allContacts) {
-          const uniqueDepts =[...new Set(settings.allContacts.map(c => c.dept))];
+        if (settings) {
+          let allUnits = new Set();
+          if (settings.companyStructure) {
+            Object.keys(settings.companyStructure).forEach(p => {
+              allUnits.add(p);
+              settings.companyStructure[p].forEach(c => allUnits.add(c));
+            });
+          }
+          if (allUnits.size === 0 && settings.allContacts) {
+            settings.allContacts.forEach(c => { if(c.dept && c.dept !== 'Unassigned') allUnits.add(c.dept.toUpperCase()); });
+          }
+          const uniqueDepts = Array.from(allUnits).sort();
+          
           const options = '<option value="" disabled selected>Select...</option>' + 
                           uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
           
@@ -53,7 +63,7 @@ async function handleLogin() {
     user = await apiCall('login', { password: pass });
     localStorage.setItem('user', JSON.stringify(user));
     document.getElementById('login-pass').value = '';
-    showApp(); // Called from app.js
+    showApp(); 
   } catch (err) { 
     alertError('login-alert', err.message); 
     showLoader(false); 
@@ -83,34 +93,15 @@ async function handleRegister(context) {
   
   showLoader(true);
   try {
-    await apiCall('registerUser', {
-      fullName: name,
-      mobile: mobile,
-      unit: unit,
-      birthday: bdayStr
-    });
-    
+    await apiCall('registerUser', { fullName: name, mobile: mobile, unit: unit, birthday: bdayStr });
     alert('User successfully registered!');
+    if (context === 'self') toggleRegisterView(false);
     
-    if (context === 'self') {
-      toggleRegisterView(false);
-    }
-    
-    // Clear inputs after successful registration
     document.getElementById(prefix + 'name').value = '';
     document.getElementById(prefix + 'mobile').value = '';
     document.getElementById(prefix + 'unit').value = '';
-    initDates(); // Reset birthday picker
-    
-  } catch(e) {
-    alertError(context === 'admin' ? 'admin-alert' : 'register-alert', e.message);
-  } finally {
-    showLoader(false);
-  }
+    initDates(); 
+  } catch(e) { alertError(context === 'admin' ? 'admin-alert' : 'register-alert', e.message); } finally { showLoader(false); }
 }
 
-function logout() { 
-  localStorage.removeItem('user'); 
-  user = null; 
-  showLogin(); 
-}
+function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
