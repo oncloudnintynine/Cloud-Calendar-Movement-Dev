@@ -6,23 +6,15 @@
 const savedTheme = localStorage.getItem('theme');
 const wantsDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-if(wantsDark) {
-    document.documentElement.classList.add('dark');
-}
+if(wantsDark) document.documentElement.classList.add('dark');
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Set initial status bar color
   const metaTheme = document.getElementById('theme-color-meta');
-  if (metaTheme) {
-    metaTheme.setAttribute('content', wantsDark ? '#121212' : '#ffffff');
-  }
-
+  if (metaTheme) metaTheme.setAttribute('content', wantsDark ? '#121212' : '#ffffff');
   if (ENV === 'Dev') document.getElementById('dev-banner').classList.remove('hidden');
   
-  if (user) showApp(); 
-  else showLogin();
+  if (user) showApp(); else showLogin();
   
-  // Login Enter Key binding
   document.getElementById('login-pass').addEventListener('keypress', e => e.key === 'Enter' && handleLogin());
   
   // Global Click-Outside handlers for dropdowns
@@ -39,6 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const resK = document.getElementById('kah-results');
       if(resK) resK.classList.add('hidden-view');
     }
+    if(!e.target.closest('#admin-behalf-leave') && !e.target.closest('#behalf-results-leave')) {
+      const resBHL = document.getElementById('behalf-results-leave');
+      if(resBHL) resBHL.classList.add('hidden-view');
+    }
+    if(!e.target.closest('#admin-behalf-event') && !e.target.closest('#behalf-results-event')) {
+      const resBHE = document.getElementById('behalf-results-event');
+      if(resBHE) resBHE.classList.add('hidden-view');
+    }
   });
   
   initDates();
@@ -52,68 +52,76 @@ async function showApp() {
   document.getElementById('menu-btn').classList.remove('hidden');
   document.getElementById('active-tab-title').classList.remove('hidden');
   
-  if (user.role === 'admin') {
-    document.getElementById('nav-user-name').innerText = "Administrator";['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.add('hidden'));
-    document.getElementById('menu-admin').classList.remove('hidden'); 
+  document.getElementById('nav-user-name').innerText = user.role === 'admin' ? "Administrator" : (user.departments.length ? `${user.name}` : user.name);
+
+  try {
+    // Both Admin and User need settings to build the dashboard now
+    const settings = await apiCall('getSettings', { adminPass: user.role === 'admin' ? user.pass : null }); 
+    window.appLeaveTypes = settings.leaveTypes; 
+    appMode = settings.appMode || 'separated';
+    companyStructure = settings.companyStructure || {};
     
-    switchTab('admin'); 
-    await loadAdminSettings();
-  } else {
-    document.getElementById('nav-user-name').innerText = user.departments.length ? `${user.name}` : user.name;['menu-dashboard','menu-parade-state','menu-my-leaves','menu-submit-leave','menu-submit-event'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-    document.getElementById('menu-admin').classList.add('hidden'); 
+    // Inject form dropdown options
+    const formLeaveType = document.getElementById('form-leave-type');
+    if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
     
-    try {
-      const settings = await apiCall('getSettings', { adminPass: null }); 
-      window.appLeaveTypes = settings.leaveTypes; 
+    // Setup Unified vs Separated Menu
+    const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+    applyMenuOrder(mOrder);
+    
+    // Process Contacts & Departments
+    if (settings.allContacts) {
+      companyContacts = settings.allContacts;
+      const uniqueNames = [...new Set(companyContacts.map(c => c.name))];
+      validContactNames = uniqueNames.map(n => n.toLowerCase());
       
-      const formLeaveType = document.getElementById('form-leave-type');
-      if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+      const uniqueDepts =[...new Set(companyContacts.map(c => c.dept))];
+      const deptNav = document.getElementById('dash-dept-nav');
       
-      const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-      applyMenuOrder(mOrder);
-      
-      if (settings.allContacts) {
-        companyContacts = settings.allContacts;
-        const uniqueNames = [...new Set(companyContacts.map(c => c.name))];
-        validContactNames = uniqueNames.map(n => n.toLowerCase());
-        
-        const uniqueDepts =[...new Set(companyContacts.map(c => c.dept))];
-        const deptNav = document.getElementById('dash-dept-nav');
-        
-        if (deptNav) {
-          deptNav.innerHTML = '<option value="">All Depts</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
-        }
-        
-        // Also pre-populate the registration dropdowns
-        const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
-        const regUnit = document.getElementById('reg-unit');
-        const adminRegUnit = document.getElementById('admin-reg-unit');
-        if (regUnit) regUnit.innerHTML = regOptions;
-        if (adminRegUnit) adminRegUnit.innerHTML = regOptions;
-        unitsLoaded = true; // Mark as loaded for auth.js
-        
-        fuseAllContacts = new Fuse(companyContacts, { keys:['name', 'dept'], threshold: 0.3 });
-        
-        let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
-        uniqueDepts.forEach(dept => {
-          attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group' });
-        });
-        fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
+      if (deptNav) {
+        let deptHtml = '<option value="">All Depts</option>';
+        if (appMode === 'unified') deptHtml += '<option value="MY_CALENDAR">My Calendar</option>';
+        deptHtml += uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+        deptNav.innerHTML = deptHtml;
       }
-
-      await loadLeavesData();
-      switchTab(mOrder[0]); 
-
-    } catch(e) {
-      console.error("Error loading settings: ", e);
+      
+      const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+      const regUnit = document.getElementById('reg-unit');
+      const adminRegUnit = document.getElementById('admin-reg-unit');
+      if (regUnit) regUnit.innerHTML = regOptions;
+      if (adminRegUnit) adminRegUnit.innerHTML = regOptions;
+      unitsLoaded = true;
+      
+      fuseAllContacts = new Fuse(companyContacts, { keys:['name', 'dept', 'phone'], threshold: 0.3 });
+      
+      let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
+      uniqueDepts.forEach(dept => {
+        attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group' });
+      });
+      fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
     }
+
+    // Admin UI Reveals
+    if (user.role === 'admin') {
+      document.getElementById('menu-admin-group').classList.remove('hidden');
+      document.getElementById('admin-behalf-leave').classList.remove('hidden-view');
+      document.getElementById('admin-behalf-event').classList.remove('hidden-view');
+      populateAdminSettingsForm(settings);
+    } else {
+      document.getElementById('menu-admin-group').classList.add('hidden');
+    }
+
+    await loadLeavesData();
+    switchTab(user.role === 'admin' ? 'dashboard' : mOrder[0]); 
+
+  } catch(e) {
+    console.error("Error loading settings: ", e);
+    alertError('login-alert', 'Error initializing app.');
   }
   showLoader(false);
 }
 
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {
-        console.error("SW Registration failed:", err);
-    }));
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
 }
