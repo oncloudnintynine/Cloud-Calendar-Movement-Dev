@@ -2,16 +2,13 @@
 // UI, Navigation, & Formatter Logic
 // ==========================================
 
-// --- Menu UI Logic ---
 function toggleMenu() {
   const menu = document.getElementById('slide-menu');
   const panel = document.getElementById('slide-menu-panel');
   if (menu.classList.contains('hidden-view')) {
     menu.classList.remove('hidden-view');
     setTimeout(() => { panel.classList.remove('-translate-x-full'); }, 10);
-  } else {
-    closeMenu();
-  }
+  } else closeMenu();
 }
 
 function closeMenu() {
@@ -23,43 +20,48 @@ function closeMenu() {
 
 function applyMenuOrder(orderArr) {
   const menuContainer = document.getElementById('slide-menu-items');
-  const adminBtn = document.getElementById('menu-admin');
-  
+  const btnLeave = document.getElementById('unified-btn-leave');
+  const btnEvent = document.getElementById('unified-btn-event');
+
   if(menuContainer) {
     orderArr.forEach(id => {
       const btn = document.getElementById(`menu-${id}`);
-      if (btn) menuContainer.appendChild(btn);
+      if (btn) {
+        // Handle Unified Mode Rules
+        if (appMode === 'unified' &&['my-leaves', 'submit-leave', 'submit-event'].includes(id)) {
+          btn.classList.add('hidden');
+        } else {
+          btn.classList.remove('hidden');
+          menuContainer.appendChild(btn);
+        }
+      }
     });
-    if (adminBtn) menuContainer.appendChild(adminBtn); 
+  }
+
+  // Dashboard Unified Action Buttons
+  if (appMode === 'unified') {
+    if(btnLeave) btnLeave.classList.remove('hidden');
+    if(btnEvent) btnEvent.classList.remove('hidden');
+  } else {
+    if(btnLeave) btnLeave.classList.add('hidden');
+    if(btnEvent) btnEvent.classList.add('hidden');
   }
 }
 
 function switchTab(tabId) {
   closeMenu();
+  document.querySelectorAll('.tab-content').forEach(el => { el.classList.add('hidden-view'); el.classList.remove('flex'); });
   
-  // Hide all views
-  document.querySelectorAll('.tab-content').forEach(el => { 
-    el.classList.add('hidden-view'); 
-    el.classList.remove('flex'); 
-  });
-  
-  // Show target view
   const view = document.getElementById(`view-${tabId}`);
-  if (view) {
-    view.classList.remove('hidden-view');
-    view.classList.add('flex'); 
-  }
+  if (view) { view.classList.remove('hidden-view'); view.classList.add('flex'); }
   
-  // Update Menu Highlights
   document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
     btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
   });
-  const activeMenu = document.getElementById(`menu-${tabId}`);
-  if (activeMenu) {
-    activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
-  }
   
-  // Update Header Title
+  const activeMenu = document.getElementById(`menu-${tabId}`);
+  if (activeMenu) activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
+  
   const titleEl = document.getElementById('active-tab-title');
   if (titleEl) {
     if (currentEditId && tabId === 'submit-event') titleEl.innerText = "Update Event";
@@ -67,30 +69,25 @@ function switchTab(tabId) {
     else titleEl.innerText = TAB_NAMES[tabId] || '';
   }
   
-  // Update Dashboard specific nav
   const deptNav = document.getElementById('dash-dept-nav');
   if (deptNav) {
     if (tabId === 'dashboard') deptNav.classList.remove('hidden');
     else deptNav.classList.add('hidden');
   }
   
-  // Trigger specific renders if needed
-  if (tabId === 'parade-state' && typeof renderParadeState === 'function') {
-    renderParadeState();
+  if (tabId === 'parade-state' && typeof renderParadeState === 'function') renderParadeState();
+  if (tabId === 'admin-structure' && typeof renderStructureBuilder === 'function') {
+    renderStructureBuilder();
+    renderKanbanBoard();
   }
 }
 
-// --- Theme & Generic Toggles ---
 function toggleTheme() {
   document.documentElement.classList.toggle('dark');
   const isDark = document.documentElement.classList.contains('dark');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  
-  // Dynamically update the mobile status bar color
   const metaTheme = document.getElementById('theme-color-meta');
-  if (metaTheme) {
-    metaTheme.setAttribute('content', isDark ? '#121212' : '#ffffff');
-  }
+  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#121212' : '#ffffff');
 }
 
 function togglePassword(id, btnElement) {
@@ -104,7 +101,6 @@ function togglePassword(id, btnElement) {
   }
 }
 
-// --- Date & Time Formatters ---
 function formatDisplayDate(dateObj) {
   if (isNaN(dateObj)) return '';
   return `${String(dateObj.getDate()).padStart(2,'0')} ${mos[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
@@ -123,11 +119,11 @@ function initDates() {
   
   appData.register.birthdayD = new Date(2000, 0, 1);
   appData.adminRegister.birthdayD = new Date(2000, 0, 1);
-  appData.manageUser.birthdayD = new Date(2000, 0, 1); // Added
+  appData.manageUser.birthdayD = new Date(2000, 0, 1);
   
   appData.register.birthdaySelected = false;
   appData.adminRegister.birthdaySelected = false;
-  appData.manageUser.birthdaySelected = false; // Added
+  appData.manageUser.birthdaySelected = false;
   
   updateButtonLabels();
 }
@@ -141,23 +137,20 @@ function updateButtonLabels() {
   const lblParade = document.getElementById('btn-parade-target');
   const lblRegBday = document.getElementById('btn-register-birthday');
   const lblAdminRegBday = document.getElementById('btn-admin-register-birthday');
-  const lblManageUserBday = document.getElementById('btn-manage-user-birthday'); // Added
+  const lblManageUserBday = document.getElementById('btn-manage-user-birthday');
 
   if(lblLStart) lblLStart.innerText = formatDisplayDate(appData.leave.startD);
   if(lblLEnd) lblLEnd.innerText = formatDisplayDate(appData.leave.endD);
-  
   if(lblEStart) lblEStart.innerText = appData.event.isAllDay ? formatDisplayDate(appData.event.startD) : formatDisplayDateTime(appData.event.startD);
   if(lblEEnd) lblEEnd.innerText = appData.event.isAllDay ? formatDisplayDate(appData.event.endD) : formatDisplayDateTime(appData.event.endD);
   if(lblEUntil) lblEUntil.innerText = formatDisplayDate(appData.event.untilD);
-  
   if(lblParade) lblParade.innerText = formatDisplayDateTime(appData.parade.targetD);
   
   if(lblRegBday) lblRegBday.innerText = appData.register.birthdaySelected ? formatDisplayDate(appData.register.birthdayD) : "Select...";
   if(lblAdminRegBday) lblAdminRegBday.innerText = appData.adminRegister.birthdaySelected ? formatDisplayDate(appData.adminRegister.birthdayD) : "Select...";
-  if(lblManageUserBday) lblManageUserBday.innerText = appData.manageUser.birthdaySelected ? formatDisplayDate(appData.manageUser.birthdayD) : "Select..."; // Added
+  if(lblManageUserBday) lblManageUserBday.innerText = appData.manageUser.birthdaySelected ? formatDisplayDate(appData.manageUser.birthdayD) : "Select...";
 }
 
-// --- App Updates (PWA/Cache) ---
 function animateAndUpdate(btn) { 
   const icon = btn.querySelector('svg'); 
   if (icon) icon.classList.add('animate-spin'); 
