@@ -17,7 +17,8 @@ function getContactsAndGroups() {
   var connections =[];
   var pageToken = null;
   do {
-    var req = { personFields: 'names,phoneNumbers,memberships', pageSize: 1000 };
+    // UPDATED: Added 'birthdays' to personFields
+    var req = { personFields: 'names,phoneNumbers,memberships,birthdays', pageSize: 1000 };
     if (pageToken) req.pageToken = pageToken;
     var res = People.People.Connections.list('people/me', req);
     if (res.connections) connections = connections.concat(res.connections);
@@ -119,13 +120,29 @@ function updateUser(data) {
 
   try {
     // 1. Get existing contact to get the required etag
-    var contact = People.People.get(data.resourceName, { personFields: 'names,phoneNumbers,memberships' });
+    // UPDATED: Added 'birthdays' to personFields
+    var contact = People.People.get(data.resourceName, { personFields: 'names,phoneNumbers,memberships,birthdays' });
     
     // 2. Update names & phone
-    contact.names = [{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }];
-    contact.phoneNumbers = [{ value: data.mobile, type: "mobile" }];
+    contact.names =[{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }];
+    contact.phoneNumbers =[{ value: data.mobile, type: "mobile" }];
     
-    People.People.updateContact(contact, data.resourceName, { updatePersonFields: 'names,phoneNumbers' });
+    // UPDATED: Handle birthday mapping
+    if (data.birthday) {
+      var parts = data.birthday.split('-');
+      contact.birthdays =[{
+        date: {
+          year: parseInt(parts[0], 10),
+          month: parseInt(parts[1], 10),
+          day: parseInt(parts[2], 10)
+        }
+      }];
+    } else {
+      contact.birthdays =[]; // Clear it if empty
+    }
+    
+    // UPDATED: Added 'birthdays' to updatePersonFields
+    People.People.updateContact(contact, data.resourceName, { updatePersonFields: 'names,phoneNumbers,birthdays' });
 
     // 3. Handle groups
     var cg = getContactsAndGroups();
@@ -159,7 +176,7 @@ function updateUser(data) {
 
     // Remove from old groups if unit changed
     var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId; });
-    var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ? [data.resourceName] :[];
+    var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ?[data.resourceName] :[];
 
     if (toAdd.length > 0) {
       People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
