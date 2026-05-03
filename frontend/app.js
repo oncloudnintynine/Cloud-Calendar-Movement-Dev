@@ -2,7 +2,6 @@
 // Main Application Initialization
 // ==========================================
 
-// Handle Dark Mode Init and Status Bar Color
 const savedTheme = localStorage.getItem('theme');
 const wantsDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
@@ -17,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('login-pass').addEventListener('keypress', e => e.key === 'Enter' && handleLogin());
   
-  // Global Click-Outside handlers for dropdowns
   document.addEventListener('click', function(e) {
     if(!e.target.closest('#form-leave-cover') && !e.target.closest('#cover-results-leave')) {
       const resCL = document.getElementById('cover-results-leave');
@@ -55,43 +53,64 @@ async function showApp() {
   document.getElementById('nav-user-name').innerText = user.role === 'admin' ? "Administrator" : (user.departments.length ? `${user.name}` : user.name);
 
   try {
-    // Both Admin and User need settings to build the dashboard now
     const settings = await apiCall('getSettings', { adminPass: user.role === 'admin' ? user.pass : null }); 
     window.appLeaveTypes = settings.leaveTypes; 
     appMode = settings.appMode || 'separated';
     companyStructure = settings.companyStructure || {};
+    companyContacts = settings.allContacts ||[];
     
-    // Inject form dropdown options
     const formLeaveType = document.getElementById('form-leave-type');
     if (formLeaveType) formLeaveType.innerHTML = settings.leaveTypes.map(t => `<option value="${t}">${t}</option>`).join('');
     
-    // Setup Unified vs Separated Menu
     const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
     applyMenuOrder(mOrder);
     
-    // Process Contacts & Departments
-    if (settings.allContacts) {
-      companyContacts = settings.allContacts;
-      const uniqueNames = [...new Set(companyContacts.map(c => c.name))];
+    // Auto-sync User Departments silently if they were moved by Admin
+    if (user.role !== 'admin' && companyContacts.length > 0) {
+        const myContact = companyContacts.find(c => c.phone == user.phone);
+        if (myContact && myContact.dept) {
+            user.departments = myContact.dept.split(',').map(s=>s.trim());
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+    }
+    
+    // Derive Units from Company Structure so empty units are available
+    let allUnits = new Set();
+    Object.keys(companyStructure).forEach(p => {
+      allUnits.add(p);
+      companyStructure[p].forEach(c => allUnits.add(c));
+    });
+    
+    if (allUnits.size === 0 && companyContacts.length > 0) {
+      companyContacts.forEach(c => {
+        if (c.dept && c.dept !== 'Unassigned') {
+          const d = c.dept.toUpperCase();
+          companyStructure[d] =[];
+          allUnits.add(d);
+        }
+      });
+    }
+    const uniqueDepts = Array.from(allUnits).sort();
+
+    // Populate Dropdowns
+    const deptNav = document.getElementById('dash-dept-nav');
+    if (deptNav) {
+      let deptHtml = '<option value="">All Depts</option>';
+      if (appMode === 'unified') deptHtml += '<option value="MY_CALENDAR">My Calendar</option>';
+      deptHtml += uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+      deptNav.innerHTML = deptHtml;
+    }
+    
+    const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+    const regUnit = document.getElementById('reg-unit');
+    const adminRegUnit = document.getElementById('admin-reg-unit');
+    if (regUnit) regUnit.innerHTML = regOptions;
+    if (adminRegUnit) adminRegUnit.innerHTML = regOptions;
+    unitsLoaded = true;
+    
+    if (companyContacts.length > 0) {
+      const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
       validContactNames = uniqueNames.map(n => n.toLowerCase());
-      
-      const uniqueDepts =[...new Set(companyContacts.map(c => c.dept))];
-      const deptNav = document.getElementById('dash-dept-nav');
-      
-      if (deptNav) {
-        let deptHtml = '<option value="">All Depts</option>';
-        if (appMode === 'unified') deptHtml += '<option value="MY_CALENDAR">My Calendar</option>';
-        deptHtml += uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
-        deptNav.innerHTML = deptHtml;
-      }
-      
-      const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
-      const regUnit = document.getElementById('reg-unit');
-      const adminRegUnit = document.getElementById('admin-reg-unit');
-      if (regUnit) regUnit.innerHTML = regOptions;
-      if (adminRegUnit) adminRegUnit.innerHTML = regOptions;
-      unitsLoaded = true;
-      
       fuseAllContacts = new Fuse(companyContacts, { keys:['name', 'dept', 'phone'], threshold: 0.3 });
       
       let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
@@ -101,7 +120,6 @@ async function showApp() {
       fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
     }
 
-    // Admin UI Reveals
     if (user.role === 'admin') {
       document.getElementById('menu-admin-group').classList.remove('hidden');
       document.getElementById('admin-behalf-leave').classList.remove('hidden-view');
@@ -121,7 +139,6 @@ async function showApp() {
   showLoader(false);
 }
 
-// Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => {}));
 }
