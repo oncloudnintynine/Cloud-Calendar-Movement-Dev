@@ -36,8 +36,11 @@ function handleLogin(data) {
   var props = PropertiesService.getScriptProperties();
   if (pass === (props.getProperty('adminPassword') || 'P@ssw0rd')) return { role: 'admin', name: 'Administrator', pass: pass };
 
-  if (pass.endsWith('peace')) {
-    var phone = pass.slice(0, -5).replace(/\D/g, '').slice(-8);
+  // Pull dynamic keyword (defaults to 'peace')
+  var keyword = props.getProperty('userKeyword') || 'peace';
+
+  if (pass.endsWith(keyword)) {
+    var phone = pass.slice(0, -keyword.length).replace(/\D/g, '').slice(-8);
     if (phone.length !== 8) throw new Error("Invalid password format.");
 
     var cg = getContactsAndGroups();
@@ -70,7 +73,6 @@ function handleLogin(data) {
 }
 
 function registerUser(data) {
-  // Create contact mapping
   var contactPayload = {
     names:[{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }],
     phoneNumbers:[{ value: data.mobile, type: "mobile" }]
@@ -87,11 +89,9 @@ function registerUser(data) {
     }];
   }
   
-  // 1. Create the base contact
   var newContact = People.People.createContact(contactPayload);
   var resourceName = newContact.resourceName;
   
-  // 2. Fetch existing groups
   var cg = getContactsAndGroups();
   var groupId = null;
   
@@ -102,18 +102,77 @@ function registerUser(data) {
     }
   }
   
-  // 3. Create the group if it doesn't exist
   if (!groupId) {
-    var newGroup = People.ContactGroups.create({
-      contactGroup: { name: data.unit }
-    });
+    var newGroup = People.ContactGroups.create({ contactGroup: { name: data.unit } });
     groupId = newGroup.resourceName;
   }
   
-  // 4. Add the new contact to the group
-  People.ContactGroups.Members.modify({
-    resourceNamesToAdd: [resourceName]
-  }, groupId);
+  People.ContactGroups.Members.modify({ resourceNamesToAdd: [resourceName] }, groupId);
   
   return { success: true, message: "User registered successfully." };
+}
+
+function updateUser(data) {
+  var props = PropertiesService.getScriptProperties();
+  if (data.adminPass !== props.getProperty('adminPassword')) throw new Error("Invalid/Expired Admin Password");
+  if (!data.resourceName) throw new Error("Missing contact identifier.");
+
+  try {
+    // 1. Get existing contact to get the required etag
+    var contact = People.People.get(data.resourceName, { personFields: 'names,phoneNumbers,memberships' });
+    
+    // 2. Update names & phone
+    contact.names = [{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }];
+    contact.phoneNumbers = [{ value: data.mobile, type: "mobile" }];
+    
+    People.People.updateContact(contact, data.resourceName, { updatePersonFields: 'names,phoneNumbers' });
+
+    // 3. Handle groups
+    var cg = getContactsAndGroups();
+    var targetGroupId = null;
+    var targetGroupName = data.unit.toUpperCase();
+
+    // Find the new group ID
+    for (var grpRes in cg.groupMap) {
+      if (cg.groupMap[grpRes].toUpperCase() === targetGroupName) {
+        targetGroupId = grpRes;
+        break;
+      }
+    }
+
+    // Create the group if it doesn't exist
+    if (!targetGroupId) {
+      var newGroup = People.ContactGroups.create({ contactGroup: { name: targetGroupName } });
+      targetGroupId = newGroup.resourceName;
+    }
+
+    // Determine current groups
+    var currentGroupIds =[];
+    if (contact.memberships) {
+      contact.memberships.forEach(function(m) {
+        if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+          var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+          if (gName) currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
+        }
+      });
+    }
+
+    // Remove from old groups if unit changed
+    var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId; });
+    var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ? [data.resourceName] :[];
+
+    if (toAdd.length > 0) {
+      People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
+    }
+    
+    if (toRemove.length > 0) {
+      toRemove.forEach(function(gId) {
+        People.ContactGroups.Members.modify({ resourceNamesToRemove:[data.resourceName] }, gId);
+      });
+    }
+
+    return { success: true };
+  } catch(e) {
+    throw new Error("Failed to update user: " + e.message);
+  }
 }
