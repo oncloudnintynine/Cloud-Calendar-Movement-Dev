@@ -26,7 +26,6 @@ function getSettings(data) {
           var deptsStr = depts.join(',');
           phoneToDepts[phone] = deptsStr;
           
-          // UPDATED: Extract Birthday
           var bdayStr = "";
           if (person.birthdays && person.birthdays.length > 0 && person.birthdays[0].date) {
             var d = person.birthdays[0].date;
@@ -59,6 +58,8 @@ function getSettings(data) {
     githubRepo: props.getProperty('githubRepo') || '',
     backupFolder: props.getProperty('backupFolder') || '',
     userKeyword: props.getProperty('userKeyword') || 'peace',
+    appMode: props.getProperty('appMode') || 'separated',
+    companyStructure: JSON.parse(props.getProperty('companyStructure') || "{}"),
     allContacts: allContacts
   };
 }
@@ -74,6 +75,9 @@ function saveSettings(data) {
   props.setProperty('kahList', JSON.stringify(data.kahList));
   
   if (data.userKeyword) props.setProperty('userKeyword', data.userKeyword);
+  if (data.appMode) props.setProperty('appMode', data.appMode);
+  if (data.companyStructure) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
+  
   if (data.menuOrder) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
   if (data.githubRepo !== undefined) props.setProperty('githubRepo', data.githubRepo);
   if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
@@ -91,5 +95,53 @@ function deleteUser(data) {
   } catch(e) {
     throw new Error("Failed to delete user from Google Contacts: " + e.message);
   }
+  return { success: true };
+}
+
+function updateUserUnits(data) {
+  var props = PropertiesService.getScriptProperties();
+  if (data.adminPass !== props.getProperty('adminPassword')) throw new Error("Invalid/Expired Admin Password");
+  
+  var cg = getContactsAndGroups();
+  
+  // data.changes format: { "resourceNames/123": "NewUnitName", ... }
+  for (var resName in data.changes) {
+    var newUnit = data.changes[resName];
+    var targetGroupId = null;
+    
+    // Find or create group
+    for (var grpRes in cg.groupMap) {
+      if (cg.groupMap[grpRes].toUpperCase() === newUnit.toUpperCase()) {
+        targetGroupId = grpRes; break;
+      }
+    }
+    if (!targetGroupId) {
+      var newGroup = People.ContactGroups.create({ contactGroup: { name: newUnit } });
+      targetGroupId = newGroup.resourceName;
+      cg.groupMap[targetGroupId] = newUnit; // update local map
+    }
+
+    // Get person to find old memberships
+    var contact = People.People.get(resName, { personFields: 'memberships' });
+    var currentGroupIds =[];
+    if (contact.memberships) {
+      contact.memberships.forEach(function(m) {
+        if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+          currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
+        }
+      });
+    }
+
+    var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId && cg.groupMap[id]; });
+    var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ? [resName] :[];
+
+    if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
+    if (toRemove.length > 0) {
+      toRemove.forEach(function(gId) {
+        People.ContactGroups.Members.modify({ resourceNamesToRemove: [resName] }, gId);
+      });
+    }
+  }
+  
   return { success: true };
 }
