@@ -30,6 +30,42 @@ function toggleRepeatUntil() {
   else container.classList.remove('hidden-view');
 }
 
+// --- Admin Submit on Behalf Logic ---
+function searchBehalf(ctx) {
+  const q = document.getElementById(`form-${ctx}-behalf-search`).value;
+  const resC = document.getElementById(`behalf-results-${ctx}`);
+  if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
+  
+  const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
+  if (results.length > 0) {
+    resC.innerHTML = results.map(c => `
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/30" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
+        <span class="font-semibold">${c.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${c.dept})</span>
+      </div>
+    `).join('');
+    resC.classList.remove('hidden-view');
+  } else {
+    resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
+  }
+}
+
+function selectBehalf(ctx, name, phone, dept) {
+  adminBehalfUser = { name, phone, dept };
+  document.getElementById(`selected-behalf-${ctx}`).innerHTML = `
+    <span>Submitting for: ${name} <span class="text-sm font-normal">(${dept})</span></span>
+    <button type="button" onclick="clearBehalf('${ctx}')" class="text-red-500 hover:text-red-700">&times; clear</button>
+  `;
+  document.getElementById(`form-${ctx}-behalf-search`).value = '';
+  document.getElementById(`form-${ctx}-behalf-search`).classList.add('hidden-view');
+  document.getElementById(`behalf-results-${ctx}`).classList.add('hidden-view');
+}
+
+function clearBehalf(ctx) {
+  adminBehalfUser = null;
+  document.getElementById(`selected-behalf-${ctx}`).innerHTML = '';
+  document.getElementById(`form-${ctx}-behalf-search`).classList.remove('hidden-view');
+}
+
 // --- Attendees Form Logic ---
 function searchAttendees() {
   const q = document.getElementById('form-event-attendee-search').value;
@@ -109,6 +145,10 @@ function triggerEdit(id) {
   appData[ctx].startD = new Date(l.StartDate);
   appData[ctx].endD = new Date(l.EndDate);
   
+  if (user.role === 'admin') {
+    selectBehalf(ctx, l.Name, l.Phone, l.Department);
+  }
+
   if (isEvent) {
     appData.event.isAllDay = l.IsAllDay === 'TRUE';
     appData.event.untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(l.EndDate);
@@ -184,13 +224,16 @@ function cancelEditMode() {
   toggleInfoAll(false);
   toggleRepeatUntil();
   
+  clearBehalf('leave');
+  clearBehalf('event');
+  
   eventAttendees =[]; renderAttendees();
 
   document.getElementById('submit-leave-btn').innerText = "Save Record";
   document.getElementById('cancel-edit-leave-btn').classList.add('hidden-view');
   document.getElementById('submit-event-btn').innerText = "Save Event";
   document.getElementById('cancel-edit-event-btn').classList.add('hidden-view');
-  switchTab('my-leaves');
+  switchTab(appMode === 'unified' ? 'dashboard' : 'my-leaves');
 }
 
 function toggleAMPM(type) {
@@ -227,6 +270,21 @@ function toggleOverseasFields() {
 
 async function submitForm(ctx) {
   showLoader(true);
+  
+  // Resolve Target User
+  let targetName = user.name;
+  let targetPhone = user.phone;
+  let targetDepts = new Set(user.departments);
+
+  if (user.role === 'admin' && adminBehalfUser) {
+    targetName = adminBehalfUser.name;
+    targetPhone = adminBehalfUser.phone;
+    targetDepts = new Set([adminBehalfUser.dept]);
+  } else if (user.role === 'admin' && !adminBehalfUser) {
+    alert("Admin: Please select a user to submit on behalf of.");
+    showLoader(false); return;
+  }
+
   if (ctx === 'leave') {
     const coverInput = document.getElementById('form-leave-cover').value.trim();
     if (!validContactNames.includes(coverInput.toLowerCase())) {
@@ -242,7 +300,6 @@ async function submitForm(ctx) {
   let calculatedHalfDay = 'None';
   let loc = '';
   let finalAttendeesStr = '';
-  let finalDepts = new Set(user.departments);
   let finalInfoAll = false;
   let eventIsAllDay = false;
   let eventUntilDate = '';
@@ -267,14 +324,12 @@ async function submitForm(ctx) {
       eventUntilDate = toLocalISO(appData.event.untilD);
     }
     
-    eventAttendees.forEach(a => {
-      finalDepts.add(a.dept);
-    });
+    eventAttendees.forEach(a => { targetDepts.add(a.dept); });
     finalAttendeesStr = JSON.stringify(eventAttendees);
   }
 
   const payload = {
-    id: currentEditId, name: user.name, phone: user.phone, departments: Array.from(finalDepts),
+    id: currentEditId, name: targetName, phone: targetPhone, departments: Array.from(targetDepts),
     leaveType: ctx === 'leave' ? document.getElementById('form-leave-type').value : document.getElementById('form-event-name').value,
     startDate: sDate, endDate: eDate, halfDay: calculatedHalfDay, 
     coveringPerson: ctx === 'leave' ? document.getElementById('form-leave-cover').value.trim() : 'N/A',
@@ -292,9 +347,7 @@ async function submitForm(ctx) {
     const action = currentEditId ? 'editLeave' : 'submitLeave';
     const res = await apiCall(action, payload);
     
-    // AWAIT the data refresh so UI is perfectly synced when transition happens
     await loadLeavesData(); 
-    
     const wasEdit = currentEditId;
     cancelEditMode(); 
     
@@ -306,11 +359,11 @@ async function submitForm(ctx) {
   }
 }
 
-async function cancelLeave(id) {
+async function cancelLeave(id, targetPhone) {
   if(!confirm("Are you sure you want to cancel this record?")) return;
   showLoader(true);
   try { 
-    await apiCall('cancelLeave', { id: id, phone: user.phone }); 
+    await apiCall('cancelLeave', { id: id, phone: targetPhone || user.phone }); 
     await loadLeavesData(); 
   } catch (err) {
     console.error(err);
