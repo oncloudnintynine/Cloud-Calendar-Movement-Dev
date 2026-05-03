@@ -25,7 +25,6 @@ function getSettings(data) {
         if (depts.length > 0) {
           var deptsStr = depts.join(',');
           phoneToDepts[phone] = deptsStr;
-          // Capture resourceName so frontend knows what to delete
           allContacts.push({ name: name, phone: phone, dept: deptsStr, resourceName: person.resourceName });
         }
       }
@@ -49,6 +48,7 @@ function getSettings(data) {
     menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
     githubRepo: props.getProperty('githubRepo') || '',
     backupFolder: props.getProperty('backupFolder') || '',
+    userKeyword: props.getProperty('userKeyword') || 'peace',
     allContacts: allContacts
   };
 }
@@ -62,8 +62,9 @@ function saveSettings(data) {
   props.setProperty('leaveTypes', JSON.stringify(data.leaveTypes));
   props.setProperty('approvingAuthority', data.approvingAuthority);
   props.setProperty('kahList', JSON.stringify(data.kahList));
-  if(data.menuOrder) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
   
+  if (data.userKeyword) props.setProperty('userKeyword', data.userKeyword);
+  if (data.menuOrder) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
   if (data.githubRepo !== undefined) props.setProperty('githubRepo', data.githubRepo);
   if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
   
@@ -73,7 +74,6 @@ function saveSettings(data) {
 function deleteUser(data) {
   var props = PropertiesService.getScriptProperties();
   if (data.adminPass !== props.getProperty('adminPassword')) throw new Error("Invalid/Expired Admin Password");
-  
   if (!data.resourceName) throw new Error("Missing contact identifier.");
   
   try {
@@ -81,6 +81,5 @@ function deleteUser(data) {
   } catch(e) {
     throw new Error("Failed to delete user from Google Contacts: " + e.message);
   }
-  
   return { success: true };
 }
