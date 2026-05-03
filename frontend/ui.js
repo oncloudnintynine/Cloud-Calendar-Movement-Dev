@@ -120,10 +120,15 @@ function initDates() {
   appData.leave.startD = new Date(now); appData.leave.endD = new Date(now);
   appData.event.startD = new Date(now); appData.event.endD = new Date(now);
   appData.parade.targetD = new Date(now);
+  
   appData.register.birthdayD = new Date(2000, 0, 1);
   appData.adminRegister.birthdayD = new Date(2000, 0, 1);
+  appData.manageUser.birthdayD = new Date(2000, 0, 1); // Added
+  
   appData.register.birthdaySelected = false;
   appData.adminRegister.birthdaySelected = false;
+  appData.manageUser.birthdaySelected = false; // Added
+  
   updateButtonLabels();
 }
 
@@ -136,6 +141,7 @@ function updateButtonLabels() {
   const lblParade = document.getElementById('btn-parade-target');
   const lblRegBday = document.getElementById('btn-register-birthday');
   const lblAdminRegBday = document.getElementById('btn-admin-register-birthday');
+  const lblManageUserBday = document.getElementById('btn-manage-user-birthday'); // Added
 
   if(lblLStart) lblLStart.innerText = formatDisplayDate(appData.leave.startD);
   if(lblLEnd) lblLEnd.innerText = formatDisplayDate(appData.leave.endD);
@@ -148,6 +154,7 @@ function updateButtonLabels() {
   
   if(lblRegBday) lblRegBday.innerText = appData.register.birthdaySelected ? formatDisplayDate(appData.register.birthdayD) : "Select...";
   if(lblAdminRegBday) lblAdminRegBday.innerText = appData.adminRegister.birthdaySelected ? formatDisplayDate(appData.adminRegister.birthdayD) : "Select...";
+  if(lblManageUserBday) lblManageUserBday.innerText = appData.manageUser.birthdaySelected ? formatDisplayDate(appData.manageUser.birthdayD) : "Select..."; // Added
 }
 
 // --- App Updates (PWA/Cache) ---
