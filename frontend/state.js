@@ -3,7 +3,7 @@
 // ==========================================
 
 let user = JSON.parse(localStorage.getItem('user')) || null;
-let allLeaves = [];
+let allLeaves =[];
 let currentEditId = null;
 
 // Contact & Search State
@@ -19,6 +19,12 @@ let tempMenuOrder = [];
 let eventAttendees =[]; 
 let isInfoAll = false;
 
+// New Configuration States
+let appMode = 'separated'; // 'separated' or 'unified'
+let companyStructure = {}; 
+let pendingStructureChanges = {}; // For drag-and-drop batch saving
+let adminBehalfUser = null; // Stores target user when admin submits on behalf
+
 // Date & Time Picker Target Data
 let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
@@ -26,7 +32,7 @@ let appData = {
   parade: { targetD: new Date() },
   register: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false },
   adminRegister: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false },
-  manageUser: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false } // Added
+  manageUser: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false }
 };
 
 // Calendar Specific Dates
@@ -48,7 +54,8 @@ const TAB_NAMES = {
   'my-leaves': 'My Calendar',
   'submit-leave': 'Add Leave/MC/OIL',
   'submit-event': 'Add Event',
-  'admin': 'Admin Settings'
+  'admin': 'Admin Settings',
+  'admin-structure': 'Company Structure' // New Tab
 };
 
 const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event'];
