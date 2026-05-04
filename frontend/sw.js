@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cloud-moves-v23';
+const CACHE_NAME = 'cloud-moves-v24';
 
 const urlsToCache =[
   './',
