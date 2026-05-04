@@ -65,7 +65,6 @@ async function showApp() {
     const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
     applyMenuOrder(mOrder);
     
-    // Auto-sync User Departments silently if they were moved by Admin
     if (user.role !== 'admin' && companyContacts.length > 0) {
         const myContact = companyContacts.find(c => c.phone == user.phone);
         if (myContact && myContact.dept) {
@@ -74,25 +73,32 @@ async function showApp() {
         }
     }
     
-    // Derive Units from Company Structure so empty units are available
+    // Assemble Unit List logic utilizing Parent-Child string formats
     let allUnits = new Set();
     Object.keys(companyStructure).forEach(p => {
       allUnits.add(p);
-      companyStructure[p].forEach(c => allUnits.add(c));
+      companyStructure[p].forEach(c => allUnits.add(`${p}-${c}`));
     });
     
     if (allUnits.size === 0 && companyContacts.length > 0) {
       companyContacts.forEach(c => {
         if (c.dept && c.dept !== 'Unassigned') {
           const d = c.dept.toUpperCase();
-          companyStructure[d] =[];
+          if (d.includes('-')) {
+              const parts = d.split('-');
+              const p = parts[0];
+              const ch = parts.slice(1).join('-');
+              if (!companyStructure[p]) companyStructure[p] = [];
+              if (!companyStructure[p].includes(ch)) companyStructure[p].push(ch);
+          } else {
+              if (!companyStructure[d]) companyStructure[d] =[];
+          }
           allUnits.add(d);
         }
       });
     }
     const uniqueDepts = Array.from(allUnits).sort();
 
-    // Populate Dropdowns
     const deptNav = document.getElementById('dash-dept-nav');
     if (deptNav) {
       let deptHtml = '<option value="">All Depts</option>';
@@ -127,10 +133,12 @@ async function showApp() {
       populateAdminSettingsForm(settings);
     } else {
       document.getElementById('menu-admin-group').classList.add('hidden');
+      document.getElementById('admin-behalf-leave').classList.add('hidden-view');
+      document.getElementById('admin-behalf-event').classList.add('hidden-view');
     }
 
     await loadLeavesData();
-    switchTab(user.role === 'admin' ? 'dashboard' : mOrder[0]); 
+    switchTab(user.role === 'admin' ? 'admin' : mOrder[0]); 
 
   } catch(e) {
     console.error("Error loading settings: ", e);
