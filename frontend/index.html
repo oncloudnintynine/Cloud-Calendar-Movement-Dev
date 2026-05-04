@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cloud Moves</title>
   
-  <!-- Dynamic Status Bar Color -->
   <meta id="theme-color-meta" name="theme-color" content="#ffffff">
-  
-  <!-- Icon Links for Desktop and iOS -->
   <link rel="icon" type="image/png" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
-  
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="styles.css">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -38,7 +35,6 @@
 </head>
 <body class="bg-gray-50 text-gray-900 dark:bg-darkbase dark:text-darktext transition-colors duration-200 h-[100dvh] flex flex-col text-[15px] overflow-hidden">
 
-  <!-- True Opaque Loader -->
   <div id="loader" class="fixed inset-0 bg-white dark:bg-darkbase z-[100] flex-col items-center justify-center hidden">
     <div class="spinner mb-3"></div><p class="font-medium text-lg">Processing...</p>
   </div>
@@ -50,12 +46,12 @@
       <button id="menu-btn" onclick="toggleMenu()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-darkhover text-gray-600 dark:text-darktext hidden transition shrink-0">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
       </button>
-      <div class="flex flex-col min-w-0 shrink">
+      <div class="flex flex-col min-w-0 shrink flex-grow">
         <div class="flex items-center gap-2">
-          <div class="font-bold text-lg md:text-xl text-blue-600 dark:text-blue-400 leading-tight truncate">Cloud Moves</div>
-          <select id="dash-dept-nav" class="hidden max-w-[140px] md:max-w-[200px] text-sm border-2 border-blue-300 dark:border-blue-700 rounded-lg py-1 px-2 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="renderDashboard()">
+          <!-- TITLE RESPONSIVENESS FIX -->
+          <div class="font-bold text-base md:text-xl text-blue-600 dark:text-blue-400 leading-tight whitespace-nowrap">Cloud Moves</div>
+          <select id="dash-dept-nav" class="hidden w-full max-w-[140px] md:max-w-[200px] text-sm border-2 border-blue-300 dark:border-blue-700 rounded-lg py-1 px-2 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="renderDashboard()">
             <option value="">All Depts</option>
-            <!-- My Calendar option injected here during Unified mode -->
           </select>
         </div>
         <div id="active-tab-title" class="text-xs font-semibold text-gray-500 dark:text-darkmuted hidden mt-0.5 truncate"></div>
@@ -101,7 +97,6 @@
     <section id="login-view" class="flex flex-col items-center justify-center h-full">
       <div class="bg-white dark:bg-darksurface p-6 rounded-2xl shadow-xl w-full max-w-sm border dark:border-darkborder">
         
-        <!-- Login Form -->
         <div id="login-form-container" class="w-full transition-opacity duration-300">
           <h2 class="text-2xl font-bold mb-1 text-center">Welcome</h2>
           <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-6">Enter your password to continue</p>
@@ -119,7 +114,6 @@
           </div>
         </div>
 
-        <!-- Self Register Form -->
         <div id="register-form-container" class="w-full hidden-view transition-opacity duration-300">
           <h2 class="text-xl font-bold mb-1 text-center">Self Registration</h2>
           <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-4">Create your account</p>
@@ -158,14 +152,24 @@
       
       <!-- Dashboard Tab -->
       <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-4">
-        <div class="flex space-x-2 w-full shrink-0 items-center">
+        
+        <!-- Dashboard Top Controls -->
+        <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 w-full shrink-0">
           <input type="text" id="dash-search" placeholder="Search Names or Activities..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition" onkeyup="renderDashboard()">
+          
+          <!-- View Toggle -->
+          <div class="flex items-center space-x-1 bg-gray-200 dark:bg-darkborder rounded-xl p-1 shrink-0 self-start md:self-auto">
+             <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-4 py-1.5 rounded-lg font-bold text-sm transition bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Agenda</button>
+             <button id="btn-dash-month" onclick="toggleDashView('month')" class="px-4 py-1.5 rounded-lg font-bold text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200">Month</button>
+          </div>
+
           <!-- Action Buttons injected dynamically during Unified Mode -->
           <button id="unified-btn-leave" onclick="switchTab('submit-leave')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs md:text-sm shrink-0 whitespace-nowrap">Add Leave/MC</button>
           <button id="unified-btn-event" onclick="switchTab('submit-event')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs md:text-sm shrink-0 whitespace-nowrap">Add Event</button>
         </div>
 
-        <div class="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
+        <!-- AGENDA VIEW WRAPPER -->
+        <div id="dash-agenda-wrapper" class="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
           <div class="w-full md:w-64 shrink-0 bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-3 h-fit text-sm">
             <div class="flex justify-between items-center mb-2">
               <button onclick="changeMonth('dash', -1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">◀</button>
@@ -186,6 +190,22 @@
             <div id="dash-agenda" class="flex-1 overflow-y-auto space-y-3 pr-2 pb-4"></div>
           </div>
         </div>
+
+        <!-- FULL MONTH GRID VIEW WRAPPER -->
+        <div id="dash-month-wrapper" class="hidden-view flex-grow flex-col overflow-hidden bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-3">
+            <div class="flex justify-between items-center mb-4 shrink-0 px-2">
+              <button onclick="changeMonth('dash', -1)" class="p-2 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition">◀ Prev</button>
+              <div id="dash-month-title" class="font-bold text-xl"></div>
+              <button onclick="changeMonth('dash', 1)" class="p-2 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition">Next ▶</button>
+            </div>
+            <div class="grid grid-cols-7 text-center text-xs md:text-sm font-bold text-gray-500 dark:text-darkmuted mb-2 shrink-0 border-b dark:border-darkborder pb-2">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            <div id="dash-month-grid" class="flex-grow overflow-y-auto flex flex-col border-l border-t dark:border-darkborder">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
       </div>
 
       <!-- Parade State Tab -->
@@ -603,7 +623,7 @@
   <script src="forms.js"></script>
   <script src="picker.js"></script>
   <script src="admin.js"></script>
-  <script src="structure.js"></script> <!-- New file for Kanban -->
+  <script src="structure.js"></script> 
   <script src="app.js"></script>
 </body>
 </html>
