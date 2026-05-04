@@ -2,6 +2,31 @@
 // Calendar & Dashboard Logic
 // ==========================================
 
+function toggleDashView(mode) {
+  dashViewMode = mode;
+  const btnAgenda = document.getElementById('btn-dash-agenda');
+  const btnMonth = document.getElementById('btn-dash-month');
+  const wrapAgenda = document.getElementById('dash-agenda-wrapper');
+  const wrapMonth = document.getElementById('dash-month-wrapper');
+
+  const activeClass =['bg-white', 'dark:bg-darksurface', 'shadow', 'text-blue-600', 'dark:text-blue-400'];
+  const inactiveClass =['text-gray-500', 'dark:text-darkmuted', 'hover:text-gray-800', 'dark:hover:text-gray-200'];
+
+  if (mode === 'agenda') {
+    btnAgenda.classList.add(...activeClass); btnAgenda.classList.remove(...inactiveClass);
+    btnMonth.classList.remove(...activeClass); btnMonth.classList.add(...inactiveClass);
+    wrapAgenda.classList.remove('hidden-view');
+    wrapMonth.classList.add('hidden-view');
+  } else {
+    btnMonth.classList.add(...activeClass); btnMonth.classList.remove(...inactiveClass);
+    btnAgenda.classList.remove(...activeClass); btnAgenda.classList.add(...inactiveClass);
+    wrapMonth.classList.remove('hidden-view');
+    wrapMonth.classList.add('flex');
+    wrapAgenda.classList.add('hidden-view');
+  }
+  renderDashboard();
+}
+
 async function loadLeavesData() {
   try { 
     allLeaves = await apiCall('getLeaves'); 
@@ -21,17 +46,20 @@ function changeMonth(ctx, offset) {
 }
 
 function selectDate(ctx, y, m, d) {
-  if (ctx === 'dash') { dashDate = new Date(y, m, d); renderDashboard(); } 
-  else { myDate = new Date(y, m, d); renderMyLeaves(); }
+  if (ctx === 'dash') { 
+    dashDate = new Date(y, m, d); 
+    toggleDashView('agenda'); // Auto switch to agenda when clicking a date
+  } else { 
+    myDate = new Date(y, m, d); 
+    renderMyLeaves(); 
+  }
 }
 
 function isEventOnDate(l, targetDate) {
   if (l.Status === 'Cancelled') return false;
-  
   const s = new Date(l.StartDate); s.setHours(0,0,0,0);
   const e = new Date(l.EndDate); e.setHours(0,0,0,0);
   const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
-  
   if (!isEvent || !l.HalfDay || l.HalfDay === 'NONE' || l.HalfDay === 'None') return targetDate >= s && targetDate <= e;
   
   const untilStr = l.UntilDate;
@@ -81,6 +109,38 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
   return html;
 }
 
+function buildFullMonthGrid(monthDate, data) {
+  const y = monthDate.getFullYear(); const m = monthDate.getMonth();
+  const firstDay = new Date(y, m, 1).getDay(); 
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  
+  let html = '<div class="grid grid-cols-7 flex-grow auto-rows-fr">'; 
+  for(let i=0; i<firstDay; i++) html += `<div class="border-r border-b dark:border-darkborder bg-gray-50/50 dark:bg-[#151515]"></div>`;
+
+  for(let d=1; d<=daysInMonth; d++) {
+    const current = new Date(y, m, d); current.setHours(0,0,0,0);
+    const isToday = current.toDateString() === new Date().toDateString();
+    const dayEvents = data.filter(l => isEventOnDate(l, current));
+    
+    html += `<div class="border-r border-b dark:border-darkborder p-1 relative flex flex-col overflow-hidden cursor-pointer hover:bg-gray-50 dark:hover:bg-darkhover transition-colors" onclick="selectDate('dash', ${y}, ${m}, ${d})">`;
+    html += `<div class="text-xs font-bold mb-1 ${isToday ? 'bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center' : 'text-gray-500 dark:text-darkmuted'}">${d}</div>`;
+    
+    html += `<div class="flex flex-col space-y-0.5 overflow-hidden">`;
+    dayEvents.slice(0, 4).forEach(l => {
+        const isLeave = window.appLeaveTypes && window.appLeaveTypes.includes(l.LeaveType);
+        const color = isLeave ? 'bg-orange-400 dark:bg-orange-500' : 'bg-blue-500 dark:bg-blue-600';
+        const title = isLeave ? `${l.Name.split(' ')[0]}: ${l.LeaveType}` : `${l.LeaveType}`;
+        html += `<div class="${color} text-white text-[9px] md:text-[10px] leading-tight px-1 py-0.5 rounded truncate font-medium shadow-sm">${title}</div>`;
+    });
+    if (dayEvents.length > 4) {
+        html += `<div class="text-[10px] text-gray-500 font-bold pl-1">+${dayEvents.length - 4} more</div>`;
+    }
+    html += `</div></div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
 function getBadgeClass(status) {
   const safeStatus = String(status || '');
   if(safeStatus.includes('Pending')) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
@@ -117,7 +177,6 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
     }
 
     let actionBtns = '';
-    // Enable edit/cancel if it's My Calendar OR if Admin
     if ((isMyCalendar || user.role === 'admin') && l.Status !== 'Cancelled') {
       actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
     }
@@ -160,13 +219,11 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
 function renderDashboard() {
   const searchEl = document.getElementById('dash-search');
   const q = searchEl ? searchEl.value.toLowerCase() : '';
-  
   const deptNav = document.getElementById('dash-dept-nav');
   const d = deptNav ? deptNav.value : '';
   
   let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
   
-  // My Calendar Unified Logic
   if (d === 'MY_CALENDAR') {
     filtered = filtered.filter(l => {
       if (l.Phone == user.phone) return true;
@@ -187,31 +244,40 @@ function renderDashboard() {
     filtered = fuse.search(q).map(res => res.item);
   }
 
-  const monthEl = document.getElementById('dash-cal-month');
-  if (monthEl) monthEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
-  
-  const gridEl = document.getElementById('dash-cal-grid');
-  if (gridEl) gridEl.innerHTML = buildCalendarHTML('dash', dashMonth, dashDate, filtered);
-  
-  const titleEl = document.getElementById('dash-agenda-title');
-  if (titleEl) titleEl.innerText = formatDisplayDate(dashDate);
+  // Agenda Mode Updates
+  if (dashViewMode === 'agenda') {
+      const monthEl = document.getElementById('dash-cal-month');
+      if (monthEl) monthEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
+      
+      const gridEl = document.getElementById('dash-cal-grid');
+      if (gridEl) gridEl.innerHTML = buildCalendarHTML('dash', dashMonth, dashDate, filtered);
+      
+      const titleEl = document.getElementById('dash-agenda-title');
+      if (titleEl) titleEl.innerText = formatDisplayDate(dashDate);
 
-  const dashTarget = new Date(dashDate); dashTarget.setHours(0,0,0,0);
-  
-  const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && isEventOnDate(l, dashTarget));
-  const infoAllContainer = document.getElementById('dash-infoall-container');
-  const infoAllList = document.getElementById('dash-infoall-list');
-  
-  if (infoAllEvents.length > 0 && infoAllContainer && infoAllList) {
-      infoAllList.innerHTML = buildAgendaHtml(infoAllEvents, false, true);
-      infoAllContainer.classList.remove('hidden-view');
-  } else if (infoAllContainer) {
-      infoAllContainer.classList.add('hidden-view');
+      const dashTarget = new Date(dashDate); dashTarget.setHours(0,0,0,0);
+      
+      const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && isEventOnDate(l, dashTarget));
+      const infoAllContainer = document.getElementById('dash-infoall-container');
+      const infoAllList = document.getElementById('dash-infoall-list');
+      if (infoAllEvents.length > 0 && infoAllContainer && infoAllList) {
+          infoAllList.innerHTML = buildAgendaHtml(infoAllEvents, false, true);
+          infoAllContainer.classList.remove('hidden-view');
+      } else if (infoAllContainer) {
+          infoAllContainer.classList.add('hidden-view');
+      }
+
+      const itemsForDate = filtered.filter(l => l.InfoAll !== 'TRUE' && isEventOnDate(l, dashTarget));
+      const agendaEl = document.getElementById('dash-agenda');
+      if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, d === 'MY_CALENDAR', false);
+  } else {
+      // Month Mode Updates
+      const monthTitleEl = document.getElementById('dash-month-title');
+      if (monthTitleEl) monthTitleEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
+      
+      const monthGridEl = document.getElementById('dash-month-grid');
+      if (monthGridEl) monthGridEl.innerHTML = buildFullMonthGrid(dashMonth, filtered);
   }
-
-  const itemsForDate = filtered.filter(l => l.InfoAll !== 'TRUE' && isEventOnDate(l, dashTarget));
-  const agendaEl = document.getElementById('dash-agenda');
-  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, d === 'MY_CALENDAR', false);
 }
 
 function renderMyLeaves() {
