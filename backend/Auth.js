@@ -17,7 +17,6 @@ function getContactsAndGroups() {
   var connections =[];
   var pageToken = null;
   do {
-    // UPDATED: Added 'birthdays' to personFields
     var req = { personFields: 'names,phoneNumbers,memberships,birthdays', pageSize: 1000 };
     if (pageToken) req.pageToken = pageToken;
     var res = People.People.Connections.list('people/me', req);
@@ -37,7 +36,6 @@ function handleLogin(data) {
   var props = PropertiesService.getScriptProperties();
   if (pass === (props.getProperty('adminPassword') || 'P@ssw0rd')) return { role: 'admin', name: 'Administrator', pass: pass };
 
-  // Pull dynamic keyword (defaults to 'peace')
   var keyword = props.getProperty('userKeyword') || 'peace';
 
   if (pass.endsWith(keyword)) {
@@ -74,6 +72,21 @@ function handleLogin(data) {
 }
 
 function registerUser(data) {
+  var cg = getContactsAndGroups();
+  
+  // Check if Mobile No already exists
+  var targetDigits = data.mobile.replace(/\D/g, '').slice(-8);
+  var phoneExists = cg.connections.some(function(person) {
+    if (!person.phoneNumbers) return false;
+    return person.phoneNumbers.some(function(p) {
+      return p.value && p.value.replace(/\D/g, '').slice(-8) === targetDigits;
+    });
+  });
+  
+  if (phoneExists) {
+    throw new Error("This Mobile No is already registered. Please check the number and try again.");
+  }
+
   var contactPayload = {
     names:[{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }],
     phoneNumbers:[{ value: data.mobile, type: "mobile" }]
@@ -82,18 +95,12 @@ function registerUser(data) {
   if (data.birthday) {
     var parts = data.birthday.split('-');
     contactPayload.birthdays =[{
-      date: {
-        year: parseInt(parts[0], 10),
-        month: parseInt(parts[1], 10),
-        day: parseInt(parts[2], 10)
-      }
+      date: { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) }
     }];
   }
   
   var newContact = People.People.createContact(contactPayload);
   var resourceName = newContact.resourceName;
-  
-  var cg = getContactsAndGroups();
   var groupId = null;
   
   for (var grpRes in cg.groupMap) {
@@ -109,7 +116,6 @@ function registerUser(data) {
   }
   
   People.ContactGroups.Members.modify({ resourceNamesToAdd: [resourceName] }, groupId);
-  
   return { success: true, message: "User registered successfully." };
 }
 
@@ -119,51 +125,35 @@ function updateUser(data) {
   if (!data.resourceName) throw new Error("Missing contact identifier.");
 
   try {
-    // 1. Get existing contact to get the required etag
-    // UPDATED: Added 'birthdays' to personFields
     var contact = People.People.get(data.resourceName, { personFields: 'names,phoneNumbers,memberships,birthdays' });
     
-    // 2. Update names & phone
     contact.names =[{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }];
     contact.phoneNumbers =[{ value: data.mobile, type: "mobile" }];
     
-    // UPDATED: Handle birthday mapping
     if (data.birthday) {
       var parts = data.birthday.split('-');
       contact.birthdays =[{
-        date: {
-          year: parseInt(parts[0], 10),
-          month: parseInt(parts[1], 10),
-          day: parseInt(parts[2], 10)
-        }
+        date: { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) }
       }];
     } else {
-      contact.birthdays =[]; // Clear it if empty
+      contact.birthdays =[]; 
     }
     
-    // UPDATED: Added 'birthdays' to updatePersonFields
     People.People.updateContact(contact, data.resourceName, { updatePersonFields: 'names,phoneNumbers,birthdays' });
 
-    // 3. Handle groups
     var cg = getContactsAndGroups();
     var targetGroupId = null;
     var targetGroupName = data.unit.toUpperCase();
 
-    // Find the new group ID
     for (var grpRes in cg.groupMap) {
-      if (cg.groupMap[grpRes].toUpperCase() === targetGroupName) {
-        targetGroupId = grpRes;
-        break;
-      }
+      if (cg.groupMap[grpRes].toUpperCase() === targetGroupName) { targetGroupId = grpRes; break; }
     }
 
-    // Create the group if it doesn't exist
     if (!targetGroupId) {
       var newGroup = People.ContactGroups.create({ contactGroup: { name: targetGroupName } });
       targetGroupId = newGroup.resourceName;
     }
 
-    // Determine current groups
     var currentGroupIds =[];
     if (contact.memberships) {
       contact.memberships.forEach(function(m) {
@@ -174,18 +164,12 @@ function updateUser(data) {
       });
     }
 
-    // Remove from old groups if unit changed
     var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId; });
     var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ?[data.resourceName] :[];
 
-    if (toAdd.length > 0) {
-      People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
-    }
-    
+    if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
     if (toRemove.length > 0) {
-      toRemove.forEach(function(gId) {
-        People.ContactGroups.Members.modify({ resourceNamesToRemove:[data.resourceName] }, gId);
-      });
+      toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove:[data.resourceName] }, gId); });
     }
 
     return { success: true };
