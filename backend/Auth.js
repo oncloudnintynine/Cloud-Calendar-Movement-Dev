@@ -115,7 +115,7 @@ function registerUser(data) {
     groupId = newGroup.resourceName;
   }
   
-  People.ContactGroups.Members.modify({ resourceNamesToAdd: [resourceName] }, groupId);
+  People.ContactGroups.Members.modify({ resourceNamesToAdd:[resourceName] }, groupId);
   return { success: true, message: "User registered successfully." };
 }
 
@@ -127,7 +127,11 @@ function updateUser(data) {
   try {
     var contact = People.People.get(data.resourceName, { personFields: 'names,phoneNumbers,memberships,birthdays' });
     
-    contact.names =[{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }];
+    // Safely update name without destroying family names if they exist
+    var nameObj = (contact.names && contact.names.length > 0) ? contact.names[0] : {};
+    nameObj.givenName = data.fullName + " (Cloud Group : " + data.unit + ")";
+    contact.names = [nameObj];
+    
     contact.phoneNumbers =[{ value: data.mobile, type: "mobile" }];
     
     if (data.birthday) {
