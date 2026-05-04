@@ -547,23 +547,23 @@
 
           <div class="flex-grow flex flex-col md:flex-row overflow-hidden min-h-0">
               
-              <!-- Left Panel: Hierarchy Builder -->
-              <div class="w-full md:w-1/3 border-r dark:border-darkborder p-4 flex flex-col overflow-y-auto h-full min-h-0 bg-gray-50 dark:bg-darkinput">
-                 <h3 class="font-bold mb-3 text-lg border-b dark:border-darkborder pb-2">Manage Units</h3>
+              <!-- Left Panel: Manage Units & Personnel -->
+              <div class="w-full md:w-3/5 border-r dark:border-darkborder p-4 flex flex-col overflow-y-auto h-full min-h-0 bg-gray-50 dark:bg-darkinput">
+                 <h3 class="font-bold mb-3 text-lg border-b dark:border-darkborder pb-2 text-gray-800 dark:text-gray-200">Manage Units & Personnel</h3>
                  
                  <div class="flex space-x-2 mb-4 shrink-0">
                    <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase">
                    <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-lg transition">Add</button>
                  </div>
                  
-                 <div id="structure-builder-list" class="space-y-4 flex-grow overflow-y-auto"></div>
+                 <div id="structure-builder-list" class="space-y-4 flex-grow overflow-y-auto pb-4 pr-2"></div>
               </div>
               
-              <!-- Right Panel: Kanban Board -->
-              <div class="w-full md:w-2/3 p-4 flex flex-col overflow-hidden bg-gray-100 dark:bg-darkbase h-full min-h-0">
-                 <h3 class="font-bold mb-3 text-lg">Assign Personnel</h3>
-                 <div id="kanban-board" class="flex-grow flex space-x-4 overflow-x-auto pb-4 snap-x">
-                    <!-- Kanban columns injected here by JS -->
+              <!-- Right Panel: Unassigned Personnel -->
+              <div class="w-full md:w-2/5 p-4 flex flex-col overflow-hidden bg-gray-100 dark:bg-darkbase h-full min-h-0 border-t md:border-t-0 dark:border-darkborder">
+                 <h3 class="font-bold mb-3 text-lg text-red-600 dark:text-red-400">Unassigned Personnel</h3>
+                 <div id="unassigned-board" class="flex-grow overflow-y-auto pr-2 pb-4">
+                    <!-- Unassigned injected here -->
                  </div>
               </div>
 
