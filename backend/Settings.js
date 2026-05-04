@@ -145,9 +145,10 @@ function updateUserUnits(data) {
       });
     }
     
-    // 3. Update Contact Name Label (e.g. Tan Ah Kow (Cloud Group : COU))
+    // 3. Update Contact Name Label securely
     if (contact.names && contact.names.length > 0) {
-       var currentName = contact.names[0].displayName || contact.names[0].givenName || "";
+       var nameObj = contact.names[0];
+       var currentName = nameObj.displayName || nameObj.givenName || "";
        var cleanName = currentName.replace(/\s*\(.*?\)\s*/g, '').trim();
        
        var newNameStr = cleanName;
@@ -155,7 +156,8 @@ function updateUserUnits(data) {
            newNameStr = cleanName + " (Cloud Group : " + newUnit + ")";
        }
        
-       contact.names[0].givenName = newNameStr;
+       nameObj.givenName = newNameStr;
+       contact.names = [nameObj]; // Write back safely
        
        try {
          People.People.updateContact(contact, resName, { updatePersonFields: 'names' });
