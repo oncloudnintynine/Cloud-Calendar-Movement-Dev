@@ -56,7 +56,9 @@ async function showApp() {
     const settings = await apiCall('getSettings', { adminPass: user.role === 'admin' ? user.pass : null }); 
     window.appLeaveTypes = settings.leaveTypes; 
     appMode = settings.appMode || 'separated';
-    companyStructure = settings.companyStructure || {};
+    
+    // Structure is now saved as a flat array of valid full paths e.g.["HQ", "CIU-COY1", "CIU-COY1-TEAM1"]
+    companyStructure = settings.companyStructure ? (Array.isArray(settings.companyStructure) ? settings.companyStructure : Object.keys(settings.companyStructure)) :[];
     companyContacts = settings.allContacts ||[];
     
     const formLeaveType = document.getElementById('form-leave-type');
@@ -73,29 +75,15 @@ async function showApp() {
         }
     }
     
-    // Assemble Unit List logic utilizing Parent-Child string formats
-    let allUnits = new Set();
-    Object.keys(companyStructure).forEach(p => {
-      allUnits.add(p);
-      companyStructure[p].forEach(c => allUnits.add(`${p}-${c}`));
-    });
-    
+    // Consolidate all valid units (from structure + fallback to contacts if empty)
+    let allUnits = new Set(companyStructure);
     if (allUnits.size === 0 && companyContacts.length > 0) {
       companyContacts.forEach(c => {
         if (c.dept && c.dept !== 'Unassigned') {
-          const d = c.dept.toUpperCase();
-          if (d.includes('-')) {
-              const parts = d.split('-');
-              const p = parts[0];
-              const ch = parts.slice(1).join('-');
-              if (!companyStructure[p]) companyStructure[p] = [];
-              if (!companyStructure[p].includes(ch)) companyStructure[p].push(ch);
-          } else {
-              if (!companyStructure[d]) companyStructure[d] =[];
-          }
-          allUnits.add(d);
+          allUnits.add(c.dept.toUpperCase());
         }
       });
+      companyStructure = Array.from(allUnits); // Auto-seed
     }
     const uniqueDepts = Array.from(allUnits).sort();
 
