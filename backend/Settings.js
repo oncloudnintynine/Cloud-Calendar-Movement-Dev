@@ -67,18 +67,20 @@ function getSettings(data) {
 function saveSettings(data) {
   var props = PropertiesService.getScriptProperties();
   if (data.adminPass !== props.getProperty('adminPassword')) throw new Error("Invalid/Expired Admin Password");
-  if(data.newAdminPass) props.setProperty('adminPassword', data.newAdminPass);
   
-  props.setProperty('kahLimit', data.kahLimit.toString());
-  props.setProperty('leaveTypes', JSON.stringify(data.leaveTypes));
-  props.setProperty('approvingAuthority', data.approvingAuthority);
-  props.setProperty('kahList', JSON.stringify(data.kahList));
+  if (data.newAdminPass) props.setProperty('adminPassword', data.newAdminPass);
   
-  if (data.userKeyword) props.setProperty('userKeyword', data.userKeyword);
-  if (data.appMode) props.setProperty('appMode', data.appMode);
-  if (data.companyStructure) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
+  // ADDED SAFTEY CHECKS: Only update properties if they were actually provided in the request
+  if (data.kahLimit !== undefined) props.setProperty('kahLimit', data.kahLimit.toString());
+  if (data.leaveTypes !== undefined) props.setProperty('leaveTypes', JSON.stringify(data.leaveTypes));
+  if (data.approvingAuthority !== undefined) props.setProperty('approvingAuthority', data.approvingAuthority);
+  if (data.kahList !== undefined) props.setProperty('kahList', JSON.stringify(data.kahList));
   
-  if (data.menuOrder) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
+  if (data.userKeyword !== undefined) props.setProperty('userKeyword', data.userKeyword);
+  if (data.appMode !== undefined) props.setProperty('appMode', data.appMode);
+  if (data.companyStructure !== undefined) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
+  
+  if (data.menuOrder !== undefined) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
   if (data.githubRepo !== undefined) props.setProperty('githubRepo', data.githubRepo);
   if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
   
