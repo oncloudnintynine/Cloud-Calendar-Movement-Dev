@@ -76,9 +76,8 @@ function switchTab(tabId) {
   }
   
   if (tabId === 'parade-state' && typeof renderParadeState === 'function') renderParadeState();
-  if (tabId === 'admin-structure' && typeof renderStructureBuilder === 'function') {
-    renderStructureBuilder();
-    renderKanbanBoard();
+  if (tabId === 'admin-structure' && typeof renderStructureUI === 'function') {
+    renderStructureUI();
   }
 }
 
