@@ -13,17 +13,20 @@ let fuseAllContacts = null;
 let fuseAttendees = null;
 
 // Form & Admin State
-let tempLeaveTypes = [];
+let tempLeaveTypes =[];
 let adminKAHList =[];
 let tempMenuOrder = [];
 let eventAttendees =[]; 
 let isInfoAll = false;
 
-// New Configuration States
+// Configuration States
 let appMode = 'separated'; // 'separated' or 'unified'
-let companyStructure = {}; 
-let pendingStructureChanges = {}; // For drag-and-drop batch saving
-let adminBehalfUser = null; // Stores target user when admin submits on behalf
+let companyStructure =[]; // CHANGED: Now a flat array of hierarchical paths e.g.["HQ", "CIU", "CIU-COY1"]
+let pendingStructureChanges = {}; 
+let adminBehalfUser = null; 
+
+// Dashboard State
+let dashViewMode = 'agenda'; // 'agenda' or 'month'
 
 // Date & Time Picker Target Data
 let appData = {
@@ -36,12 +39,8 @@ let appData = {
 };
 
 // Calendar Specific Dates
-let dashDate = new Date(); 
-dashDate.setHours(0,0,0,0);
-
-let myDate = new Date(); 
-myDate.setHours(0,0,0,0);
-
+let dashDate = new Date(); dashDate.setHours(0,0,0,0);
+let myDate = new Date(); myDate.setHours(0,0,0,0);
 let dashMonth = new Date(dashDate.getFullYear(), dashDate.getMonth(), 1);
 let myMonth = new Date(myDate.getFullYear(), myDate.getMonth(), 1);
 
@@ -55,7 +54,7 @@ const TAB_NAMES = {
   'submit-leave': 'Add Leave/MC/OIL',
   'submit-event': 'Add Event',
   'admin': 'Admin Settings',
-  'admin-structure': 'Company Structure' // New Tab
+  'admin-structure': 'Organisational Structure'
 };
 
 const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event'];
