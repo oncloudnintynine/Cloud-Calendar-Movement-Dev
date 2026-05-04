@@ -89,7 +89,7 @@
         
         <div id="menu-admin-group" class="hidden border-t dark:border-darkborder mt-2 pt-2">
             <button onclick="switchTab('admin')" id="menu-admin" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Admin Settings</button>
-            <button onclick="switchTab('admin-structure')" id="menu-admin-structure" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Company Structure</button>
+            <button onclick="switchTab('admin-structure')" id="menu-admin-structure" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Organisational Structure</button>
         </div>
       </div>
     </div>
@@ -541,28 +541,29 @@
         <div class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
           
           <div class="p-4 border-b dark:border-darkborder bg-gray-50 dark:bg-darkinput flex justify-between items-center shrink-0">
-              <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400">Company Structure & Personnel</h2>
+              <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400">Structure & Personnel Assignment</h2>
               <button onclick="saveCompanyStructure()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl shadow transition text-sm">Save Assignments</button>
           </div>
 
-          <div class="flex-grow flex flex-col md:flex-row overflow-hidden min-h-0">
+          <!-- FORCED SIDE BY SIDE COLUMNS -->
+          <div class="flex-grow flex flex-row overflow-hidden min-h-0">
               
               <!-- Left Panel: Manage Units & Personnel -->
-              <div class="w-full md:w-3/5 border-r dark:border-darkborder p-4 flex flex-col overflow-y-auto h-full min-h-0 bg-gray-50 dark:bg-darkinput">
-                 <h3 class="font-bold mb-3 text-lg border-b dark:border-darkborder pb-2 text-gray-800 dark:text-gray-200">Manage Units & Personnel</h3>
+              <div class="w-1/2 border-r dark:border-darkborder p-2 md:p-4 flex flex-col overflow-y-auto h-full min-h-0 bg-gray-50 dark:bg-darkinput">
+                 <h3 class="font-bold mb-3 text-sm md:text-lg border-b dark:border-darkborder pb-2 text-gray-800 dark:text-gray-200">Manage Units & Personnel</h3>
                  
                  <div class="flex space-x-2 mb-4 shrink-0">
-                   <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase">
-                   <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-lg transition">Add</button>
+                   <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-2 md:px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase text-xs md:text-sm">
+                   <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 md:px-4 rounded-lg transition text-xs md:text-sm">Add</button>
                  </div>
                  
-                 <div id="structure-builder-list" class="space-y-4 flex-grow overflow-y-auto pb-4 pr-2"></div>
+                 <div id="structure-builder-list" class="space-y-4 flex-grow overflow-y-auto pb-4 pr-1 md:pr-2"></div>
               </div>
               
               <!-- Right Panel: Unassigned Personnel -->
-              <div class="w-full md:w-2/5 p-4 flex flex-col overflow-hidden bg-gray-100 dark:bg-darkbase h-full min-h-0 border-t md:border-t-0 dark:border-darkborder">
-                 <h3 class="font-bold mb-3 text-lg text-red-600 dark:text-red-400">Unassigned Personnel</h3>
-                 <div id="unassigned-board" class="flex-grow overflow-y-auto pr-2 pb-4">
+              <div class="w-1/2 p-2 md:p-4 flex flex-col overflow-hidden bg-gray-100 dark:bg-darkbase h-full min-h-0">
+                 <h3 class="font-bold mb-3 text-sm md:text-lg text-red-600 dark:text-red-400">Unassigned Personnel</h3>
+                 <div id="unassigned-board" class="flex-grow overflow-y-auto pr-1 md:pr-2 pb-4">
                     <!-- Unassigned injected here -->
                  </div>
               </div>
