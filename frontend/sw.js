@@ -1,5 +1,5 @@
 const CACHE_NAME = 'cloud-moves-v31';
-
+ 
 const urlsToCache =[
   './',
   './index.html',
