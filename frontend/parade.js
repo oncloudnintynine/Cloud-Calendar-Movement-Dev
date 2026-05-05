@@ -24,21 +24,16 @@ function renderParadeState() {
       const fullPath = String(contact.dept || 'Unassigned').toUpperCase();
       const parts = fullPath.split('-');
       
-      // Traverse and build tree nodes dynamically
       let currentLevel = tree;
       parts.forEach((part, index) => {
           if (!currentLevel[part]) {
               currentLevel[part] = { _meta: { members:[], total: 0, inOffice: 0, isTerminal: false } };
           }
           currentLevel[part]._meta.total++;
-          
-          if (index === parts.length - 1) {
-              currentLevel[part]._meta.isTerminal = true;
-          }
+          if (index === parts.length - 1) currentLevel[part]._meta.isTerminal = true;
           currentLevel = currentLevel[part];
       });
 
-      // Compute active records for this contact
       const activeRecords = allLeaves.filter(l => {
         if (l.Status === 'Cancelled') return false;
         
@@ -58,7 +53,7 @@ function renderParadeState() {
         const sDate = new Date(l.StartDate);
         const eDate = new Date(l.EndDate);
         const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
-        if (!isEvent) { eDate.setHours(23, 59, 59, 999); }
+        if (!isEvent) eDate.setHours(23, 59, 59, 999);
         
         return sDate <= now && eDate >= now;
       });
@@ -82,7 +77,6 @@ function renderParadeState() {
       if (isOffice) inOfficeGlobal++;
       const memberObj = { name: contact.name || 'Unknown', isOffice: isOffice, location: locationStr };
       
-      // Update inOffice count up the tree
       let updateLevel = tree;
       parts.forEach(part => {
           if (isOffice) updateLevel[part]._meta.inOffice++;
@@ -95,7 +89,6 @@ function renderParadeState() {
 
     if (paradeHeader) paradeHeader.innerText = `Overall Parade State: (${inOfficeGlobal} / ${totalGlobal})`;
 
-    // Recursive UI Builder
     const sortMembers = (mems) => {
         mems.sort((a, b) => {
             if (a.isOffice && !b.isOffice) return -1;
@@ -112,7 +105,6 @@ function renderParadeState() {
         
         let html = '';
         
-        // Root Level styling vs Nested styling
         if (depth === 0) {
             html += `<div class="mb-6 border-l-4 border-blue-500 pl-4">`;
             html += `<h3 class="font-bold text-lg mb-3 text-gray-800 dark:text-gray-100">${nodeName} <span class="text-sm font-semibold text-gray-500 dark:text-darkmuted">(${meta.inOffice} / ${meta.total})</span></h3>`;
@@ -123,7 +115,6 @@ function renderParadeState() {
             html += `<h4 class="font-semibold text-base mb-2 text-gray-700 dark:text-gray-300">${nodeName} <span class="text-xs font-semibold text-gray-500 dark:text-darkmuted">(${meta.inOffice} / ${meta.total})</span></h4>`;
         }
 
-        // Render Direct Members
         if (meta.members.length > 0) {
             html += `<div class="space-y-1.5 text-[14px]">`;
             meta.members.forEach((m, i) => {
@@ -140,7 +131,6 @@ function renderParadeState() {
             html += `</div>`;
         }
 
-        // Render Sub-Units Recursively
         const childrenKeys = Object.keys(node).filter(k => k !== '_meta').sort((a, b) => String(a).localeCompare(String(b)));
         childrenKeys.forEach(childKey => {
             html += renderNode(node[childKey], childKey, depth + 1);
@@ -157,9 +147,7 @@ function renderParadeState() {
       return String(a).localeCompare(String(b));
     });
 
-    rootKeys.forEach(root => {
-        finalHtml += renderNode(tree[root], root, 0);
-    });
+    rootKeys.forEach(root => { finalHtml += renderNode(tree[root], root, 0); });
 
     if (paradeBody) paradeBody.innerHTML = finalHtml || `<p class="text-center text-gray-500">No departments to display.</p>`;
   } catch(err) {
