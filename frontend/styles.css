@@ -41,32 +41,35 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 /* ROBUST DRAG & DROP ENGINE CSS              */
 /* ========================================== */
 
-/* Fades out the original item while dragging */
 .locked-for-drag {
-    opacity: 0.4;
+    opacity: 0.4 !important;
     filter: grayscale(50%);
 }
 
-/* Styles the floating clone that follows your finger/mouse */
 .dragging-clone {
-    position: fixed;
-    pointer-events: none !important; /* CRITICAL for elementFromPoint to work */
-    z-index: 9999;
+    position: fixed !important;
+    pointer-events: none !important; /* CRITICAL for mobile accuracy */
+    z-index: 99999 !important;
     opacity: 0.95;
     box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-    transform: scale(1.02); /* Slight pop-out effect */
+    transform: scale(1.02);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 !important;
+    background-color: white;
+    border-radius: 0.5rem;
 }
 
-/* Add your own styling for when a dragged item hovers over a valid dropzone */
+.dark .dragging-clone {
+    background-color: #1e1e1e;
+}
+
 .drag-over-highlight {
-    border-color: #2563eb !important;
+    border-color: #3b82f6 !important;
     background-color: rgba(59, 130, 246, 0.1) !important;
 }
 
-/* Hide scrollbar for the continuous agenda to look cleaner */
+/* Hide scrollbars for continuous agenda */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
