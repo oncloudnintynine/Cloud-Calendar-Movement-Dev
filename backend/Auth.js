@@ -1,5 +1,5 @@
 // ==========================================
-// Auth.js - Login & People API Logic
+// Auth.js - Login & People API Logic 
 // ==========================================
 
 function getContactsAndGroups() {
