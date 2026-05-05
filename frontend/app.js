@@ -57,7 +57,9 @@ async function showApp() {
     window.appLeaveTypes = settings.leaveTypes; 
     appMode = settings.appMode || 'separated';
     
-    // Structure is now saved as a flat array of valid full paths e.g.["HQ", "CIU-COY1", "CIU-COY1-TEAM1"]
+    // Globally store KAH phones for sorting in Parade State
+    window.kahPhones = (settings.kahList ||[]).map(k => String(k.phone));
+    
     companyStructure = settings.companyStructure ? (Array.isArray(settings.companyStructure) ? settings.companyStructure : Object.keys(settings.companyStructure)) :[];
     companyContacts = settings.allContacts ||[];
     
@@ -75,7 +77,6 @@ async function showApp() {
         }
     }
     
-    // Consolidate all valid units (from structure + fallback to contacts if empty)
     let allUnits = new Set(companyStructure);
     if (allUnits.size === 0 && companyContacts.length > 0) {
       companyContacts.forEach(c => {
@@ -83,7 +84,7 @@ async function showApp() {
           allUnits.add(c.dept.toUpperCase());
         }
       });
-      companyStructure = Array.from(allUnits); // Auto-seed
+      companyStructure = Array.from(allUnits);
     }
     const uniqueDepts = Array.from(allUnits).sort();
 
