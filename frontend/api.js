@@ -15,10 +15,10 @@ function alertError(id, msg) {
 
 async function apiCall(action, data = {}) {
  try {
-   // Attach credentials automatically if user is logged in
-   let credentials = null;
-   if (user && user.phone && user.pass) {
-       credentials = { phone: user.phone, pass: user.pass };
+   // Send credentials automatically. Gracefully handle admin users who lack a phone number.
+   let credentials = {};
+   if (user && user.pass) {
+       credentials = { phone: user.phone || '', pass: user.pass };
    }
 
    const response = await fetch(API_URL, {
