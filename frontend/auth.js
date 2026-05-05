@@ -71,6 +71,13 @@ async function handleLogin() {
  showLoader(true);
  try {
    user = await apiCall('login', { password: pass });
+   
+   // FIX: Ensure the user object explicitly has the password so getLeaves succeeds 
+   // even if an older GAS backend script forgot to return it
+   if (!user.pass) {
+       user.pass = pass;
+   }
+   
    localStorage.setItem('user', JSON.stringify(user));
    document.getElementById('login-pass').value = '';
    showApp(); 
