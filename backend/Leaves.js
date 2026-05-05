@@ -1,5 +1,5 @@
 // ==========================================
-// Leaves.js - Core CRUD & KAH Logic
+// Leaves.js - Core CRUD & KAH Logic 
 // ==========================================
 
 function submitLeave(data) {
