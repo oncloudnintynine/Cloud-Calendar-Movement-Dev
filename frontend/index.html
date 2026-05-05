@@ -55,7 +55,6 @@
        </div>
        <div class="flex items-center gap-2 mt-0.5">
          <div id="active-tab-title" class="text-xs font-semibold text-gray-500 dark:text-darkmuted hidden truncate"></div>
-         <!-- Toggle moved here -->
          <div id="dash-view-toggle" class="hidden items-center bg-gray-200 dark:bg-darkborder rounded p-0.5 shrink-0">
             <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-2 py-0.5 rounded font-bold text-[10px] transition bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Agenda</button>
             <button id="btn-dash-month" onclick="toggleDashView('month')" class="px-2 py-0.5 rounded font-bold text-[10px] transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200">Month</button>
@@ -529,10 +528,6 @@
      <div id="view-admin-structure" class="tab-content hidden-view flex-col max-w-4xl mx-auto w-full h-full pb-0 relative">
        <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          
-         <div class="p-3 border-b dark:border-darkborder bg-gray-50 dark:bg-darkinput flex justify-between items-center shrink-0">
-             <h2 class="text-lg font-bold text-blue-600 dark:text-blue-400">Organisational Structure</h2>
-         </div>
-
          <!-- TOP SCROLLABLE: Manage Units -->
          <div class="flex-grow flex flex-col min-h-[30vh] border-b dark:border-darkborder">
             <div class="sticky top-0 bg-gray-100 dark:bg-[#1a1a1a] p-2 border-b dark:border-darkborder z-10 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-2">
@@ -546,7 +541,7 @@
          </div>
          
          <!-- BOTTOM SCROLLABLE: Unassigned -->
-         <div class="h-[35%] flex flex-col min-h-[150px] shrink-0 bg-white dark:bg-darksurface">
+         <div class="h-[20%] flex flex-col min-h-[110px] shrink-0 bg-white dark:bg-darksurface">
             <div class="sticky top-0 bg-red-50 dark:bg-red-900/20 p-2 border-b border-red-200 dark:border-red-800 z-10 shadow-sm">
                 <h3 class="font-bold text-sm text-red-600 dark:text-red-400">Unassigned Personnel</h3>
             </div>
