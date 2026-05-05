@@ -48,11 +48,69 @@ function changeMonth(ctx, offset) {
 function selectDate(ctx, y, m, d) {
   if (ctx === 'dash') { 
     dashDate = new Date(y, m, d); 
-    toggleDashView('agenda'); // Auto switch to agenda when clicking a date
+    toggleDashView('agenda');
+    updateMiniCalendarSelection('dash', d);
+    const group = document.querySelector(`#dash-agenda .agenda-day-group[data-day="${d}"]`);
+    if (group) group.scrollIntoView({ behavior: 'smooth' });
   } else { 
     myDate = new Date(y, m, d); 
-    renderMyLeaves(); 
+    updateMiniCalendarSelection('my', d);
+    const group = document.querySelector(`#my-agenda .agenda-day-group[data-day="${d}"]`);
+    if (group) group.scrollIntoView({ behavior: 'smooth' });
   }
+}
+
+// Highly efficient DOM update for the mini calendar selection
+function updateMiniCalendarSelection(ctx, d) {
+    const grid = document.getElementById(`${ctx}-cal-grid`);
+    if (!grid) return;
+    const cells = grid.querySelectorAll('.cal-day-cell');
+    cells.forEach(cell => {
+        const cellDay = parseInt(cell.dataset.day);
+        const isToday = cell.dataset.istoday === 'true';
+        
+        cell.className = `cal-day-cell relative flex items-center justify-center w-6 h-6 mx-auto rounded-full cursor-pointer transition-colors text-xs font-medium ${isToday ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500' : 'hover:bg-gray-200 dark:hover:bg-darkhover'}`;
+        
+        if (cellDay === d) {
+            cell.className = `cal-day-cell relative flex items-center justify-center w-6 h-6 mx-auto rounded-full cursor-pointer transition-colors text-xs font-bold bg-blue-600 text-white shadow-md`;
+        }
+        
+        const hasEvent = cell.dataset.hasevent === 'true';
+        if (hasEvent) {
+            const dotColor = cellDay === d ? 'bg-white' : 'bg-blue-500';
+            cell.innerHTML = `${cellDay}<div class="absolute bottom-0 w-1 h-1 ${dotColor} rounded-full"></div>`;
+        } else {
+            cell.innerHTML = `${cellDay}`;
+        }
+    });
+}
+
+function handleAgendaScroll(ctx) {
+    const container = document.getElementById(`${ctx}-agenda`);
+    const groups = container.querySelectorAll('.agenda-day-group');
+    let topDay = null;
+    
+    for (const group of groups) {
+        const rect = group.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        
+        // Find the group currently crossing the top of the container
+        if (rect.top >= containerRect.top && rect.top <= containerRect.top + 100) {
+            topDay = parseInt(group.dataset.day); break;
+        } else if (rect.top < containerRect.top && rect.bottom > containerRect.top) {
+            topDay = parseInt(group.dataset.day); break;
+        }
+    }
+    
+    if (topDay) {
+        if (ctx === 'dash' && dashDate.getDate() !== topDay) {
+            dashDate.setDate(topDay);
+            updateMiniCalendarSelection('dash', topDay);
+        } else if (ctx === 'my' && myDate.getDate() !== topDay) {
+            myDate.setDate(topDay);
+            updateMiniCalendarSelection('my', topDay);
+        }
+    }
 }
 
 function isEventOnDate(l, targetDate) {
@@ -93,18 +151,17 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
     const current = new Date(y, m, d); current.setHours(0,0,0,0);
     const isSelected = current.toDateString() === selDate.toDateString();
     const isToday = current.toDateString() === new Date().toDateString();
-
     const hasEvent = data.some(l => isEventOnDate(l, current));
 
-    let baseClass = "w-7 h-7 text-xs flex items-center justify-center rounded-full mx-auto cursor-pointer transition-colors relative ";
+    let baseClass = "cal-day-cell relative flex items-center justify-center w-6 h-6 mx-auto rounded-full cursor-pointer transition-colors text-xs font-medium ";
     if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
     else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
     else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
-    const dot = hasEvent && !isSelected ? `<div class="absolute bottom-0.5 w-1 h-1 bg-blue-500 rounded-full"></div>` : '';
-    const selDot = hasEvent && isSelected ? `<div class="absolute bottom-0.5 w-1 h-1 bg-white rounded-full"></div>` : '';
+    const dotColor = isSelected ? 'bg-white' : 'bg-blue-500';
+    const dot = hasEvent ? `<div class="absolute bottom-0 w-1 h-1 ${dotColor} rounded-full"></div>` : '';
 
-    html += `<div class="${baseClass}" onclick="selectDate('${ctx}', ${y}, ${m}, ${d})">${d}${dot}${selDot}</div>`;
+    html += `<div class="${baseClass}" data-day="${d}" data-istoday="${isToday}" data-hasevent="${hasEvent}" onclick="selectDate('${ctx}', ${y}, ${m}, ${d})">${d}${dot}</div>`;
   }
   return html;
 }
@@ -155,7 +212,7 @@ function formatStatusBadge(status) {
 }
 
 function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
-  if (!items || items.length === 0) return isCompactInfoAll ? '' : `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records for this date.</p>`;
+  if (!items || items.length === 0) return isCompactInfoAll ? '' : `<p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>`;
   
   return items.map(l => {
     const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
@@ -244,7 +301,6 @@ function renderDashboard() {
     filtered = fuse.search(q).map(res => res.item);
   }
 
-  // Agenda Mode Updates
   if (dashViewMode === 'agenda') {
       const monthEl = document.getElementById('dash-cal-month');
       if (monthEl) monthEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
@@ -252,12 +308,43 @@ function renderDashboard() {
       const gridEl = document.getElementById('dash-cal-grid');
       if (gridEl) gridEl.innerHTML = buildCalendarHTML('dash', dashMonth, dashDate, filtered);
       
-      const titleEl = document.getElementById('dash-agenda-title');
-      if (titleEl) titleEl.innerText = formatDisplayDate(dashDate);
-
-      const dashTarget = new Date(dashDate); dashTarget.setHours(0,0,0,0);
+      // Continuous Scroll Generation
+      const daysInMonth = new Date(dashMonth.getFullYear(), dashMonth.getMonth() + 1, 0).getDate();
+      let agendaHtml = '';
       
-      const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && isEventOnDate(l, dashTarget));
+      for(let day=1; day<=daysInMonth; day++) {
+          const curDate = new Date(dashMonth.getFullYear(), dashMonth.getMonth(), day);
+          const dayEvents = filtered.filter(l => l.InfoAll !== 'TRUE' && isEventOnDate(l, curDate));
+          
+          if (dayEvents.length > 0 || curDate.toDateString() === dashDate.toDateString()) {
+              agendaHtml += `
+                <div class="agenda-day-group mb-6" data-day="${day}">
+                    <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b dark:border-darkborder mb-3">
+                        <h3 class="font-bold text-blue-600 dark:text-blue-400">${formatDisplayDate(curDate)}</h3>
+                    </div>
+                    <div class="space-y-3">
+                        ${buildAgendaHtml(dayEvents, d === 'MY_CALENDAR', false)}
+                    </div>
+                </div>
+              `;
+          }
+      }
+      
+      const agendaEl = document.getElementById('dash-agenda');
+      if (agendaEl) {
+          agendaEl.innerHTML = agendaHtml || `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records for this month.</p>`;
+          agendaEl.removeEventListener('scroll', () => handleAgendaScroll('dash'));
+          agendaEl.addEventListener('scroll', () => handleAgendaScroll('dash'));
+          
+          // Auto-scroll to selected date on render
+          setTimeout(() => {
+              const group = agendaEl.querySelector(`.agenda-day-group[data-day="${dashDate.getDate()}"]`);
+              if (group) group.scrollIntoView();
+          }, 10);
+      }
+
+      // Info All Events
+      const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && isEventOnDate(l, dashDate));
       const infoAllContainer = document.getElementById('dash-infoall-container');
       const infoAllList = document.getElementById('dash-infoall-list');
       if (infoAllEvents.length > 0 && infoAllContainer && infoAllList) {
@@ -266,12 +353,7 @@ function renderDashboard() {
       } else if (infoAllContainer) {
           infoAllContainer.classList.add('hidden-view');
       }
-
-      const itemsForDate = filtered.filter(l => l.InfoAll !== 'TRUE' && isEventOnDate(l, dashTarget));
-      const agendaEl = document.getElementById('dash-agenda');
-      if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, d === 'MY_CALENDAR', false);
   } else {
-      // Month Mode Updates
       const monthTitleEl = document.getElementById('dash-month-title');
       if (monthTitleEl) monthTitleEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
       
@@ -298,27 +380,36 @@ function renderMyLeaves() {
   const gridEl = document.getElementById('my-cal-grid');
   if (gridEl) gridEl.innerHTML = buildCalendarHTML('my', myMonth, myDate, my);
   
-  const titleEl = document.getElementById('my-agenda-title');
-  if (titleEl) titleEl.innerText = formatDisplayDate(myDate);
-
-  const myTarget = new Date(myDate); myTarget.setHours(0,0,0,0);
-  const itemsForDate = my.filter(l => isEventOnDate(l, myTarget));
+  const daysInMonth = new Date(myMonth.getFullYear(), myMonth.getMonth() + 1, 0).getDate();
+  let agendaHtml = '';
   
+  for(let day=1; day<=daysInMonth; day++) {
+      const curDate = new Date(myMonth.getFullYear(), myMonth.getMonth(), day);
+      const dayEvents = my.filter(l => isEventOnDate(l, curDate));
+      
+      if (dayEvents.length > 0 || curDate.toDateString() === myDate.toDateString()) {
+          agendaHtml += `
+            <div class="agenda-day-group mb-6" data-day="${day}">
+                <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b dark:border-darkborder mb-3">
+                    <h3 class="font-bold text-blue-600 dark:text-blue-400">${formatDisplayDate(curDate)}</h3>
+                </div>
+                <div class="space-y-3">
+                    ${buildAgendaHtml(dayEvents, true, false)}
+                </div>
+            </div>
+          `;
+      }
+  }
+
   const agendaEl = document.getElementById('my-agenda');
-  if (agendaEl) agendaEl.innerHTML = buildAgendaHtml(itemsForDate, true, false);
-
-  const cancelledLeaves = my.filter(l => l.Status === 'Cancelled');
-  const cancelContainer = document.getElementById('cancelled-leaves-container');
-  
-  if (cancelContainer) {
-    cancelContainer.innerHTML = cancelledLeaves.length 
-      ? `<details class="group cursor-pointer text-sm">
-           <summary class="font-bold text-gray-700 dark:text-darktext select-none outline-none flex items-center list-none[&::-webkit-details-marker]:hidden">
-             <svg class="w-5 h-5 mr-1 transition-transform duration-200 transform group-open:rotate-90 text-gray-700 dark:text-darktext" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-             <span class="text-gray-700 dark:text-darktext">Cancelled (${cancelledLeaves.length})</span>
-           </summary>
-           <div class="grid gap-3 mt-3 cursor-default pl-6">${buildAgendaHtml(cancelledLeaves, true, false)}</div>
-         </details>`
-      : '';
+  if (agendaEl) {
+      agendaEl.innerHTML = agendaHtml || `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records for this month.</p>`;
+      agendaEl.removeEventListener('scroll', () => handleAgendaScroll('my'));
+      agendaEl.addEventListener('scroll', () => handleAgendaScroll('my'));
+      
+      setTimeout(() => {
+          const group = agendaEl.querySelector(`.agenda-day-group[data-day="${myDate.getDate()}"]`);
+          if (group) group.scrollIntoView();
+      }, 10);
   }
 }
