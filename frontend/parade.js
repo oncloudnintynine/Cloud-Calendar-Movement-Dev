@@ -87,7 +87,7 @@ function renderParadeState() {
      });
    });
 
-   if (paradeHeader) paradeHeader.innerHTML = `Overall Parade State:<br><span class="text-[0.9em] opacity-90">(${inOfficeGlobal} / ${totalGlobal})</span>`;
+   if (paradeHeader) paradeHeader.innerHTML = `Overall Parade State: <br><span class="text-sm font-semibold text-gray-600 dark:text-gray-400">(${inOfficeGlobal} / ${totalGlobal})</span>`;
 
    // SORT RULE: 1. In Office, 2. KAH, 3. Alpha
    const sortMembers = (mems) => {
