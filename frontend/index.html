@@ -44,22 +44,22 @@
  <nav class="bg-white dark:bg-darksurface shadow-sm border-b dark:border-darkborder px-3 md:px-4 py-2 flex justify-between items-center z-40 shrink-0">
    
    <!-- Left: Menu & Branding -->
-   <div class="flex items-center space-x-2 md:space-x-3 min-w-0">
+   <div class="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
      <button id="menu-btn" onclick="toggleMenu()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-darkhover text-gray-600 dark:text-darktext hidden transition shrink-0">
        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
      </button>
-     <div class="flex flex-col min-w-0 shrink">
+     <div class="flex flex-col min-w-0 shrink flex-1">
        <div class="font-bold text-base md:text-xl text-blue-600 dark:text-blue-400 leading-tight whitespace-nowrap">Cloud Moves</div>
        <div id="active-tab-title" class="text-xs font-semibold text-gray-500 dark:text-darkmuted hidden mt-0.5 truncate"></div>
      </div>
    </div>
    
    <!-- Middle: Controls -->
-   <div class="flex flex-col items-stretch gap-1 ml-auto mr-2 md:mr-4 shrink-0 w-[115px] md:w-[130px]">
+   <div id="dash-controls-wrapper" class="hidden flex-col items-stretch gap-1 ml-auto mr-2 md:mr-4 shrink-0 w-[115px] md:w-[130px]">
      <select id="dash-dept-nav" class="hidden w-full text-[11px] md:text-xs border border-blue-500 dark:border-blue-600 rounded-md py-[3px] pl-2 pr-5 bg-blue-50 dark:bg-transparent text-blue-800 dark:text-blue-400 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer" onchange="window.agendaDirty=true; renderDashboard();">
        <option value="">All Depts</option>
      </select>
-     <div id="dash-view-toggle" class="hidden flex items-center bg-gray-200 dark:bg-darkborder rounded p-0.5 shrink-0 justify-between w-full">
+     <div id="dash-view-toggle" class="flex items-center bg-gray-200 dark:bg-darkborder rounded p-0.5 shrink-0 justify-between w-full">
         <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="flex-1 px-1 py-0.5 rounded font-bold text-[10px] transition bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400 text-center">Agenda</button>
         <button id="btn-dash-month" onclick="toggleDashView('month')" class="flex-1 px-1 py-0.5 rounded font-bold text-[10px] transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 text-center">Month</button>
      </div>
@@ -238,7 +238,6 @@
      <div id="view-submit-leave" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
        <form id="leave-form" onsubmit="event.preventDefault(); submitForm('leave');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-4">
-           <!-- Form body identical to previous -->
            <div id="admin-behalf-leave" class="hidden-view relative mb-3 pb-4 border-b-2 border-dashed dark:border-darkborder">
              <label class="block font-bold mb-1 text-sm text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
              <input type="text" id="form-leave-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-lg py-2 px-3 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition text-sm" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('leave')">
@@ -302,7 +301,6 @@
      <div id="view-submit-event" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
        <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-4">
-           <!-- Form body identical to previous -->
            <div id="admin-behalf-event" class="hidden-view relative mb-3 pb-4 border-b-2 border-dashed dark:border-darkborder">
              <label class="block font-bold mb-1 text-sm text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
              <input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-lg py-2 px-3 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition text-sm" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
