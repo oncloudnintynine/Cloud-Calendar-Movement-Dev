@@ -1,100 +1,3 @@
-Code Review: Security, Performance, Optimization
-335,930 tokens
-
-Model 2:11 PM
-ThinkingThoughts
-Expand to view model thoughts
-
-chevron_right
-I have thoroughly reviewed your codebase. I fully understand the architecture: it is a serverless Progressive Web App (PWA) using Google Apps Script (GAS) as the backend router (doPost), Google Sheets as the database, Google Contacts (People API) as the authentication/user management system, and Google Calendar for event tracking. The frontend is built with Vanilla JS, Tailwind CSS, and bundled locally.
-Overall, the architecture is quite creative—using Google Contacts as a source of truth for organizational structure and departments is a clever way to keep everything within the Google Workspace ecosystem.
-However, there are several critical security vulnerabilities, massive performance bottlenecks, and frontend optimization opportunities that need to be addressed before deploying this to production.
-Here is my senior-level review of the codebase.
-1. Critical Security Vulnerability: Unauthenticated API Endpoints
-File: backend/Code.js & backend/Leaves.js
-The Issue:
-Your doPost router checks the adminPassword for settings and user management, and handleLogin checks the phone/password combination. However, actions like submitLeave, editLeave, and cancelLeave do not validate the user's credentials.
-The frontend api.js currently sends { action: 'submitLeave', data: { phone: user.phone, ... } }. A malicious actor (or someone inspecting the network tab) could easily send a POST request with someone else's phone number to submit or delete their leaves.
-The Fix:
-You must enforce authentication on every request. Since you don't have session tokens, pass the user's password (or a hashed version/session token) in every API call from the frontend and verify it in GAS before executing the action.
-code
-JavaScript
-// In frontend/api.js
-body: JSON.stringify({ action, data, credentials: { phone: user.phone, pass: user.pass } })
-
-// In backend/Code.js (doPost)
-if (['submitLeave', 'editLeave', 'cancelLeave', 'getLeaves'].includes(action)) {
-    var authCheck = handleLogin({ password: payload.credentials.pass });
-    if (authCheck.phone !== payload.credentials.phone) throw new Error("Unauthorized");
-}
-2. Critical Performance Bug: The "N+1 Query" Problem
-File: backend/Leaves.js (in the getLeaves function)
-The Issue:
-Inside the getLeaves loop, you are doing two heavily expensive operations for every single row in the spreadsheet:
-sheet.getRange(...).setValue(...) (to update departments/cancelled status).
-CalendarApp.getCalendarById(...) and cal.getEventById(...) (to check if an event was deleted from Google Calendar).
-Google Apps Script API calls take ~100ms - 300ms each. If you have 500 records in your database, getLeaves will make over 1,000 API calls sequentially. This will cause the script to quickly hit the 6-minute execution limit and crash, blocking users from seeing the dashboard.
-The Fix:
-Batch Sheet Writes: Never use .setValue() inside a loop. Modify the 2D array in memory, and then use sheet.getRange(2, 1, resultData.length, headers.length).setValues(resultData) at the very end.
-Decouple Calendar Sync: Do not check CalendarApp synchronously when a user requests the dashboard. Instead, move the "event deletion check" to a separate GAS Time-Driven Trigger (e.g., running every 1 hour) that cleans up the sheet in the background.
-3. API Quota Risk: Excessive Google Contacts Fetching
-File: backend/Auth.js (getContactsAndGroups)
-The Issue:
-Every time a user logs in, fetches leaves, or updates settings, getContactsAndGroups() is executed. This makes pagination calls to People.People.Connections.list and People.ContactGroups.list. As your company scales, calling the People API this frequently will hit Google's strict read quotas (e.g., quota exceeded for API).
-The Fix:
-Use CacheService to cache the organizational structure and contacts for 15-30 minutes.
-code
-JavaScript
-function getContactsAndGroups() {
-  var cache = CacheService.getScriptCache();
-  var cached = cache.get("contacts_groups");
-  if (cached) return JSON.parse(cached);
-
-  // ... run existing People API logic ...
-  
-  cache.put("contacts_groups", JSON.stringify(result), 1800); // cache for 30 minutes
-  return result;
-}
-(Note: Be sure to invalidate/clear this cache inside registerUser and updateUserUnits).
-4. Frontend Memory & Jank: Picker.js DOM Bloat
-File: frontend/picker.js
-The Issue:
-Your infinite rolodex picker generates a massive amount of DOM elements.
-code
-JavaScript
-const loops = 15;
-For the year wheel (100 years for birthdays), 100 years * 15 loops = 1,500 <div> elements.
-With 5 wheels (Day, Month, Year, Hour, Min), the modal generates around 4,500+ DOM nodes every time openPicker() is called. Mobile devices will experience heavy scroll jank and memory spikes.
-The Fix:
-Instead of brute-forcing the infinite scroll by multiplying the list 15 times, standard implementations use 3-5 loops and re-center the scroll position silently when the user hits the boundary (which you are already trying to do). Drop loops down to 3 or 5.
-5. Minor Bugs & Logic Optimizations
-Frontend / isEventOnDate Performance (calendar.js):
-You are evaluating isEventOnDate repeatedly for every day of the calendar loop. For a 31-day month and 1000 leave records, that's 31,000 evaluations.
-Optimization: Pre-filter the data array before the loop to only include events that overlap the current month's start and end dates.
-KAH Limit Edge Case (backend/Leaves.js):
-In checkKahLimit: (((overlappingKAHPhones.length) / totalKahInDept) * 100 > limit).
-If a department has 0 KAH personnel registered, totalKahInDept is 0, leading to a Division by Zero (Infinity > limit -> evaluates to true). Ensure you check if (totalKahInDept === 0) return false;.
-GAS Lock Service Scope (backend/Code.js):
-lock.waitLock(15000); is applied globally to all doPost actions. This means if one user is fetching getLeaves, a completely different user cannot login until the lock is released.
-Optimization: Only acquire the lock for action === 'submitLeave', editLeave, cancelLeave, and registerUser. Read-only actions (login, getLeaves, getSettings) should bypass the lock to ensure the app remains responsive.
-Global Variables Context Leak (frontend/app.js):
-In your frontend JS, you rely heavily on global variables (user, allLeaves, companyContacts, etc.) without explicit window. declarations or closures. While JS allows this, it makes the code brittle. Consider encapsulating app state into a single global state object.
-Summary of Next Steps
-If you plan to ship this soon, prioritize Issue #1 (Security) and Issue #2 (N+1 Sheet/Calendar API loop). Without those fixed, users can alter each other's data, and the dashboard will inevitably crash due to GAS execution timeouts.
-Let me know if you would like me to rewrite any specific modules (e.g., the batched getLeaves logic or the authenticated doPost router) to apply these fixes!
-Model 4:20 PM
-ThinkingThoughts
-Expand to view model thoughts
-
-chevron_right
-Here is the first batch of updates addressing the Critical Security Vulnerabilities, Performance Bottlenecks (N+1 queries & Quota risks), and the DOM Bloat in picker.js.
-This batch updates backend/Code.js, backend/Auth.js, backend/Leaves.js, backend/Settings.js, frontend/api.js, and frontend/picker.js.
-Batch 1: Backend Security, Performance Optimization & Picker Fixes
-code
-JavaScript
-#####*****
-backend/Code.js
-#####*****
 // ==========================================
 // Code.js - Main Router & DB Setup
 // ==========================================
@@ -196,4 +99,201 @@ function doPost(e) {
 
 function doOptions(e) { 
  return ContentService.createTextOutput("").setMimeType(ContentService.MimeType.JSON); 
+}
+#####*****
+backend/Auth.js
+#####*****
+// ==========================================
+// Auth.js - Login & People API Logic
+// ==========================================
+
+function getContactsAndGroups() {
+ var cache = CacheService.getScriptCache();
+ var cached = cache.get("contacts_groups");
+ if (cached) {
+   try { return JSON.parse(cached); } catch(e) {}
+ }
+
+ var groupMap = {};
+ var groupsRes = People.ContactGroups.list({ groupFields: "name,groupType", pageSize: 1000 });
+ if (groupsRes.contactGroups) {
+   groupsRes.contactGroups.forEach(function(g) {
+     var groupName = g.name || g.formattedName;
+     if (g.groupType === 'USER_CONTACT_GROUP' && groupName !== "DSTA Contacts") {
+       groupMap[g.resourceName] = groupName;
+     }
+   });
+ }
+
+ var connections =[];
+ var pageToken = null;
+ do {
+   var req = { personFields: 'names,phoneNumbers,memberships,birthdays', pageSize: 1000 };
+   if (pageToken) req.pageToken = pageToken;
+   var res = People.People.Connections.list('people/me', req);
+   if (res.connections) connections = connections.concat(res.connections);
+   pageToken = res.nextPageToken;
+ } while (pageToken);
+
+ var result = { groupMap: groupMap, connections: connections };
+ try {
+   // Cache structure for 30 mins to avoid API limits. Ignore if over 100KB payload limit.
+   cache.put("contacts_groups", JSON.stringify(result), 1800); 
+ } catch(e) {}
+ 
+ return result;
+}
+
+function invalidateContactsCache() {
+ CacheService.getScriptCache().remove("contacts_groups");
+}
+
+function cleanName(name) {
+ return name ? name.replace(/\s*\(.*?\)\s*/g, '').trim() : "";
+}
+
+function handleLogin(data) {
+ var pass = data.password;
+ var props = PropertiesService.getScriptProperties();
+ if (pass === (props.getProperty('adminPassword') || 'P@ssw0rd')) return { role: 'admin', name: 'Administrator', pass: pass };
+
+ var keyword = props.getProperty('userKeyword') || 'peace';
+
+ if (pass.endsWith(keyword)) {
+   var phone = pass.slice(0, -keyword.length).replace(/\D/g, '').slice(-8);
+   if (phone.length !== 8) throw new Error("Invalid password format.");
+
+   var cg = getContactsAndGroups();
+   var userDepts =[];
+   var userName = "";
+
+   cg.connections.forEach(function(person) {
+     if (person.phoneNumbers) {
+       person.phoneNumbers.forEach(function(phoneObj) {
+         if (phoneObj.value && phoneObj.value.replace(/\D/g, '').slice(-8) === phone) {
+           if (!userName && person.names && person.names.length > 0) userName = cleanName(person.names[0].displayName);
+           if (person.memberships) {
+             person.memberships.forEach(function(m) {
+               if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+                 var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+                 if (gName && userDepts.indexOf(gName) === -1) userDepts.push(gName);
+               }
+             });
+           }
+         }
+       });
+     }
+   });
+   
+   if (!userName) throw new Error("User phone number not found in Google Contacts. If you just registered, please wait a minute for Google to sync.");
+   return { role: 'user', name: userName, phone: phone, departments: userDepts };
+ }
+ 
+ throw new Error("Invalid password");
+}
+
+function registerUser(data) {
+ var cg = getContactsAndGroups();
+ 
+ var targetDigits = data.mobile.replace(/\D/g, '').slice(-8);
+ var phoneExists = cg.connections.some(function(person) {
+   if (!person.phoneNumbers) return false;
+   return person.phoneNumbers.some(function(p) {
+     return p.value && p.value.replace(/\D/g, '').slice(-8) === targetDigits;
+   });
+ });
+ 
+ if (phoneExists) throw new Error("This Mobile No is already registered.");
+
+ var contactPayload = {
+   names: [{ givenName: data.fullName + " (Cloud Group : " + data.unit + ")" }],
+   phoneNumbers: [{ value: data.mobile, type: "mobile" }]
+ };
+ 
+ if (data.birthday) {
+   var parts = data.birthday.split('-');
+   contactPayload.birthdays =[{
+     date: { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) }
+   }];
+ }
+ 
+ var newContact = People.People.createContact(contactPayload);
+ var resourceName = newContact.resourceName;
+ var groupId = null;
+ 
+ for (var grpRes in cg.groupMap) {
+   if (cg.groupMap[grpRes].toLowerCase() === data.unit.toLowerCase()) {
+     groupId = grpRes;
+     break;
+   }
+ }
+ 
+ if (!groupId) {
+   var newGroup = People.ContactGroups.create({ contactGroup: { name: data.unit } });
+   groupId = newGroup.resourceName;
+ }
+ 
+ People.ContactGroups.Members.modify({ resourceNamesToAdd: [resourceName] }, groupId);
+ invalidateContactsCache();
+ return { success: true, message: "User registered successfully." };
+}
+
+function updateUser(data) {
+ if (data._userRole !== 'admin') throw new Error("Unauthorized");
+ if (!data.resourceName) throw new Error("Missing contact identifier.");
+
+ try {
+   var contact = People.People.get(data.resourceName, { personFields: 'names,phoneNumbers,memberships,birthdays' });
+   var nameObj = (contact.names && contact.names.length > 0) ? contact.names[0] : {};
+   nameObj.givenName = data.fullName + " (Cloud Group : " + data.unit + ")";
+   contact.names = [nameObj];
+   contact.phoneNumbers =[{ value: data.mobile, type: "mobile" }];
+   
+   if (data.birthday) {
+     var parts = data.birthday.split('-');
+     contact.birthdays = [{
+       date: { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) }
+     }];
+   } else {
+     contact.birthdays =[]; 
+   }
+   
+   People.People.updateContact(contact, data.resourceName, { updatePersonFields: 'names,phoneNumbers,birthdays' });
+
+   var cg = getContactsAndGroups();
+   var targetGroupId = null;
+   var targetGroupName = data.unit.toUpperCase();
+
+   for (var grpRes in cg.groupMap) {
+     if (cg.groupMap[grpRes].toUpperCase() === targetGroupName) { targetGroupId = grpRes; break; }
+   }
+
+   if (!targetGroupId) {
+     var newGroup = People.ContactGroups.create({ contactGroup: { name: targetGroupName } });
+     targetGroupId = newGroup.resourceName;
+   }
+
+   var currentGroupIds =[];
+   if (contact.memberships) {
+     contact.memberships.forEach(function(m) {
+       if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+         var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+         if (gName) currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
+       }
+     });
+   }
+
+   var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId; });
+   var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ? [data.resourceName] :[];
+
+   if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
+   if (toRemove.length > 0) {
+     toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove: [data.resourceName] }, gId); });
+   }
+
+   invalidateContactsCache();
+   return { success: true };
+ } catch(e) {
+   throw new Error("Failed to update user: " + e.message);
+ }
 }
