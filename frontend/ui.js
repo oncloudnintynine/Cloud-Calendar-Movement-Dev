@@ -68,20 +68,20 @@ function switchTab(tabId) {
  }
  
  const deptNav = document.getElementById('dash-dept-nav');
- const viewToggle = document.getElementById('dash-view-toggle');
- if (deptNav && viewToggle) {
+ const controlsWrapper = document.getElementById('dash-controls-wrapper');
+ 
+ if (controlsWrapper) {
    if (tabId === 'dashboard' || tabId === 'my-leaves') {
        if (tabId === 'dashboard') {
-           deptNav.classList.remove('hidden');
+           if (deptNav) deptNav.classList.remove('hidden');
        } else {
-           deptNav.classList.add('hidden');
+           if (deptNav) deptNav.classList.add('hidden');
        }
-       viewToggle.classList.remove('hidden');
-       viewToggle.classList.add('flex');
+       controlsWrapper.classList.remove('hidden');
+       controlsWrapper.classList.add('flex');
    } else {
-       deptNav.classList.add('hidden');
-       viewToggle.classList.add('hidden');
-       viewToggle.classList.remove('flex');
+       controlsWrapper.classList.add('hidden');
+       controlsWrapper.classList.remove('flex');
    }
  }
  
