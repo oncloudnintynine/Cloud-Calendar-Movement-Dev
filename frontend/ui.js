@@ -70,8 +70,12 @@ function switchTab(tabId) {
  const deptNav = document.getElementById('dash-dept-nav');
  const viewToggle = document.getElementById('dash-view-toggle');
  if (deptNav && viewToggle) {
-   if (tabId === 'dashboard') {
-       deptNav.classList.remove('hidden');
+   if (tabId === 'dashboard' || tabId === 'my-leaves') {
+       if (tabId === 'dashboard') {
+           deptNav.classList.remove('hidden');
+       } else {
+           deptNav.classList.add('hidden');
+       }
        viewToggle.classList.remove('hidden');
        viewToggle.classList.add('flex');
    } else {
