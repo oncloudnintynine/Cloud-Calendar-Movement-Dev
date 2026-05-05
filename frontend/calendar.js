@@ -9,8 +9,11 @@ function toggleDashView(mode) {
  dashViewMode = mode;
  const btnAgenda = document.getElementById('btn-dash-agenda');
  const btnMonth = document.getElementById('btn-dash-month');
- const wrapAgenda = document.getElementById('dash-agenda-wrapper');
- const wrapMonth = document.getElementById('dash-month-wrapper');
+ 
+ const dashWrapAgenda = document.getElementById('dash-agenda-wrapper');
+ const dashWrapMonth = document.getElementById('dash-month-wrapper');
+ const myWrapAgenda = document.getElementById('my-agenda-wrapper');
+ const myWrapMonth = document.getElementById('my-month-wrapper');
 
  const activeClass =['bg-white', 'dark:bg-darksurface', 'shadow', 'text-blue-600', 'dark:text-blue-400'];
  const inactiveClass =['text-gray-500', 'dark:text-darkmuted', 'hover:text-gray-800', 'dark:hover:text-gray-200', 'bg-transparent'];
@@ -18,18 +21,32 @@ function toggleDashView(mode) {
  if (mode === 'agenda') {
    btnAgenda.classList.add(...activeClass); btnAgenda.classList.remove(...inactiveClass);
    btnMonth.classList.remove(...activeClass); btnMonth.classList.add(...inactiveClass);
-   wrapAgenda.classList.remove('hidden-view');
-   wrapMonth.classList.add('hidden-view');
+   
+   if (dashWrapAgenda) dashWrapAgenda.classList.remove('hidden-view');
+   if (dashWrapMonth) dashWrapMonth.classList.add('hidden-view');
+   if (myWrapAgenda) myWrapAgenda.classList.remove('hidden-view');
+   if (myWrapMonth) myWrapMonth.classList.add('hidden-view');
  } else {
    btnMonth.classList.add(...activeClass); btnMonth.classList.remove(...inactiveClass);
    btnAgenda.classList.remove(...activeClass); btnAgenda.classList.add(...inactiveClass);
-   wrapMonth.classList.remove('hidden-view');
-   wrapMonth.classList.add('flex');
-   wrapAgenda.classList.add('hidden-view');
+   
+   if (dashWrapMonth) {
+       dashWrapMonth.classList.remove('hidden-view');
+       dashWrapMonth.classList.add('flex');
+   }
+   if (dashWrapAgenda) dashWrapAgenda.classList.add('hidden-view');
+   
+   if (myWrapMonth) {
+       myWrapMonth.classList.remove('hidden-view');
+       myWrapMonth.classList.add('flex');
+   }
+   if (myWrapAgenda) myWrapAgenda.classList.add('hidden-view');
  }
  
  window.agendaDirty = true;
+ window.myAgendaDirty = true;
  renderDashboard();
+ renderMyLeaves();
 }
 
 async function loadLeavesData() {
@@ -69,6 +86,7 @@ function selectDate(ctx, y, m, d) {
    if (group) group.scrollIntoView({ behavior: 'smooth' });
  } else { 
    myDate = new Date(y, m, d); 
+   if (dashViewMode === 'month') toggleDashView('agenda');
    updateMiniCalendarSelection('my', d);
    const group = document.querySelector(`#my-agenda .agenda-day-group[data-date="${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}"]`);
    if (group) group.scrollIntoView({ behavior: 'smooth' });
@@ -122,7 +140,7 @@ function handleAgendaScroll(ctx) {
        }
        
        if (topDateStr) {
-           const [y, m, d] = topDateStr.split('-').map(Number);
+           const[y, m, d] = topDateStr.split('-').map(Number);
            const targetDate = isDash ? dashDate : myDate;
            const targetMonth = isDash ? dashMonth : myMonth;
            
@@ -206,7 +224,7 @@ function renderMiniCalendar(ctx) {
  if (gridEl) gridEl.innerHTML = html;
 }
 
-function buildFullMonthGrid(monthDate, data) {
+function buildFullMonthGrid(monthDate, data, ctx) {
  const y = monthDate.getFullYear(); 
  const m = monthDate.getMonth();
  const firstDay = new Date(y, m, 1); 
@@ -285,7 +303,7 @@ function buildFullMonthGrid(monthDate, data) {
          let isToday = curD.toDateString() === new Date().toDateString();
          let isCurMonth = curD.getMonth() === m;
          let bg = isCurMonth ? '' : 'bg-gray-50/50 dark:bg-[#151515]';
-         html += `<div class="flex-1 border-r last:border-r-0 dark:border-darkborder ${bg} p-1" onclick="selectDate('dash', ${curD.getFullYear()}, ${curD.getMonth()}, ${curD.getDate()})">
+         html += `<div class="flex-1 border-r last:border-r-0 dark:border-darkborder ${bg} p-1" onclick="selectDate('${ctx}', ${curD.getFullYear()}, ${curD.getMonth()}, ${curD.getDate()})">
             <div class="text-[11px] font-bold ${isToday ? 'bg-blue-600 text-white rounded-full w-[22px] h-[22px] mx-auto flex items-center justify-center shadow-md' : 'text-gray-500 dark:text-darkmuted text-center'}">${curD.getDate()}</div>
          </div>`;
      }
@@ -296,7 +314,7 @@ function buildFullMonthGrid(monthDate, data) {
          const title = seg.isLeave ? `${seg.l.Name.split(' ')[0]} : ${seg.l.LeaveType}` : seg.l.LeaveType;
          const left = (seg.sDay / 7) * 100;
          const width = (seg.len / 7) * 100;
-         const top = seg.slot * 20;
+         const topOffset = (seg.slot * 20) + 26; // Account for date numbers at the top
 
          let rounded = 'rounded-sm';
          if (seg.len > 1) {
@@ -305,7 +323,7 @@ function buildFullMonthGrid(monthDate, data) {
             else if (seg.eDay === 6) rounded = 'rounded-l-sm';
          }
 
-         html += `<div class="absolute h-[18px] px-1 text-[10px] md:text-[11px] font-bold leading-tight truncate shadow-sm pointer-events-auto cursor-pointer ${color} ${rounded}" style="left: calc(${left}% + 2px); width: calc(${width}% - 4px); top: ${top}px;" onclick="selectDate('dash', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${title}">${title}</div>`;
+         html += `<div class="absolute h-[18px] px-1 text-[10px] md:text-[11px] font-bold leading-tight truncate shadow-sm pointer-events-auto cursor-pointer border-b border-black/10 ${color} ${rounded}" style="left: calc(${left}% + 1px); width: calc(${width}% - 2px); top: ${topOffset}px;" onclick="selectDate('${ctx}', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${title}">${title}</div>`;
      });
      html += `</div></div>`; 
  }
@@ -349,7 +367,7 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
    }
 
    let actionBtns = '';
-   if ((isMyCalendar || user.role === 'admin') && l.Status !== 'Cancelled') {
+   if ((String(l.Phone) === String(user.phone) || user.role === 'admin') && l.Status !== 'Cancelled') {
      actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
    }
 
@@ -486,7 +504,7 @@ function renderDashboard() {
      if (monthTitleEl) monthTitleEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
      
      const monthGridEl = document.getElementById('dash-month-grid');
-     if (monthGridEl) monthGridEl.innerHTML = buildFullMonthGrid(dashMonth, filtered);
+     if (monthGridEl) monthGridEl.innerHTML = buildFullMonthGrid(dashMonth, filtered, 'dash');
  }
 }
 
@@ -503,21 +521,29 @@ function renderMyLeaves() {
  });
  
  window.myFilteredLeaves = my;
- renderMiniCalendar('my');
 
- if (window.myAgendaDirty) {
-     generateContinuousAgenda('my', my);
-     window.myAgendaDirty = false;
- }
+ if (dashViewMode === 'agenda') {
+     renderMiniCalendar('my');
+     if (window.myAgendaDirty) {
+         generateContinuousAgenda('my', my);
+         window.myAgendaDirty = false;
+     }
 
- const agendaEl = document.getElementById('my-agenda');
- if (agendaEl) {
-     setTimeout(() => {
-         const yyyy = myDate.getFullYear();
-         const mm = String(myDate.getMonth() + 1).padStart(2, '0');
-         const dd = String(myDate.getDate()).padStart(2, '0');
-         const group = agendaEl.querySelector(`.agenda-day-group[data-date="${yyyy}-${mm}-${dd}"]`);
-         if (group) group.scrollIntoView({ behavior: 'smooth' });
-     }, 10);
+     const agendaEl = document.getElementById('my-agenda');
+     if (agendaEl) {
+         setTimeout(() => {
+             const yyyy = myDate.getFullYear();
+             const mm = String(myDate.getMonth() + 1).padStart(2, '0');
+             const dd = String(myDate.getDate()).padStart(2, '0');
+             const group = agendaEl.querySelector(`.agenda-day-group[data-date="${yyyy}-${mm}-${dd}"]`);
+             if (group) group.scrollIntoView({ behavior: 'smooth' });
+         }, 10);
+     }
+ } else {
+     const monthTitleEl = document.getElementById('my-month-title');
+     if (monthTitleEl) monthTitleEl.innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
+     
+     const monthGridEl = document.getElementById('my-month-grid');
+     if (monthGridEl) monthGridEl.innerHTML = buildFullMonthGrid(myMonth, my, 'my');
  }
 }
