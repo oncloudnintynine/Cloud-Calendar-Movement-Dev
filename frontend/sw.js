@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cloud-moves-v27';
+const CACHE_NAME = 'cloud-moves-v28';
 
 const urlsToCache =[
   './',
@@ -20,7 +20,8 @@ const urlsToCache =[
   './icon-192.png',
   './icon-512.png',
   'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2'
+  'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2',
+  'https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js'
 ];
 
 self.addEventListener('install', event => {
