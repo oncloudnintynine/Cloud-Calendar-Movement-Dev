@@ -13,7 +13,6 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <script>
     tailwind.config = { 
       darkMode: 'class',
@@ -48,7 +47,6 @@
       </button>
       <div class="flex flex-col min-w-0 shrink flex-grow">
         <div class="flex items-center gap-2">
-          <!-- TITLE RESPONSIVENESS FIX -->
           <div class="font-bold text-base md:text-xl text-blue-600 dark:text-blue-400 leading-tight whitespace-nowrap">Cloud Moves</div>
           <select id="dash-dept-nav" class="hidden w-full max-w-[140px] md:max-w-[200px] text-sm border-2 border-blue-300 dark:border-blue-700 rounded-lg py-1 px-2 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="renderDashboard()">
             <option value="">All Depts</option>
@@ -97,6 +95,7 @@
     <section id="login-view" class="flex flex-col items-center justify-center h-full">
       <div class="bg-white dark:bg-darksurface p-6 rounded-2xl shadow-xl w-full max-w-sm border dark:border-darkborder">
         
+        <!-- Login Form -->
         <div id="login-form-container" class="w-full transition-opacity duration-300">
           <h2 class="text-2xl font-bold mb-1 text-center">Welcome</h2>
           <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-6">Enter your password to continue</p>
@@ -114,6 +113,7 @@
           </div>
         </div>
 
+        <!-- Self Register Form -->
         <div id="register-form-container" class="w-full hidden-view transition-opacity duration-300">
           <h2 class="text-xl font-bold mb-1 text-center">Self Registration</h2>
           <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-4">Create your account</p>
@@ -151,43 +151,44 @@
     <section id="app-view" class="hidden-view flex-col h-full overflow-hidden">
       
       <!-- Dashboard Tab -->
-      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-4">
+      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-3">
         
-        <!-- Dashboard Top Controls -->
-        <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 w-full shrink-0">
-          <input type="text" id="dash-search" placeholder="Search Names or Activities..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition" onkeyup="renderDashboard()">
+        <!-- FLATTENED DASHBOARD CONTROLS ROW -->
+        <div class="flex flex-row items-center space-x-2 w-full shrink-0 overflow-x-auto pb-1 scrollbar-hide">
+          <input type="text" id="dash-search" placeholder="Search..." class="flex-grow min-w-[120px] border-2 border-gray-400 dark:border-gray-500 rounded-xl py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition" onkeyup="renderDashboard()">
           
           <!-- View Toggle -->
-          <div class="flex items-center space-x-1 bg-gray-200 dark:bg-darkborder rounded-xl p-1 shrink-0 self-start md:self-auto">
-             <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-4 py-1.5 rounded-lg font-bold text-sm transition bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Agenda</button>
-             <button id="btn-dash-month" onclick="toggleDashView('month')" class="px-4 py-1.5 rounded-lg font-bold text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200">Month</button>
+          <div class="flex items-center bg-gray-200 dark:bg-darkborder rounded-xl p-1 shrink-0">
+             <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-3 py-1 rounded-lg font-bold text-sm transition bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Agenda</button>
+             <button id="btn-dash-month" onclick="toggleDashView('month')" class="px-3 py-1 rounded-lg font-bold text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200">Month</button>
           </div>
 
-          <!-- Action Buttons injected dynamically during Unified Mode -->
-          <button id="unified-btn-leave" onclick="switchTab('submit-leave')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs md:text-sm shrink-0 whitespace-nowrap">Add Leave/MC</button>
-          <button id="unified-btn-event" onclick="switchTab('submit-event')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs md:text-sm shrink-0 whitespace-nowrap">Add Event</button>
+          <!-- Unified Action Buttons -->
+          <button id="unified-btn-leave" onclick="switchTab('submit-leave')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-3 rounded-xl shadow-sm transition text-xs shrink-0 whitespace-nowrap">Add Leave/MC</button>
+          <button id="unified-btn-event" onclick="switchTab('submit-event')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-3 rounded-xl shadow-sm transition text-xs shrink-0 whitespace-nowrap">Add Event</button>
         </div>
 
-        <!-- AGENDA VIEW WRAPPER -->
-        <div id="dash-agenda-wrapper" class="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
-          <div class="w-full md:w-64 shrink-0 bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-3 h-fit text-sm">
-            <div class="flex justify-between items-center mb-2">
-              <button onclick="changeMonth('dash', -1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">◀</button>
-              <div id="dash-cal-month" class="font-bold text-base"></div>
-              <button onclick="changeMonth('dash', 1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">▶</button>
+        <!-- AGENDA VIEW WRAPPER (Continuously Scrollable) -->
+        <div id="dash-agenda-wrapper" class="flex flex-col md:flex-row gap-3 flex-grow overflow-hidden">
+          
+          <!-- COMPRESSED VERTICAL CALENDAR -->
+          <div class="w-full md:w-56 shrink-0 bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-2 h-fit text-sm">
+            <div class="flex justify-between items-center mb-1">
+              <button onclick="changeMonth('dash', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">◀</button>
+              <div id="dash-cal-month" class="font-bold text-sm"></div>
+              <button onclick="changeMonth('dash', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">▶</button>
             </div>
-            <div class="grid grid-cols-7 text-center text-[11px] font-bold text-gray-400 dark:text-darkmuted mb-1"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
-            <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-1 font-medium"></div>
+            <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 dark:text-darkmuted mb-0.5"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
+            <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-0.5 font-medium"></div>
           </div>
-          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-4 min-h-0 h-full">
-            <h3 id="dash-agenda-title" class="font-bold text-lg border-b dark:border-darkborder pb-2 mb-3 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0"></h3>
-            
-            <div id="dash-infoall-container" class="hidden-view shrink-0 mb-3 pb-3 border-b-2 border-dashed dark:border-darkborder">
-              <h4 class="font-bold text-sm text-blue-600 dark:text-blue-400 mb-2 uppercase tracking-wide">📌 Info All Events</h4>
-              <div id="dash-infoall-list" class="max-h-40 overflow-y-auto space-y-2 pr-1"></div>
-            </div>
 
-            <div id="dash-agenda" class="flex-1 overflow-y-auto space-y-3 pr-2 pb-4"></div>
+          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-3 min-h-0 h-full relative">
+            <div id="dash-infoall-container" class="hidden-view shrink-0 mb-2 pb-2 border-b-2 border-dashed dark:border-darkborder">
+              <h4 class="font-bold text-xs text-blue-600 dark:text-blue-400 mb-1 uppercase tracking-wide">📌 Info All Events</h4>
+              <div id="dash-infoall-list" class="max-h-32 overflow-y-auto space-y-1.5 pr-1"></div>
+            </div>
+            <!-- CONTINUOUS AGENDA LIST -->
+            <div id="dash-agenda" class="flex-1 overflow-y-auto space-y-4 pr-1 pb-10 scrollbar-hide"></div>
           </div>
         </div>
 
@@ -220,27 +221,27 @@
       </div>
 
       <!-- My Calendar Tab -->
-      <div id="view-my-leaves" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-4">
-        <div class="flex space-x-2 w-full md:w-auto shrink-0">
-          <button onclick="switchTab('submit-leave')" class="flex-1 md:flex-none bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs md:text-sm">Add Leave/MC/OIL</button>
-          <button onclick="switchTab('submit-event')" class="flex-1 md:flex-none bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-2 px-3 rounded-xl shadow-sm transition text-xs md:text-sm">Add Event</button>
+      <div id="view-my-leaves" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-3">
+        
+        <div class="flex flex-row items-center space-x-2 w-full shrink-0 overflow-x-auto pb-1 scrollbar-hide">
+          <button onclick="switchTab('submit-leave')" class="shrink-0 bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-4 rounded-xl shadow-sm transition text-sm whitespace-nowrap">Add Leave/MC</button>
+          <button onclick="switchTab('submit-event')" class="shrink-0 bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-4 rounded-xl shadow-sm transition text-sm whitespace-nowrap">Add Event</button>
         </div>
-        <div class="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
-          <div class="w-full md:w-64 shrink-0 bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-3 h-fit text-sm">
-            <div class="flex justify-between items-center mb-2">
-              <button onclick="changeMonth('my', -1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">◀</button>
-              <div id="my-cal-month" class="font-bold text-base"></div>
-              <button onclick="changeMonth('my', 1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">▶</button>
+
+        <div class="flex flex-col md:flex-row gap-3 flex-grow overflow-hidden">
+          
+          <div class="w-full md:w-56 shrink-0 bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-2 h-fit text-sm">
+            <div class="flex justify-between items-center mb-1">
+              <button onclick="changeMonth('my', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">◀</button>
+              <div id="my-cal-month" class="font-bold text-sm"></div>
+              <button onclick="changeMonth('my', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">▶</button>
             </div>
-            <div class="grid grid-cols-7 text-center text-[11px] font-bold text-gray-400 dark:text-darkmuted mb-1"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
-            <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-1 font-medium"></div>
+            <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 dark:text-darkmuted mb-0.5"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
+            <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-0.5 font-medium"></div>
           </div>
-          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-4 min-h-0 h-full">
-            <h3 id="my-agenda-title" class="font-bold text-lg border-b dark:border-darkborder pb-2 mb-2 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0"></h3>
-            <div class="flex-1 overflow-y-auto pr-2 flex flex-col pb-6">
-              <div id="my-agenda" class="space-y-3 shrink-0"></div>
-              <div id="cancelled-leaves-container" class="mt-6 pt-4 border-t dark:border-darkborder shrink-0"></div>
-            </div>
+
+          <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-3 min-h-0 h-full relative">
+            <div id="my-agenda" class="flex-1 overflow-y-auto space-y-4 pr-1 pb-10 scrollbar-hide"></div>
           </div>
         </div>
       </div>
@@ -250,8 +251,6 @@
         <form id="leave-form" onsubmit="event.preventDefault(); submitForm('leave');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
           
           <div class="flex-grow overflow-y-auto p-5 space-y-5">
-            
-            <!-- ADMIN ON BEHALF OF FIELD -->
             <div id="admin-behalf-leave" class="hidden-view relative mb-4 pb-5 border-b-2 border-dashed dark:border-darkborder">
               <label class="block font-bold mb-1 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
               <input type="text" id="form-leave-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-2.5 px-4 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('leave')">
@@ -320,7 +319,6 @@
           
           <div class="flex-grow overflow-y-auto p-5 space-y-5">
             
-            <!-- ADMIN ON BEHALF OF FIELD -->
             <div id="admin-behalf-event" class="hidden-view relative mb-4 pb-5 border-b-2 border-dashed dark:border-darkborder">
               <label class="block font-bold mb-1 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
               <input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-2.5 px-4 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
@@ -556,39 +554,29 @@
         </div>
       </div>
 
-      <!-- Admin Company Structure Tab -->
-      <div id="view-admin-structure" class="tab-content hidden-view flex-col max-w-6xl mx-auto w-full h-full pb-2 md:pb-6">
-        <div class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
-          
-          <div class="p-4 border-b dark:border-darkborder bg-gray-50 dark:bg-darkinput flex justify-between items-center shrink-0">
-              <h2 class="text-xl font-bold text-blue-600 dark:text-blue-400">Structure & Personnel Assignment</h2>
-              <button onclick="saveCompanyStructure()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl shadow transition text-sm">Save Assignments</button>
-          </div>
+      <!-- Admin Company Structure Tab (UPDATED TOP/BOTTOM LAYOUT) -->
+      <div id="view-admin-structure" class="tab-content hidden-view flex-col max-w-6xl mx-auto w-full h-full pb-0 relative">
+        <div class="flex-grow flex flex-col overflow-y-auto pb-20">
+            <!-- Top Panel: Manage Units & Personnel -->
+            <div class="w-full border-b dark:border-darkborder p-3 md:p-4 flex flex-col bg-gray-50 dark:bg-darkinput flex-shrink-0">
+               <h3 class="font-bold mb-3 text-sm md:text-lg text-gray-800 dark:text-gray-200">Manage Units & Personnel</h3>
+               <div class="flex space-x-2 mb-4 shrink-0">
+                 <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase text-sm">
+                 <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-lg transition text-sm">Add</button>
+               </div>
+               <div id="structure-builder-list" class="space-y-4"></div>
+            </div>
+            
+            <!-- Bottom Panel: Unassigned Personnel -->
+            <div class="w-full p-3 md:p-4 flex flex-col bg-gray-100 dark:bg-darkbase flex-grow min-h-[300px]">
+               <h3 class="font-bold mb-3 text-sm md:text-lg text-red-600 dark:text-red-400">Unassigned Personnel</h3>
+               <div id="unassigned-board" class="flex-grow"></div>
+            </div>
+        </div>
 
-          <!-- FORCED SIDE BY SIDE COLUMNS -->
-          <div class="flex-grow flex flex-row overflow-hidden min-h-0">
-              
-              <!-- Left Panel: Manage Units & Personnel -->
-              <div class="w-1/2 border-r dark:border-darkborder p-2 md:p-4 flex flex-col overflow-y-auto h-full min-h-0 bg-gray-50 dark:bg-darkinput">
-                 <h3 class="font-bold mb-3 text-sm md:text-lg border-b dark:border-darkborder pb-2 text-gray-800 dark:text-gray-200">Manage Units & Personnel</h3>
-                 
-                 <div class="flex space-x-2 mb-4 shrink-0">
-                   <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-2 md:px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase text-xs md:text-sm">
-                   <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 md:px-4 rounded-lg transition text-xs md:text-sm">Add</button>
-                 </div>
-                 
-                 <div id="structure-builder-list" class="space-y-4 flex-grow overflow-y-auto pb-4 pr-1 md:pr-2"></div>
-              </div>
-              
-              <!-- Right Panel: Unassigned Personnel -->
-              <div class="w-1/2 p-2 md:p-4 flex flex-col overflow-hidden bg-gray-100 dark:bg-darkbase h-full min-h-0">
-                 <h3 class="font-bold mb-3 text-sm md:text-lg text-red-600 dark:text-red-400">Unassigned Personnel</h3>
-                 <div id="unassigned-board" class="flex-grow overflow-y-auto pr-1 md:pr-2 pb-4">
-                    <!-- Unassigned injected here -->
-                 </div>
-              </div>
-
-          </div>
+        <!-- Fixed Save Button -->
+        <div class="absolute bottom-0 left-0 w-full p-3 bg-white dark:bg-darksurface border-t dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
+            <button onclick="saveCompanyStructure()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-md transition text-lg">Save Assignments</button>
         </div>
       </div>
       
