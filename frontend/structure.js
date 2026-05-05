@@ -37,6 +37,7 @@ function renderStructureUI() {
  function buildTreeHtml(node, depth) {
      let html = '';
      
+     // Sorting to ensure 'HQ' is always placed at the very top, followed alphanumerically
      const keys = Object.keys(node).filter(k => k !== '_fullPath').sort((a, b) => {
          if (a.toUpperCase() === 'HQ') return -1;
          if (b.toUpperCase() === 'HQ') return 1;
@@ -118,13 +119,14 @@ function openReassignModal(resName, name, phone, currentUnit) {
  reassignTargetResource = resName;
  document.getElementById('reassign-user-name').innerText = `${name} (${phone})`;
  
+ // Apply HQ sort rule to the modal dropdown list as well
  const sortedStructure = [...companyStructure].sort((a, b) => {
      if (a.toUpperCase() === 'HQ') return -1;
      if (b.toUpperCase() === 'HQ') return 1;
      return a.localeCompare(b);
  });
  
- const allUnits =["UNASSIGNED", ...sortedStructure];
+ const allUnits = ["UNASSIGNED", ...sortedStructure];
  let html = allUnits.map(u => `
      <button onclick="confirmReassign('${u}')" class="w-full text-left p-3 rounded-lg border mb-2 text-sm font-medium transition ${u === currentUnit ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-darkborder hover:bg-gray-50 dark:hover:bg-darkhover text-gray-700 dark:text-gray-200'}">
          ${u === 'UNASSIGNED' ? '🔴 Unassigned' : u}
