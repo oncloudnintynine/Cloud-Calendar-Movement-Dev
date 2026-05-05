@@ -1,6 +1,8 @@
 // ==========================================
-// Company Structure & Custom Drag/Drop Engine
+// Company Structure & Reassignment Logic
 // ==========================================
+
+let reassignTargetResource = null;
 
 function getEffectiveDept(contact) {
   if (pendingStructureChanges[contact.resourceName] !== undefined) {
@@ -38,51 +40,40 @@ function renderStructureUI() {
       
       keys.forEach(k => {
           const fullPath = node[k]._fullPath;
+          const members = cols[fullPath] ||[];
           const isRoot = depth === 0;
-          const isGrandChild = depth === 2; // Support up to 3 tiers!
+          const isGrandChild = depth === 2; // Maximum 3 levels
           
-          if (isRoot) {
-              html += `
-              <div class="bg-white dark:bg-darksurface rounded-xl shadow-sm border border-gray-300 dark:border-gray-600 mb-5 overflow-hidden">
-                <div class="bg-gray-200 dark:bg-gray-800 p-2 flex justify-between items-center font-bold">
-                  <span class="text-blue-700 dark:text-blue-300 text-lg">${k}</span>
-                  <button onclick="removeUnit('${fullPath}')" class="text-red-500 hover:text-red-700 text-xl leading-none">&times;</button>
-                </div>
-                <div class="p-3">
-                  <div class="text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Directly in ${k}:</div>
-                  <div class="dnd-dropzone min-h-[60px] bg-gray-50 dark:bg-[#1a1a1a] rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-2 space-y-2 mb-4" data-target-id="${fullPath}">
-                      ${renderCards(cols[fullPath], true)}
+          const headerColors = depth === 0 ? 'text-blue-700 dark:text-blue-400' : depth === 1 ? 'text-purple-600 dark:text-purple-400' : 'text-emerald-600 dark:text-emerald-400';
+          const bgColors = depth === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-[#151515]';
+
+          html += `
+          <details class="group mb-3 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-darksurface shadow-sm" ${isRoot ? 'open' : ''}>
+              <summary class="flex justify-between items-center p-2.5 cursor-pointer select-none ${bgColors}">
+                  <div class="flex items-center space-x-2">
+                      <svg class="w-4 h-4 transition-transform group-open:rotate-90 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <span class="font-bold text-sm md:text-base ${headerColors}">${k} <span class="text-xs font-normal text-gray-500">(${members.length})</span></span>
                   </div>
-                  <div class="ml-2 pl-3 border-l-2 border-blue-200 dark:border-blue-900 space-y-4">
+                  <button onclick="removeUnit('${fullPath}', event)" class="text-red-500 hover:text-red-700 font-bold px-3 text-lg leading-none" title="Delete Unit">&times;</button>
+              </summary>
+              <div class="p-2 md:p-3 border-t border-gray-200 dark:border-darkborder space-y-3">
+                  
+                  ${members.length > 0 
+                      ? `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">${renderCards(members, true, fullPath)}</div>` 
+                      : `<p class="text-xs text-gray-400 dark:text-darkmuted italic ml-1">No personnel assigned directly here.</p>`}
+                  
+                  <!-- Nested Sub-Units -->
+                  <div class="pl-2 md:pl-4 border-l-2 ${depth===0 ? 'border-blue-200 dark:border-blue-900' : 'border-purple-200 dark:border-purple-900'} mt-2 space-y-2">
                       ${buildTreeHtml(node[k], depth + 1)}
-                      <div class="flex space-x-2 mt-2 pt-2">
-                          <input type="text" id="new-child-${fullPath}" placeholder="Add Child Unit..." class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 text-xs bg-white dark:bg-black text-gray-900 dark:text-white uppercase outline-none focus:border-blue-500 transition">
-                          <button onclick="addChildUnit('${fullPath}')" class="bg-blue-600 text-white text-xs font-bold px-3 rounded-lg hover:bg-blue-700 transition">Add</button>
-                      </div>
+                      
+                      ${!isGrandChild ? `
+                      <div class="flex space-x-2 mt-2">
+                          <input type="text" id="new-child-${fullPath}" placeholder="Add Sub-Unit to ${k}..." class="w-full border border-gray-300 dark:border-gray-600 rounded p-1.5 text-xs bg-white dark:bg-black text-gray-900 dark:text-white uppercase outline-none focus:border-blue-500 transition">
+                          <button onclick="addChildUnit('${fullPath}')" class="bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold px-3 rounded transition">Add</button>
+                      </div>` : ''}
                   </div>
-                </div>
-              </div>`;
-          } else {
-              html += `
-              <div>
-                  <div class="flex justify-between items-center text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                      <span>↳ ${k}</span>
-                      <button onclick="removeUnit('${fullPath}')" class="text-red-500 hover:text-red-700 font-bold text-lg">&times;</button>
-                  </div>
-                  <div class="dnd-dropzone min-h-[60px] bg-gray-50 dark:bg-[#1a1a1a] rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-2 space-y-2" data-target-id="${fullPath}">
-                      ${renderCards(cols[fullPath], true)}
-                  </div>
-                  ${!isGrandChild ? `
-                  <div class="ml-2 pl-3 border-l-2 border-purple-200 dark:border-purple-900 mt-2 space-y-3">
-                      ${buildTreeHtml(node[k], depth + 1)}
-                      <div class="flex space-x-2 mt-1 pt-1">
-                          <input type="text" id="new-child-${fullPath}" placeholder="Add Sub-Unit..." class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1 text-[11px] bg-white dark:bg-black text-gray-900 dark:text-white uppercase outline-none focus:border-blue-500 transition">
-                          <button onclick="addChildUnit('${fullPath}')" class="bg-purple-600 text-white text-[11px] font-bold px-2 rounded-lg hover:bg-purple-700 transition">Add</button>
-                      </div>
-                  </div>
-                  ` : ''}
-              </div>`;
-          }
+              </div>
+          </details>`;
       });
       return html;
   }
@@ -91,30 +82,62 @@ function renderStructureUI() {
     ? `<p class="text-gray-500 italic text-sm">No parent units created yet. Add one above.</p>` 
     : buildTreeHtml(tree, 0);
 
+  // Unassigned Board in Grid
   rightContainer.innerHTML = `
-      <div class="dnd-dropzone min-h-[300px] h-full pb-10 space-y-2 bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded-xl border-2 border-dashed border-red-300 dark:border-red-900/50" data-target-id="UNASSIGNED">
-          ${renderCards(cols["UNASSIGNED"], false)}
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          ${renderCards(cols["UNASSIGNED"], false, 'UNASSIGNED')}
       </div>
   `;
 }
 
-function renderCards(contacts, showCross) {
+function renderCards(contacts, showCross, currentUnit) {
   if (!contacts) return '';
   return contacts.map(c => `
-      <div class="dnd-draggable relative bg-white dark:bg-darkinput p-2 rounded-lg shadow border border-gray-200 dark:border-darkborder text-sm flex items-center group transition-colors hover:border-blue-300 dark:hover:border-blue-700 select-none touch-manipulation" data-item-id="${c.resourceName}">
-        <div class="drag-handle px-1 mr-2 text-gray-400 text-lg">☰</div>
-        <div class="main-name-pill flex flex-col flex-grow">
-            <span class="font-bold text-gray-800 dark:text-gray-100">${c.name}</span>
-            <span class="text-[10px] text-gray-500 dark:text-darkmuted mt-0.5">${c.phone}</span>
-        </div>
+      <div onclick="openReassignModal('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${currentUnit}')" class="relative bg-white dark:bg-darkinput p-2 rounded shadow-sm border border-gray-200 dark:border-darkborder text-xs flex flex-col cursor-pointer transition-colors hover:border-blue-400 dark:hover:border-blue-600">
+        <span class="font-bold text-gray-800 dark:text-gray-100 pr-4 truncate">${c.name}</span>
+        <span class="text-[10px] text-gray-500 dark:text-darkmuted mt-0.5">${c.phone}</span>
         ${showCross ? `
-        <button onclick="unassignUser('${c.resourceName}')" class="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-md transition z-10">&times;</button>
+        <button onclick="unassignUser('${c.resourceName}', event)" class="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-md transition z-10">&times;</button>
         ` : ''}
       </div>
   `).join('');
 }
 
-function unassignUser(resName) { pendingStructureChanges[resName] = "UNASSIGNED"; renderStructureUI(); }
+function unassignUser(resName, e) {
+  e.stopPropagation(); // Prevent opening the modal
+  pendingStructureChanges[resName] = "UNASSIGNED";
+  renderStructureUI();
+}
+
+function openReassignModal(resName, name, phone, currentUnit) {
+  reassignTargetResource = resName;
+  document.getElementById('reassign-user-name').innerText = `${name} (${phone})`;
+  
+  const allUnits = ["UNASSIGNED", ...companyStructure];
+  let html = allUnits.map(u => `
+      <button onclick="confirmReassign('${u}')" class="w-full text-left p-3 rounded-lg border mb-2 text-sm font-medium transition ${u === currentUnit ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-darkborder hover:bg-gray-50 dark:hover:bg-darkhover text-gray-700 dark:text-gray-200'}">
+          ${u === 'UNASSIGNED' ? '🔴 Unassigned' : u}
+      </button>
+  `).join('');
+  
+  document.getElementById('reassign-unit-list').innerHTML = html;
+  document.getElementById('reassign-modal').classList.remove('hidden-view');
+  document.getElementById('reassign-modal').classList.add('flex');
+}
+
+function confirmReassign(newUnit) {
+  if (reassignTargetResource) {
+      pendingStructureChanges[reassignTargetResource] = newUnit;
+      renderStructureUI();
+  }
+  closeReassignModal();
+}
+
+function closeReassignModal() {
+  reassignTargetResource = null;
+  document.getElementById('reassign-modal').classList.add('hidden-view');
+  document.getElementById('reassign-modal').classList.remove('flex');
+}
 
 function addParentUnit() {
   const input = document.getElementById('new-parent-unit');
@@ -139,11 +162,11 @@ function addChildUnit(parentPath) {
   renderStructureUI();
 }
 
-function removeUnit(fullPath) {
+function removeUnit(fullPath, e) {
+  if (e) { e.stopPropagation(); e.preventDefault(); }
   if (!confirm(`Are you sure you want to delete ${fullPath} and all its sub-units? Personnel inside will automatically be marked as Unassigned.`)) return;
   
   const toDelete = companyStructure.filter(p => p === fullPath || p.startsWith(`${fullPath}-`));
-  
   companyContacts.forEach(c => {
       if (toDelete.includes(getEffectiveDept(c))) {
           pendingStructureChanges[c.resourceName] = "UNASSIGNED";
@@ -178,122 +201,4 @@ async function saveCompanyStructure() {
     }
     window.location.reload();
   } catch (err) { alert("Error saving: " + err.message); showLoader(false); }
-}
-
-// ==========================================
-// Custom Robust Drag & Drop Engine
-// ==========================================
-if (!window.dndInitialized) {
-    window.dndInitialized = true;
-
-    let dndState = { timer: null, isDragging: false, el: null, clone: null };
-
-    document.addEventListener('touchstart', (e) => {
-        if(e.touches.length > 1) return;
-        startDrag(e, e.touches[0].clientX, e.touches[0].clientY, true);
-    }, {passive: false});
-
-    document.addEventListener('touchmove', (e) => {
-        if (dndState.isDragging) {
-            e.preventDefault(); 
-            moveDrag(e, e.touches[0].clientX, e.touches[0].clientY);
-        } else if (dndState.timer) {
-            clearTimeout(dndState.timer); dndState.timer = null; dndState.el = null;
-        }
-    }, {passive: false});
-
-    document.addEventListener('touchend', (e) => {
-        const touch = e.changedTouches ? e.changedTouches[0] : e.touches[0];
-        endDrag(e, touch.clientX, touch.clientY);
-    });
-
-    document.addEventListener('touchcancel', (e) => {
-        const touch = e.changedTouches ? e.changedTouches[0] : e.touches[0];
-        endDrag(e, touch.clientX, touch.clientY);
-    });
-
-    document.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
-        startDrag(e, e.clientX, e.clientY, false);
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (dndState.isDragging) { e.preventDefault(); moveDrag(e, e.clientX, e.clientY); }
-    });
-
-    document.addEventListener('mouseup', (e) => { endDrag(e, e.clientX, e.clientY); });
-
-    function startDrag(e, clientX, clientY, isTouch) {
-        if(e.target.closest('button')) return;
-        let draggable = e.target.closest('.dnd-draggable');
-        if(!draggable) return;
-
-        dndState.el = draggable;
-        const nodeToClone = dndState.el;
-        const rect = nodeToClone.getBoundingClientRect();
-
-        const delay = isTouch ? 150 : 0; // Allows normal scrolling on touch
-
-        dndState.timer = setTimeout(() => {
-            dndState.isDragging = true;
-            if(isTouch && navigator.vibrate) navigator.vibrate(50);
-
-            dndState.el.classList.add('locked-for-drag');
-            dndState.clone = nodeToClone.cloneNode(true);
-            dndState.clone.classList.add('dragging-clone');
-            dndState.clone.style.width = rect.width + 'px';
-            dndState.clone.style.height = rect.height + 'px';
-
-            document.body.appendChild(dndState.clone);
-            updateClonePosition(clientX, clientY, rect.width, rect.height);
-        }, delay);
-    }
-
-    function moveDrag(e, clientX, clientY) {
-        if (!dndState.isDragging || !dndState.clone) return;
-        const w = parseFloat(dndState.clone.style.width);
-        const h = parseFloat(dndState.clone.style.height);
-        updateClonePosition(clientX, clientY, w, h);
-
-        const elAtPoint = document.elementFromPoint(clientX, clientY);
-        const activeDz = elAtPoint ? elAtPoint.closest('.dnd-dropzone') : null;
-
-        document.querySelectorAll('.dnd-dropzone').forEach(dz => {
-            if (dz === activeDz) dz.classList.add('drag-over-highlight');
-            else dz.classList.remove('drag-over-highlight');
-        });
-    }
-
-    function endDrag(e, clientX, clientY) {
-        if(dndState.timer) { clearTimeout(dndState.timer); dndState.timer = null; }
-        if(dndState.el) dndState.el.classList.remove('locked-for-drag');
-
-        if (dndState.isDragging && dndState.clone) {
-            dndState.clone.remove();
-            dndState.clone = null;
-            dndState.isDragging = false;
-
-            document.querySelectorAll('.dnd-dropzone').forEach(dz => dz.classList.remove('drag-over-highlight'));
-
-            const elAtPoint = document.elementFromPoint(clientX, clientY);
-            const dropZone = elAtPoint ? elAtPoint.closest('.dnd-dropzone') : null;
-
-            if(dropZone && dndState.el) {
-                const sourceId = dndState.el.dataset.itemId;
-                const targetId = dropZone.dataset.targetId;
-                
-                // EXECUTE CUSTOM APP LOGIC
-                pendingStructureChanges[sourceId] = targetId;
-                renderStructureUI();
-            }
-        }
-        dndState.el = null;
-    }
-
-    function updateClonePosition(x, y, w, h) {
-        if(dndState.clone) {
-            dndState.clone.style.left = (x - (w / 2)) + 'px';
-            dndState.clone.style.top = (y - (h / 2)) + 'px';
-        }
-    }
 }
