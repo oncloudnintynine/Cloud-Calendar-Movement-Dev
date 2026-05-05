@@ -50,7 +50,6 @@ function doPost(e) {
  var payload = JSON.parse(e.postData.contents);
  var action = payload.action;
  
- // OPTIMIZATION: Only lock the script for mutating actions to prevent read-only blocking
  var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings'].indexOf(action) !== -1;
  if (needsLock) lock.waitLock(15000); 
  
@@ -62,13 +61,12 @@ function doPost(e) {
    // SECURITY: Enforce API authentication for sensitive endpoints
    var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'backupCode', 'updateUser', 'deleteUser', 'updateUserUnits'];
    if (secureActions.indexOf(action) !== -1) {
-     if (!credentials.phone && !credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
+     if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
      
-     // Determine if it's admin explicit override or normal user pass
      var checkPass = data.adminPass || credentials.pass;
      var verifiedUser = handleLogin({ password: checkPass });
      
-     if (verifiedUser.role !== 'admin' && verifiedUser.phone !== credentials.phone) {
+     if (verifiedUser.role !== 'admin' && String(verifiedUser.phone) !== String(credentials.phone)) {
        throw new Error("Unauthorized: Invalid credentials");
      }
      
