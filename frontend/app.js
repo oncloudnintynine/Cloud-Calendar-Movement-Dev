@@ -12,7 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
  if (metaTheme) metaTheme.setAttribute('content', wantsDark ? '#121212' : '#ffffff');
  if (ENV === 'Dev') document.getElementById('dev-banner').classList.remove('hidden');
  
- if (user) showApp(); else showLogin();
+ if (user) {
+   if (!user.pass) {
+       logout(); // Force login if old cache format lacks password
+   } else {
+       showApp(); 
+   }
+ } else {
+   showLogin();
+ }
  
  document.getElementById('login-pass').addEventListener('keypress', e => e.key === 'Enter' && handleLogin());
  
@@ -89,7 +97,12 @@ async function showApp() {
      });
      companyStructure = Array.from(allUnits);
    }
-   const uniqueDepts = Array.from(allUnits).sort();
+   
+   const uniqueDepts = Array.from(allUnits).sort((a, b) => {
+       if (a.toUpperCase() === 'HQ') return -1;
+       if (b.toUpperCase() === 'HQ') return 1;
+       return a.localeCompare(b);
+   });
 
    const deptNav = document.getElementById('dash-dept-nav');
    if (deptNav) {
