@@ -13,10 +13,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-  
-  <!-- ADD THIS LINE BACK -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-  
   <script>
     tailwind.config = { 
       darkMode: 'class',
@@ -93,13 +90,12 @@
     </div>
   </div>
 
-  <main class="flex-grow flex flex-col p-3 md:p-5 w-full max-w-6xl mx-auto relative overflow-hidden">
+  <main class="flex-grow flex flex-col p-2 md:p-4 w-full max-w-6xl mx-auto relative overflow-hidden">
     
     <!-- Login View -->
     <section id="login-view" class="flex flex-col items-center justify-center h-full">
       <div class="bg-white dark:bg-darksurface p-6 rounded-2xl shadow-xl w-full max-w-sm border dark:border-darkborder">
         
-        <!-- Login Form -->
         <div id="login-form-container" class="w-full transition-opacity duration-300">
           <h2 class="text-2xl font-bold mb-1 text-center">Welcome</h2>
           <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-6">Enter your password to continue</p>
@@ -117,7 +113,6 @@
           </div>
         </div>
 
-        <!-- Self Register Form -->
         <div id="register-form-container" class="w-full hidden-view transition-opacity duration-300">
           <h2 class="text-xl font-bold mb-1 text-center">Self Registration</h2>
           <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-4">Create your account</p>
@@ -155,32 +150,28 @@
     <section id="app-view" class="hidden-view flex-col h-full overflow-hidden">
       
       <!-- Dashboard Tab -->
-      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-3">
+      <div id="view-dashboard" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-2 md:space-y-3">
         
         <!-- FLATTENED DASHBOARD CONTROLS ROW -->
         <div class="flex flex-row items-center space-x-2 w-full shrink-0 overflow-x-auto pb-1 scrollbar-hide">
-          <input type="text" id="dash-search" placeholder="Search..." class="flex-grow min-w-[120px] border-2 border-gray-400 dark:border-gray-500 rounded-xl py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition" onkeyup="renderDashboard()">
+          <input type="text" id="dash-search" placeholder="Search..." class="flex-grow min-w-[120px] border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition text-sm" onkeyup="renderDashboard()">
           
-          <!-- View Toggle -->
-          <div class="flex items-center bg-gray-200 dark:bg-darkborder rounded-xl p-1 shrink-0">
-             <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-3 py-1 rounded-lg font-bold text-sm transition bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Agenda</button>
-             <button id="btn-dash-month" onclick="toggleDashView('month')" class="px-3 py-1 rounded-lg font-bold text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200">Month</button>
+          <button id="unified-btn-leave" onclick="switchTab('submit-leave')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-3 rounded-lg shadow-sm transition text-xs shrink-0 whitespace-nowrap">Add Leave/MC</button>
+          <button id="unified-btn-event" onclick="switchTab('submit-event')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-3 rounded-lg shadow-sm transition text-xs shrink-0 whitespace-nowrap">Add Event</button>
+          
+          <div class="flex items-center bg-gray-200 dark:bg-darkborder rounded-lg p-0.5 shrink-0">
+             <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-3 py-1 rounded-md font-bold text-xs transition bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Agenda</button>
+             <button id="btn-dash-month" onclick="toggleDashView('month')" class="px-3 py-1 rounded-md font-bold text-xs transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200">Month</button>
           </div>
-
-          <!-- Unified Action Buttons -->
-          <button id="unified-btn-leave" onclick="switchTab('submit-leave')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-3 rounded-xl shadow-sm transition text-xs shrink-0 whitespace-nowrap">Add Leave/MC</button>
-          <button id="unified-btn-event" onclick="switchTab('submit-event')" class="hidden bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-3 rounded-xl shadow-sm transition text-xs shrink-0 whitespace-nowrap">Add Event</button>
         </div>
 
-        <!-- AGENDA VIEW WRAPPER (Continuously Scrollable) -->
+        <!-- AGENDA VIEW WRAPPER -->
         <div id="dash-agenda-wrapper" class="flex flex-col md:flex-row gap-3 flex-grow overflow-hidden">
-          
-          <!-- COMPRESSED VERTICAL CALENDAR -->
           <div class="w-full md:w-56 shrink-0 bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-2 h-fit text-sm">
             <div class="flex justify-between items-center mb-1">
-              <button onclick="changeMonth('dash', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">◀</button>
-              <div id="dash-cal-month" class="font-bold text-sm"></div>
-              <button onclick="changeMonth('dash', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">▶</button>
+              <button onclick="changeMonth('dash', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition leading-none">◀</button>
+              <div id="dash-cal-month" class="font-bold text-sm leading-none"></div>
+              <button onclick="changeMonth('dash', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition leading-none">▶</button>
             </div>
             <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 dark:text-darkmuted mb-0.5"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
             <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-0.5 font-medium"></div>
@@ -189,186 +180,178 @@
           <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-3 min-h-0 h-full relative">
             <div id="dash-infoall-container" class="hidden-view shrink-0 mb-2 pb-2 border-b-2 border-dashed dark:border-darkborder">
               <h4 class="font-bold text-xs text-blue-600 dark:text-blue-400 mb-1 uppercase tracking-wide">📌 Info All Events</h4>
-              <div id="dash-infoall-list" class="max-h-32 overflow-y-auto space-y-1.5 pr-1"></div>
+              <div id="dash-infoall-list" class="max-h-32 overflow-y-auto space-y-1 pr-1"></div>
             </div>
             <!-- CONTINUOUS AGENDA LIST -->
-            <div id="dash-agenda" class="flex-1 overflow-y-auto space-y-4 pr-1 pb-10 scrollbar-hide"></div>
+            <div id="dash-agenda" class="flex-1 overflow-y-auto space-y-3 pr-1 pb-10 scrollbar-hide"></div>
           </div>
         </div>
 
         <!-- FULL MONTH GRID VIEW WRAPPER -->
-        <div id="dash-month-wrapper" class="hidden-view flex-grow flex-col overflow-hidden bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-3">
-            <div class="flex justify-between items-center mb-4 shrink-0 px-2">
-              <button onclick="changeMonth('dash', -1)" class="p-2 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition">◀ Prev</button>
-              <div id="dash-month-title" class="font-bold text-xl"></div>
-              <button onclick="changeMonth('dash', 1)" class="p-2 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition">Next ▶</button>
+        <div id="dash-month-wrapper" class="hidden-view flex-grow flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-2">
+            <div class="flex justify-between items-center mb-2 shrink-0 px-1">
+              <button onclick="changeMonth('dash', -1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm">◀ Prev</button>
+              <div id="dash-month-title" class="font-bold text-lg"></div>
+              <button onclick="changeMonth('dash', 1)" class="p-1.5 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm">Next ▶</button>
             </div>
-            <div class="grid grid-cols-7 text-center text-xs md:text-sm font-bold text-gray-500 dark:text-darkmuted mb-2 shrink-0 border-b dark:border-darkborder pb-2">
+            <div class="grid grid-cols-7 text-center text-[11px] font-bold text-gray-500 dark:text-darkmuted mb-1 shrink-0 border-b dark:border-darkborder pb-1">
                 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
             </div>
             <div id="dash-month-grid" class="flex-grow overflow-y-auto flex flex-col border-l border-t dark:border-darkborder">
                 <!-- Generated by JS -->
             </div>
         </div>
-
       </div>
 
       <!-- Parade State Tab -->
       <div id="view-parade-state" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full">
-        <div class="bg-white dark:bg-darksurface rounded-2xl shadow-sm border dark:border-darkborder p-5 flex-grow flex flex-col min-h-0 h-full">
-          <div class="flex justify-between items-center border-b dark:border-darkborder pb-3 mb-4 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0">
-            <h2 id="parade-state-header" class="text-xl font-bold text-blue-600 dark:text-blue-400 m-0">Overall Parade State</h2>
-            <button type="button" id="btn-parade-target" onclick="openPicker('datetime', 'parade', 'target')" class="border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black font-medium text-xs md:text-sm transition">Change Time</button>
+        <div class="bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-4 flex-grow flex flex-col min-h-0 h-full">
+          <div class="flex justify-between items-center border-b dark:border-darkborder pb-2 mb-3 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0">
+            <h2 id="parade-state-header" class="text-lg font-bold text-blue-600 dark:text-blue-400 m-0">Overall Parade State</h2>
+            <button type="button" id="btn-parade-target" onclick="openPicker('datetime', 'parade', 'target')" class="border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black font-medium text-xs transition">Change Time</button>
           </div>
-          <div id="parade-state-body" class="flex-1 overflow-y-auto space-y-6 pr-2 pb-4"></div>
+          <div id="parade-state-body" class="flex-1 overflow-y-auto space-y-4 pr-1 pb-4"></div>
         </div>
       </div>
 
       <!-- My Calendar Tab -->
       <div id="view-my-leaves" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-3">
-        
-        <div class="flex flex-row items-center space-x-2 w-full shrink-0 overflow-x-auto pb-1 scrollbar-hide">
-          <button onclick="switchTab('submit-leave')" class="shrink-0 bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-4 rounded-xl shadow-sm transition text-sm whitespace-nowrap">Add Leave/MC</button>
-          <button onclick="switchTab('submit-event')" class="shrink-0 bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-4 rounded-xl shadow-sm transition text-sm whitespace-nowrap">Add Event</button>
+        <div class="flex space-x-2 w-full shrink-0 overflow-x-auto pb-1 scrollbar-hide">
+          <button onclick="switchTab('submit-leave')" class="shrink-0 bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-4 rounded-lg shadow-sm transition text-xs whitespace-nowrap">Add Leave/MC</button>
+          <button onclick="switchTab('submit-event')" class="shrink-0 bg-blue-50 dark:bg-[#1a1a1a] border-2 border-blue-200 dark:border-gray-500 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-black font-bold py-1.5 px-4 rounded-lg shadow-sm transition text-xs whitespace-nowrap">Add Event</button>
         </div>
 
         <div class="flex flex-col md:flex-row gap-3 flex-grow overflow-hidden">
-          
           <div class="w-full md:w-56 shrink-0 bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-2 h-fit text-sm">
             <div class="flex justify-between items-center mb-1">
-              <button onclick="changeMonth('my', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">◀</button>
-              <div id="my-cal-month" class="font-bold text-sm"></div>
-              <button onclick="changeMonth('my', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition">▶</button>
+              <button onclick="changeMonth('my', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition leading-none">◀</button>
+              <div id="my-cal-month" class="font-bold text-sm leading-none"></div>
+              <button onclick="changeMonth('my', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full font-bold transition leading-none">▶</button>
             </div>
             <div class="grid grid-cols-7 text-center text-[10px] font-bold text-gray-400 dark:text-darkmuted mb-0.5"><div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div></div>
             <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-0.5 font-medium"></div>
           </div>
-
           <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-3 min-h-0 h-full relative">
-            <div id="my-agenda" class="flex-1 overflow-y-auto space-y-4 pr-1 pb-10 scrollbar-hide"></div>
+            <div id="my-agenda" class="flex-1 overflow-y-auto space-y-3 pr-1 pb-10 scrollbar-hide"></div>
           </div>
         </div>
       </div>
 
       <!-- Add/Submit Leave Tab -->
       <div id="view-submit-leave" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
-        <form id="leave-form" onsubmit="event.preventDefault(); submitForm('leave');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
-          
-          <div class="flex-grow overflow-y-auto p-5 space-y-5">
-            <div id="admin-behalf-leave" class="hidden-view relative mb-4 pb-5 border-b-2 border-dashed dark:border-darkborder">
-              <label class="block font-bold mb-1 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
-              <input type="text" id="form-leave-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-2.5 px-4 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('leave')">
-              <div id="behalf-results-leave" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-300 dark:border-emerald-700 rounded-xl shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
-              <div id="selected-behalf-leave" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-lg flex items-center justify-between empty:hidden"></div>
+        <form id="leave-form" onsubmit="event.preventDefault(); submitForm('leave');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
+          <div class="flex-grow overflow-y-auto p-4 space-y-4">
+            <!-- Form body identical to previous -->
+            <div id="admin-behalf-leave" class="hidden-view relative mb-3 pb-4 border-b-2 border-dashed dark:border-darkborder">
+              <label class="block font-bold mb-1 text-sm text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
+              <input type="text" id="form-leave-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-lg py-2 px-3 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition text-sm" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('leave')">
+              <div id="behalf-results-leave" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-300 dark:border-emerald-700 rounded-lg shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
+              <div id="selected-behalf-leave" class="mt-2 font-bold text-emerald-700 dark:text-emerald-400 text-sm flex items-center justify-between empty:hidden"></div>
             </div>
-
             <div>
-              <label class="block font-semibold mb-1 text-base">Leave/MC/OIL Type</label>
-              <select id="form-leave-type" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="toggleOverseasFields()" required></select>
+              <label class="block font-semibold mb-1 text-sm">Leave/MC/OIL Type</label>
+              <select id="form-leave-type" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="toggleOverseasFields()" required></select>
             </div>
-            <div class="flex space-x-3">
+            <div class="flex space-x-2">
               <div class="flex-grow">
-                <label class="block font-semibold mb-1 text-base">Start Date</label>
-                <button type="button" id="btn-leave-start" onclick="openPicker('date', 'leave', 'start')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition">Select Date</button>
+                <label class="block font-semibold mb-1 text-sm">Start Date</label>
+                <button type="button" id="btn-leave-start" onclick="openPicker('date', 'leave', 'start')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm">Select Date</button>
               </div>
-              <div class="w-28 shrink-0">
-                <label class="block font-semibold mb-1 text-center text-base">Time</label>
-                <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-xl p-1 h-[46px] cursor-pointer select-none" onclick="toggleAMPM('start')">
-                  <div id="start-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded-lg transition-transform"></div>
-                  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-sm" id="start-leave-am">AM</div>
-                  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-sm" id="start-leave-pm">PM</div>
+              <div class="w-24 shrink-0">
+                <label class="block font-semibold mb-1 text-center text-sm">Time</label>
+                <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none" onclick="toggleAMPM('start')">
+                  <div id="start-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform"></div>
+                  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="start-leave-am">AM</div>
+                  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="start-leave-pm">PM</div>
                 </div>
               </div>
             </div>
-            <div class="flex space-x-3">
+            <div class="flex space-x-2">
               <div class="flex-grow">
-                <label class="block font-semibold mb-1 text-base">End Date</label>
-                <button type="button" id="btn-leave-end" onclick="openPicker('date', 'leave', 'end')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition">Select Date</button>
+                <label class="block font-semibold mb-1 text-sm">End Date</label>
+                <button type="button" id="btn-leave-end" onclick="openPicker('date', 'leave', 'end')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm">Select Date</button>
               </div>
-              <div class="w-28 shrink-0">
-                <label class="block font-semibold mb-1 text-center text-base">Time</label>
-                <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-xl p-1 h-[46px] cursor-pointer select-none" onclick="toggleAMPM('end')">
-                  <div id="end-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded-lg transition-transform translate-x-full"></div>
-                  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-sm" id="end-leave-am">AM</div>
-                  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-sm" id="end-leave-pm">PM</div>
+              <div class="w-24 shrink-0">
+                <label class="block font-semibold mb-1 text-center text-sm">Time</label>
+                <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none" onclick="toggleAMPM('end')">
+                  <div id="end-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform translate-x-full"></div>
+                  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="end-leave-am">AM</div>
+                  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="end-leave-pm">PM</div>
                 </div>
               </div>
             </div>
             <div class="relative">
-              <label class="block font-semibold mb-1 text-base">Covering Person <span class="text-red-500">*</span></label>
-              <input type="text" id="form-leave-cover" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" placeholder="Search for personnel..." autocomplete="off" onkeyup="searchCovering('leave')" required>
-              <div id="cover-results-leave" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-gray-300 dark:border-darkborder rounded-xl shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
+              <label class="block font-semibold mb-1 text-sm">Covering Person <span class="text-red-500">*</span></label>
+              <input type="text" id="form-leave-cover" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition text-sm" placeholder="Search for personnel..." autocomplete="off" onkeyup="searchCovering('leave')" required>
+              <div id="cover-results-leave" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-gray-300 dark:border-darkborder rounded-lg shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
             </div>
-            <div id="overseas-fields" class="hidden-view grid grid-cols-2 gap-4 p-4 bg-gray-100 dark:bg-darkinput rounded-xl border-2 border-gray-300 dark:border-darkborder mt-2">
-              <div><label class="block font-semibold mb-1">Country <span class="text-red-500">*</span></label><input type="text" id="form-leave-country" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition"></div>
-              <div><label class="block font-semibold mb-1 text-gray-500 dark:text-darkmuted">State</label><input type="text" id="form-leave-state" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition"></div>
+            <div id="overseas-fields" class="hidden-view grid grid-cols-2 gap-3 p-3 bg-gray-100 dark:bg-darkinput rounded-lg border border-gray-300 dark:border-darkborder mt-2">
+              <div><label class="block font-semibold mb-1 text-sm">Country <span class="text-red-500">*</span></label><input type="text" id="form-leave-country" class="w-full border border-gray-400 dark:border-gray-500 rounded p-1.5 bg-white dark:bg-black outline-none focus:border-blue-500 text-sm"></div>
+              <div><label class="block font-semibold mb-1 text-sm text-gray-500">State</label><input type="text" id="form-leave-state" class="w-full border border-gray-400 dark:border-gray-500 rounded p-1.5 bg-white dark:bg-black outline-none focus:border-blue-500 text-sm"></div>
             </div>
             <div>
-              <label class="block font-semibold mb-1 text-base">Remarks</label>
-              <textarea id="form-leave-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 transition"></textarea>
+              <label class="block font-semibold mb-1 text-sm">Remarks</label>
+              <textarea id="form-leave-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 transition text-sm"></textarea>
             </div>
           </div>
-
-          <div class="shrink-0 p-4 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button type="submit" id="submit-leave-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md text-lg transition">Save Record</button>
-            <button type="button" id="cancel-edit-leave-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 rounded-xl shadow hidden-view mt-3 transition">Cancel Edit</button>
+          <div class="shrink-0 p-3 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10">
+            <button type="submit" id="submit-leave-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-md transition">Save Record</button>
+            <button type="button" id="cancel-edit-leave-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 rounded-lg shadow hidden-view mt-2 transition">Cancel Edit</button>
           </div>
-
         </form>
       </div>
 
       <!-- Add/Submit Event Tab -->
       <div id="view-submit-event" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
-        <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
-          
-          <div class="flex-grow overflow-y-auto p-5 space-y-5">
-            
-            <div id="admin-behalf-event" class="hidden-view relative mb-4 pb-5 border-b-2 border-dashed dark:border-darkborder">
-              <label class="block font-bold mb-1 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
-              <input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-2.5 px-4 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
-              <div id="behalf-results-event" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-300 dark:border-emerald-700 rounded-xl shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
-              <div id="selected-behalf-event" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-lg flex items-center justify-between empty:hidden"></div>
+        <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
+          <div class="flex-grow overflow-y-auto p-4 space-y-4">
+            <!-- Form body identical to previous -->
+            <div id="admin-behalf-event" class="hidden-view relative mb-3 pb-4 border-b-2 border-dashed dark:border-darkborder">
+              <label class="block font-bold mb-1 text-sm text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
+              <input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-lg py-2 px-3 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition text-sm" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
+              <div id="behalf-results-event" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-300 dark:border-emerald-700 rounded-lg shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
+              <div id="selected-behalf-event" class="mt-2 font-bold text-emerald-700 dark:text-emerald-400 text-sm flex items-center justify-between empty:hidden"></div>
             </div>
 
-            <div class="flex space-x-3 items-end">
+            <div class="flex space-x-2 items-end">
               <div class="flex-grow">
-                <label class="block font-semibold mb-1 text-base">Event Title</label>
-                <input type="text" id="form-event-name" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" placeholder="e.g. Planning Seminar" required>
+                <label class="block font-semibold mb-1 text-sm">Event Title</label>
+                <input type="text" id="form-event-name" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition text-sm" placeholder="e.g. Planning Seminar" required>
               </div>
-              <button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-400 dark:border-gray-500 rounded-xl px-4 py-2.5 font-bold text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-darkhover transition">Info All</button>
+              <button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-400 dark:border-gray-500 rounded-lg px-3 py-2 font-bold text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-darkhover transition">Info All</button>
             </div>
             
             <div>
-              <label class="block font-semibold mb-1 text-base">Location</label>
-              <input type="text" id="form-event-location" value="Office" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition" required>
+              <label class="block font-semibold mb-1 text-sm">Location</label>
+              <input type="text" id="form-event-location" value="Office" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition text-sm" required>
             </div>
 
-            <div class="flex items-center space-x-2 mt-2">
+            <div class="flex items-center space-x-2 mt-1">
               <input type="checkbox" id="form-event-allday" class="w-4 h-4 cursor-pointer text-blue-600" onchange="toggleEventAllDay()">
-              <label for="form-event-allday" class="font-bold text-base cursor-pointer select-none">All Day Event</label>
+              <label for="form-event-allday" class="font-bold text-sm cursor-pointer select-none">All Day Event</label>
             </div>
             
-            <div class="relative pl-8 py-2 border-l-4 border-gray-200 dark:border-darkborder ml-3 space-y-4">
+            <div class="relative pl-6 py-1 border-l-2 border-gray-200 dark:border-darkborder ml-2 space-y-3">
               <div class="relative">
-                <div class="absolute -left-[42px] top-2 w-5 h-5 rounded-full bg-blue-500 ring-4 ring-white dark:ring-darksurface"></div>
-                <label class="block font-bold text-xs text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1.5">Start</label>
-                <button type="button" id="btn-event-start" onclick="openEventPicker('start')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition">Select Date & Time</button>
+                <div class="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full bg-blue-500 ring-4 ring-white dark:ring-darksurface"></div>
+                <label class="block font-bold text-[10px] text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1">Start</label>
+                <button type="button" id="btn-event-start" onclick="openEventPicker('start')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm">Select Date & Time</button>
               </div>
               <div class="relative">
-                <div class="absolute -left-[42px] top-2 w-5 h-5 rounded-full bg-red-500 ring-4 ring-white dark:ring-darksurface"></div>
-                <label class="block font-bold text-xs text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1.5">End</label>
-                <button type="button" id="btn-event-end" onclick="openEventPicker('end')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition">Select Date & Time</button>
+                <div class="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full bg-red-500 ring-4 ring-white dark:ring-darksurface"></div>
+                <label class="block font-bold text-[10px] text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1">End</label>
+                <button type="button" id="btn-event-end" onclick="openEventPicker('end')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm">Select Date & Time</button>
               </div>
-              <div id="event-until-container" class="relative hidden-view pt-2">
-                <div class="absolute -left-[42px] top-4 w-5 h-5 rounded-full bg-purple-500 ring-4 ring-white dark:ring-darksurface"></div>
-                <label class="block font-bold text-xs text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1.5">Repeat Until</label>
-                <button type="button" id="btn-event-until" onclick="openPicker('date', 'event', 'until')" class="w-full border-2 border-purple-300 dark:border-purple-800 rounded-xl py-2.5 px-4 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-left outline-none font-medium transition text-purple-900 dark:text-purple-200">Select Date</button>
+              <div id="event-until-container" class="relative hidden-view pt-1">
+                <div class="absolute -left-[30px] top-3 w-3.5 h-3.5 rounded-full bg-purple-500 ring-4 ring-white dark:ring-darksurface"></div>
+                <label class="block font-bold text-[10px] text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Repeat Until</label>
+                <button type="button" id="btn-event-until" onclick="openPicker('date', 'event', 'until')" class="w-full border-2 border-purple-300 dark:border-purple-800 rounded-lg py-2 px-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 text-left outline-none font-medium transition text-sm text-purple-900 dark:text-purple-200">Select Date</button>
               </div>
             </div>
 
             <div>
-              <label class="block font-semibold mb-1 text-base">Repeat Event</label>
-              <select id="form-event-repeat" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" onchange="toggleRepeatUntil()">
+              <label class="block font-semibold mb-1 text-sm">Repeat Event</label>
+              <select id="form-event-repeat" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer text-sm" onchange="toggleRepeatUntil()">
                 <option value="NONE">Does not repeat</option>
                 <option value="DAILY">Daily</option>
                 <option value="WEEKLY">Weekly</option>
@@ -379,21 +362,21 @@
             </div>
             
             <div class="relative">
-              <label class="block font-semibold mb-1 text-base">Attendees <span class="text-xs font-normal text-gray-500">(Optional)</span></label>
-              <div id="attendees-chip-container" class="flex flex-wrap gap-2 mb-2 empty:hidden"></div>
-              <input type="text" id="form-event-attendee-search" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" placeholder="Add person or department..." autocomplete="off" onkeyup="searchAttendees()">
-              <div id="attendees-results" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-gray-300 dark:border-darkborder rounded-xl shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
+              <label class="block font-semibold mb-1 text-sm">Attendees <span class="text-[10px] font-normal text-gray-500">(Optional)</span></label>
+              <div id="attendees-chip-container" class="flex flex-wrap gap-1.5 mb-1.5 empty:hidden"></div>
+              <input type="text" id="form-event-attendee-search" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition text-sm" placeholder="Add person or department..." autocomplete="off" onkeyup="searchAttendees()">
+              <div id="attendees-results" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-gray-300 dark:border-darkborder rounded-lg shadow-2xl hidden-view max-h-40 overflow-y-auto mt-1"></div>
             </div>
 
             <div>
-              <label class="block font-semibold mb-1 text-base">Remarks</label>
-              <textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 transition"></textarea>
+              <label class="block font-semibold mb-1 text-sm">Remarks</label>
+              <textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 transition text-sm"></textarea>
             </div>
           </div>
 
-          <div class="shrink-0 p-4 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button type="submit" id="submit-event-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md text-lg transition">Save Event</button>
-            <button type="button" id="cancel-edit-event-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 rounded-xl shadow hidden-view mt-3 transition">Cancel Edit</button>
+          <div class="shrink-0 p-3 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10">
+            <button type="submit" id="submit-event-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-md transition text-base">Save Event</button>
+            <button type="button" id="cancel-edit-event-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 rounded-lg shadow hidden-view mt-2 transition text-sm">Cancel Edit</button>
           </div>
 
         </form>
@@ -401,186 +384,199 @@
       
       <!-- Admin Settings Tab -->
       <div id="view-admin" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
-        <div class="flex flex-col h-full bg-white dark:bg-darksurface rounded-2xl shadow border dark:border-darkborder overflow-hidden">
+        <div class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
           
-          <div class="flex-grow overflow-y-auto p-5 space-y-6">
-            <h2 class="text-xl font-bold border-b dark:border-darkborder pb-3 text-blue-600 dark:text-blue-400">Global Configuration</h2>
+          <div class="flex-grow overflow-y-auto p-4 space-y-5">
+            <h2 class="text-lg font-bold border-b dark:border-darkborder pb-2 text-blue-600 dark:text-blue-400">Global Configuration</h2>
             
-            <!-- App Mode Selection -->
             <div>
-              <label class="block font-semibold mb-2 text-base text-purple-600 dark:text-purple-400">App Interface Mode</label>
-              <div class="flex flex-col space-y-2 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-xl border border-purple-200 dark:border-purple-800">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                  <input type="radio" name="app-mode" value="separated" class="w-4 h-4 text-purple-600 focus:ring-purple-500 cursor-pointer">
+              <label class="block font-semibold mb-1 text-sm text-purple-600 dark:text-purple-400">App Interface Mode</label>
+              <div class="flex flex-col space-y-1.5 bg-purple-50 dark:bg-purple-900/20 p-2.5 rounded-lg border border-purple-200 dark:border-purple-800">
+                <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                  <input type="radio" name="app-mode" value="separated" class="w-3.5 h-3.5 text-purple-600 focus:ring-purple-500 cursor-pointer">
                   <span class="font-medium">Separated Mode (Classic Dashboard & My Calendar)</span>
                 </label>
-                <label class="flex items-center space-x-3 cursor-pointer">
-                  <input type="radio" name="app-mode" value="unified" class="w-4 h-4 text-purple-600 focus:ring-purple-500 cursor-pointer">
+                <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                  <input type="radio" name="app-mode" value="unified" class="w-3.5 h-3.5 text-purple-600 focus:ring-purple-500 cursor-pointer">
                   <span class="font-medium">Unified Mode (Combined Dashboard with Forms)</span>
                 </label>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label class="block font-semibold mb-1 text-base">Admin Password</label>
+                <label class="block font-semibold mb-1 text-sm">Admin Password</label>
                 <div class="relative">
-                  <input type="password" id="set-admin-pass" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" placeholder="Leave blank to keep current">
-                  <button onclick="togglePassword('set-admin-pass', this)" class="absolute right-3 top-3 text-gray-500 dark:text-darkmuted"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+                  <input type="password" id="set-admin-pass" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 transition text-sm" placeholder="Leave blank to keep current">
                 </div>
               </div>
               <div>
-                <label class="block font-semibold mb-1 text-base">User Login Keyword</label>
-                <input type="text" id="set-user-keyword" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" placeholder="e.g. peace">
-                <p class="text-[11px] text-gray-500 mt-1 leading-tight">Users will log in with their mobile number followed by this keyword.</p>
+                <label class="block font-semibold mb-1 text-sm">User Login Keyword</label>
+                <input type="text" id="set-user-keyword" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 transition text-sm" placeholder="e.g. peace">
+                <p class="text-[10px] text-gray-500 mt-1 leading-tight">Users will log in with their mobile number followed by this keyword.</p>
               </div>
             </div>
 
-            <!-- Menu Reordering block -->
             <div id="menu-order-container">
-              <label class="block font-semibold mb-2 text-base">App Menu Order</label>
-              <div id="menu-order-list" class="space-y-2 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded-xl border-2 border-gray-300 dark:border-gray-600"></div>
+              <label class="block font-semibold mb-1.5 text-sm">App Menu Order</label>
+              <div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
             </div>
             
             <div>
-              <label class="block font-semibold mb-2 text-base">Leave/MC/OIL Types</label>
-              <div id="leave-types-list" class="space-y-2 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 mb-3"></div>
-              <div class="flex space-x-3">
-                <input type="text" id="new-leave-type" class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" placeholder="Add new type...">
-                <button type="button" onclick="addLeaveType()" class="bg-gray-300 dark:bg-darkhover font-bold px-5 rounded-xl hover:bg-gray-400 dark:hover:bg-[#333] transition">Add</button>
+              <label class="block font-semibold mb-1.5 text-sm">Leave/MC/OIL Types</label>
+              <div id="leave-types-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-2"></div>
+              <div class="flex space-x-2">
+                <input type="text" id="new-leave-type" class="flex-grow border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-blue-500 transition" placeholder="Add new type...">
+                <button type="button" onclick="addLeaveType()" class="bg-gray-300 font-bold px-4 rounded-lg hover:bg-gray-400 transition text-sm">Add</button>
               </div>
             </div>
             
-            <div><label class="block font-semibold mb-1 text-base">KAH Limit (%)</label><input type="number" id="set-kah-limit" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition"></div>
-            <div><label class="block font-semibold mb-1 text-base">Approving Authority Email</label><input type="email" id="set-appr-email" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition"></div>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="block font-semibold mb-1 text-sm">KAH Limit (%)</label><input type="number" id="set-kah-limit" class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 outline-none focus:border-blue-500 text-sm"></div>
+              <div><label class="block font-semibold mb-1 text-sm">Approving Email</label><input type="email" id="set-appr-email" class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 outline-none focus:border-blue-500 text-sm"></div>
+            </div>
             
             <div>
-              <label class="block font-semibold mb-1 text-base">KAH Personnel Search</label>
+              <label class="block font-semibold mb-1 text-sm">KAH Personnel Search</label>
               <div class="relative">
-                <input type="text" id="kah-search" placeholder="Type name to add..." class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" autocomplete="off" onkeyup="searchKAH()">
-                <div id="kah-results" class="absolute z-50 w-full bg-white dark:bg-darksurface border-x-2 border-b-2 border-gray-300 dark:border-darkborder rounded-b-xl shadow-2xl hidden-view max-h-48 overflow-y-auto -mt-1"></div>
+                <input type="text" id="kah-search" placeholder="Type name to add..." class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 outline-none shadow-sm focus:border-blue-500 text-sm" autocomplete="off" onkeyup="searchKAH()">
+                <div id="kah-results" class="absolute z-50 w-full bg-white border-x border-b border-gray-300 rounded-b-lg shadow-xl hidden-view max-h-40 overflow-y-auto"></div>
               </div>
-              
-              <div class="mt-4 font-bold text-base mb-2">Current KAH List:</div>
-              <div id="kah-selected-list" class="space-y-4 bg-gray-100 dark:bg-[#1a1a1a] p-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 min-h-[50px] empty:hidden"></div>
+              <div class="mt-3 font-bold text-sm mb-1.5">Current KAH List:</div>
+              <div id="kah-selected-list" class="space-y-3 bg-gray-100 p-2 rounded-lg border border-gray-300 min-h-[40px] empty:hidden"></div>
             </div>
             
             <!-- REGISTER NEW USER SYSTEM -->
-            <div class="border-t-2 border-dashed border-gray-300 dark:border-darkborder pt-5 mt-2">
-              <h3 class="font-bold text-lg text-emerald-600 dark:text-emerald-400 mb-3">Register New User</h3>
-              <div id="admin-alert" class="hidden bg-red-100 text-red-700 text-sm p-3 rounded-xl mb-4 text-center"></div>
-              <div class="space-y-4">
-                <div>
-                  <label class="block font-semibold mb-1">Full Name</label>
-                  <input type="text" id="admin-reg-name" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition" placeholder="e.g. Tan Ah Kow">
+            <div class="border-t border-dashed border-gray-300 dark:border-darkborder pt-4 mt-2">
+              <h3 class="font-bold text-base text-emerald-600 dark:text-emerald-400 mb-2">Register New User</h3>
+              <div id="admin-alert" class="hidden bg-red-100 text-red-700 text-xs p-2 rounded-lg mb-3 text-center"></div>
+              <div class="space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block font-semibold mb-1 text-xs">Full Name</label>
+                    <input type="text" id="admin-reg-name" class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 text-sm outline-none" placeholder="e.g. Tan Ah Kow">
+                  </div>
+                  <div>
+                    <label class="block font-semibold mb-1 text-xs">Mobile No</label>
+                    <input type="tel" id="admin-reg-mobile" class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 text-sm outline-none" placeholder="e.g. 96745345">
+                  </div>
                 </div>
-                <div>
-                  <label class="block font-semibold mb-1">Mobile No</label>
-                  <input type="tel" id="admin-reg-mobile" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition" placeholder="e.g. 96745345">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block font-semibold mb-1 text-xs">Unit</label>
+                    <select id="admin-reg-unit" class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 text-sm outline-none cursor-pointer"></select>
+                  </div>
+                  <div>
+                    <label class="block font-semibold mb-1 text-xs">Birthday</label>
+                    <button type="button" id="btn-admin-register-birthday" onclick="openPicker('date', 'adminRegister', 'birthday')" class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 text-left outline-none font-medium text-sm">Select...</button>
+                  </div>
                 </div>
-                <div>
-                  <label class="block font-semibold mb-1">Unit</label>
-                  <select id="admin-reg-unit" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition cursor-pointer">
-                    <option value="" disabled selected>Select...</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block font-semibold mb-1">Birthday</label>
-                  <button type="button" id="btn-admin-register-birthday" onclick="openPicker('date', 'adminRegister', 'birthday')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-gray-900 dark:text-white">Select...</button>
-                </div>
-                <button onclick="submitAdminRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition text-lg mt-2">Register User</button>
+                <button onclick="submitAdminRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm">Register User</button>
               </div>
             </div>
             
             <!-- MANAGE USERS SYSTEM -->
-            <div class="border-t-2 border-dashed border-gray-300 dark:border-darkborder pt-5 mt-2">
-              <h3 class="font-bold text-lg text-red-600 dark:text-red-400 mb-3">Edit / Remove Users</h3>
-              <div class="relative mb-3">
-                <input type="text" id="admin-manage-search" placeholder="Search user to edit or remove..." class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2.5 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition" autocomplete="off" onkeyup="searchUserToManage()">
-                <div id="admin-manage-results" class="absolute z-50 w-full bg-white dark:bg-darksurface border-x-2 border-b-2 border-gray-300 dark:border-darkborder rounded-b-xl shadow-2xl hidden-view max-h-48 overflow-y-auto -mt-1"></div>
+            <div class="border-t border-dashed border-gray-300 dark:border-darkborder pt-4 mt-2">
+              <h3 class="font-bold text-base text-red-600 dark:text-red-400 mb-2">Edit / Remove Users</h3>
+              <div class="relative mb-2">
+                <input type="text" id="admin-manage-search" placeholder="Search user to edit or remove..." class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 text-sm outline-none shadow-sm focus:border-blue-500 transition" autocomplete="off" onkeyup="searchUserToManage()">
+                <div id="admin-manage-results" class="absolute z-50 w-full bg-white border-x border-b border-gray-300 rounded-b-lg shadow-xl hidden-view max-h-40 overflow-y-auto"></div>
               </div>
               
-              <div id="user-to-manage-container" class="hidden-view p-4 bg-gray-100 dark:bg-darkinput border border-gray-300 dark:border-darkborder rounded-xl space-y-4">
+              <div id="user-to-manage-container" class="hidden-view p-3 bg-gray-100 border border-gray-300 rounded-lg space-y-3 mt-2">
                 <div class="flex justify-between items-center mb-1">
-                  <span class="font-bold text-lg text-gray-800 dark:text-gray-200">Edit User Details</span>
-                  <button type="button" onclick="cancelManageUser()" class="text-gray-500 hover:text-gray-700 dark:text-darkmuted dark:hover:text-gray-300 text-2xl leading-none">&times;</button>
+                  <span class="font-bold text-sm text-gray-800">Edit User Details</span>
+                  <button type="button" onclick="cancelManageUser()" class="text-gray-500 hover:text-gray-700 text-xl leading-none">&times;</button>
                 </div>
                 
-                <div>
-                  <label class="block font-semibold mb-1 text-sm">Full Name</label>
-                  <input type="text" id="edit-user-name" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block font-semibold mb-1 text-xs">Full Name</label>
+                      <input type="text" id="edit-user-name" class="w-full border border-gray-400 rounded bg-white text-sm py-1 px-2 outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                      <label class="block font-semibold mb-1 text-xs">Mobile No</label>
+                      <input type="tel" id="edit-user-mobile" class="w-full border border-gray-400 rounded bg-white text-sm py-1 px-2 outline-none focus:border-blue-500">
+                    </div>
                 </div>
-                <div>
-                  <label class="block font-semibold mb-1 text-sm">Mobile No</label>
-                  <input type="tel" id="edit-user-mobile" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition">
-                </div>
-                <div>
-                  <label class="block font-semibold mb-1 text-sm">Unit</label>
-                  <select id="edit-user-unit" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition cursor-pointer">
-                  </select>
-                </div>
-                <div>
-                  <label class="block font-semibold mb-1 text-sm">Birthday</label>
-                  <button type="button" id="btn-manage-user-birthday" onclick="openPicker('date', 'manageUser', 'birthday')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-white dark:bg-black text-left outline-none font-medium transition text-gray-900 dark:text-white">Select...</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block font-semibold mb-1 text-xs">Unit</label>
+                      <select id="edit-user-unit" class="w-full border border-gray-400 rounded bg-white text-sm py-1 px-2 outline-none cursor-pointer"></select>
+                    </div>
+                    <div>
+                      <label class="block font-semibold mb-1 text-xs">Birthday</label>
+                      <button type="button" id="btn-manage-user-birthday" onclick="openPicker('date', 'manageUser', 'birthday')" class="w-full border border-gray-400 rounded bg-white text-left text-sm py-1 px-2 outline-none">Select...</button>
+                    </div>
                 </div>
                 
-                <div class="flex space-x-3 pt-2 border-t dark:border-darkborder">
-                  <button onclick="confirmUpdateUser()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow transition text-sm">Update User</button>
-                  <button onclick="confirmDeleteUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg shadow transition text-sm">Remove User</button>
+                <div class="flex space-x-2 pt-2 border-t border-gray-300">
+                  <button onclick="confirmUpdateUser()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 rounded shadow transition text-xs">Update User</button>
+                  <button onclick="confirmDeleteUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded shadow transition text-xs">Remove User</button>
                 </div>
               </div>
             </div>
 
             <!-- CODE BACKUP SYSTEM -->
-            <div class="border-t-2 border-dashed border-gray-300 dark:border-darkborder pt-5 mt-2">
-              <div class="flex justify-between items-center mb-3">
-                 <h3 class="font-bold text-lg text-purple-600 dark:text-purple-400">Code Backup</h3>
-                 <button onclick="triggerCodeBackup()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm transition text-xs md:text-sm">One-Click Backup</button>
+            <div class="border-t border-dashed border-gray-300 dark:border-darkborder pt-4 mt-2">
+              <div class="flex justify-between items-center mb-2">
+                 <h3 class="font-bold text-base text-purple-600 dark:text-purple-400">Code Backup</h3>
+                 <button onclick="triggerCodeBackup()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-2 rounded shadow-sm transition text-xs">One-Click Backup</button>
               </div>
-              <div class="space-y-4">
+              <div class="space-y-3">
                 <div>
-                  <label class="block font-semibold mb-1">GitHub Repo <span class="text-xs text-gray-500">(owner/repo)</span></label>
-                  <input type="text" id="set-github-repo" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition" placeholder="e.g. oncloudnintynine/Cloud-Calendar-Movement-Dev">
+                  <label class="block font-semibold mb-1 text-xs">GitHub Repo <span class="text-gray-500">(owner/repo)</span></label>
+                  <input type="text" id="set-github-repo" class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 text-sm outline-none focus:border-blue-500" placeholder="e.g. oncloudnintynine/Cloud-Calendar-Movement-Dev">
                 </div>
                 <div>
-                  <label class="block font-semibold mb-1">Backup Drive Folder ID</label>
-                  <input type="text" id="set-backup-folder" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-xl py-2 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition" placeholder="Paste Folder ID or URL here">
+                  <label class="block font-semibold mb-1 text-xs">Backup Drive Folder ID</label>
+                  <input type="text" id="set-backup-folder" class="w-full border border-gray-400 rounded-lg py-1.5 px-3 bg-gray-50 text-sm outline-none focus:border-blue-500" placeholder="Paste Folder ID or URL here">
                 </div>
               </div>
             </div>
 
           </div>
 
-          <div class="shrink-0 p-4 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-md text-lg transition">Save Settings</button>
+          <div class="shrink-0 p-3 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10 shadow-inner">
+            <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition">Save Settings</button>
           </div>
 
         </div>
       </div>
 
-      <!-- Admin Company Structure Tab (UPDATED TOP/BOTTOM LAYOUT) -->
-      <div id="view-admin-structure" class="tab-content hidden-view flex-col max-w-6xl mx-auto w-full h-full pb-0 relative">
-        <div class="flex-grow flex flex-col overflow-y-auto pb-20">
-            <!-- Top Panel: Manage Units & Personnel -->
-            <div class="w-full border-b dark:border-darkborder p-3 md:p-4 flex flex-col bg-gray-50 dark:bg-darkinput flex-shrink-0">
-               <h3 class="font-bold mb-3 text-sm md:text-lg text-gray-800 dark:text-gray-200">Manage Units & Personnel</h3>
-               <div class="flex space-x-2 mb-4 shrink-0">
-                 <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="flex-grow border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase text-sm">
-                 <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 rounded-lg transition text-sm">Add</button>
-               </div>
-               <div id="structure-builder-list" class="space-y-4"></div>
-            </div>
-            
-            <!-- Bottom Panel: Unassigned Personnel -->
-            <div class="w-full p-3 md:p-4 flex flex-col bg-gray-100 dark:bg-darkbase flex-grow min-h-[300px]">
-               <h3 class="font-bold mb-3 text-sm md:text-lg text-red-600 dark:text-red-400">Unassigned Personnel</h3>
-               <div id="unassigned-board" class="flex-grow"></div>
-            </div>
-        </div>
+      <!-- Admin Company Structure Tab -->
+      <div id="view-admin-structure" class="tab-content hidden-view flex-col max-w-4xl mx-auto w-full h-full pb-0 relative">
+        <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
+          
+          <div class="p-3 border-b dark:border-darkborder bg-gray-50 dark:bg-darkinput flex justify-between items-center shrink-0">
+              <h2 class="text-lg font-bold text-blue-600 dark:text-blue-400">Organisational Structure</h2>
+          </div>
 
-        <!-- Fixed Save Button -->
-        <div class="absolute bottom-0 left-0 w-full p-3 bg-white dark:bg-darksurface border-t dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
-            <button onclick="saveCompanyStructure()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-md transition text-lg">Save Assignments</button>
+          <!-- TOP SCROLLABLE: Manage Units -->
+          <div class="flex-grow flex flex-col min-h-[30vh] border-b dark:border-darkborder">
+             <div class="sticky top-0 bg-gray-100 dark:bg-[#1a1a1a] p-2 border-b dark:border-darkborder z-10 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-2">
+                 <h3 class="font-bold text-sm md:text-base text-gray-800 dark:text-gray-200">Manage Units & Personnel</h3>
+                 <div class="flex space-x-2">
+                   <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="w-full md:w-48 border border-gray-400 dark:border-gray-500 rounded p-1 text-xs bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 uppercase">
+                   <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 rounded transition text-xs">Add</button>
+                 </div>
+             </div>
+             <div id="structure-builder-list" class="flex-grow overflow-y-auto p-2 space-y-2 bg-gray-50 dark:bg-darkinput pb-6"></div>
+          </div>
+          
+          <!-- BOTTOM SCROLLABLE: Unassigned -->
+          <div class="h-[35%] flex flex-col min-h-[150px] shrink-0 bg-white dark:bg-darksurface">
+             <div class="sticky top-0 bg-red-50 dark:bg-red-900/20 p-2 border-b border-red-200 dark:border-red-800 z-10 shadow-sm">
+                 <h3 class="font-bold text-sm text-red-600 dark:text-red-400">Unassigned Personnel</h3>
+             </div>
+             <div id="unassigned-board" class="flex-grow overflow-y-auto p-2 pb-6"></div>
+          </div>
+
+          <!-- Footer Save Button -->
+          <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
+              <button onclick="saveCompanyStructure()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow transition text-sm">Save Assignments</button>
+          </div>
+
         </div>
       </div>
       
@@ -602,9 +598,23 @@
       </div>
     </div>
 
+    <!-- Reassign User Modal -->
+    <div id="reassign-modal" class="fixed inset-0 bg-black/70 z-[60] hidden-view flex-col items-center justify-center p-3">
+       <div class="bg-white dark:bg-darksurface w-full max-w-sm rounded-xl shadow-2xl flex flex-col overflow-hidden max-h-[80vh]">
+          <div class="flex justify-between items-center p-3 border-b dark:border-darkborder bg-gray-50 dark:bg-darkinput shrink-0">
+             <h3 class="font-bold text-gray-800 dark:text-darktext">Reassign Personnel</h3>
+             <button onclick="closeReassignModal()" class="text-gray-500 hover:text-gray-800 dark:hover:text-white text-xl leading-none">&times;</button>
+          </div>
+          <div class="p-3 bg-blue-50 dark:bg-blue-900/20 shrink-0 border-b border-blue-200 dark:border-blue-800">
+             <div class="text-[10px] text-gray-500 dark:text-darkmuted uppercase font-bold">Moving User:</div>
+             <div id="reassign-user-name" class="font-bold text-blue-700 dark:text-blue-300 text-sm"></div>
+          </div>
+          <div id="reassign-unit-list" class="overflow-y-auto p-2 space-y-1.5 flex-grow"></div>
+       </div>
+    </div>
+
   </main>
 
-  <!-- Extracted modular JS files loaded in dependency order -->
   <script src="config.js"></script>
   <script src="state.js"></script>
   <script src="api.js"></script>
