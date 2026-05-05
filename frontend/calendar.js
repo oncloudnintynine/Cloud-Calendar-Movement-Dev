@@ -69,10 +69,11 @@ function updateMiniCalendarSelection(ctx, d) {
         const cellDay = parseInt(cell.dataset.day);
         const isToday = cell.dataset.istoday === 'true';
         
-        cell.className = `cal-day-cell relative flex items-center justify-center w-6 h-6 mx-auto rounded-full cursor-pointer transition-colors text-xs font-medium ${isToday ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500' : 'hover:bg-gray-200 dark:hover:bg-darkhover'}`;
+        // Use w-5 h-5 and text-[10px] for max vertical compression
+        cell.className = `cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-medium ${isToday ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500' : 'hover:bg-gray-200 dark:hover:bg-darkhover'}`;
         
         if (cellDay === d) {
-            cell.className = `cal-day-cell relative flex items-center justify-center w-6 h-6 mx-auto rounded-full cursor-pointer transition-colors text-xs font-bold bg-blue-600 text-white shadow-md`;
+            cell.className = `cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-bold bg-blue-600 text-white shadow-md`;
         }
         
         const hasEvent = cell.dataset.hasevent === 'true';
@@ -90,14 +91,13 @@ function handleAgendaScroll(ctx) {
     const groups = container.querySelectorAll('.agenda-day-group');
     let topDay = null;
     
+    // Find which day group is exactly at the top of the scrolling viewport
+    const containerTop = container.getBoundingClientRect().top;
     for (const group of groups) {
         const rect = group.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        
-        // Find the group currently crossing the top of the container
-        if (rect.top >= containerRect.top && rect.top <= containerRect.top + 100) {
+        if (rect.top >= containerTop && rect.top <= containerTop + 60) {
             topDay = parseInt(group.dataset.day); break;
-        } else if (rect.top < containerRect.top && rect.bottom > containerRect.top) {
+        } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
             topDay = parseInt(group.dataset.day); break;
         }
     }
@@ -153,7 +153,8 @@ function buildCalendarHTML(ctx, monthDate, selDate, data) {
     const isToday = current.toDateString() === new Date().toDateString();
     const hasEvent = data.some(l => isEventOnDate(l, current));
 
-    let baseClass = "cal-day-cell relative flex items-center justify-center w-6 h-6 mx-auto rounded-full cursor-pointer transition-colors text-xs font-medium ";
+    // Notice the extremely compressed sizing here (w-5 h-5 text-[10px])
+    let baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-medium ";
     if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
     else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
     else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
@@ -247,27 +248,27 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
     }
 
     if (isCompactInfoAll) {
-        return `<div class="border border-blue-200 dark:border-blue-900/50 p-3 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
+        return `<div class="border border-blue-200 dark:border-blue-900/50 p-2.5 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
           <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${l.LeaveType}</h3>
-          <p class="text-xs text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
-          ${l.Location ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
-          ${attendeesDisplay ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
-          ${l.Remarks ? `<p class="text-xs text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
+          <p class="text-[11px] text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
+          ${l.Location ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
+          ${attendeesDisplay ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
+          ${l.Remarks ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
         </div>`;
     }
 
-    return `<div class="border border-gray-200 dark:border-darkborder p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
+    return `<div class="border border-gray-200 dark:border-darkborder p-3 md:p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
       <div class="flex justify-between items-start mb-2">
-        <h3 class="font-bold text-base">${isMyCalendar ? (l.LeaveType||'') : (l.Name||'') + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-sm">(' + (l.Department||'') + ')</span>'}</h3>
-        <span class="text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
+        <h3 class="font-bold text-sm md:text-base">${isMyCalendar ? (l.LeaveType||'') : (l.Name||'') + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-xs md:text-sm">(' + (l.Department||'') + ')</span>'}</h3>
+        <span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
       </div>
-      <p class="font-medium text-gray-700 dark:text-darktext">${isMyCalendar ? '' : (l.LeaveType||'') + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
-      <p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
-      ${isEvent && l.Location ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
-      ${!isEvent && l.Country ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${l.Country} ${l.State ? `(${l.State})` : ''}</p>` : ''}
-      ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
-      ${attendeesDisplay ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
-      ${l.Remarks ? `<p class="text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
+      <p class="font-medium text-xs md:text-sm text-gray-700 dark:text-darktext">${isMyCalendar ? '' : (l.LeaveType||'') + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
+      <p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
+      ${isEvent && l.Location ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
+      ${!isEvent && l.Country ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${l.Country} ${l.State ? `(${l.State})` : ''}</p>` : ''}
+      ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
+      ${attendeesDisplay ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
+      ${l.Remarks ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
       ${actionBtns}
     </div>`;
   }).join('');
@@ -308,7 +309,6 @@ function renderDashboard() {
       const gridEl = document.getElementById('dash-cal-grid');
       if (gridEl) gridEl.innerHTML = buildCalendarHTML('dash', dashMonth, dashDate, filtered);
       
-      // Continuous Scroll Generation
       const daysInMonth = new Date(dashMonth.getFullYear(), dashMonth.getMonth() + 1, 0).getDate();
       let agendaHtml = '';
       
@@ -319,10 +319,10 @@ function renderDashboard() {
           if (dayEvents.length > 0 || curDate.toDateString() === dashDate.toDateString()) {
               agendaHtml += `
                 <div class="agenda-day-group mb-6" data-day="${day}">
-                    <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b dark:border-darkborder mb-3">
-                        <h3 class="font-bold text-blue-600 dark:text-blue-400">${formatDisplayDate(curDate)}</h3>
+                    <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b dark:border-darkborder mb-2 shadow-sm">
+                        <h3 class="font-bold text-sm md:text-base text-blue-600 dark:text-blue-400 pl-1">${formatDisplayDate(curDate)}</h3>
                     </div>
-                    <div class="space-y-3">
+                    <div class="space-y-2">
                         ${buildAgendaHtml(dayEvents, d === 'MY_CALENDAR', false)}
                     </div>
                 </div>
@@ -336,10 +336,9 @@ function renderDashboard() {
           agendaEl.removeEventListener('scroll', () => handleAgendaScroll('dash'));
           agendaEl.addEventListener('scroll', () => handleAgendaScroll('dash'));
           
-          // Auto-scroll to selected date on render
           setTimeout(() => {
               const group = agendaEl.querySelector(`.agenda-day-group[data-day="${dashDate.getDate()}"]`);
-              if (group) group.scrollIntoView();
+              if (group) { group.scrollIntoView(); updateMiniCalendarSelection('dash', dashDate.getDate()); }
           }, 10);
       }
 
@@ -390,10 +389,10 @@ function renderMyLeaves() {
       if (dayEvents.length > 0 || curDate.toDateString() === myDate.toDateString()) {
           agendaHtml += `
             <div class="agenda-day-group mb-6" data-day="${day}">
-                <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b dark:border-darkborder mb-3">
-                    <h3 class="font-bold text-blue-600 dark:text-blue-400">${formatDisplayDate(curDate)}</h3>
+                <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b dark:border-darkborder mb-2 shadow-sm">
+                    <h3 class="font-bold text-sm md:text-base text-blue-600 dark:text-blue-400 pl-1">${formatDisplayDate(curDate)}</h3>
                 </div>
-                <div class="space-y-3">
+                <div class="space-y-2">
                     ${buildAgendaHtml(dayEvents, true, false)}
                 </div>
             </div>
@@ -409,7 +408,7 @@ function renderMyLeaves() {
       
       setTimeout(() => {
           const group = agendaEl.querySelector(`.agenda-day-group[data-day="${myDate.getDate()}"]`);
-          if (group) group.scrollIntoView();
+          if (group) { group.scrollIntoView(); updateMiniCalendarSelection('my', myDate.getDate()); }
       }, 10);
   }
 }
