@@ -1,5 +1,5 @@
 // ==========================================
-// Auth.js - Login & People API Logic 
+// Auth.js - Login & People API Logic
 // ==========================================
 
 function getContactsAndGroups() {
@@ -32,7 +32,6 @@ function getContactsAndGroups() {
 
  var result = { groupMap: groupMap, connections: connections };
  try {
-   // Cache structure for 30 mins to avoid API limits. Ignore if over 100KB payload limit.
    cache.put("contacts_groups", JSON.stringify(result), 1800); 
  } catch(e) {}
  
@@ -81,7 +80,8 @@ function handleLogin(data) {
    });
    
    if (!userName) throw new Error("User phone number not found in Google Contacts. If you just registered, please wait a minute for Google to sync.");
-   return { role: 'user', name: userName, phone: phone, departments: userDepts };
+   // FIX: Return the password so the frontend can securely authenticate future API calls
+   return { role: 'user', name: userName, phone: phone, pass: pass, departments: userDepts };
  }
  
  throw new Error("Invalid password");
