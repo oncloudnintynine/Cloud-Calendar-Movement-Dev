@@ -11,12 +11,10 @@ function showLogin() {
  document.getElementById('menu-btn').classList.add('hidden');
  document.getElementById('active-tab-title').classList.add('hidden');
  
- const deptNav = document.getElementById('dash-dept-nav');
- const viewToggle = document.getElementById('dash-view-toggle');
- if (deptNav) deptNav.classList.add('hidden');
- if (viewToggle) {
-   viewToggle.classList.add('hidden');
-   viewToggle.classList.remove('flex');
+ const controlsWrapper = document.getElementById('dash-controls-wrapper');
+ if (controlsWrapper) {
+   controlsWrapper.classList.add('hidden');
+   controlsWrapper.classList.remove('flex');
  }
 }
 
@@ -71,13 +69,6 @@ async function handleLogin() {
  showLoader(true);
  try {
    user = await apiCall('login', { password: pass });
-   
-   // FIX: Ensure the user object explicitly has the password so getLeaves succeeds 
-   // even if an older GAS backend script forgot to return it
-   if (!user.pass) {
-       user.pass = pass;
-   }
-   
    localStorage.setItem('user', JSON.stringify(user));
    document.getElementById('login-pass').value = '';
    showApp(); 
