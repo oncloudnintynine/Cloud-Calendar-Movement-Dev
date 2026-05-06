@@ -314,7 +314,7 @@ function buildFullMonthGrid(monthDate, data, ctx) {
          const title = seg.isLeave ? `${seg.l.Name.split(' ')[0]} : ${seg.l.LeaveType}` : seg.l.LeaveType;
          const left = (seg.sDay / 7) * 100;
          const width = (seg.len / 7) * 100;
-         const topOffset = (seg.slot * 20) + 26; // Account for date numbers at the top
+         const topOffset = (seg.slot * 20) + 26; 
 
          let rounded = 'rounded-sm';
          if (seg.len > 1) {
@@ -340,7 +340,11 @@ function getBadgeClass(status) {
 
 function formatStatusBadge(status) {
  let s = String(status || '').replace('Approved', 'Cal Updated');
- if (s.includes('KAH Limit Reached')) return `Cal Updated<br><span class="text-[9px] font-bold opacity-90 tracking-tight leading-none block mt-0.5">(KAH Limit Reached)</span>`;
+ if (s.includes('KAH Limit Crossed')) {
+   const match = s.match(/KAH Limit Crossed for (.*)\)/);
+   const dept = match ? match[1] : '';
+   return `Cal Updated<br><span class="text-[9px] font-bold opacity-90 tracking-tight leading-none block mt-0.5">(KAH Limit Crossed - ${dept})</span>`;
+ }
  return s;
 }
 
@@ -451,12 +455,12 @@ function renderDashboard() {
  
  if (d === 'MY_CALENDAR') {
    filtered = filtered.filter(l => {
-     if (l.Phone == user.phone) return true;
+     if (String(l.Phone) === String(user.phone)) return true;
      if (l.Attendees) {
        try {
          const att = JSON.parse(l.Attendees);
-         return att.some(a => (a.type === 'contact' && a.id == user.phone) || (a.type === 'group' && user.departments.includes(a.dept)));
-       } catch(e) { return String(l.Attendees).includes(user.phone); }
+         return att.some(a => (a.type === 'contact' && String(a.id) === String(user.phone)) || (a.type === 'group' && user.departments.includes(a.dept)));
+       } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
      }
      return false;
    });
@@ -510,12 +514,12 @@ function renderDashboard() {
 
 function renderMyLeaves() {
  const my = allLeaves.filter(l => {
-   if (l.Phone == user.phone) return true;
+   if (String(l.Phone) === String(user.phone)) return true;
    if (l.Attendees) {
      try {
        const att = JSON.parse(l.Attendees);
-       return att.some(a => (a.type === 'contact' && a.id == user.phone) || (a.type === 'group' && user.departments.includes(a.dept)));
-     } catch(e) { return String(l.Attendees).includes(user.phone); }
+       return att.some(a => (a.type === 'contact' && String(a.id) === String(user.phone)) || (a.type === 'group' && user.departments.includes(a.dept)));
+     } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
    }
    return false;
  });
