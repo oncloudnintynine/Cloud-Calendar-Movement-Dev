@@ -47,7 +47,6 @@ function renderStructureUI() {
      keys.forEach(k => {
          const fullPath = node[k]._fullPath;
          const members = cols[fullPath] ||[];
-         const isRoot = depth === 0;
          const isGrandChild = depth >= 2; 
          
          let containerBg = '';
@@ -69,7 +68,7 @@ function renderStructureUI() {
          }
 
          html += `
-         <details class="group mb-3 border ${borderColor} rounded-lg overflow-hidden ${containerBg} shadow-sm" ${isRoot ? 'open' : ''}>
+         <details class="group mb-3 border ${borderColor} rounded-lg overflow-hidden ${containerBg} shadow-sm" open>
              <summary class="flex justify-between items-center p-2.5 cursor-pointer select-none bg-black/5 dark:bg-white/5 border-b ${borderColor}">
                  <div class="flex items-center space-x-2">
                      <svg class="w-4 h-4 transition-transform group-open:rotate-90 ${headerColor}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -139,7 +138,7 @@ function openReassignModal(resName, name, phone, currentUnit) {
      return a.localeCompare(b);
  });
  
- const allUnits = ["UNASSIGNED", ...sortedStructure];
+ const allUnits =["UNASSIGNED", ...sortedStructure];
  let html = allUnits.map(u => `
      <button onclick="confirmReassign('${u}')" class="w-full text-left p-3 rounded-lg border mb-2 text-sm font-medium transition ${u === currentUnit ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-darkborder hover:bg-gray-50 dark:hover:bg-darkhover text-gray-700 dark:text-gray-200'}">
          ${u === 'UNASSIGNED' ? '🔴 Unassigned' : u}
