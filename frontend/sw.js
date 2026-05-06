@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cloud-moves-v33';
+const CACHE_NAME = 'cloud-moves-v34';
  
 const urlsToCache =[
   './',
@@ -51,4 +51,3 @@ self.addEventListener('activate', event => {
   );
   self.clients.claim();
 });
- 
