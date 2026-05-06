@@ -6,14 +6,16 @@ let userToDeleteResource = null;
 let userToManageResource = null;
 
 function populateAdminSettingsForm(settings) {
+ // KAH Fields
  document.getElementById('set-kah-limit').value = settings.kahLimit;
  document.getElementById('set-appr-email').value = settings.approvingAuthority;
+ document.getElementById('set-kah-subject').value = settings.kahEmailSubject || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
+ document.getElementById('set-kah-body').value = settings.kahEmailBody || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.";
+ 
+ // Admin Fields
  document.getElementById('set-user-keyword').value = settings.userKeyword || 'peace';
  document.getElementById('set-github-repo').value = settings.githubRepo || '';
  document.getElementById('set-backup-folder').value = settings.backupFolder || '';
- 
- document.getElementById('set-kah-subject').value = settings.kahEmailSubject || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
- document.getElementById('set-kah-body').value = settings.kahEmailBody || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.";
  
  const radios = document.getElementsByName('app-mode');
  radios.forEach(r => { if(r.value === appMode) r.checked = true; });
@@ -26,6 +28,29 @@ function populateAdminSettingsForm(settings) {
  
  adminKAHList = settings.kahList ||[];
  renderKAHSelected();
+ 
+ // Admin Page Sections Ordering
+ tempAdminSectionsOrder = settings.adminSectionsOrder && settings.adminSectionsOrder.length 
+  ? settings.adminSectionsOrder 
+  :['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'leave-types', 'code-backup'];
+ 
+ const container = document.getElementById('admin-sections-container');
+ if (container) {
+   tempAdminSectionsOrder.forEach(id => {
+     const el = container.querySelector(`[data-section="${id}"]`);
+     if (el) container.appendChild(el);
+   });
+   
+   if (window.adminSectionsSortable) window.adminSectionsSortable.destroy();
+   window.adminSectionsSortable = new Sortable(container, {
+     animation: 150,
+     handle: '.section-handle',
+     ghostClass: 'opacity-50',
+     onEnd: function () {
+       tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
+     }
+   });
+ }
 }
 
 async function loadAdminSettings() {
@@ -126,7 +151,7 @@ function renderKAHSelected() {
    
    if (!grouped[parent]) grouped[parent] = {};
    if (child) {
-       if (!grouped[parent][child]) grouped[parent][child] = [];
+       if (!grouped[parent][child]) grouped[parent][child] =[];
        grouped[parent][child].push(k);
    } else {
        if (!grouped[parent]['_direct']) grouped[parent]['_direct'] =[];
@@ -247,11 +272,7 @@ async function saveAdminSettings() {
    adminPass: user.pass, newAdminPass: newPass, appMode: selectedMode,
    userKeyword: document.getElementById('set-user-keyword').value.trim() || 'peace',
    menuOrder: tempMenuOrder, leaveTypes: tempLeaveTypes.filter(Boolean),
-   kahLimit: document.getElementById('set-kah-limit').value,
-   approvingAuthority: document.getElementById('set-appr-email').value,
-   kahList: adminKAHList,
-   kahEmailSubject: document.getElementById('set-kah-subject').value.trim(),
-   kahEmailBody: document.getElementById('set-kah-body').value.trim(),
+   adminSectionsOrder: tempAdminSectionsOrder,
    githubRepo: document.getElementById('set-github-repo').value.trim(),
    backupFolder: document.getElementById('set-backup-folder').value.trim()
  };
@@ -261,6 +282,24 @@ async function saveAdminSettings() {
    alert("Settings successfully saved! App will reload to apply UI changes.");
    if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); }
    window.location.reload(); 
+ } catch (err) { alert("Error: " + err.message); showLoader(false); }
+}
+
+async function saveKahSettings() {
+ showLoader(true);
+ const payload = {
+   adminPass: user.pass,
+   kahLimit: document.getElementById('set-kah-limit').value,
+   approvingAuthority: document.getElementById('set-appr-email').value,
+   kahList: adminKAHList,
+   kahEmailSubject: document.getElementById('set-kah-subject').value.trim(),
+   kahEmailBody: document.getElementById('set-kah-body').value.trim()
+ };
+ 
+ try {
+   await apiCall('saveSettings', payload);
+   alert("KAH Settings successfully saved! App will reload to apply changes.");
+   window.location.reload();
  } catch (err) { alert("Error: " + err.message); showLoader(false); }
 }
 
