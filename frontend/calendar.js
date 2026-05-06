@@ -4,6 +4,15 @@
 
 window.agendaDirty = true;
 window.myAgendaDirty = true;
+window.isProgrammaticScroll = false;
+window.progScrollTimeout = null;
+
+// Pauses the scroll spy temporarily during programmatic navigation to prevent race conditions
+function setProgrammaticScroll() {
+    window.isProgrammaticScroll = true;
+    clearTimeout(window.progScrollTimeout);
+    window.progScrollTimeout = setTimeout(() => { window.isProgrammaticScroll = false; }, 1000);
+}
 
 function toggleDashView(mode) {
  dashViewMode = mode;
@@ -66,30 +75,36 @@ async function loadLeavesData() {
 }
 
 function changeMonth(ctx, offset) {
+ setProgrammaticScroll();
  if (ctx === 'dash') { 
      dashMonth.setMonth(dashMonth.getMonth() + offset); 
      dashDate = new Date(dashMonth.getFullYear(), dashMonth.getMonth(), 1);
+     window.agendaDirty = true;
      renderDashboard(); 
  } else { 
      myMonth.setMonth(myMonth.getMonth() + offset); 
      myDate = new Date(myMonth.getFullYear(), myMonth.getMonth(), 1);
+     window.myAgendaDirty = true;
      renderMyLeaves(); 
  }
 }
 
 function selectDate(ctx, y, m, d) {
+ setProgrammaticScroll();
  if (ctx === 'dash') { 
    dashDate = new Date(y, m, d); 
-   if (dashViewMode === 'month') toggleDashView('agenda');
-   updateMiniCalendarSelection('dash', d);
-   const group = document.querySelector(`#dash-agenda .agenda-day-group[data-date="${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}"]`);
-   if (group) group.scrollIntoView({ behavior: 'smooth' });
+   if (dashViewMode === 'month') {
+       toggleDashView('agenda');
+   } else {
+       renderDashboard(); // Re-render triggers scrolling and info-all updates
+   }
  } else { 
    myDate = new Date(y, m, d); 
-   if (dashViewMode === 'month') toggleDashView('agenda');
-   updateMiniCalendarSelection('my', d);
-   const group = document.querySelector(`#my-agenda .agenda-day-group[data-date="${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}"]`);
-   if (group) group.scrollIntoView({ behavior: 'smooth' });
+   if (dashViewMode === 'month') {
+       toggleDashView('agenda');
+   } else {
+       renderMyLeaves();
+   }
  }
 }
 
@@ -120,22 +135,44 @@ function updateMiniCalendarSelection(ctx, d) {
 let scrollTimeoutDash, scrollTimeoutMy;
 
 function handleAgendaScroll(ctx) {
+   if (window.isProgrammaticScroll) return; // Prevent race conditions on momentum scroll
+   
    const isDash = ctx === 'dash';
    clearTimeout(isDash ? scrollTimeoutDash : scrollTimeoutMy);
    
    const timeout = setTimeout(() => {
        const container = document.getElementById(`${ctx}-agenda`);
        if (!container) return;
-       const groups = container.querySelectorAll('.agenda-day-group');
-       const containerTop = container.getBoundingClientRect().top;
+       const groups = Array.from(container.querySelectorAll('.agenda-day-group'));
+       if (groups.length === 0) return;
+
+       const containerRect = container.getBoundingClientRect();
+       const containerTop = containerRect.top;
+       const containerBottom = containerRect.bottom;
+       
+       // Detect if scrolled to the absolute bottom (fixes blindspot issue)
+       const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 5;
        
        let topDateStr = null;
-       for (const group of groups) {
-           const rect = group.getBoundingClientRect();
-           if (rect.top >= containerTop && rect.top <= containerTop + 60) {
-               topDateStr = group.dataset.date; break;
-           } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
-               topDateStr = group.dataset.date; break;
+       
+       if (isAtBottom) {
+           // Find the last visible element touching the bottom
+           for (let i = groups.length - 1; i >= 0; i--) {
+               const rect = groups[i].getBoundingClientRect();
+               if (rect.top < containerBottom) {
+                   topDateStr = groups[i].dataset.date; 
+                   break;
+               }
+           }
+       } else {
+           // Standard scroll spy detecting elements hitting the top
+           for (const group of groups) {
+               const rect = group.getBoundingClientRect();
+               if (rect.top >= containerTop && rect.top <= containerTop + 100) {
+                   topDateStr = group.dataset.date; break;
+               } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
+                   topDateStr = group.dataset.date; break;
+               }
            }
        }
        
@@ -445,6 +482,45 @@ function generateContinuousAgenda(ctx, data) {
     container.addEventListener('scroll', ctx === 'dash' ? () => handleAgendaScroll('dash') : () => handleAgendaScroll('my'));
 }
 
+// Dynamically inserts an empty day group if it doesn't already exist to prevent full DOM rebuilds
+function ensureAgendaDateExists(ctx, targetDateObj) {
+    const y = targetDateObj.getFullYear();
+    const m = targetDateObj.getMonth();
+    const d = targetDateObj.getDate();
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    
+    const container = document.getElementById(`${ctx}-agenda`);
+    if (!container) return null;
+
+    let group = container.querySelector(`.agenda-day-group[data-date="${dateStr}"]`);
+    
+    if (!group) {
+        group = document.createElement('div');
+        group.className = 'agenda-day-group mb-6';
+        group.dataset.date = dateStr;
+        group.innerHTML = `
+            <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b dark:border-darkborder mb-2 shadow-sm">
+                <h3 class="font-bold text-sm md:text-base text-blue-600 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
+            </div>
+            <div class="space-y-2">
+                <p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>
+            </div>`;
+
+        // Insert chronologically without rebuilding the whole list
+        const allGroups = Array.from(container.querySelectorAll('.agenda-day-group'));
+        let inserted = false;
+        for (let i = 0; i < allGroups.length; i++) {
+            if (allGroups[i].dataset.date > dateStr) {
+                container.insertBefore(group, allGroups[i]);
+                inserted = true;
+                break;
+            }
+        }
+        if (!inserted) container.appendChild(group);
+    }
+    return group;
+}
+
 function renderDashboard() {
  const searchEl = document.getElementById('dash-search');
  const q = searchEl ? searchEl.value.toLowerCase() : '';
@@ -486,10 +562,7 @@ function renderDashboard() {
      const agendaEl = document.getElementById('dash-agenda');
      if (agendaEl) {
          setTimeout(() => {
-             const yyyy = dashDate.getFullYear();
-             const mm = String(dashDate.getMonth() + 1).padStart(2, '0');
-             const dd = String(dashDate.getDate()).padStart(2, '0');
-             const group = agendaEl.querySelector(`.agenda-day-group[data-date="${yyyy}-${mm}-${dd}"]`);
+             const group = ensureAgendaDateExists('dash', dashDate);
              if (group) group.scrollIntoView({ behavior: 'smooth' });
          }, 10);
      }
@@ -536,10 +609,7 @@ function renderMyLeaves() {
      const agendaEl = document.getElementById('my-agenda');
      if (agendaEl) {
          setTimeout(() => {
-             const yyyy = myDate.getFullYear();
-             const mm = String(myDate.getMonth() + 1).padStart(2, '0');
-             const dd = String(myDate.getDate()).padStart(2, '0');
-             const group = agendaEl.querySelector(`.agenda-day-group[data-date="${yyyy}-${mm}-${dd}"]`);
+             const group = ensureAgendaDateExists('my', myDate);
              if (group) group.scrollIntoView({ behavior: 'smooth' });
          }, 10);
      }
