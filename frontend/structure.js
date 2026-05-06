@@ -48,43 +48,28 @@ function renderStructureUI() {
          const fullPath = node[k]._fullPath;
          const members = cols[fullPath] ||[];
          const isRoot = depth === 0;
-         const isGrandChild = depth >= 2; 
+         const isGrandChild = depth === 2; // Maximum 3 levels
          
-         let containerBg = '';
-         let borderColor = '';
-         let headerColor = '';
-         
-         if (depth === 0) {
-             containerBg = 'bg-blue-50 dark:bg-blue-900/10';
-             borderColor = 'border-blue-300 dark:border-blue-700';
-             headerColor = 'text-blue-700 dark:text-blue-400';
-         } else if (depth === 1) {
-             containerBg = 'bg-purple-50 dark:bg-purple-900/10';
-             borderColor = 'border-purple-300 dark:border-purple-700';
-             headerColor = 'text-purple-700 dark:text-purple-400';
-         } else {
-             containerBg = 'bg-emerald-50 dark:bg-emerald-900/10';
-             borderColor = 'border-emerald-300 dark:border-emerald-700';
-             headerColor = 'text-emerald-700 dark:text-emerald-400';
-         }
+         const headerColors = depth === 0 ? 'text-blue-700 dark:text-blue-400' : depth === 1 ? 'text-purple-600 dark:text-purple-400' : 'text-emerald-600 dark:text-emerald-400';
+         const bgColors = depth === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-50 dark:bg-[#151515]';
 
          html += `
-         <details class="group mb-3 border ${borderColor} rounded-lg overflow-hidden ${containerBg} shadow-sm" ${isRoot ? 'open' : ''}>
-             <summary class="flex justify-between items-center p-2.5 cursor-pointer select-none bg-black/5 dark:bg-white/5 border-b ${borderColor}">
+         <details class="group mb-3 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-darksurface shadow-sm" ${isRoot ? 'open' : ''}>
+             <summary class="flex justify-between items-center p-2.5 cursor-pointer select-none ${bgColors}">
                  <div class="flex items-center space-x-2">
-                     <svg class="w-4 h-4 transition-transform group-open:rotate-90 ${headerColor}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                     <span class="font-bold text-sm md:text-base ${headerColor}">${k} <span class="text-xs font-normal opacity-70">(${members.length})</span></span>
+                     <svg class="w-4 h-4 transition-transform group-open:rotate-90 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                     <span class="font-bold text-sm md:text-base ${headerColors}">${k} <span class="text-xs font-normal text-gray-500">(${members.length})</span></span>
                  </div>
                  <button onclick="removeUnit('${fullPath}', event)" class="text-red-500 hover:text-red-700 font-bold px-3 text-lg leading-none" title="Delete Unit">&times;</button>
              </summary>
-             <div class="p-2 md:p-3 space-y-3">
+             <div class="p-2 md:p-3 border-t border-gray-200 dark:border-darkborder space-y-3">
                  
                  ${members.length > 0 
                      ? `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">${renderCards(members, true, fullPath)}</div>` 
                      : `<p class="text-xs text-gray-400 dark:text-darkmuted italic ml-1">No personnel assigned directly here.</p>`}
                  
                  <!-- Nested Sub-Units -->
-                 <div class="pl-2 md:pl-4 border-l-2 ${borderColor} mt-2 space-y-2">
+                 <div class="pl-2 md:pl-4 border-l-2 ${depth===0 ? 'border-blue-200 dark:border-blue-900' : 'border-purple-200 dark:border-purple-900'} mt-2 space-y-2">
                      ${buildTreeHtml(node[k], depth + 1)}
                      
                      ${!isGrandChild ? `
@@ -103,6 +88,7 @@ function renderStructureUI() {
    ? `<p class="text-gray-500 italic text-sm">No parent units created yet. Add one above.</p>` 
    : buildTreeHtml(tree, 0);
 
+ // Unassigned Board in Grid
  rightContainer.innerHTML = `
      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
          ${renderCards(cols["UNASSIGNED"], false, 'UNASSIGNED')}
@@ -124,7 +110,7 @@ function renderCards(contacts, showCross, currentUnit) {
 }
 
 function unassignUser(resName, e) {
- e.stopPropagation(); 
+ e.stopPropagation(); // Prevent opening the modal
  pendingStructureChanges[resName] = "UNASSIGNED";
  renderStructureUI();
 }
@@ -133,6 +119,7 @@ function openReassignModal(resName, name, phone, currentUnit) {
  reassignTargetResource = resName;
  document.getElementById('reassign-user-name').innerText = `${name} (${phone})`;
  
+ // Apply HQ sort rule to the modal dropdown list as well
  const sortedStructure = [...companyStructure].sort((a, b) => {
      if (a.toUpperCase() === 'HQ') return -1;
      if (b.toUpperCase() === 'HQ') return 1;
