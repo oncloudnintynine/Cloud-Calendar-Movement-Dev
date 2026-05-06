@@ -380,7 +380,7 @@ function formatStatusBadge(status) {
  if (s.includes('KAH Limit Crossed')) {
    const match = s.match(/KAH Limit Crossed for (.*)\)/);
    const dept = match ? match[1] : '';
-   return `Cal Updated<br><span class="text-[9px] font-bold opacity-90 tracking-tight leading-none block mt-0.5">(KAH Limit Crossed - ${dept})</span>`;
+   return `Cal Updated<br><span class="text-[9px] font-bold text-red-600 dark:text-red-400 tracking-tight leading-tight block mt-1">KAH Limit Crossed</span><span class="text-[9px] font-bold text-red-600 dark:text-red-400 tracking-tight leading-none block mt-0.5">${dept}</span>`;
  }
  return s;
 }
