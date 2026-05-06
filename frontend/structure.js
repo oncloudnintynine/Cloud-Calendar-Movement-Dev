@@ -84,7 +84,7 @@ function renderStructureUI() {
                      : `<p class="text-xs text-gray-400 dark:text-darkmuted italic ml-1">No personnel assigned directly here.</p>`}
                  
                  <!-- Nested Sub-Units -->
-                 <div class="pl-2 md:pl-4 border-l-2 ${borderColor} mt-2 space-y-2">
+                 <div class="pl-2 md:pl-4 mt-2 space-y-2">
                      ${buildTreeHtml(node[k], depth + 1)}
                      
                      ${!isGrandChild ? `
