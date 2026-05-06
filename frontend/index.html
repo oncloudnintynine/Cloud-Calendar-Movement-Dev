@@ -93,6 +93,7 @@
        
        <div id="menu-admin-group" class="hidden border-t dark:border-darkborder mt-2 pt-2">
            <button onclick="switchTab('admin')" id="menu-admin" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Admin Settings</button>
+           <button onclick="switchTab('kah-management')" id="menu-kah-management" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">KAH Management</button>
            <button onclick="switchTab('admin-structure')" id="menu-admin-structure" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Organisational Structure</button>
        </div>
      </div>
@@ -380,53 +381,184 @@
      </div>
      
      <!-- Admin Settings Tab -->
-     <div id="view-admin" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
-       <div class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
+     <div id="view-admin" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
+       
+       <div id="admin-sections-container" class="flex-grow overflow-y-auto space-y-4 pb-4 px-1 pt-1">
          
-         <div class="flex-grow overflow-y-auto p-4 space-y-5">
-           <h2 class="text-lg font-bold border-b dark:border-darkborder pb-2 text-blue-600 dark:text-blue-400">Global Configuration</h2>
-           
-           <div>
-             <label class="block font-semibold mb-1 text-sm text-purple-600 dark:text-purple-400">App Interface Mode</label>
-             <div class="flex flex-col space-y-1.5 bg-purple-50 dark:bg-purple-900/20 p-2.5 rounded-lg border border-purple-200 dark:border-purple-800">
-               <label class="flex items-center space-x-2 cursor-pointer text-sm">
-                 <input type="radio" name="app-mode" value="separated" class="w-3.5 h-3.5 text-purple-600 focus:ring-purple-500 cursor-pointer">
-                 <span class="font-medium">Separated Mode (Classic Dashboard & My Calendar)</span>
-               </label>
-               <label class="flex items-center space-x-2 cursor-pointer text-sm">
-                 <input type="radio" name="app-mode" value="unified" class="w-3.5 h-3.5 text-purple-600 focus:ring-purple-500 cursor-pointer">
-                 <span class="font-medium">Unified Mode (Combined Dashboard with Forms)</span>
-               </label>
-             </div>
+         <!-- Section: App Interface Mode -->
+         <div data-section="app-mode" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
+           <div class="flex justify-between items-center mb-3">
+             <h3 class="font-bold text-base text-purple-600 dark:text-purple-400">App Interface Mode</h3>
+             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
            </div>
+           <div class="flex flex-col space-y-1.5 bg-purple-50 dark:bg-purple-900/20 p-2.5 rounded-lg border border-purple-200 dark:border-purple-800">
+             <label class="flex items-center space-x-2 cursor-pointer text-sm">
+               <input type="radio" name="app-mode" value="separated" class="w-3.5 h-3.5 text-purple-600 focus:ring-purple-500 cursor-pointer">
+               <span class="font-medium">Separated Mode (Classic Dashboard & My Calendar)</span>
+             </label>
+             <label class="flex items-center space-x-2 cursor-pointer text-sm">
+               <input type="radio" name="app-mode" value="unified" class="w-3.5 h-3.5 text-purple-600 focus:ring-purple-500 cursor-pointer">
+               <span class="font-medium">Unified Mode (Combined Dashboard with Forms)</span>
+             </label>
+           </div>
+         </div>
 
-           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-             <div>
-               <label class="block font-semibold mb-1 text-sm">Admin Password</label>
-               <div class="relative">
-                 <input type="password" id="set-admin-pass" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 transition text-sm" placeholder="Leave blank to keep current">
+         <!-- Section: Register New User -->
+         <div data-section="register-user" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
+           <div class="flex justify-between items-center mb-3">
+             <h3 class="font-bold text-base text-emerald-600 dark:text-emerald-400">Register New User</h3>
+             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+           </div>
+           <div id="admin-alert" class="hidden bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs p-2 rounded-lg mb-3 text-center"></div>
+           <div class="space-y-3">
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+               <div>
+                 <label class="block font-semibold mb-1 text-xs">Full Name</label>
+                 <input type="text" id="admin-reg-name" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500" placeholder="e.g. Tan Ah Kow">
+               </div>
+               <div>
+                 <label class="block font-semibold mb-1 text-xs">Mobile No</label>
+                 <input type="tel" id="admin-reg-mobile" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500" placeholder="e.g. 96745345">
                </div>
              </div>
-             <div>
-               <label class="block font-semibold mb-1 text-sm">User Login Keyword</label>
-               <input type="text" id="set-user-keyword" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 transition text-sm" placeholder="e.g. peace">
-               <p class="text-[10px] text-gray-500 mt-1 leading-tight">Users will log in with their mobile number followed by this keyword.</p>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+               <div>
+                 <label class="block font-semibold mb-1 text-xs">Unit</label>
+                 <select id="admin-reg-unit" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none cursor-pointer focus:border-blue-500"></select>
+               </div>
+               <div>
+                 <label class="block font-semibold mb-1 text-xs">Birthday</label>
+                 <button type="button" id="btn-admin-register-birthday" onclick="openPicker('date', 'adminRegister', 'birthday')" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-left outline-none font-medium text-sm focus:border-blue-500">Select...</button>
+               </div>
              </div>
+             <button onclick="submitAdminRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm">Register User</button>
            </div>
+         </div>
 
-           <div id="menu-order-container">
-             <label class="block font-semibold mb-1.5 text-sm">App Menu Order</label>
-             <div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+         <!-- Section: Edit / Remove Users -->
+         <div data-section="manage-users" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
+           <div class="flex justify-between items-center mb-3">
+             <h3 class="font-bold text-base text-red-600 dark:text-red-400">Edit / Remove Users</h3>
+             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+           </div>
+           <div class="relative mb-2">
+             <input type="text" id="admin-manage-search" placeholder="Search user to edit or remove..." class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none shadow-sm focus:border-blue-500 transition" autocomplete="off" onkeyup="searchUserToManage()">
+             <div id="admin-manage-results" class="absolute z-50 w-full bg-white dark:bg-darksurface border-x border-b border-gray-300 dark:border-darkborder rounded-b-lg shadow-xl hidden-view max-h-40 overflow-y-auto"></div>
            </div>
            
-           <div>
-             <label class="block font-semibold mb-1.5 text-sm">Leave/MC/OIL Types</label>
-             <div id="leave-types-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-2"></div>
-             <div class="flex space-x-2">
-               <input type="text" id="new-leave-type" class="flex-grow border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-blue-500 transition" placeholder="Add new type...">
-               <button type="button" onclick="addLeaveType()" class="bg-gray-300 dark:bg-gray-700 font-bold px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm">Add</button>
+           <div id="user-to-manage-container" class="hidden-view p-3 bg-gray-100 dark:bg-darkinput border border-gray-300 dark:border-darkborder rounded-lg space-y-3 mt-2">
+             <div class="flex justify-between items-center mb-1">
+               <span class="font-bold text-sm text-gray-800 dark:text-gray-200">Edit User Details</span>
+               <button type="button" onclick="cancelManageUser()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xl leading-none">&times;</button>
+             </div>
+             
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                 <div>
+                   <label class="block font-semibold mb-1 text-xs">Full Name</label>
+                   <input type="text" id="edit-user-name" class="w-full border border-gray-400 dark:border-gray-500 rounded bg-white dark:bg-black text-sm py-1 px-2 outline-none focus:border-blue-500">
+                 </div>
+                 <div>
+                   <label class="block font-semibold mb-1 text-xs">Mobile No</label>
+                   <input type="tel" id="edit-user-mobile" class="w-full border border-gray-400 dark:border-gray-500 rounded bg-white dark:bg-black text-sm py-1 px-2 outline-none focus:border-blue-500">
+                 </div>
+             </div>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                 <div>
+                   <label class="block font-semibold mb-1 text-xs">Unit</label>
+                   <select id="edit-user-unit" class="w-full border border-gray-400 dark:border-gray-500 rounded bg-white dark:bg-black text-sm py-1 px-2 outline-none cursor-pointer focus:border-blue-500"></select>
+                 </div>
+                 <div>
+                   <label class="block font-semibold mb-1 text-xs">Birthday</label>
+                   <button type="button" id="btn-manage-user-birthday" onclick="openPicker('date', 'manageUser', 'birthday')" class="w-full border border-gray-400 dark:border-gray-500 rounded bg-white dark:bg-black text-left text-sm py-1 px-2 outline-none focus:border-blue-500">Select...</button>
+                 </div>
+             </div>
+             
+             <div class="flex space-x-2 pt-2 border-t border-gray-300 dark:border-darkborder">
+               <button onclick="confirmUpdateUser()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 rounded shadow transition text-xs">Update User</button>
+               <button onclick="confirmDeleteUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded shadow transition text-xs">Remove User</button>
              </div>
            </div>
+         </div>
+
+         <!-- Section: Admin Password -->
+         <div data-section="admin-pass" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
+           <div class="flex justify-between items-center mb-3">
+             <h3 class="font-bold text-base text-blue-600 dark:text-blue-400">Admin Password</h3>
+             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+           </div>
+           <div>
+             <input type="password" id="set-admin-pass" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 transition text-sm" placeholder="Leave blank to keep current">
+           </div>
+         </div>
+
+         <!-- Section: User Login Keyword -->
+         <div data-section="user-keyword" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
+           <div class="flex justify-between items-center mb-3">
+             <h3 class="font-bold text-base text-blue-600 dark:text-blue-400">User Login Keyword</h3>
+             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+           </div>
+           <div>
+             <input type="text" id="set-user-keyword" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 transition text-sm" placeholder="e.g. peace">
+             <p class="text-[10px] text-gray-500 mt-1 leading-tight">Users will log in with their mobile number followed by this keyword.</p>
+           </div>
+         </div>
+
+         <!-- Section: App Menu Order -->
+         <div data-section="menu-order" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
+           <div class="flex justify-between items-center mb-3">
+             <h3 class="font-bold text-base text-blue-600 dark:text-blue-400">App Menu Order</h3>
+             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+           </div>
+           <div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+         </div>
+
+         <!-- Section: Leave Types -->
+         <div data-section="leave-types" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
+           <div class="flex justify-between items-center mb-3">
+             <h3 class="font-bold text-base text-blue-600 dark:text-blue-400">Leave/MC/OIL Types</h3>
+             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+           </div>
+           <div id="leave-types-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-2"></div>
+           <div class="flex space-x-2">
+             <input type="text" id="new-leave-type" class="flex-grow border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-blue-500 transition" placeholder="Add new type...">
+             <button type="button" onclick="addLeaveType()" class="bg-gray-300 dark:bg-gray-700 font-bold px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm">Add</button>
+           </div>
+         </div>
+
+         <!-- Section: Code Backup -->
+         <div data-section="code-backup" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
+           <div class="flex justify-between items-center mb-3">
+             <h3 class="font-bold text-base text-indigo-600 dark:text-indigo-400">Code Backup</h3>
+             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+           </div>
+           <div class="space-y-3">
+             <div>
+               <label class="block font-semibold mb-1 text-xs">GitHub Repo <span class="text-gray-500">(owner/repo)</span></label>
+               <input type="text" id="set-github-repo" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500" placeholder="e.g. oncloudnintynine/Cloud-Calendar-Movement-Dev">
+             </div>
+             <div>
+               <label class="block font-semibold mb-1 text-xs">Backup Drive Folder ID</label>
+               <input type="text" id="set-backup-folder" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500" placeholder="Paste Folder ID or URL here">
+             </div>
+             <button onclick="triggerCodeBackup()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm">One-Click Backup</button>
+           </div>
+         </div>
+
+       </div>
+
+       <!-- Footer Save Button -->
+       <div class="shrink-0 p-3 bg-white dark:bg-darksurface border border-gray-300 dark:border-darkborder rounded-xl shadow-md z-20 mt-2">
+         <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow transition text-base">Save Settings</button>
+       </div>
+
+     </div>
+
+     <!-- KAH Management Tab -->
+     <div id="view-kah-management" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
+       <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
+         
+         <div class="flex-grow overflow-y-auto p-4 space-y-5">
+           <h2 class="text-lg font-bold border-b dark:border-darkborder pb-2 text-yellow-600 dark:text-yellow-500">Key Appointment Holders</h2>
            
            <div class="grid grid-cols-2 gap-3">
              <div><label class="block font-semibold mb-1 text-sm">KAH Limit (%)</label><input type="number" id="set-kah-limit" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] outline-none focus:border-blue-500 text-sm"></div>
@@ -454,100 +586,11 @@
              <div class="mt-3 font-bold text-sm mb-1.5">Current KAH List:</div>
              <div id="kah-selected-list" class="space-y-3 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 min-h-[40px] empty:hidden"></div>
            </div>
-           
-           <!-- REGISTER NEW USER SYSTEM -->
-           <div class="border-t border-dashed border-gray-300 dark:border-darkborder pt-4 mt-2">
-             <h3 class="font-bold text-base text-emerald-600 dark:text-emerald-400 mb-2">Register New User</h3>
-             <div id="admin-alert" class="hidden bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs p-2 rounded-lg mb-3 text-center"></div>
-             <div class="space-y-3">
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                 <div>
-                   <label class="block font-semibold mb-1 text-xs">Full Name</label>
-                   <input type="text" id="admin-reg-name" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none" placeholder="e.g. Tan Ah Kow">
-                 </div>
-                 <div>
-                   <label class="block font-semibold mb-1 text-xs">Mobile No</label>
-                   <input type="tel" id="admin-reg-mobile" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none" placeholder="e.g. 96745345">
-                 </div>
-               </div>
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                 <div>
-                   <label class="block font-semibold mb-1 text-xs">Unit</label>
-                   <select id="admin-reg-unit" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none cursor-pointer"></select>
-                 </div>
-                 <div>
-                   <label class="block font-semibold mb-1 text-xs">Birthday</label>
-                   <button type="button" id="btn-admin-register-birthday" onclick="openPicker('date', 'adminRegister', 'birthday')" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-left outline-none font-medium text-sm">Select...</button>
-                 </div>
-               </div>
-               <button onclick="submitAdminRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm">Register User</button>
-             </div>
-           </div>
-           
-           <!-- MANAGE USERS SYSTEM -->
-           <div class="border-t border-dashed border-gray-300 dark:border-darkborder pt-4 mt-2">
-             <h3 class="font-bold text-base text-red-600 dark:text-red-400 mb-2">Edit / Remove Users</h3>
-             <div class="relative mb-2">
-               <input type="text" id="admin-manage-search" placeholder="Search user to edit or remove..." class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none shadow-sm focus:border-blue-500 transition" autocomplete="off" onkeyup="searchUserToManage()">
-               <div id="admin-manage-results" class="absolute z-50 w-full bg-white dark:bg-darksurface border-x border-b border-gray-300 dark:border-darkborder rounded-b-lg shadow-xl hidden-view max-h-40 overflow-y-auto"></div>
-             </div>
-             
-             <div id="user-to-manage-container" class="hidden-view p-3 bg-gray-100 dark:bg-darkinput border border-gray-300 dark:border-darkborder rounded-lg space-y-3 mt-2">
-               <div class="flex justify-between items-center mb-1">
-                 <span class="font-bold text-sm text-gray-800 dark:text-gray-200">Edit User Details</span>
-                 <button type="button" onclick="cancelManageUser()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xl leading-none">&times;</button>
-               </div>
-               
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                   <div>
-                     <label class="block font-semibold mb-1 text-xs">Full Name</label>
-                     <input type="text" id="edit-user-name" class="w-full border border-gray-400 dark:border-gray-500 rounded bg-white dark:bg-black text-sm py-1 px-2 outline-none focus:border-blue-500">
-                   </div>
-                   <div>
-                     <label class="block font-semibold mb-1 text-xs">Mobile No</label>
-                     <input type="tel" id="edit-user-mobile" class="w-full border border-gray-400 dark:border-gray-500 rounded bg-white dark:bg-black text-sm py-1 px-2 outline-none focus:border-blue-500">
-                   </div>
-               </div>
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                   <div>
-                     <label class="block font-semibold mb-1 text-xs">Unit</label>
-                     <select id="edit-user-unit" class="w-full border border-gray-400 dark:border-gray-500 rounded bg-white dark:bg-black text-sm py-1 px-2 outline-none cursor-pointer"></select>
-                   </div>
-                   <div>
-                     <label class="block font-semibold mb-1 text-xs">Birthday</label>
-                     <button type="button" id="btn-manage-user-birthday" onclick="openPicker('date', 'manageUser', 'birthday')" class="w-full border border-gray-400 dark:border-gray-500 rounded bg-white dark:bg-black text-left text-sm py-1 px-2 outline-none">Select...</button>
-                   </div>
-               </div>
-               
-               <div class="flex space-x-2 pt-2 border-t border-gray-300 dark:border-darkborder">
-                 <button onclick="confirmUpdateUser()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 rounded shadow transition text-xs">Update User</button>
-                 <button onclick="confirmDeleteUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded shadow transition text-xs">Remove User</button>
-               </div>
-             </div>
-           </div>
-
-           <!-- CODE BACKUP SYSTEM -->
-           <div class="border-t border-dashed border-gray-300 dark:border-darkborder pt-4 mt-2">
-             <div class="flex justify-between items-center mb-2">
-                <h3 class="font-bold text-base text-purple-600 dark:text-purple-400">Code Backup</h3>
-                <button onclick="triggerCodeBackup()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-2 rounded shadow-sm transition text-xs">One-Click Backup</button>
-             </div>
-             <div class="space-y-3">
-               <div>
-                 <label class="block font-semibold mb-1 text-xs">GitHub Repo <span class="text-gray-500">(owner/repo)</span></label>
-                 <input type="text" id="set-github-repo" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500" placeholder="e.g. oncloudnintynine/Cloud-Calendar-Movement-Dev">
-               </div>
-               <div>
-                 <label class="block font-semibold mb-1 text-xs">Backup Drive Folder ID</label>
-                 <input type="text" id="set-backup-folder" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500" placeholder="Paste Folder ID or URL here">
-               </div>
-             </div>
-           </div>
-
          </div>
 
-         <div class="shrink-0 p-3 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10 shadow-inner">
-           <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition">Save Settings</button>
+         <!-- Footer Save Button -->
+         <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
+           <button onclick="saveKahSettings()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition">Save KAH Settings</button>
          </div>
 
        </div>
