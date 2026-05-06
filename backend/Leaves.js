@@ -191,10 +191,11 @@ function cancelLeave(data) {
  throw new Error("Record not found");
 }
 
-function checkKahLimit(data, props, sheet, skipId) {
+function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeaders) {
  if (data.leaveType !== 'Overseas Leave' && data.leaveType !== 'Official Trip') return false;
  
- var headers = verifySchema(sheet);
+ var headers = preloadedHeaders || verifySchema(sheet);
+ var rows = preloadedRows || sheet.getDataRange().getValues();
  var kahList = JSON.parse(props.getProperty('kahList') || "[]");
  var limit = parseInt(props.getProperty('kahLimit') || "50");
  
@@ -202,7 +203,6 @@ function checkKahLimit(data, props, sheet, skipId) {
  if (userKAHData.length === 0) return false;
 
  var exceededDepts =[];
- var rows = sheet.getDataRange().getValues();
 
  userKAHData.forEach(function(userKAH) {
    var dept = userKAH.dept;
@@ -242,14 +242,64 @@ function checkKahLimit(data, props, sheet, skipId) {
 
  if (exceededDepts.length > 0) {
    var deptStr = exceededDepts.join(', ');
-   var subjectTemplate = props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
-   var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.";
    
-   var finalSubject = subjectTemplate.replace(/{Name}/g, data.name).replace(/{LeaveType}/g, data.leaveType).replace(/{Unit}/g, deptStr);
-   var finalBody = bodyTemplate.replace(/{Name}/g, data.name).replace(/{LeaveType}/g, data.leaveType).replace(/{Unit}/g, deptStr);
-   
-   MailApp.sendEmail(props.getProperty('approvingAuthority'), finalSubject, finalBody);
+   // Suppress email trigger if this check is happening during bulk recalculations
+   if (!data._isRecalculation) {
+     var subjectTemplate = props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
+     var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.";
+     
+     var finalSubject = subjectTemplate.replace(/{Name}/g, data.name).replace(/{LeaveType}/g, data.leaveType).replace(/{Unit}/g, deptStr);
+     var finalBody = bodyTemplate.replace(/{Name}/g, data.name).replace(/{LeaveType}/g, data.leaveType).replace(/{Unit}/g, deptStr);
+     
+     MailApp.sendEmail(props.getProperty('approvingAuthority'), finalSubject, finalBody);
+   }
    return deptStr;
  }
  return false;
+}
+
+// Systematically recalculates limits dynamically across all future leaves when Admin updates KAH settings
+function recalculateAllKahStatuses(props) {
+  var sheetId = props.getProperty('dbSheetId');
+  if (!sheetId) return;
+  
+  var sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+  var headers = verifySchema(sheet);
+  var rows = sheet.getDataRange().getValues();
+  if (rows.length <= 1) return;
+
+  var now = new Date();
+  now.setHours(0, 0, 0, 0);
+  var statusColIdx = headers.indexOf('Status');
+
+  for (var i = 1; i < rows.length; i++) {
+    var rId = rows[i][headers.indexOf('ID')];
+    var rStatus = rows[i][statusColIdx];
+    var rType = rows[i][headers.indexOf('LeaveType')];
+    var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
+    
+    // Ignore past & cancelled leaves
+    if (rStatus === 'Cancelled' || rEnd < now) continue;
+    
+    if (rType === 'Overseas Leave' || rType === 'Official Trip') {
+      var dataMock = {
+         id: rId,
+         phone: rows[i][headers.indexOf('Phone')],
+         name: rows[i][headers.indexOf('Name')],
+         leaveType: rType,
+         startDate: rows[i][headers.indexOf('StartDate')],
+         endDate: rows[i][headers.indexOf('EndDate')],
+         _isRecalculation: true
+      };
+      
+      var kahExceededDept = checkKahLimit(dataMock, props, sheet, rId, rows, headers);
+      var newStatus = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
+      
+      // Update DB and Memory state smoothly if state changed (Limits breached or restored)
+      if (rStatus !== newStatus) {
+         sheet.getRange(i + 1, statusColIdx + 1).setValue(newStatus);
+         rows[i][statusColIdx] = newStatus; 
+      }
+    }
+  }
 }
