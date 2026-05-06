@@ -13,7 +13,8 @@ let fuseAttendees = null;
 
 let tempLeaveTypes =[];
 let adminKAHList =[];
-let tempMenuOrder = [];
+let tempMenuOrder =[];
+let tempAdminSectionsOrder = [];
 let eventAttendees =[]; 
 let isInfoAll = false;
 
@@ -47,6 +48,7 @@ const TAB_NAMES = {
   'submit-leave': 'Add Leave/MC/OIL',
   'submit-event': 'Add Event',
   'admin': 'Admin Settings',
+  'kah-management': 'KAH Management',
   'admin-structure': 'Organisational Structure'
 };
 
