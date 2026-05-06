@@ -1,5 +1,5 @@
 // ==========================================
-// Leaves.js - Core CRUD & KAH Logic 
+// Leaves.js - Core CRUD & KAH Logic
 // ==========================================
 
 function submitLeave(data) {
@@ -7,13 +7,14 @@ function submitLeave(data) {
  var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
  var headers = verifySchema(sheet);
  
- // SECURITY: Only Admins can set data.phone to someone else's phone.
  if (data._userRole !== 'admin' && String(data.phone) !== String(data._userPhone)) {
    throw new Error("Unauthorized to submit data on behalf of others.");
  }
  
+ var kahExceededDept = checkKahLimit(data, props, sheet);
+ var status = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
+ 
  var id = Utilities.getUuid();
- var status = checkKahLimit(data, props, sheet) ? "Cal Updated (KAH Limit Reached)" : "Cal Updated";
  var eventIds = createGCalEvents(data, props);
 
  var row = new Array(headers.length).fill('');
@@ -51,7 +52,6 @@ function editLeave(data) {
  for (var i = 1; i < rows.length; i++) {
    if (rows[i][headers.indexOf('ID')] === data.id) {
      
-     // SECURITY: Ensure user owns this record or is Admin
      if (data._userRole !== 'admin' && String(rows[i][headers.indexOf('Phone')]) !== String(data._userPhone)) {
        throw new Error("Unauthorized to modify this record.");
      }
@@ -75,7 +75,8 @@ function editLeave(data) {
        } catch(e) {}
      });
 
-     var status = checkKahLimit(data, props, sheet, data.id) ? "Cal Updated (KAH Limit Reached)" : "Cal Updated";
+     var kahExceededDept = checkKahLimit(data, props, sheet, data.id);
+     var status = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
      var newEventIds = createGCalEvents(data, props);
 
      var newRow = new Array(headers.length).fill('');
@@ -112,7 +113,7 @@ function getLeaves(data) {
  var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
  var headers = verifySchema(sheet);
  var rows = sheet.getDataRange().getValues();
- rows.shift(); // remove headers
+ rows.shift();
  
  var result =[];
  var updates = false;
@@ -133,7 +134,6 @@ function getLeaves(data) {
    }
  });
 
- // PERFORMANCE FIX: Removed synchronous CalendarApp event validation (N+1 query issue)
  for(var i = 0; i < rows.length; i++) {
    var obj = {};
    headers.forEach(function(h, idx) { obj[h] = rows[i][idx]; });
@@ -148,7 +148,6 @@ function getLeaves(data) {
  }
  
  if (updates) {
-   // Batch write all Department updates back to the sheet at once
    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
  }
  
@@ -163,8 +162,6 @@ function cancelLeave(data) {
  
  for (var i = 1; i < rows.length; i++) {
    if (rows[i][headers.indexOf('ID')] === data.id) {
-     
-     // SECURITY: Ensure user owns this record or is Admin
      if (data._userRole !== 'admin' && String(rows[i][headers.indexOf('Phone')]) !== String(data._userPhone)) {
        throw new Error("Unauthorized to cancel this record.");
      }
@@ -201,19 +198,19 @@ function checkKahLimit(data, props, sheet, skipId) {
  var kahList = JSON.parse(props.getProperty('kahList') || "[]");
  var limit = parseInt(props.getProperty('kahLimit') || "50");
  
- var userKAHData = kahList.filter(function(k) { return k.phone === data.phone; });
+ var userKAHData = kahList.filter(function(k) { return String(k.phone) === String(data.phone); });
  if (userKAHData.length === 0) return false;
 
- var limitExceeded = false;
+ var exceededDepts =[];
  var rows = sheet.getDataRange().getValues();
 
  userKAHData.forEach(function(userKAH) {
    var dept = userKAH.dept;
    var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
    
-   if (totalKahInDept === 0) return; // Prevent division by zero
+   if (totalKahInDept === 0) return;
    
-   var overlappingKAHPhones = [String(data.phone)];
+   var overlappingKAHPhones =[String(data.phone)];
    
    for (var i = 1; i < rows.length; i++) {
      var rId = rows[i][headers.indexOf('ID')];
@@ -226,7 +223,7 @@ function checkKahLimit(data, props, sheet, skipId) {
      if (rStatus === 'Cancelled' || rId === skipId) continue;
      
      if (rType === 'Overseas Leave' || rType === 'Official Trip') {
-       var isKAHForDept = kahList.some(function(k) { return k.phone == rPhone && k.dept === dept; });
+       var isKAHForDept = kahList.some(function(k) { return String(k.phone) === String(rPhone) && k.dept === dept; });
        if (isKAHForDept) {
          var dStart = new Date(data.startDate), dEnd = new Date(data.endDate);
          if (dStart <= rEnd && dEnd >= rStart) {
@@ -239,13 +236,20 @@ function checkKahLimit(data, props, sheet, skipId) {
    }
    
    if (((overlappingKAHPhones.length) / totalKahInDept) * 100 > limit) {
-     limitExceeded = true;
+     exceededDepts.push(dept);
    }
  });
 
- if (limitExceeded) {
-   MailApp.sendEmail(props.getProperty('approvingAuthority'), "Leave Requires Approval: KAH Limit Exceeded", "User " + data.name + " applied for " + data.leaveType + " but KAH limit was exceeded.");
-   return true;
+ if (exceededDepts.length > 0) {
+   var deptStr = exceededDepts.join(', ');
+   var subjectTemplate = props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
+   var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.";
+   
+   var finalSubject = subjectTemplate.replace(/{Name}/g, data.name).replace(/{LeaveType}/g, data.leaveType).replace(/{Unit}/g, deptStr);
+   var finalBody = bodyTemplate.replace(/{Name}/g, data.name).replace(/{LeaveType}/g, data.leaveType).replace(/{Unit}/g, deptStr);
+   
+   MailApp.sendEmail(props.getProperty('approvingAuthority'), finalSubject, finalBody);
+   return deptStr;
  }
  return false;
 }
