@@ -1,4 +1,3 @@
-#####*****
 // ==========================================
 // Code.js - Main Router & DB Setup
 // ==========================================
@@ -103,6 +102,3 @@ function doPost(e) {
 function doOptions(e) { 
  return ContentService.createTextOutput("").setMimeType(ContentService.MimeType.JSON); 
 }
-
-// ==========================================
-#####*****
