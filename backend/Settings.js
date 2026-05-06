@@ -1,5 +1,5 @@
 // ==========================================
-// Settings.js - Admin Settings Logic 
+// Settings.js - Admin Settings Logic
 // ==========================================
 
 function getSettings(data) {
@@ -53,6 +53,8 @@ function getSettings(data) {
    leaveTypes: JSON.parse(props.getProperty('leaveTypes') || "[]"),
    approvingAuthority: props.getProperty('approvingAuthority'),
    kahList: syncedKahList,
+   kahEmailSubject: props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}",
+   kahEmailBody: props.getProperty('kahEmailBody') || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.",
    menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
    githubRepo: props.getProperty('githubRepo') || '',
    backupFolder: props.getProperty('backupFolder') || '',
@@ -72,6 +74,8 @@ function saveSettings(data) {
  if (data.leaveTypes !== undefined) props.setProperty('leaveTypes', JSON.stringify(data.leaveTypes));
  if (data.approvingAuthority !== undefined) props.setProperty('approvingAuthority', data.approvingAuthority);
  if (data.kahList !== undefined) props.setProperty('kahList', JSON.stringify(data.kahList));
+ if (data.kahEmailSubject !== undefined) props.setProperty('kahEmailSubject', data.kahEmailSubject);
+ if (data.kahEmailBody !== undefined) props.setProperty('kahEmailBody', data.kahEmailBody);
  if (data.userKeyword !== undefined) props.setProperty('userKeyword', data.userKeyword);
  if (data.appMode !== undefined) props.setProperty('appMode', data.appMode);
  if (data.companyStructure !== undefined) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
@@ -128,7 +132,7 @@ function updateUserUnits(data) {
 
    if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
    if (toRemove.length > 0) {
-     toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove: [resName] }, gId); });
+     toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove:[resName] }, gId); });
    }
    
    if (contact.names && contact.names.length > 0) {
