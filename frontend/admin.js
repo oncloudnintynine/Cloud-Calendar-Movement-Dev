@@ -12,6 +12,9 @@ function populateAdminSettingsForm(settings) {
  document.getElementById('set-github-repo').value = settings.githubRepo || '';
  document.getElementById('set-backup-folder').value = settings.backupFolder || '';
  
+ document.getElementById('set-kah-subject').value = settings.kahEmailSubject || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
+ document.getElementById('set-kah-body').value = settings.kahEmailBody || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.";
+ 
  const radios = document.getElementsByName('app-mode');
  radios.forEach(r => { if(r.value === appMode) r.checked = true; });
 
@@ -35,25 +38,6 @@ async function loadAdminSettings() {
    if(settings.allContacts) {
      companyContacts = settings.allContacts;
      fuseAllContacts = new Fuse(settings.allContacts, { keys:['name', 'dept', 'phone'], threshold: 0.3 });
-     
-     let allUnits = new Set();
-     Object.keys(companyStructure).forEach(p => {
-       allUnits.add(p);
-       companyStructure[p].forEach(c => allUnits.add(c));
-     });
-     
-     const uniqueDepts = Array.from(allUnits).sort((a, b) => {
-         if (a.toUpperCase() === 'HQ') return -1;
-         if (b.toUpperCase() === 'HQ') return 1;
-         return a.localeCompare(b);
-     });
-     
-     const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
-     
-     const adminRegUnit = document.getElementById('admin-reg-unit');
-     const editUserUnit = document.getElementById('edit-user-unit');
-     if (adminRegUnit) adminRegUnit.innerHTML = regOptions;
-     if (editUserUnit) editUserUnit.innerHTML = regOptions;
    }
  } catch (err) { alertError('login-alert', err.message); }
 }
@@ -194,7 +178,9 @@ function selectUserToManage(resourceName, name, phone, dept, birthday) {
  userToManageResource = resourceName;
  document.getElementById('edit-user-name').value = name;
  document.getElementById('edit-user-mobile').value = phone;
- document.getElementById('edit-user-unit').value = dept;
+ 
+ const primaryDept = dept ? dept.split(',')[0].trim().toUpperCase() : '';
+ document.getElementById('edit-user-unit').value = primaryDept;
  
  if (birthday) {
    const parts = birthday.split('-');
@@ -264,6 +250,8 @@ async function saveAdminSettings() {
    kahLimit: document.getElementById('set-kah-limit').value,
    approvingAuthority: document.getElementById('set-appr-email').value,
    kahList: adminKAHList,
+   kahEmailSubject: document.getElementById('set-kah-subject').value.trim(),
+   kahEmailBody: document.getElementById('set-kah-body').value.trim(),
    githubRepo: document.getElementById('set-github-repo').value.trim(),
    backupFolder: document.getElementById('set-backup-folder').value.trim()
  };
