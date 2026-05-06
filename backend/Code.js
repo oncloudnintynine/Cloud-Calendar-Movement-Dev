@@ -1,3 +1,4 @@
+#####*****
 // ==========================================
 // Code.js - Main Router & DB Setup
 // ==========================================
@@ -19,6 +20,7 @@ function INITIAL_SETUP() {
  if (!props.getProperty('approvingAuthority')) props.setProperty('approvingAuthority', Session.getActiveUser().getEmail());
  if (!props.getProperty('kahList')) props.setProperty('kahList', JSON.stringify([]));
  if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringify(['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event']));
+ if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'leave-types', 'code-backup']));
  
  if (!props.getProperty('kahEmailSubject')) props.setProperty('kahEmailSubject', 'Leave Requires Approval: KAH Limit Crossed for {Unit}');
  if (!props.getProperty('kahEmailBody')) props.setProperty('kahEmailBody', 'User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.');
@@ -103,3 +105,4 @@ function doOptions(e) {
 }
 
 // ==========================================
+#####*****
