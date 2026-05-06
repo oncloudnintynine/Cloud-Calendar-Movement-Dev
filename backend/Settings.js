@@ -56,6 +56,7 @@ function getSettings(data) {
    kahEmailSubject: props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}",
    kahEmailBody: props.getProperty('kahEmailBody') || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.",
    menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
+   adminSectionsOrder: JSON.parse(props.getProperty('adminSectionsOrder') || "null"),
    githubRepo: props.getProperty('githubRepo') || '',
    backupFolder: props.getProperty('backupFolder') || '',
    userKeyword: props.getProperty('userKeyword') || 'peace',
@@ -80,6 +81,7 @@ function saveSettings(data) {
  if (data.appMode !== undefined) props.setProperty('appMode', data.appMode);
  if (data.companyStructure !== undefined) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
  if (data.menuOrder !== undefined) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
+ if (data.adminSectionsOrder !== undefined) props.setProperty('adminSectionsOrder', JSON.stringify(data.adminSectionsOrder));
  if (data.githubRepo !== undefined) props.setProperty('githubRepo', data.githubRepo);
  if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
  
@@ -128,7 +130,7 @@ function updateUserUnits(data) {
    }
 
    var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId && cg.groupMap[id]; });
-   var toAdd = targetGroupId && currentGroupIds.indexOf(targetGroupId) === -1 ? [resName] :[];
+   var toAdd = targetGroupId && currentGroupIds.indexOf(targetGroupId) === -1 ?[resName] :[];
 
    if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
    if (toRemove.length > 0) {
