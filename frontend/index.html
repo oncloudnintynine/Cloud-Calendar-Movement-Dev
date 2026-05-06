@@ -190,7 +190,7 @@
      <div id="view-parade-state" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full">
        <div class="bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-4 flex-grow flex flex-col min-h-0 h-full">
          <div class="flex justify-between items-center border-b dark:border-darkborder pb-2 mb-3 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0">
-           <h2 id="parade-state-header" class="text-lg font-bold text-blue-600 dark:text-blue-400 m-0">Overall Parade State</h2>
+           <h2 id="parade-state-header" class="text-lg font-bold text-blue-600 dark:text-blue-400 m-0 leading-tight">Overall Parade State</h2>
            <button type="button" id="btn-parade-target" onclick="openPicker('datetime', 'parade', 'target')" class="border-2 border-gray-400 dark:border-gray-500 rounded-lg py-1 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black font-medium text-xs transition">Change Time</button>
          </div>
          <div id="parade-state-body" class="flex-1 overflow-y-auto space-y-4 pr-1 pb-4"></div>
@@ -238,6 +238,7 @@
      <div id="view-submit-leave" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
        <form id="leave-form" onsubmit="event.preventDefault(); submitForm('leave');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-4">
+           <!-- Form body identical to previous -->
            <div id="admin-behalf-leave" class="hidden-view relative mb-3 pb-4 border-b-2 border-dashed dark:border-darkborder">
              <label class="block font-bold mb-1 text-sm text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
              <input type="text" id="form-leave-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-lg py-2 px-3 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition text-sm" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('leave')">
@@ -301,6 +302,7 @@
      <div id="view-submit-event" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
        <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-4">
+           <!-- Form body identical to previous -->
            <div id="admin-behalf-event" class="hidden-view relative mb-3 pb-4 border-b-2 border-dashed dark:border-darkborder">
              <label class="block font-bold mb-1 text-sm text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
              <input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-lg py-2 px-3 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition text-sm" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
@@ -429,6 +431,18 @@
            <div class="grid grid-cols-2 gap-3">
              <div><label class="block font-semibold mb-1 text-sm">KAH Limit (%)</label><input type="number" id="set-kah-limit" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] outline-none focus:border-blue-500 text-sm"></div>
              <div><label class="block font-semibold mb-1 text-sm">Approving Email</label><input type="email" id="set-appr-email" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] outline-none focus:border-blue-500 text-sm"></div>
+           </div>
+           
+           <div class="border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-[#1a1a1a] space-y-3">
+             <div>
+               <label class="block font-semibold mb-1 text-sm">KAH Email Subject Format</label>
+               <input type="text" id="set-kah-subject" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-sm outline-none focus:border-blue-500 transition" placeholder="e.g. Leave Requires Approval: KAH Limit Crossed for {Unit}">
+             </div>
+             <div>
+               <label class="block font-semibold mb-1 text-sm">KAH Email Body Format</label>
+               <textarea id="set-kah-body" rows="2" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-sm outline-none focus:border-blue-500 transition resize-none overflow-hidden" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" placeholder="e.g. User {Name} applied for {LeaveType}..."></textarea>
+               <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Available variables: {Name}, {LeaveType}, {Unit}</p>
+             </div>
            </div>
            
            <div>
