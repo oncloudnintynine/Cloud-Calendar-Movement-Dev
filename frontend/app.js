@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
  
  if (user) {
    if (!user.pass) {
-       logout(); // Force login if old cache format lacks password
+       logout(); 
    } else {
        showApp(); 
    }
@@ -115,8 +115,11 @@ async function showApp() {
    const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
    const regUnit = document.getElementById('reg-unit');
    const adminRegUnit = document.getElementById('admin-reg-unit');
+   const editUserUnit = document.getElementById('edit-user-unit');
+   
    if (regUnit) regUnit.innerHTML = regOptions;
    if (adminRegUnit) adminRegUnit.innerHTML = regOptions;
+   if (editUserUnit) editUserUnit.innerHTML = regOptions;
    unitsLoaded = true;
    
    if (companyContacts.length > 0) {
