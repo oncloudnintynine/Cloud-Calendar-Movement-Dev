@@ -70,11 +70,19 @@ function saveSettings(data) {
  if (data._userRole !== 'admin') throw new Error("Unauthorized");
  var props = PropertiesService.getScriptProperties();
  
+ var triggerKahRecalc = false;
+ 
  if (data.newAdminPass) props.setProperty('adminPassword', data.newAdminPass);
- if (data.kahLimit !== undefined) props.setProperty('kahLimit', data.kahLimit.toString());
+ if (data.kahLimit !== undefined) {
+     props.setProperty('kahLimit', data.kahLimit.toString());
+     triggerKahRecalc = true;
+ }
  if (data.leaveTypes !== undefined) props.setProperty('leaveTypes', JSON.stringify(data.leaveTypes));
  if (data.approvingAuthority !== undefined) props.setProperty('approvingAuthority', data.approvingAuthority);
- if (data.kahList !== undefined) props.setProperty('kahList', JSON.stringify(data.kahList));
+ if (data.kahList !== undefined) {
+     props.setProperty('kahList', JSON.stringify(data.kahList));
+     triggerKahRecalc = true;
+ }
  if (data.kahEmailSubject !== undefined) props.setProperty('kahEmailSubject', data.kahEmailSubject);
  if (data.kahEmailBody !== undefined) props.setProperty('kahEmailBody', data.kahEmailBody);
  if (data.userKeyword !== undefined) props.setProperty('userKeyword', data.userKeyword);
@@ -84,6 +92,11 @@ function saveSettings(data) {
  if (data.adminSectionsOrder !== undefined) props.setProperty('adminSectionsOrder', JSON.stringify(data.adminSectionsOrder));
  if (data.githubRepo !== undefined) props.setProperty('githubRepo', data.githubRepo);
  if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
+ 
+ // Fire recalculation explicitly if KAH constraints were manipulated
+ if (triggerKahRecalc && typeof recalculateAllKahStatuses === 'function') {
+     recalculateAllKahStatuses(props);
+ }
  
  return { updated: true };
 }
