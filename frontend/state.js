@@ -53,7 +53,9 @@ const TAB_NAMES = {
   'submit-combined': 'Add Event / Leave',
   'admin': 'Admin Settings',
   'kah-management': 'KAH Management',
-  'admin-structure': 'Organisational Structure'
+  'admin-structure': 'Organisational Structure',
+  'admin-event-templates': 'Event Types & Templates',
+  'admin-acronyms': 'Acronyms / Shortforms'
 };
 
 const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-combined'];
