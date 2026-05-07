@@ -74,6 +74,8 @@ async function showApp() {
  document.getElementById('menu-btn').classList.remove('hidden');
  document.getElementById('active-tab-title').classList.remove('hidden');
  
+ user.departments = user.departments ||[]; // Safety fallback for Admins
+ 
  document.getElementById('nav-user-name').innerText = user.role === 'admin' ? "Administrator" : (user.departments.length ? `${user.name}` : user.name);
 
  try {
