@@ -37,9 +37,10 @@ function populateAdminSettingsForm(settings) {
  renderKAHSelected();
  renderCustomKahGroups();
  
+ // Excluded the newly separated tabs from the drag-and-drop array
  tempAdminSectionsOrder = settings.adminSectionsOrder && settings.adminSectionsOrder.length 
   ? settings.adminSectionsOrder 
-  :['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'typical-event-types', 'templates', 'acronyms', 'code-backup'];
+  :['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'code-backup'];
  
  const container = document.getElementById('admin-sections-container');
  if (container) {
@@ -400,76 +401,3 @@ async function confirmDeleteUser() {
 }
 
 function submitAdminRegister() { handleRegister('admin'); }
-
-async function saveAdminSettings() {
- showLoader(true);
- const newPass = document.getElementById('set-admin-pass').value || null;
- let selectedMode = 'combined';
- document.getElementsByName('app-mode').forEach(r => { if(r.checked) selectedMode = r.value; });
-
- const payload = {
-   adminPass: user.pass, newAdminPass: newPass, appMode: selectedMode,
-   userKeyword: document.getElementById('set-user-keyword').value.trim() || 'peace',
-   menuOrder: tempMenuOrder,
-   typicalEventTypes: tempTypicalEventTypes,
-   acronyms: tempAcronyms,
-   gcalTemplate: document.getElementById('set-gcal-template').value.trim(),
-   agendaTemplate: document.getElementById('set-agenda-template').value.trim(),
-   adminSectionsOrder: tempAdminSectionsOrder,
-   githubRepo: document.getElementById('set-github-repo').value.trim(),
-   backupFolder: document.getElementById('set-backup-folder').value.trim()
- };
- 
- try {
-   await apiCall('saveSettings', payload);
-   alert("Settings successfully saved! App will reload to apply UI changes.");
-   if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); }
-   window.location.reload(); 
- } catch (err) { alert("Error: " + err.message); showLoader(false); }
-}
-
-async function saveKahSettings() {
- showLoader(true);
- const payload = {
-   adminPass: user.pass,
-   kahLimit: document.getElementById('set-kah-limit').value,
-   approvingAuthority: document.getElementById('set-appr-email').value,
-   kahList: adminKAHList,
-   customKahGroups: customKahGroups,
-   kahEmailSubject: document.getElementById('set-kah-subject').value.trim(),
-   kahEmailBody: document.getElementById('set-kah-body').value.trim()
- };
- 
- try {
-   await apiCall('saveSettings', payload);
-   alert("KAH Settings successfully saved! App will reload to apply changes.");
-   window.location.reload();
- } catch (err) { alert("Error: " + err.message); showLoader(false); }
-}
-
-async function triggerCodeBackup() {
- const repo = document.getElementById('set-github-repo').value.trim();
- const folderInput = document.getElementById('set-backup-folder').value.trim();
- if (!repo || !folderInput) return alert('Please fill out the GitHub Repo and Backup Drive Folder fields, and click "Save Settings" before backing up.');
- let folderId = folderInput;
- if (folderInput.includes('drive.google.com')) { const match = folderInput.match(/folders\/([a-zA-Z0-9_-]+)/); if (match) folderId = match[1]; }
-
- showLoader(true);
- try {
-     const repoRes = await fetch(`https://api.github.com/repos/${repo}`);
-     if (!repoRes.ok) throw new Error("GitHub repo not found.");
-     const defaultBranch = (await repoRes.json()).default_branch || 'main';
-     const treeRes = await fetch(`https://api.github.com/repos/${repo}/git/trees/${defaultBranch}?recursive=1`);
-     const treeData = await treeRes.json();
-     const fileNodes = treeData.tree.filter(item => item.type === 'blob');
-     
-     let compiledFiles = new Array();
-     for (const file of fileNodes) {
-         const content = await (await fetch(`https://raw.githubusercontent.com/${repo}/${defaultBranch}/${file.path}`)).text();
-         compiledFiles.push({ url: `https://github.com/${repo}/blob/${defaultBranch}/${file.path}`, content: content });
-     }
-
-     const res = await apiCall('backupCode', { folderId: folderId, hierarchy: fileNodes.map(f=>f.path).join('\n'), files: compiledFiles });
-     alert(`Code successfully backed up!\n\nURL:\n${res.url}`);
- } catch (err) { alert("Backup Error: " + err.message); } finally { showLoader(false); }
-}
