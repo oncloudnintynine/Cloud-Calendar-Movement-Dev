@@ -469,7 +469,7 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
        <h3 class="font-bold text-sm md:text-base">${finalTitle}</h3>
        <span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight shrink-0 ml-2 ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
      </div>
-     ${!isMyCalendar && isLeave && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-xs md:text-sm text-gray-700 dark:text-darktext">(${l.HalfDay})</p>` : ''}
+     ${!isMyCalendar && !isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-xs md:text-sm text-gray-700 dark:text-darktext">(${l.HalfDay})</p>` : ''}
      <p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
      ${isEvent && finalLocation ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
      ${!isEvent && finalCountry ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${finalCountry} ${l.State ? `(${l.State})` : ''}</p>` : ''}
@@ -576,7 +576,7 @@ function renderDashboard() {
                 } else if (a.name.startsWith('zz KAH:')) {
                     return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
                 } else {
-                    return user.departments.includes(a.dept);
+                    return (user.departments ||[]).includes(a.dept); // Safety fallback
                 }
             }
             return false;
@@ -645,7 +645,7 @@ function renderMyLeaves() {
                 } else if (a.name.startsWith('zz KAH:')) {
                     return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
                 } else {
-                    return user.departments.includes(a.dept);
+                    return (user.departments ||[]).includes(a.dept); // Safety fallback
                 }
             }
             return false;
