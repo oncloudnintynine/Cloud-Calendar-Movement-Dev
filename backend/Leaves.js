@@ -192,23 +192,36 @@ function cancelLeave(data) {
 }
 
 function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeaders) {
- if (data.leaveType !== 'Overseas Leave' && data.leaveType !== 'Official Trip') return false;
+ var eventTypes = JSON.parse(props.getProperty('eventTypes') || "[]");
+ var typeObj = eventTypes.filter(function(t) { return t.name === data.leaveType; })[0];
+ if (!typeObj || !typeObj.isKAH) return false; // Only run check if event type is flagged as KAH
  
  var headers = preloadedHeaders || verifySchema(sheet);
  var rows = preloadedRows || sheet.getDataRange().getValues();
  var kahList = JSON.parse(props.getProperty('kahList') || "[]");
+ var customGroups = JSON.parse(props.getProperty('kahCustomGroups') || "[]");
  var limit = parseInt(props.getProperty('kahLimit') || "50");
  
+ // Find which Units and Custom Groups this user represents as KAH
  var userKAHData = kahList.filter(function(k) { return String(k.phone) === String(data.phone); });
- if (userKAHData.length === 0) return false;
+ var userCustomGroups = customGroups.filter(function(cg) { return cg.phones.indexOf(String(data.phone)) !== -1; });
+ 
+ if (userKAHData.length === 0 && userCustomGroups.length === 0) return false;
 
  var exceededDepts =[];
 
- userKAHData.forEach(function(userKAH) {
-   var dept = userKAH.dept;
-   var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
+ // Helper to check a specific group (Unit or Custom)
+ function evaluateGroup(groupName, isCustom) {
+   var totalKahInGroup = 0;
    
-   if (totalKahInDept === 0) return;
+   if (isCustom) {
+       var cg = customGroups.filter(function(c) { return c.groupName === groupName; })[0];
+       if (cg) totalKahInGroup = cg.phones.length;
+   } else {
+       totalKahInGroup = kahList.filter(function(k) { return k.dept === groupName; }).length;
+   }
+   
+   if (totalKahInGroup === 0) return;
    
    var overlappingKAHPhones =[String(data.phone)];
    
@@ -222,9 +235,17 @@ function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeade
 
      if (rStatus === 'Cancelled' || rId === skipId) continue;
      
-     if (rType === 'Overseas Leave' || rType === 'Official Trip') {
-       var isKAHForDept = kahList.some(function(k) { return String(k.phone) === String(rPhone) && k.dept === dept; });
-       if (isKAHForDept) {
+     var rTypeObj = eventTypes.filter(function(t) { return t.name === rType; })[0];
+     if (rTypeObj && rTypeObj.isKAH) {
+       var isKAHForGroup = false;
+       if (isCustom) {
+           var rCg = customGroups.filter(function(c) { return c.groupName === groupName; })[0];
+           if (rCg && rCg.phones.indexOf(String(rPhone)) !== -1) isKAHForGroup = true;
+       } else {
+           isKAHForGroup = kahList.some(function(k) { return String(k.phone) === String(rPhone) && k.dept === groupName; });
+       }
+       
+       if (isKAHForGroup) {
          var dStart = new Date(data.startDate), dEnd = new Date(data.endDate);
          if (dStart <= rEnd && dEnd >= rStart) {
            if (overlappingKAHPhones.indexOf(String(rPhone)) === -1) {
@@ -235,21 +256,41 @@ function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeade
      }
    }
    
-   if (((overlappingKAHPhones.length) / totalKahInDept) * 100 > limit) {
-     exceededDepts.push(dept);
+   if (((overlappingKAHPhones.length) / totalKahInGroup) * 100 > limit) {
+     exceededDepts.push(groupName);
    }
- });
+ }
+
+ // Evaluate Units
+ userKAHData.forEach(function(u) { evaluateGroup(u.dept, false); });
+ // Evaluate Custom Groups
+ userCustomGroups.forEach(function(cg) { evaluateGroup(cg.groupName, true); });
 
  if (exceededDepts.length > 0) {
    var deptStr = exceededDepts.join(', ');
    
-   // Suppress email trigger if this check is happening during bulk recalculations
    if (!data._isRecalculation) {
      var subjectTemplate = props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
      var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.";
      
-     var finalSubject = subjectTemplate.replace(/{Name}/g, data.name).replace(/{LeaveType}/g, data.leaveType).replace(/{Unit}/g, deptStr);
-     var finalBody = bodyTemplate.replace(/{Name}/g, data.name).replace(/{LeaveType}/g, data.leaveType).replace(/{Unit}/g, deptStr);
+     var fmtStart = Utilities.formatDate(new Date(data.startDate), Session.getScriptTimeZone(), "dd MMM yyyy");
+     var fmtEnd = Utilities.formatDate(new Date(data.endDate), Session.getScriptTimeZone(), "dd MMM yyyy");
+     
+     var replacements = {
+         '{Name}': data.name,
+         '{LeaveType}': data.leaveType,
+         '{Unit}': deptStr,
+         '{StartDate}': fmtStart,
+         '{EndDate}': fmtEnd,
+         '{Remarks}': data.remarks || 'None'
+     };
+     
+     var finalSubject = subjectTemplate;
+     var finalBody = bodyTemplate;
+     for (var key in replacements) {
+         finalSubject = finalSubject.replace(new RegExp(key, 'g'), replacements[key]);
+         finalBody = finalBody.replace(new RegExp(key, 'g'), replacements[key]);
+     }
      
      MailApp.sendEmail(props.getProperty('approvingAuthority'), finalSubject, finalBody);
    }
@@ -271,6 +312,8 @@ function recalculateAllKahStatuses(props) {
   var now = new Date();
   now.setHours(0, 0, 0, 0);
   var statusColIdx = headers.indexOf('Status');
+  
+  var eventTypes = JSON.parse(props.getProperty('eventTypes') || "[]");
 
   for (var i = 1; i < rows.length; i++) {
     var rId = rows[i][headers.indexOf('ID')];
@@ -281,7 +324,10 @@ function recalculateAllKahStatuses(props) {
     // Ignore past & cancelled leaves
     if (rStatus === 'Cancelled' || rEnd < now) continue;
     
-    if (rType === 'Overseas Leave' || rType === 'Official Trip') {
+    var rTypeObj = eventTypes.filter(function(t) { return t.name === rType; })[0];
+    
+    // If it's a KAH event type, test it
+    if (rTypeObj && rTypeObj.isKAH) {
       var dataMock = {
          id: rId,
          phone: rows[i][headers.indexOf('Phone')],
