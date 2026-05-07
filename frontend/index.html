@@ -93,6 +93,8 @@
            <button onclick="switchTab('admin')" id="menu-admin" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Admin Settings</button>
            <button onclick="switchTab('kah-management')" id="menu-kah-management" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">KAH Management</button>
            <button onclick="switchTab('admin-structure')" id="menu-admin-structure" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Organisational Structure</button>
+           <button onclick="switchTab('admin-event-templates')" id="menu-admin-event-templates" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Event Types & Templates</button>
+           <button onclick="switchTab('admin-acronyms')" id="menu-admin-acronyms" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Acronyms / Shortforms</button>
        </div>
      </div>
    </div>
@@ -178,7 +180,6 @@
        </div>
      </div>
 
-     <!-- Parade State Tab -->
      <div id="view-parade-state" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full">
        <div class="bg-white dark:bg-darksurface rounded-xl shadow-sm border dark:border-darkborder p-4 flex-grow flex flex-col min-h-0 h-full">
          <div class="flex justify-between items-center border-b dark:border-darkborder pb-2 mb-3 sticky top-0 bg-white dark:bg-darksurface z-10 shrink-0">
@@ -189,7 +190,6 @@
        </div>
      </div>
 
-     <!-- My Calendar Tab -->
      <div id="view-my-leaves" class="tab-content hidden-view flex-grow flex-col overflow-hidden h-full space-y-3">
        <div id="my-calendar-quick-add" class="flex space-x-2 w-full shrink-0 overflow-x-auto pb-1 scrollbar-hide"></div>
 
@@ -221,7 +221,6 @@
        </div>
      </div>
 
-     <!-- NEW UNIFIED Add/Submit Combined Form Tab -->
      <div id="view-submit-combined" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
        <form id="combined-form" onsubmit="event.preventDefault(); submitForm('combined');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-4">
@@ -346,7 +345,6 @@
        </form>
      </div>
 
-     <!-- CLASSIC Add Leave Tab -->
      <div id="view-submit-leave" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
        <form id="leave-form" onsubmit="event.preventDefault(); submitForm('leave');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-4">
@@ -409,7 +407,6 @@
        </form>
      </div>
 
-     <!-- CLASSIC Add Event Tab -->
      <div id="view-submit-event" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
        <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-4">
@@ -489,9 +486,7 @@
        </form>
      </div>
      
-     <!-- Admin Settings Tab -->
      <div id="view-admin" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
-       
        <div id="admin-sections-container" class="flex-grow overflow-y-auto space-y-4 pb-4 px-1 pt-1">
          
          <div data-section="app-mode" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
@@ -615,54 +610,6 @@
            <div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
          </div>
 
-         <div data-section="typical-event-types" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
-           <div class="flex justify-between items-center mb-3">
-             <h3 class="font-bold text-base text-blue-600 dark:text-blue-400">Typical Event Types</h3>
-             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-           </div>
-           <div id="typical-event-types-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-2"></div>
-           <div class="flex space-x-2">
-             <input type="text" id="new-typical-event-type" class="flex-grow border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-blue-500 transition" placeholder="Add new type...">
-             <select id="new-typical-event-isEvent" class="border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none">
-                 <option value="true">Event (Time-Bound)</option>
-                 <option value="false">Leave (All-Day)</option>
-             </select>
-             <button type="button" onclick="addTypicalEventType()" class="bg-gray-300 dark:bg-gray-700 font-bold px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm">Add</button>
-           </div>
-         </div>
-         
-         <div data-section="templates" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
-           <div class="flex justify-between items-center mb-3">
-             <h3 class="font-bold text-base text-yellow-600 dark:text-yellow-500">Display Templates</h3>
-             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-           </div>
-           <div class="space-y-3">
-             <div>
-               <label class="block font-semibold mb-1 text-xs">GCal Event Title Template</label>
-               <input type="text" id="set-gcal-template" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500" placeholder="{EventType} - {Name}, {Attendees} {Time}">
-             </div>
-             <div>
-               <label class="block font-semibold mb-1 text-xs">App Agenda Display Template</label>
-               <input type="text" id="set-agenda-template" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500" placeholder="{EventType} - {Name} ({Department})">
-             </div>
-             <p class="text-[10px] text-gray-500 leading-tight">Available Variables: {EventType}, {Name}, {Attendees}, {Department}, {Location}, {Time}</p>
-           </div>
-         </div>
-         
-         <div data-section="acronyms" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
-           <div class="flex justify-between items-center mb-3">
-             <h3 class="font-bold text-base text-yellow-600 dark:text-yellow-500">Acronyms / Shortforms</h3>
-             <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-           </div>
-           <p class="text-[10px] text-gray-500 mb-2 leading-tight">Define shortforms to automatically abbreviate long phrases in GCal and Agenda views.</p>
-           <div id="acronyms-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-2 max-h-48 overflow-y-auto"></div>
-           <div class="flex space-x-2">
-             <input type="text" id="new-acronym-key" class="w-24 border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-yellow-500 transition" placeholder="Short (MTG)">
-             <input type="text" id="new-acronym-val" class="flex-grow border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-yellow-500 transition" placeholder="Full Word (Meeting)">
-             <button type="button" onclick="addAcronym()" class="bg-gray-300 dark:bg-gray-700 font-bold px-3 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm">Add</button>
-           </div>
-         </div>
-
          <div data-section="code-backup" class="bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder p-4">
            <div class="flex justify-between items-center mb-3">
              <h3 class="font-bold text-base text-indigo-600 dark:text-indigo-400">Code Backup</h3>
@@ -686,10 +633,71 @@
        <div class="shrink-0 p-3 bg-white dark:bg-darksurface border border-gray-300 dark:border-darkborder rounded-xl shadow-md z-20 mt-2">
          <button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow transition text-base">Save Settings</button>
        </div>
-
      </div>
 
-     <!-- KAH Management Tab -->
+     <div id="view-admin-event-templates" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
+       <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
+         <div class="flex-grow overflow-y-auto p-4 space-y-5">
+           
+           <div>
+             <h3 class="font-bold text-lg text-blue-600 dark:text-blue-400 mb-3 border-b dark:border-darkborder pb-1">Typical Event Types</h3>
+             <div id="typical-event-types-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-2"></div>
+             <div class="flex space-x-2">
+               <input type="text" id="new-typical-event-type" class="flex-grow border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-blue-500 transition" placeholder="Add new type...">
+               <select id="new-typical-event-isEvent" class="border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none cursor-pointer">
+                   <option value="true">Event (Time-Bound)</option>
+                   <option value="false">Leave (All-Day)</option>
+               </select>
+               <button type="button" onclick="addTypicalEventType()" class="bg-gray-300 dark:bg-gray-700 font-bold px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm">Add</button>
+             </div>
+           </div>
+
+           <div>
+             <h3 class="font-bold text-lg text-yellow-600 dark:text-yellow-500 mb-3 border-b dark:border-darkborder pb-1">Display Templates</h3>
+             <div class="space-y-3">
+               <div>
+                 <label class="block font-semibold mb-1 text-sm">GCal Event Title Template</label>
+                 <input type="text" id="set-gcal-template" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500" placeholder="{EventType} - {Name}, {Attendees} {Time}">
+               </div>
+               <div>
+                 <label class="block font-semibold mb-1 text-sm">App Agenda Display Template</label>
+                 <input type="text" id="set-agenda-template" class="w-full border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500" placeholder="{EventType} - {Name} ({Department})">
+               </div>
+               <p class="text-[10px] text-gray-500 leading-tight">Available Variables: {EventType}, {Name}, {Attendees}, {Department}, {Location}, {Time}</p>
+             </div>
+           </div>
+
+         </div>
+         <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
+           <button onclick="saveEventTemplates()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition">Save Event Types & Templates</button>
+         </div>
+       </div>
+     </div>
+
+     <div id="view-admin-acronyms" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
+       <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
+         <div class="flex-grow overflow-y-auto p-4 space-y-5">
+           
+           <div>
+             <h3 class="font-bold text-lg text-yellow-600 dark:text-yellow-500 mb-2 border-b dark:border-darkborder pb-1">Acronyms / Shortforms</h3>
+             <p class="text-xs text-gray-500 dark:text-darkmuted mb-3 leading-tight">Define shortforms to automatically abbreviate long phrases in GCal and Agenda views.</p>
+             
+             <div class="flex space-x-2 mb-3">
+               <input type="text" id="new-acronym-key" class="w-24 border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-yellow-500 transition" placeholder="Short (MTG)">
+               <input type="text" id="new-acronym-val" class="flex-grow border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-yellow-500 transition" placeholder="Full Word (Meeting)">
+               <button type="button" onclick="addAcronym()" class="bg-gray-300 dark:bg-gray-700 font-bold px-3 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm">Add</button>
+             </div>
+
+             <div id="acronyms-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-2 min-h-[40px]"></div>
+           </div>
+
+         </div>
+         <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
+           <button onclick="saveAcronyms()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition">Save Acronyms</button>
+         </div>
+       </div>
+     </div>
+
      <div id="view-kah-management" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
        <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          
@@ -744,7 +752,6 @@
        </div>
      </div>
 
-     <!-- Admin Company Structure Tab -->
      <div id="view-admin-structure" class="tab-content hidden-view flex-col max-w-4xl mx-auto w-full h-full pb-0 relative">
        <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          
