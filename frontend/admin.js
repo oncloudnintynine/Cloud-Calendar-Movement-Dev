@@ -566,4 +566,24 @@ if (!repo || !token || !rawInput) return alert('Please provide the GitHub Repo, 
 showLoader(true);
 try {
    const files =[];
-   const fileRegex = /\$\$\$\s*FILE:\s*([^\$]+)\s*\$\$\$\s*
+   const fileRegex = /\$\$\$\s*FILE:\s*([^\$]+)\s*\$\$\$\s*```javascript([\s\S]*?)```/g;
+   let match;
+   
+   while ((match = fileRegex.exec(rawInput)) !== null) {
+       files.push({
+           path: match[1].trim(),
+           content: match[2].trim()
+       });
+   }
+
+   if (files.length === 0) throw new Error("No files successfully parsed. Ensure you copied the exact format provided by the AI ($$$ FILE: path $$$ followed by ```javascript code block).");
+
+   const res = await apiCall('pushCodeUpdate', { githubToken: token, githubRepo: repo, files: files });
+   alert(`Code successfully pushed to GitHub!\n\nCommit URL:\n${res.commitUrl}`);
+   document.getElementById('set-github-code-input').value = '';
+} catch (err) { 
+   alert("Code Update Error: " + err.message); 
+} finally { 
+   showLoader(false); 
+}
+}
