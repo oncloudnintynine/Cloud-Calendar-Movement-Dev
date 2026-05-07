@@ -1,5 +1,5 @@
 // ==========================================
-// Admin Settings & User Management
+// Admin Settings, User Management & Code Backup
 // ==========================================
 
 let userToDeleteResource = null;
@@ -64,6 +64,11 @@ try {
     tempAdminSectionsOrder = settings.adminSectionsOrder && settings.adminSectionsOrder.length 
     ? settings.adminSectionsOrder 
     :['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'code-backup'];
+
+    // FAILSAFE: Force 'code-backup' back into the array if an older saved settings payload excluded it
+    if (!tempAdminSectionsOrder.includes('code-backup')) {
+        tempAdminSectionsOrder.push('code-backup');
+    }
 
     const container = document.getElementById('admin-sections-container');
     if (container) {

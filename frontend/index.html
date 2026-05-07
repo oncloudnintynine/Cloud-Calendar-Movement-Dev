@@ -617,6 +617,24 @@
          <div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
        </div>
 
+       <div data-section="code-backup" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
+         <div class="flex justify-between items-center mb-3">
+           <h3 class="font-bold text-base text-indigo-600 dark:text-indigo-400">Code Backup</h3>
+           <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+         </div>
+         <div class="space-y-3">
+           <div>
+             <label class="block font-semibold mb-1 text-xs">GitHub Repo <span class="text-gray-500">(owner/repo)</span></label>
+             <input type="text" id="set-github-repo" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition" placeholder="e.g. oncloudnintynine/Cloud-Calendar-Movement-Dev">
+           </div>
+           <div>
+             <label class="block font-semibold mb-1 text-xs">Backup Drive Folder ID</label>
+             <input type="text" id="set-backup-folder" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition" placeholder="Paste Folder ID or URL here">
+           </div>
+           <button onclick="triggerCodeBackup()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm">One-Click Backup</button>
+         </div>
+       </div>
+
      </div>
 
      <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
