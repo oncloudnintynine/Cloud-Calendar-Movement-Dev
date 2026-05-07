@@ -11,17 +11,16 @@ let validContactNames =[];
 let fuseAllContacts = null;
 let fuseAttendees = null;
 
-let tempEventTypes =[];
+let tempTypicalEventTypes =[];
+let tempAcronyms = {};
 let adminKAHList =[];
-let adminKAHCustomGroups =[];
+let customKahGroups = [];
 let tempMenuOrder =[];
-let tempAdminSectionsOrder = [];
-let tempDisplayTemplates = {};
+let tempAdminSectionsOrder =[];
 let eventAttendees =[]; 
 let isInfoAll = false;
 
-let appMode = 'separated'; 
-let formMode = 'separated'; 
+let appMode = 'combined'; 
 let companyStructure =[]; 
 let pendingStructureChanges = {}; 
 let adminBehalfUser = null; 
@@ -49,22 +48,12 @@ const TAB_NAMES = {
   'dashboard': 'Dashboard',
   'parade-state': 'Parade State',
   'my-leaves': 'My Calendar',
-  'submit-leave': 'Add Leave/MC/OIL',
-  'submit-event': 'Add Event',
-  'submit-combined': 'Add Event/Leave',
+  'submit-leave': 'Add Leave/MC/OIL (Classic)',
+  'submit-event': 'Add Event (Classic)',
+  'submit-combined': 'Add Event / Leave',
   'admin': 'Admin Settings',
   'kah-management': 'KAH Management',
   'admin-structure': 'Organisational Structure'
 };
 
-const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event', 'submit-combined'];
-
-function applyFrontendTemplate(templateStr, dataObj) {
-  if (!templateStr) return '';
-  let result = templateStr;
-  for (let key in dataObj) {
-      const regex = new RegExp('{' + key + '}', 'g');
-      result = result.replace(regex, dataObj[key] || '');
-  }
-  return result.replace(/\s+/g, ' ').trim();
-}
+const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-combined'];
