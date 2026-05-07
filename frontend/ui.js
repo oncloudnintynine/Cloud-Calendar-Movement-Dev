@@ -20,6 +20,7 @@ function closeMenu() {
 
 function applyMenuOrder(orderArr) {
  const menuContainer = document.getElementById('slide-menu-items');
+ const btnCombined = document.getElementById('unified-btn-combined');
  const btnLeave = document.getElementById('unified-btn-leave');
  const btnEvent = document.getElementById('unified-btn-event');
 
@@ -27,7 +28,9 @@ function applyMenuOrder(orderArr) {
    orderArr.forEach(id => {
      const btn = document.getElementById(`menu-${id}`);
      if (btn) {
-       if (appMode === 'unified' &&['my-leaves', 'submit-leave', 'submit-event'].includes(id)) {
+       if (appMode === 'combined' && ['submit-leave', 'submit-event'].includes(id)) {
+         btn.classList.add('hidden');
+       } else if (appMode === 'separated' && id === 'submit-combined') {
          btn.classList.add('hidden');
        } else {
          btn.classList.remove('hidden');
@@ -37,12 +40,14 @@ function applyMenuOrder(orderArr) {
    });
  }
 
- if (appMode === 'unified') {
-   if(btnLeave) btnLeave.classList.remove('hidden');
-   if(btnEvent) btnEvent.classList.remove('hidden');
- } else {
+ if (appMode === 'combined') {
+   if(btnCombined) btnCombined.classList.remove('hidden');
    if(btnLeave) btnLeave.classList.add('hidden');
    if(btnEvent) btnEvent.classList.add('hidden');
+ } else {
+   if(btnCombined) btnCombined.classList.add('hidden');
+   if(btnLeave) btnLeave.classList.remove('hidden');
+   if(btnEvent) btnEvent.classList.remove('hidden');
  }
 }
 
@@ -62,8 +67,7 @@ function switchTab(tabId) {
  
  const titleEl = document.getElementById('active-tab-title');
  if (titleEl) {
-   if (currentEditId && tabId === 'submit-event') titleEl.innerText = "Update Event";
-   else if (currentEditId && tabId === 'submit-leave') titleEl.innerText = "Update Record";
+   if (currentEditId && tabId.startsWith('submit-')) titleEl.innerText = "Update Record";
    else titleEl.innerText = TAB_NAMES[tabId] || '';
  }
  
@@ -120,8 +124,11 @@ function formatDisplayDateTime(dateObj) {
 
 function initDates() {
  const now = new Date();
+ const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+ 
  appData.leave.startD = new Date(now); appData.leave.endD = new Date(now);
- appData.event.startD = new Date(now); appData.event.endD = new Date(now);
+ appData.event.startD = new Date(now); appData.event.endD = new Date(oneHourLater);
+ appData.combined.startD = new Date(now); appData.combined.endD = new Date(oneHourLater);
  appData.parade.targetD = new Date(now);
  
  appData.register.birthdayD = new Date(2000, 0, 1);
@@ -136,26 +143,26 @@ function initDates() {
 }
 
 function updateButtonLabels() {
- const lblLStart = document.getElementById('btn-leave-start');
- const lblLEnd = document.getElementById('btn-leave-end');
- const lblEStart = document.getElementById('btn-event-start');
- const lblEEnd = document.getElementById('btn-event-end');
- const lblEUntil = document.getElementById('btn-event-until');
- const lblParade = document.getElementById('btn-parade-target');
- const lblRegBday = document.getElementById('btn-register-birthday');
- const lblAdminRegBday = document.getElementById('btn-admin-register-birthday');
- const lblManageUserBday = document.getElementById('btn-manage-user-birthday');
+ const checkAndUpdate = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
 
- if(lblLStart) lblLStart.innerText = formatDisplayDate(appData.leave.startD);
- if(lblLEnd) lblLEnd.innerText = formatDisplayDate(appData.leave.endD);
- if(lblEStart) lblEStart.innerText = appData.event.isAllDay ? formatDisplayDate(appData.event.startD) : formatDisplayDateTime(appData.event.startD);
- if(lblEEnd) lblEEnd.innerText = appData.event.isAllDay ? formatDisplayDate(appData.event.endD) : formatDisplayDateTime(appData.event.endD);
- if(lblEUntil) lblEUntil.innerText = formatDisplayDate(appData.event.untilD);
- if(lblParade) lblParade.innerText = formatDisplayDateTime(appData.parade.targetD);
+ checkAndUpdate('btn-leave-start', formatDisplayDate(appData.leave.startD));
+ checkAndUpdate('btn-leave-end', formatDisplayDate(appData.leave.endD));
  
- if(lblRegBday) lblRegBday.innerText = appData.register.birthdaySelected ? formatDisplayDate(appData.register.birthdayD) : "Select...";
- if(lblAdminRegBday) lblAdminRegBday.innerText = appData.adminRegister.birthdaySelected ? formatDisplayDate(appData.adminRegister.birthdayD) : "Select...";
- if(lblManageUserBday) lblManageUserBday.innerText = appData.manageUser.birthdaySelected ? formatDisplayDate(appData.manageUser.birthdayD) : "Select...";
+ checkAndUpdate('btn-event-start', appData.event.isAllDay ? formatDisplayDate(appData.event.startD) : formatDisplayDateTime(appData.event.startD));
+ checkAndUpdate('btn-event-end', appData.event.isAllDay ? formatDisplayDate(appData.event.endD) : formatDisplayDateTime(appData.event.endD));
+ checkAndUpdate('btn-event-until', formatDisplayDate(appData.event.untilD));
+
+ checkAndUpdate('btn-combined-leave-start', formatDisplayDate(appData.combined.startD));
+ checkAndUpdate('btn-combined-leave-end', formatDisplayDate(appData.combined.endD));
+ checkAndUpdate('btn-combined-event-start', appData.combined.isAllDay ? formatDisplayDate(appData.combined.startD) : formatDisplayDateTime(appData.combined.startD));
+ checkAndUpdate('btn-combined-event-end', appData.combined.isAllDay ? formatDisplayDate(appData.combined.endD) : formatDisplayDateTime(appData.combined.endD));
+ checkAndUpdate('btn-combined-until', formatDisplayDate(appData.combined.untilD));
+
+ checkAndUpdate('btn-parade-target', formatDisplayDateTime(appData.parade.targetD));
+ 
+ checkAndUpdate('btn-register-birthday', appData.register.birthdaySelected ? formatDisplayDate(appData.register.birthdayD) : "Select...");
+ checkAndUpdate('btn-admin-register-birthday', appData.adminRegister.birthdaySelected ? formatDisplayDate(appData.adminRegister.birthdayD) : "Select...");
+ checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ? formatDisplayDate(appData.manageUser.birthdayD) : "Select...");
 }
 
 function animateAndUpdate(btn) { 
