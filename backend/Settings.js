@@ -50,17 +50,23 @@ function getSettings(data) {
 
  return {
    kahLimit: props.getProperty('kahLimit'),
-   leaveTypes: JSON.parse(props.getProperty('leaveTypes') || "[]"),
    approvingAuthority: props.getProperty('approvingAuthority'),
    kahList: syncedKahList,
    kahEmailSubject: props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}",
-   kahEmailBody: props.getProperty('kahEmailBody') || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.",
+   kahEmailBody: props.getProperty('kahEmailBody') || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.",
+   
+   typicalEventTypes: JSON.parse(props.getProperty('typicalEventTypes') || "[]"),
+   gcalTemplate: props.getProperty('gcalTemplate') || '{EventType} - {Name}, {Attendees} {Time}',
+   agendaTemplate: props.getProperty('agendaTemplate') || '{EventType} - {Name} ({Department})',
+   acronyms: JSON.parse(props.getProperty('acronyms') || "{}"),
+   customKahGroups: JSON.parse(props.getProperty('customKahGroups') || "[]"),
+   
    menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
    adminSectionsOrder: JSON.parse(props.getProperty('adminSectionsOrder') || "null"),
    githubRepo: props.getProperty('githubRepo') || '',
    backupFolder: props.getProperty('backupFolder') || '',
    userKeyword: props.getProperty('userKeyword') || 'peace',
-   appMode: props.getProperty('appMode') || 'separated',
+   appMode: props.getProperty('appMode') || 'combined',
    companyStructure: JSON.parse(props.getProperty('companyStructure') || "{}"),
    allContacts: allContacts
  };
@@ -77,7 +83,6 @@ function saveSettings(data) {
      props.setProperty('kahLimit', data.kahLimit.toString());
      triggerKahRecalc = true;
  }
- if (data.leaveTypes !== undefined) props.setProperty('leaveTypes', JSON.stringify(data.leaveTypes));
  if (data.approvingAuthority !== undefined) props.setProperty('approvingAuthority', data.approvingAuthority);
  if (data.kahList !== undefined) {
      props.setProperty('kahList', JSON.stringify(data.kahList));
@@ -85,6 +90,13 @@ function saveSettings(data) {
  }
  if (data.kahEmailSubject !== undefined) props.setProperty('kahEmailSubject', data.kahEmailSubject);
  if (data.kahEmailBody !== undefined) props.setProperty('kahEmailBody', data.kahEmailBody);
+ 
+ if (data.typicalEventTypes !== undefined) props.setProperty('typicalEventTypes', JSON.stringify(data.typicalEventTypes));
+ if (data.gcalTemplate !== undefined) props.setProperty('gcalTemplate', data.gcalTemplate);
+ if (data.agendaTemplate !== undefined) props.setProperty('agendaTemplate', data.agendaTemplate);
+ if (data.acronyms !== undefined) props.setProperty('acronyms', JSON.stringify(data.acronyms));
+ if (data.customKahGroups !== undefined) props.setProperty('customKahGroups', JSON.stringify(data.customKahGroups));
+ 
  if (data.userKeyword !== undefined) props.setProperty('userKeyword', data.userKeyword);
  if (data.appMode !== undefined) props.setProperty('appMode', data.appMode);
  if (data.companyStructure !== undefined) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
@@ -93,7 +105,6 @@ function saveSettings(data) {
  if (data.githubRepo !== undefined) props.setProperty('githubRepo', data.githubRepo);
  if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
  
- // Fire recalculation explicitly if KAH constraints were manipulated
  if (triggerKahRecalc && typeof recalculateAllKahStatuses === 'function') {
      recalculateAllKahStatuses(props);
  }
