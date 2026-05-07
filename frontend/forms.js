@@ -272,9 +272,7 @@ function cancelEditMode() {
   appData.leave.startAMPM = 'AM'; appData.leave.endAMPM = 'PM';
   appData.combined.startAMPM = 'AM'; appData.combined.endAMPM = 'PM';
   appData.event.isAllDay = false;
-  appData.combined.isAllDay = false;
-  
-  ['form-event-allday', 'form-combined-allday'].forEach(id => {
+  appData.combined.isAllDay = false;['form-event-allday', 'form-combined-allday'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.checked = false;
   });
@@ -345,7 +343,7 @@ async function submitForm(ctx) {
   
   let targetName = user.name;
   let targetPhone = user.phone;
-  let targetDepts = new Set(user.departments);
+  let targetDepts = new Set(user.departments ||[]);
 
   if (user.role === 'admin' && adminBehalfUser) {
     targetName = adminBehalfUser.name;
