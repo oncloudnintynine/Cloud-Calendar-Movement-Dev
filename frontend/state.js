@@ -11,14 +11,17 @@ let validContactNames =[];
 let fuseAllContacts = null;
 let fuseAttendees = null;
 
-let tempLeaveTypes =[];
+let tempEventTypes =[];
 let adminKAHList =[];
+let adminKAHCustomGroups =[];
 let tempMenuOrder =[];
 let tempAdminSectionsOrder = [];
+let tempDisplayTemplates = {};
 let eventAttendees =[]; 
 let isInfoAll = false;
 
 let appMode = 'separated'; 
+let formMode = 'separated'; 
 let companyStructure =[]; 
 let pendingStructureChanges = {}; 
 let adminBehalfUser = null; 
@@ -28,6 +31,7 @@ let dashViewMode = 'agenda';
 let appData = {
   leave: { startD: new Date(), endD: new Date(), startAMPM: 'AM', endAMPM: 'PM' },
   event: { startD: new Date(), endD: new Date(), untilD: new Date(), isAllDay: false },
+  combined: { startD: new Date(), endD: new Date(), untilD: new Date(), startAMPM: 'AM', endAMPM: 'PM', isAllDay: false },
   parade: { targetD: new Date() },
   register: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false },
   adminRegister: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false },
@@ -47,9 +51,20 @@ const TAB_NAMES = {
   'my-leaves': 'My Calendar',
   'submit-leave': 'Add Leave/MC/OIL',
   'submit-event': 'Add Event',
+  'submit-combined': 'Add Event/Leave',
   'admin': 'Admin Settings',
   'kah-management': 'KAH Management',
   'admin-structure': 'Organisational Structure'
 };
 
-const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event'];
+const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-leave', 'submit-event', 'submit-combined'];
+
+function applyFrontendTemplate(templateStr, dataObj) {
+  if (!templateStr) return '';
+  let result = templateStr;
+  for (let key in dataObj) {
+      const regex = new RegExp('{' + key + '}', 'g');
+      result = result.replace(regex, dataObj[key] || '');
+  }
+  return result.replace(/\s+/g, ' ').trim();
+}
