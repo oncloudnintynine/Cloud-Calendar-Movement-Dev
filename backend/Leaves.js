@@ -3,314 +3,314 @@
 // ==========================================
 
 function submitLeave(data) {
- var props = PropertiesService.getScriptProperties();
- var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
- var headers = verifySchema(sheet);
- 
- if (data._userRole !== 'admin' && String(data.phone) !== String(data._userPhone)) {
-   throw new Error("Unauthorized to submit data on behalf of others.");
- }
- 
- var kahExceededDept = checkKahLimit(data, props, sheet);
- var status = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
- 
- var id = Utilities.getUuid();
- var eventIds = createGCalEvents(data, props);
+var props = PropertiesService.getScriptProperties();
+var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
+var headers = verifySchema(sheet);
 
- var row = new Array(headers.length).fill('');
- row[headers.indexOf('ID')] = id;
- row[headers.indexOf('Timestamp')] = new Date();
- row[headers.indexOf('Phone')] = data.phone;
- row[headers.indexOf('Name')] = data.name;
- row[headers.indexOf('Department')] = data.departments.join(',');
- row[headers.indexOf('LeaveType')] = data.leaveType;
- row[headers.indexOf('StartDate')] = data.startDate;
- row[headers.indexOf('EndDate')] = data.endDate;
- row[headers.indexOf('HalfDay')] = data.halfDay;
- row[headers.indexOf('CoveringPerson')] = data.coveringPerson;
- row[headers.indexOf('Country')] = data.country || '';
- row[headers.indexOf('State')] = data.state || '';
- row[headers.indexOf('Remarks')] = data.remarks || '';
- row[headers.indexOf('Status')] = status;
- row[headers.indexOf('EventIDs')] = eventIds.join(',');
- row[headers.indexOf('Location')] = data.location || '';
- row[headers.indexOf('Attendees')] = data.attendees || '';
- row[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
- row[headers.indexOf('IsAllDay')] = data.isAllDay ? 'TRUE' : 'FALSE';
- row[headers.indexOf('UntilDate')] = data.untilDate || '';
+if (data._userRole !== 'admin' && String(data.phone) !== String(data._userPhone)) {
+  throw new Error("Unauthorized to submit data on behalf of others.");
+}
 
- sheet.appendRow(row);
- return { status: status };
+var kahExceededDept = checkKahLimit(data, props, sheet);
+var status = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
+
+var id = Utilities.getUuid();
+var eventIds = createGCalEvents(data, props);
+
+var row = new Array(headers.length).fill('');
+row[headers.indexOf('ID')] = id;
+row[headers.indexOf('Timestamp')] = new Date();
+row[headers.indexOf('Phone')] = data.phone;
+row[headers.indexOf('Name')] = data.name;
+row[headers.indexOf('Department')] = data.departments.join(',');
+row[headers.indexOf('LeaveType')] = data.leaveType;
+row[headers.indexOf('StartDate')] = data.startDate;
+row[headers.indexOf('EndDate')] = data.endDate;
+row[headers.indexOf('HalfDay')] = data.halfDay;
+row[headers.indexOf('CoveringPerson')] = data.coveringPerson;
+row[headers.indexOf('Country')] = data.country || '';
+row[headers.indexOf('State')] = data.state || '';
+row[headers.indexOf('Remarks')] = data.remarks || '';
+row[headers.indexOf('Status')] = status;
+row[headers.indexOf('EventIDs')] = eventIds.join(',');
+row[headers.indexOf('Location')] = data.location || '';
+row[headers.indexOf('Attendees')] = data.attendees || '';
+row[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
+row[headers.indexOf('IsAllDay')] = data.isAllDay ? 'TRUE' : 'FALSE';
+row[headers.indexOf('UntilDate')] = data.untilDate || '';
+
+sheet.appendRow(row);
+return { status: status };
 }
 
 function editLeave(data) {
- var props = PropertiesService.getScriptProperties();
- var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
- var headers = verifySchema(sheet);
- var rows = sheet.getDataRange().getValues();
- 
- for (var i = 1; i < rows.length; i++) {
-   if (rows[i][headers.indexOf('ID')] === data.id) {
-     
-     if (data._userRole !== 'admin' && String(rows[i][headers.indexOf('Phone')]) !== String(data._userPhone)) {
-       throw new Error("Unauthorized to modify this record.");
-     }
+var props = PropertiesService.getScriptProperties();
+var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
+var headers = verifySchema(sheet);
+var rows = sheet.getDataRange().getValues();
 
-     var oldEventIds = (rows[i][headers.indexOf('EventIDs')] || '').split(',');
-     oldEventIds.forEach(function(calAndEvt) {
-       if (!calAndEvt) return;
-       try {
-         var parts = calAndEvt.split('|');
-         if (parts.length === 2) {
-           var cal = CalendarApp.getCalendarById(parts[0]);
-           if (cal) {
-             var evt = cal.getEventById(parts[1]);
-             if (evt) evt.deleteEvent();
-             else {
-               var series = cal.getEventSeriesById(parts[1]);
-               if (series) series.deleteEventSeries();
-             }
-           }
-         }
-       } catch(e) {}
-     });
+for (var i = 1; i < rows.length; i++) {
+  if (rows[i][headers.indexOf('ID')] === data.id) {
+    
+    if (data._userRole !== 'admin' && String(rows[i][headers.indexOf('Phone')]) !== String(data._userPhone)) {
+      throw new Error("Unauthorized to modify this record.");
+    }
 
-     var kahExceededDept = checkKahLimit(data, props, sheet, data.id);
-     var status = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
-     var newEventIds = createGCalEvents(data, props);
+    var oldEventIds = (rows[i][headers.indexOf('EventIDs')] || '').split(',');
+    oldEventIds.forEach(function(calAndEvt) {
+      if (!calAndEvt) return;
+      try {
+        var parts = calAndEvt.split('|');
+        if (parts.length === 2) {
+          var cal = CalendarApp.getCalendarById(parts[0]);
+          if (cal) {
+            var evt = cal.getEventById(parts[1]);
+            if (evt) evt.deleteEvent();
+            else {
+              var series = cal.getEventSeriesById(parts[1]);
+              if (series) series.deleteEventSeries();
+            }
+          }
+        }
+      } catch(e) {}
+    });
 
-     var newRow = new Array(headers.length).fill('');
-     newRow[headers.indexOf('ID')] = data.id;
-     newRow[headers.indexOf('Timestamp')] = new Date();
-     newRow[headers.indexOf('Phone')] = data.phone;
-     newRow[headers.indexOf('Name')] = data.name;
-     newRow[headers.indexOf('Department')] = data.departments.join(',');
-     newRow[headers.indexOf('LeaveType')] = data.leaveType;
-     newRow[headers.indexOf('StartDate')] = data.startDate;
-     newRow[headers.indexOf('EndDate')] = data.endDate;
-     newRow[headers.indexOf('HalfDay')] = data.halfDay;
-     newRow[headers.indexOf('CoveringPerson')] = data.coveringPerson;
-     newRow[headers.indexOf('Country')] = data.country || '';
-     newRow[headers.indexOf('State')] = data.state || '';
-     newRow[headers.indexOf('Remarks')] = data.remarks || '';
-     newRow[headers.indexOf('Status')] = status;
-     newRow[headers.indexOf('EventIDs')] = newEventIds.join(',');
-     newRow[headers.indexOf('Location')] = data.location || '';
-     newRow[headers.indexOf('Attendees')] = data.attendees || '';
-     newRow[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
-     newRow[headers.indexOf('IsAllDay')] = data.isAllDay ? 'TRUE' : 'FALSE';
-     newRow[headers.indexOf('UntilDate')] = data.untilDate || '';
+    var kahExceededDept = checkKahLimit(data, props, sheet, data.id);
+    var status = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
+    var newEventIds = createGCalEvents(data, props);
 
-     sheet.getRange(i + 1, 1, 1, headers.length).setValues([newRow]);
-     return { status: status };
-   }
- }
- throw new Error("Record not found");
+    var newRow = new Array(headers.length).fill('');
+    newRow[headers.indexOf('ID')] = data.id;
+    newRow[headers.indexOf('Timestamp')] = new Date();
+    newRow[headers.indexOf('Phone')] = data.phone;
+    newRow[headers.indexOf('Name')] = data.name;
+    newRow[headers.indexOf('Department')] = data.departments.join(',');
+    newRow[headers.indexOf('LeaveType')] = data.leaveType;
+    newRow[headers.indexOf('StartDate')] = data.startDate;
+    newRow[headers.indexOf('EndDate')] = data.endDate;
+    newRow[headers.indexOf('HalfDay')] = data.halfDay;
+    newRow[headers.indexOf('CoveringPerson')] = data.coveringPerson;
+    newRow[headers.indexOf('Country')] = data.country || '';
+    newRow[headers.indexOf('State')] = data.state || '';
+    newRow[headers.indexOf('Remarks')] = data.remarks || '';
+    newRow[headers.indexOf('Status')] = status;
+    newRow[headers.indexOf('EventIDs')] = newEventIds.join(',');
+    newRow[headers.indexOf('Location')] = data.location || '';
+    newRow[headers.indexOf('Attendees')] = data.attendees || '';
+    newRow[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
+    newRow[headers.indexOf('IsAllDay')] = data.isAllDay ? 'TRUE' : 'FALSE';
+    newRow[headers.indexOf('UntilDate')] = data.untilDate || '';
+
+    sheet.getRange(i + 1, 1, 1, headers.length).setValues([newRow]);
+    return { status: status };
+  }
+}
+throw new Error("Record not found");
 }
 
 function getLeaves(data) {
- var props = PropertiesService.getScriptProperties();
- var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
- var headers = verifySchema(sheet);
- var rows = sheet.getDataRange().getValues();
- rows.shift();
- 
- var result =[];
- var updates = false;
- var cg = getContactsAndGroups();
- var phoneToDepts = {};
- 
- cg.connections.forEach(function(person) {
-   var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.phoneNumbers[0].value.replace(/\D/g, '').slice(-8) : "";
-   if (phone && person.memberships) {
-     var depts =[];
-     person.memberships.forEach(function(m) {
-       if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-         var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
-         if (gName) depts.push(gName);
-       }
-     });
-     if(depts.length > 0) phoneToDepts[phone] = depts.join(',');
-   }
- });
+var props = PropertiesService.getScriptProperties();
+var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
+var headers = verifySchema(sheet);
+var rows = sheet.getDataRange().getValues();
+rows.shift();
 
- for(var i = 0; i < rows.length; i++) {
-   var obj = {};
-   headers.forEach(function(h, idx) { obj[h] = rows[i][idx]; });
+var result =[];
+var updates = false;
+var cg = getContactsAndGroups();
+var phoneToDepts = {};
 
-   var currentActualDepts = phoneToDepts[obj.Phone];
-   if (currentActualDepts && currentActualDepts !== obj.Department) {
-      obj.Department = currentActualDepts;
-      rows[i][headers.indexOf('Department')] = currentActualDepts;
-      updates = true;
-   }
-   result.push(obj);
- }
- 
- if (updates) {
-   sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
- }
- 
- return result;
+cg.connections.forEach(function(person) {
+  var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.phoneNumbers[0].value.replace(/\D/g, '').slice(-8) : "";
+  if (phone && person.memberships) {
+    var depts =[];
+    person.memberships.forEach(function(m) {
+      if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+        var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+        if (gName) depts.push(gName);
+      }
+    });
+    if(depts.length > 0) phoneToDepts[phone] = depts.join(',');
+  }
+});
+
+for(var i = 0; i < rows.length; i++) {
+  var obj = {};
+  headers.forEach(function(h, idx) { obj[h] = rows[i][idx]; });
+
+  var currentActualDepts = phoneToDepts[obj.Phone];
+  if (currentActualDepts && currentActualDepts !== obj.Department) {
+     obj.Department = currentActualDepts;
+     rows[i][headers.indexOf('Department')] = currentActualDepts;
+     updates = true;
+  }
+  result.push(obj);
+}
+
+if (updates) {
+  sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+}
+
+return result;
 }
 
 function cancelLeave(data) {
- var props = PropertiesService.getScriptProperties();
- var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
- var headers = verifySchema(sheet);
- var rows = sheet.getDataRange().getValues();
- 
- for (var i = 1; i < rows.length; i++) {
-   if (rows[i][headers.indexOf('ID')] === data.id) {
-     if (data._userRole !== 'admin' && String(rows[i][headers.indexOf('Phone')]) !== String(data._userPhone)) {
-       throw new Error("Unauthorized to cancel this record.");
-     }
-     
-     sheet.getRange(i + 1, headers.indexOf('Status') + 1).setValue('Cancelled');
-     var eventIds = (rows[i][headers.indexOf('EventIDs')] || '').split(',');
-     eventIds.forEach(function(calAndEvt) {
-       if (!calAndEvt) return;
-       try {
-         var parts = calAndEvt.split('|');
-         if(parts.length === 2) {
-           var cal = CalendarApp.getCalendarById(parts[0]);
-           if (cal) {
-             var evt = cal.getEventById(parts[1]);
-             if (evt) evt.deleteEvent();
-             else {
-               var series = cal.getEventSeriesById(parts[1]);
-               if (series) series.deleteEventSeries();
-             }
-           }
-         }
-       } catch(e) {}
-     });
-     return { success: true };
-   }
- }
- throw new Error("Record not found");
+var props = PropertiesService.getScriptProperties();
+var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
+var headers = verifySchema(sheet);
+var rows = sheet.getDataRange().getValues();
+
+for (var i = 1; i < rows.length; i++) {
+  if (rows[i][headers.indexOf('ID')] === data.id) {
+    if (data._userRole !== 'admin' && String(rows[i][headers.indexOf('Phone')]) !== String(data._userPhone)) {
+      throw new Error("Unauthorized to cancel this record.");
+    }
+    
+    sheet.getRange(i + 1, headers.indexOf('Status') + 1).setValue('Cancelled');
+    var eventIds = (rows[i][headers.indexOf('EventIDs')] || '').split(',');
+    eventIds.forEach(function(calAndEvt) {
+      if (!calAndEvt) return;
+      try {
+        var parts = calAndEvt.split('|');
+        if(parts.length === 2) {
+          var cal = CalendarApp.getCalendarById(parts[0]);
+          if (cal) {
+            var evt = cal.getEventById(parts[1]);
+            if (evt) evt.deleteEvent();
+            else {
+              var series = cal.getEventSeriesById(parts[1]);
+              if (series) series.deleteEventSeries();
+            }
+          }
+        }
+      } catch(e) {}
+    });
+    return { success: true };
+  }
+}
+throw new Error("Record not found");
 }
 
 function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeaders) {
- if (data.leaveType !== 'Overseas Leave' && data.leaveType !== 'Official Trip') return false;
- 
- var headers = preloadedHeaders || verifySchema(sheet);
- var rows = preloadedRows || sheet.getDataRange().getValues();
- var kahList = JSON.parse(props.getProperty('kahList') || "[]");
- var limit = parseInt(props.getProperty('kahLimit') || "50");
- 
- var userKAHData = kahList.filter(function(k) { return String(k.phone) === String(data.phone); });
- if (userKAHData.length === 0) return false;
+if (data.leaveType !== 'Overseas Leave' && data.leaveType !== 'Official Trip') return false;
 
- var exceededDepts =[];
+var headers = preloadedHeaders || verifySchema(sheet);
+var rows = preloadedRows || sheet.getDataRange().getValues();
+var kahList = JSON.parse(props.getProperty('kahList') || "[]");
+var limit = parseInt(props.getProperty('kahLimit') || "50");
 
- userKAHData.forEach(function(userKAH) {
-   var dept = userKAH.dept;
-   var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
-   
-   if (totalKahInDept === 0) return;
-   
-   var overlappingKAHPhones =[String(data.phone)];
-   
-   for (var i = 1; i < rows.length; i++) {
-     var rId = rows[i][headers.indexOf('ID')];
-     var rType = rows[i][headers.indexOf('LeaveType')];
-     var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
-     var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
-     var rPhone = rows[i][headers.indexOf('Phone')];
-     var rStatus = rows[i][headers.indexOf('Status')];
+var userKAHData = kahList.filter(function(k) { return String(k.phone) === String(data.phone); });
+if (userKAHData.length === 0) return false;
 
-     if (rStatus === 'Cancelled' || rId === skipId) continue;
-     
-     if (rType === 'Overseas Leave' || rType === 'Official Trip') {
-       var isKAHForDept = kahList.some(function(k) { return String(k.phone) === String(rPhone) && k.dept === dept; });
-       if (isKAHForDept) {
-         var dStart = new Date(data.startDate), dEnd = new Date(data.endDate);
-         if (dStart <= rEnd && dEnd >= rStart) {
-           if (overlappingKAHPhones.indexOf(String(rPhone)) === -1) {
-             overlappingKAHPhones.push(String(rPhone));
-           }
-         }
-       }
-     }
-   }
-   
-   if (((overlappingKAHPhones.length) / totalKahInDept) * 100 > limit) {
-     exceededDepts.push(dept);
-   }
- });
+var exceededDepts =[];
 
- if (exceededDepts.length > 0) {
-   var deptStr = exceededDepts.join(', ');
-   
-   if (!data._isRecalculation) {
-     var subjectTemplate = props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
-     var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.";
-     var acronyms = JSON.parse(props.getProperty('acronyms') || "{}");
-     
-     var finalSubject = subjectTemplate
-         .replace(/{Name}/g, data.name || "")
-         .replace(/{EventType}/g, data.leaveType || "")
-         .replace(/{Unit}/g, deptStr || "")
-         .replace(/{Location}/g, data.location || data.country || "")
-         .replace(/{Remarks}/g, data.remarks || "");
-         
-     var finalBody = bodyTemplate
-         .replace(/{Name}/g, data.name || "")
-         .replace(/{EventType}/g, data.leaveType || "")
-         .replace(/{Unit}/g, deptStr || "")
-         .replace(/{Location}/g, data.location || data.country || "")
-         .replace(/{Remarks}/g, data.remarks || "");
-
-     finalSubject = applyAcronyms(finalSubject, acronyms);
-     finalBody = applyAcronyms(finalBody, acronyms);
-     
-     MailApp.sendEmail(props.getProperty('approvingAuthority'), finalSubject, finalBody);
-   }
-   return deptStr;
- }
- return false;
-}
-
-function recalculateAllKahStatuses(props) {
-  var sheetId = props.getProperty('dbSheetId');
-  if (!sheetId) return;
+userKAHData.forEach(function(userKAH) {
+  var dept = userKAH.dept;
+  var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
   
-  var sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
-  var headers = verifySchema(sheet);
-  var rows = sheet.getDataRange().getValues();
-  if (rows.length <= 1) return;
-
-  var now = new Date();
-  now.setHours(0, 0, 0, 0);
-  var statusColIdx = headers.indexOf('Status');
-
+  if (totalKahInDept === 0) return;
+  
+  var overlappingKAHPhones =[String(data.phone)];
+  
   for (var i = 1; i < rows.length; i++) {
     var rId = rows[i][headers.indexOf('ID')];
-    var rStatus = rows[i][statusColIdx];
     var rType = rows[i][headers.indexOf('LeaveType')];
+    var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
     var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
-    
-    if (rStatus === 'Cancelled' || rEnd < now) continue;
+    var rPhone = rows[i][headers.indexOf('Phone')];
+    var rStatus = rows[i][headers.indexOf('Status')];
+
+    if (rStatus === 'Cancelled' || rId === skipId) continue;
     
     if (rType === 'Overseas Leave' || rType === 'Official Trip') {
-      var dataMock = {
-         id: rId,
-         phone: rows[i][headers.indexOf('Phone')],
-         name: rows[i][headers.indexOf('Name')],
-         leaveType: rType,
-         startDate: rows[i][headers.indexOf('StartDate')],
-         endDate: rows[i][headers.indexOf('EndDate')],
-         _isRecalculation: true
-      };
-      
-      var kahExceededDept = checkKahLimit(dataMock, props, sheet, rId, rows, headers);
-      var newStatus = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
-      
-      if (rStatus !== newStatus) {
-         sheet.getRange(i + 1, statusColIdx + 1).setValue(newStatus);
-         rows[i][statusColIdx] = newStatus; 
+      var isKAHForDept = kahList.some(function(k) { return String(k.phone) === String(rPhone) && k.dept === dept; });
+      if (isKAHForDept) {
+        var dStart = new Date(data.startDate), dEnd = new Date(data.endDate);
+        if (dStart <= rEnd && dEnd >= rStart) {
+          if (overlappingKAHPhones.indexOf(String(rPhone)) === -1) {
+            overlappingKAHPhones.push(String(rPhone));
+          }
+        }
       }
     }
   }
+  
+  if (((overlappingKAHPhones.length) / totalKahInDept) * 100 > limit) {
+    exceededDepts.push(dept);
+  }
+});
+
+if (exceededDepts.length > 0) {
+  var deptStr = exceededDepts.join(', ');
+  
+  if (!data._isRecalculation) {
+    var subjectTemplate = props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
+    var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.";
+    var acronyms = JSON.parse(props.getProperty('acronyms') || "{}");
+    
+    var finalSubject = subjectTemplate
+        .replace(/{Name}/g, data.name || "")
+        .replace(/{EventType}/g, data.leaveType || "")
+        .replace(/{Unit}/g, deptStr || "")
+        .replace(/{Location}/g, data.location || data.country || "")
+        .replace(/{Remarks}/g, data.remarks || "");
+        
+    var finalBody = bodyTemplate
+        .replace(/{Name}/g, data.name || "")
+        .replace(/{EventType}/g, data.leaveType || "")
+        .replace(/{Unit}/g, deptStr || "")
+        .replace(/{Location}/g, data.location || data.country || "")
+        .replace(/{Remarks}/g, data.remarks || "");
+
+    finalSubject = applyAcronyms(finalSubject, acronyms);
+    finalBody = applyAcronyms(finalBody, acronyms);
+    
+    MailApp.sendEmail(props.getProperty('approvingAuthority'), finalSubject, finalBody);
+  }
+  return deptStr;
+}
+return false;
+}
+
+function recalculateAllKahStatuses(props) {
+ var sheetId = props.getProperty('dbSheetId');
+ if (!sheetId) return;
+ 
+ var sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+ var headers = verifySchema(sheet);
+ var rows = sheet.getDataRange().getValues();
+ if (rows.length <= 1) return;
+
+ var now = new Date();
+ now.setHours(0, 0, 0, 0);
+ var statusColIdx = headers.indexOf('Status');
+
+ for (var i = 1; i < rows.length; i++) {
+   var rId = rows[i][headers.indexOf('ID')];
+   var rStatus = rows[i][statusColIdx];
+   var rType = rows[i][headers.indexOf('LeaveType')];
+   var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
+   
+   if (rStatus === 'Cancelled' || rEnd < now) continue;
+   
+   if (rType === 'Overseas Leave' || rType === 'Official Trip') {
+     var dataMock = {
+        id: rId,
+        phone: rows[i][headers.indexOf('Phone')],
+        name: rows[i][headers.indexOf('Name')],
+        leaveType: rType,
+        startDate: rows[i][headers.indexOf('StartDate')],
+        endDate: rows[i][headers.indexOf('EndDate')],
+        _isRecalculation: true
+     };
+     
+     var kahExceededDept = checkKahLimit(dataMock, props, sheet, rId, rows, headers);
+     var newStatus = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
+     
+     if (rStatus !== newStatus) {
+        sheet.getRange(i + 1, statusColIdx + 1).setValue(newStatus);
+        rows[i][statusColIdx] = newStatus; 
+     }
+   }
+ }
 }
