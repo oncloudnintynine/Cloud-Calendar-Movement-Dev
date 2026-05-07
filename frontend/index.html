@@ -42,7 +42,6 @@
  <div id="dev-banner" class="bg-red-600 text-white text-center py-1 text-xs font-bold tracking-widest hidden z-50 relative">DEV MODE</div>
 
  <nav class="bg-white dark:bg-darksurface shadow-sm border-b dark:border-darkborder px-3 md:px-4 py-2 flex justify-between items-center z-40 shrink-0">
-   
    <div class="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
      <button id="menu-btn" onclick="toggleMenu()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-darkhover text-gray-600 dark:text-darktext hidden transition shrink-0">
        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -99,6 +98,7 @@
      </div>
    </div>
  </div>
+
  <main class="flex-grow flex flex-col p-2 md:p-4 w-full max-w-6xl mx-auto relative overflow-hidden">
    
    <section id="login-view" class="flex flex-col items-center justify-center h-full">
@@ -219,6 +219,7 @@
            <div id="my-month-grid" class="flex-grow overflow-y-auto flex flex-col pt-1"></div>
        </div>
      </div>
+
      <div id="view-submit-combined" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
        <form id="combined-form" onsubmit="event.preventDefault(); submitForm('combined');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-4">
@@ -404,7 +405,86 @@
          </div>
        </form>
      </div>
-     <!-- Admin Settings Tab -->
+
+     <div id="view-submit-event" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6">
+       <form id="event-form" onsubmit="event.preventDefault(); submitForm('event');" class="flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
+         <div class="flex-grow overflow-y-auto p-4 space-y-4">
+           <div id="admin-behalf-event" class="hidden-view relative mb-3 pb-4 border-b-2 border-dashed dark:border-darkborder">
+             <label class="block font-bold mb-1 text-sm text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
+             <input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-lg py-2 px-3 bg-emerald-50 dark:bg-emerald-900/20 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-500 focus:border-emerald-500 transition text-sm" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
+             <div id="behalf-results-event" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-300 dark:border-emerald-700 rounded-lg shadow-2xl hidden-view max-h-48 overflow-y-auto mt-1"></div>
+             <div id="selected-behalf-event" class="mt-2 font-bold text-emerald-700 dark:text-emerald-400 text-sm flex items-center justify-between empty:hidden"></div>
+           </div>
+
+           <div class="flex space-x-2 items-end">
+             <div class="flex-grow">
+               <label class="block font-semibold mb-1 text-sm">Event Type</label>
+               <select id="form-event-type" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer" required></select>
+             </div>
+             <button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-400 dark:border-gray-500 rounded-lg px-3 py-2 font-bold text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-darkhover transition">Info All</button>
+           </div>
+           
+           <div>
+             <label class="block font-semibold mb-1 text-sm">Location</label>
+             <input type="text" id="form-event-location" value="Office" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition text-sm" required>
+           </div>
+
+           <div class="flex items-center space-x-2 mt-1">
+             <input type="checkbox" id="form-event-allday" class="w-4 h-4 cursor-pointer text-blue-600" onchange="toggleEventAllDay()">
+             <label for="form-event-allday" class="font-bold text-sm cursor-pointer select-none">All Day Event</label>
+           </div>
+           
+           <div class="relative pl-6 py-1 border-l-2 border-gray-200 dark:border-darkborder ml-2 space-y-3">
+             <div class="relative">
+               <div class="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full bg-blue-500 ring-4 ring-white dark:ring-darksurface"></div>
+               <label class="block font-bold text-[10px] text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1">Start</label>
+               <button type="button" id="btn-event-start" onclick="openPicker(appData.event.isAllDay ? 'date' : 'datetime', 'event', 'start')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm">Select Date & Time</button>
+             </div>
+             <div class="relative">
+               <div class="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full bg-red-500 ring-4 ring-white dark:ring-darksurface"></div>
+               <label class="block font-bold text-[10px] text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1">End</label>
+               <button type="button" id="btn-event-end" onclick="openPicker(appData.event.isAllDay ? 'date' : 'datetime', 'event', 'end')" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm">Select Date & Time</button>
+             </div>
+             <div id="event-until-container" class="relative hidden-view pt-1">
+               <div class="absolute -left-[30px] top-3 w-3.5 h-3.5 rounded-full bg-purple-500 ring-4 ring-white dark:ring-darksurface"></div>
+               <label class="block font-bold text-[10px] text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Repeat Until</label>
+               <button type="button" id="btn-event-until" onclick="openPicker('date', 'event', 'until')" class="w-full border-2 border-purple-300 dark:border-purple-800 rounded-lg py-2 px-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 text-left outline-none font-medium transition text-sm text-purple-900 dark:text-purple-200">Select Date</button>
+             </div>
+           </div>
+
+           <div>
+             <label class="block font-semibold mb-1 text-sm">Repeat Event</label>
+             <select id="form-event-repeat" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 transition cursor-pointer text-sm" onchange="toggleRepeatUntil('event')">
+               <option value="NONE">Does not repeat</option>
+               <option value="DAILY">Daily</option>
+               <option value="WEEKLY">Weekly</option>
+               <option value="MONTHLY">Monthly</option>
+               <option value="ANNUALLY">Annually</option>
+               <option value="WEEKDAY">Every weekday (Mon-Fri)</option>
+             </select>
+           </div>
+           
+           <div class="relative">
+             <label class="block font-semibold mb-1 text-sm">Attendees <span class="text-[10px] font-normal text-gray-500">(Optional)</span></label>
+             <div id="event-attendees-chip-container" class="flex flex-wrap gap-1.5 mb-1.5 empty:hidden"></div>
+             <input type="text" id="form-event-attendee-search" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-gray-400 dark:placeholder-darkmuted focus:border-blue-500 transition text-sm" placeholder="Add person or department..." autocomplete="off" onkeyup="searchAttendees('event')">
+             <div id="event-attendees-results" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-gray-300 dark:border-darkborder rounded-lg shadow-2xl hidden-view max-h-40 overflow-y-auto mt-1"></div>
+           </div>
+
+           <div>
+             <label class="block font-semibold mb-1 text-sm">Remarks</label>
+             <textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-400 dark:border-gray-500 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 transition text-sm"></textarea>
+           </div>
+         </div>
+
+         <div class="shrink-0 p-3 border-t dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10">
+           <button type="submit" id="submit-event-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-md transition text-base">Save Event</button>
+           <button type="button" id="cancel-edit-event-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 rounded-lg shadow hidden-view mt-2 transition text-sm">Cancel Edit</button>
+         </div>
+
+       </form>
+     </div>
+
      <div id="view-admin" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
        <div id="admin-sections-container" class="flex-grow overflow-y-auto space-y-4 pb-4 px-1 pt-1">
          
@@ -554,7 +634,6 @@
        </div>
      </div>
 
-     <!-- Event Types & Templates Tab -->
      <div id="view-admin-event-templates" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
        <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-5">
@@ -563,7 +642,6 @@
              <h3 class="font-bold text-lg text-blue-600 dark:text-blue-400 mb-3 border-b dark:border-darkborder pb-1">Typical Event Types</h3>
              <div id="typical-event-types-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-2"></div>
              
-             <!-- FIXED RESPONSIVE WRAP FOR MOBILE -->
              <div class="flex flex-wrap sm:flex-nowrap gap-2">
                <input type="text" id="new-typical-event-type" class="flex-grow w-full sm:w-auto border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-blue-500 transition" placeholder="Add new type...">
                <div class="flex w-full sm:w-auto space-x-2">
@@ -598,7 +676,6 @@
        </div>
      </div>
 
-     <!-- Acronyms Tab -->
      <div id="view-admin-acronyms" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
        <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          <div class="flex-grow overflow-y-auto p-4 space-y-5">
@@ -607,7 +684,6 @@
              <h3 class="font-bold text-lg text-yellow-600 dark:text-yellow-500 mb-2 border-b dark:border-darkborder pb-1">Acronyms / Shortforms</h3>
              <p class="text-xs text-gray-500 dark:text-darkmuted mb-3 leading-tight">Define shortforms to automatically abbreviate long phrases in GCal and Agenda views.</p>
              
-             <!-- FIXED RESPONSIVE WRAP FOR MOBILE -->
              <div class="flex flex-wrap sm:flex-nowrap gap-2 mb-3">
                <div class="flex w-full sm:w-auto space-x-2">
                  <input type="text" id="new-acronym-key" class="w-1/3 sm:w-24 border border-gray-400 dark:border-gray-500 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white text-sm outline-none shadow-sm focus:border-yellow-500 transition" placeholder="Short (MTG)">
@@ -626,7 +702,6 @@
        </div>
      </div>
 
-     <!-- KAH Management Tab -->
      <div id="view-kah-management" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
        <div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface rounded-xl shadow border dark:border-darkborder overflow-hidden">
          
@@ -710,7 +785,6 @@
      </div>
      
    </section>
-
    <div id="picker-modal" class="fixed inset-0 bg-black/70 z-[60] hidden-view flex-col items-center justify-end md:justify-center p-3 sm:p-0">
      <div class="bg-white dark:bg-darksurface w-full md:w-[400px] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up md:animate-none">
        
