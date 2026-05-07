@@ -37,7 +37,6 @@ function populateAdminSettingsForm(settings) {
  renderKAHSelected();
  renderCustomKahGroups();
  
- // Excluded the newly separated tabs from the drag-and-drop array
  tempAdminSectionsOrder = settings.adminSectionsOrder && settings.adminSectionsOrder.length 
   ? settings.adminSectionsOrder 
   :['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'code-backup'];
@@ -96,14 +95,15 @@ function renderTypicalEventTypes() {
  list.innerHTML = tempTypicalEventTypes.map((t, i) => {
    const isFixed = FIXED_TYPICAL_EVENTS.includes(t.name);
    return `
-   <div data-idx="${i}" class="flex items-center space-x-2 md:space-x-3 bg-white dark:bg-darksurface p-2 rounded-xl border dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
-     <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'opacity-0'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-     <input type="text" value="${t.name}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow min-w-[80px] border-2 border-gray-200 dark:border-gray-600 rounded-lg py-1.5 px-2 md:px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm" ${isFixed ? 'disabled' : ''}>
-     <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="border-2 border-gray-200 dark:border-gray-600 rounded-lg py-1.5 px-1 md:px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none text-xs md:text-sm cursor-pointer shrink-0">
+   <div data-idx="${i}" class="flex items-center gap-1.5 sm:gap-3 bg-white dark:bg-darksurface p-2 rounded-xl border dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
+     <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+     ${isFixed ? `<div class="w-2 sm:w-0 shrink-0"></div>` : ''}
+     <input type="text" value="${t.name}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow min-w-[70px] border-2 border-gray-200 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm" ${isFixed ? 'disabled' : ''}>
+     <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="border-2 border-gray-200 dark:border-gray-600 rounded-lg py-1.5 px-1 sm:px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none text-xs sm:text-sm cursor-pointer shrink-0">
         <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
         <option value="false" ${!t.isEvent ? 'selected' : ''}>All-Day / Half-Day</option>
      </select>
-     ${!isFixed ? `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg transition" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : `<div class="w-8 shrink-0"></div>`}
+     ${!isFixed ? `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-red-700 p-1 rounded-lg transition shrink-0" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : `<div class="w-6 shrink-0 hidden sm:block"></div>`}
    </div>
  `}).join('');
  
