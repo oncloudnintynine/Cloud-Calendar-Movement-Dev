@@ -100,8 +100,8 @@ function renderTypicalEventTypes() {
      <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'opacity-0'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
      <input type="text" value="${t.name}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow min-w-[80px] border-2 border-gray-200 dark:border-gray-600 rounded-lg py-1.5 px-2 md:px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm" ${isFixed ? 'disabled' : ''}>
      <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="border-2 border-gray-200 dark:border-gray-600 rounded-lg py-1.5 px-1 md:px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none text-xs md:text-sm cursor-pointer shrink-0">
-        <option value="true" ${t.isEvent ? 'selected' : ''}>Event (Time-Bound)</option>
-        <option value="false" ${!t.isEvent ? 'selected' : ''}>Leave (All-Day)</option>
+        <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
+        <option value="false" ${!t.isEvent ? 'selected' : ''}>All-Day / Half-Day</option>
      </select>
      ${!isFixed ? `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg transition" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : `<div class="w-8 shrink-0"></div>`}
    </div>
@@ -401,3 +401,104 @@ async function confirmDeleteUser() {
 }
 
 function submitAdminRegister() { handleRegister('admin'); }
+
+// ==========================================
+// Save Functions for Admin Sections
+// ==========================================
+
+async function saveAdminSettings() {
+ showLoader(true);
+ const newPass = document.getElementById('set-admin-pass').value || null;
+ let selectedMode = 'combined';
+ document.getElementsByName('app-mode').forEach(r => { if(r.checked) selectedMode = r.value; });
+
+ const payload = {
+   adminPass: user.pass, newAdminPass: newPass, appMode: selectedMode,
+   userKeyword: document.getElementById('set-user-keyword').value.trim() || 'peace',
+   menuOrder: tempMenuOrder,
+   adminSectionsOrder: tempAdminSectionsOrder,
+   githubRepo: document.getElementById('set-github-repo').value.trim(),
+   backupFolder: document.getElementById('set-backup-folder').value.trim()
+ };
+ 
+ try {
+   await apiCall('saveSettings', payload);
+   alert("Settings successfully saved! App will reload to apply UI changes.");
+   if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); }
+   window.location.reload(); 
+ } catch (err) { alert("Error: " + err.message); showLoader(false); }
+}
+
+async function saveEventTemplates() {
+ showLoader(true);
+ const payload = {
+   adminPass: user.pass,
+   typicalEventTypes: tempTypicalEventTypes,
+   gcalTemplate: document.getElementById('set-gcal-template').value.trim(),
+   agendaTemplate: document.getElementById('set-agenda-template').value.trim()
+ };
+ try {
+   await apiCall('saveSettings', payload);
+   alert("Event Types & Templates successfully saved! App will reload to apply changes.");
+   window.location.reload();
+ } catch (err) { alert("Error: " + err.message); showLoader(false); }
+}
+
+async function saveAcronyms() {
+ showLoader(true);
+ const payload = {
+   adminPass: user.pass,
+   acronyms: tempAcronyms
+ };
+ try {
+   await apiCall('saveSettings', payload);
+   alert("Acronyms successfully saved! App will reload to apply changes.");
+   window.location.reload();
+ } catch (err) { alert("Error: " + err.message); showLoader(false); }
+}
+
+async function saveKahSettings() {
+ showLoader(true);
+ const payload = {
+   adminPass: user.pass,
+   kahLimit: document.getElementById('set-kah-limit').value,
+   approvingAuthority: document.getElementById('set-appr-email').value,
+   kahList: adminKAHList,
+   customKahGroups: customKahGroups,
+   kahEmailSubject: document.getElementById('set-kah-subject').value.trim(),
+   kahEmailBody: document.getElementById('set-kah-body').value.trim()
+ };
+ 
+ try {
+   await apiCall('saveSettings', payload);
+   alert("KAH Settings successfully saved! App will reload to apply changes.");
+   window.location.reload();
+ } catch (err) { alert("Error: " + err.message); showLoader(false); }
+}
+
+async function triggerCodeBackup() {
+ const repo = document.getElementById('set-github-repo').value.trim();
+ const folderInput = document.getElementById('set-backup-folder').value.trim();
+ if (!repo || !folderInput) return alert('Please fill out the GitHub Repo and Backup Drive Folder fields, and click "Save Settings" before backing up.');
+ let folderId = folderInput;
+ if (folderInput.includes('drive.google.com')) { const match = folderInput.match(/folders\/([a-zA-Z0-9_-]+)/); if (match) folderId = match[1]; }
+
+ showLoader(true);
+ try {
+     const repoRes = await fetch(`https://api.github.com/repos/${repo}`);
+     if (!repoRes.ok) throw new Error("GitHub repo not found.");
+     const defaultBranch = (await repoRes.json()).default_branch || 'main';
+     const treeRes = await fetch(`https://api.github.com/repos/${repo}/git/trees/${defaultBranch}?recursive=1`);
+     const treeData = await treeRes.json();
+     const fileNodes = treeData.tree.filter(item => item.type === 'blob');
+     
+     let compiledFiles = new Array();
+     for (const file of fileNodes) {
+         const content = await (await fetch(`https://raw.githubusercontent.com/${repo}/${defaultBranch}/${file.path}`)).text();
+         compiledFiles.push({ url: `https://github.com/${repo}/blob/${defaultBranch}/${file.path}`, content: content });
+     }
+
+     const res = await apiCall('backupCode', { folderId: folderId, hierarchy: fileNodes.map(f=>f.path).join('\n'), files: compiledFiles });
+     alert(`Code successfully backed up!\n\nURL:\n${res.url}`);
+ } catch (err) { alert("Backup Error: " + err.message); } finally { showLoader(false); }
+}
