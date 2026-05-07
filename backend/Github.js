@@ -28,4 +28,12 @@ body.appendParagraph("");
 // Export in the exact format required for the Code Updater
 data.files.forEach(function(file) {
   body.appendParagraph("$$$ FILE: " + file.path + " $$$");
-  body.appendParagraph("
+  body.appendParagraph("```javascript");
+  body.appendParagraph(file.content);
+  body.appendParagraph("```");
+  body.appendParagraph("");
+});
+
+doc.saveAndClose();
+return { url: doc.getUrl() };
+}
