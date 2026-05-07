@@ -1,5 +1,5 @@
 // ==========================================
-// Settings.js - Admin Settings Logic
+// Settings.js - Admin Settings Logic 
 // ==========================================
 
 function getSettings(data) {
