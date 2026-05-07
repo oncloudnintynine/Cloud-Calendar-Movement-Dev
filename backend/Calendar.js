@@ -2,67 +2,58 @@
 // Calendar.js - Google Calendar Logic
 // ==========================================
 
-function applyTemplate(templateStr, dataObj) {
-  if (!templateStr) return '';
-  var result = templateStr;
-  for (var key in dataObj) {
-      var regex = new RegExp('{' + key + '}', 'g');
-      result = result.replace(regex, dataObj[key] || '');
-  }
-  return result.replace(/\s+/g, ' ').trim(); // cleanup extra spaces
-}
-
 function createGCalEvents(data, props) {
   var eventIds =[];
+  var typicalEventTypes = JSON.parse(props.getProperty('typicalEventTypes') || "[]");
+  var acronyms = JSON.parse(props.getProperty('acronyms') || "{}");
+  var gcalTemplate = props.getProperty('gcalTemplate') || '{EventType} - {Name}, {Attendees} {Time}';
   
-  var eventTypes = JSON.parse(props.getProperty('eventTypes') || "[]");
-  var typeObj = eventTypes.filter(function(t) { return t.name === data.leaveType; })[0];
-  var isEvent = typeObj ? typeObj.style === 'event' : false;
+  var eventTypeObj = typicalEventTypes.filter(function(t) { return t.name === data.leaveType; })[0];
+  var isEvent = eventTypeObj ? eventTypeObj.isEvent : false;
   
-  var templates = JSON.parse(props.getProperty('displayTemplates') || "{}");
-  var titleTemplate = isEvent ? (templates.gcalEventTitle || '{Type} - {Name}, {Attendees} {HalfDay}') : (templates.gcalLeaveTitle || '{Type} - {Name} {HalfDay}');
-
   var attendeesStr = "";
   if (data.attendees) {
     try {
       var att = JSON.parse(data.attendees);
       if (att && att.length > 0) {
-        attendeesStr = att.map(function(a) { return a.type === 'group' ? a.name.replace('zz ', '') : a.name; }).join(', ');
+        attendeesStr = att.map(function(a) { return a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name; }).join(', ');
       }
     } catch(e) {}
   }
-  
-  var hdStr = "";
-  if (data.halfDay && data.halfDay !== 'None' && data.halfDay !== 'NONE') {
-      hdStr = "(" + data.halfDay + ")";
-  }
-  
-  var locCountryStr = data.country ? data.country + (data.state ? " (" + data.state + ")" : "") : (data.location || "");
 
-  var templateData = {
-      Name: data.name,
-      Dept: data.departments.join(', '),
-      Type: data.leaveType,
-      HalfDay: hdStr,
-      Location: data.location || '',
-      Country: data.country || '',
-      State: data.state || '',
-      Covering: data.coveringPerson || '',
-      Attendees: attendeesStr,
-      Remarks: data.remarks || ''
-  };
+  var timeStr = "";
+  if (!isEvent && data.halfDay !== 'None' && data.halfDay !== 'NONE') timeStr = "(" + data.halfDay + ")";
 
   data.departments.forEach(function(deptName) {
     var cals = CalendarApp.getCalendarsByName(deptName);
     var cal = cals.length > 0 ? cals[0] : CalendarApp.createCalendar(deptName);
     
-    var title = applyTemplate(titleTemplate, templateData);
-    // Fallback if template is empty
-    if (!title) title = data.leaveType + " - " + data.name;
+    var locationStr = data.location || "";
+    if (!isEvent && data.leaveType === 'Overseas Leave' && data.country) {
+      locationStr = data.country + (data.state ? " (" + data.state + ")" : "");
+    }
+
+    var title = gcalTemplate
+      .replace(/{EventType}/g, data.leaveType || "")
+      .replace(/{Name}/g, data.name || "")
+      .replace(/{Attendees}/g, attendeesStr || "")
+      .replace(/{Department}/g, deptName || "")
+      .replace(/{Location}/g, locationStr || "")
+      .replace(/{Time}/g, timeStr || "");
+
+    // Cleanup empty template artifacts
+    title = title.replace(/,\s*(?=[,\)]|$)/g, "").replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
+    if (title.endsWith('-')) title = title.slice(0, -1).trim();
+
+    // Apply acronyms
+    title = applyAcronyms(title, acronyms);
     
     var opts = {};
-    if (isEvent && data.location) opts.location = data.location;
-    if (!isEvent && locCountryStr) opts.description = "Location: " + locCountryStr;
+    if (locationStr) opts.location = applyAcronyms(locationStr, acronyms);
+    
+    if (!isEvent && data.leaveType === 'Overseas Leave' && data.country) {
+      opts.description = applyAcronyms("Location: " + data.country + (data.state ? " (" + data.state + ")" : ""), acronyms);
+    }
     
     var evt;
     if (isEvent) {
@@ -70,7 +61,6 @@ function createGCalEvents(data, props) {
       var endDt = new Date(data.endDate);
       var rec = null;
       
-      // Determine if there is a repetition rule
       if (data.halfDay && data.halfDay !== 'NONE') {
         if (data.halfDay === 'DAILY') rec = CalendarApp.newRecurrence().addDailyRule();
         else if (data.halfDay === 'WEEKLY') rec = CalendarApp.newRecurrence().addWeeklyRule();
@@ -85,12 +75,10 @@ function createGCalEvents(data, props) {
         }
       }
 
-      // Create Event based on AllDay and Recurrence
       if (data.isAllDay) {
         if (rec) {
           evt = cal.createAllDayEventSeries(title, startDt, rec, opts);
         } else {
-          // If multi-day all day event, GAS requires end date to be day AFTER the last day.
           var endDtAdjusted = new Date(endDt.getTime() + 86400000);
           evt = cal.createAllDayEvent(title, startDt, endDtAdjusted, opts);
         }
@@ -102,7 +90,6 @@ function createGCalEvents(data, props) {
         }
       }
     } else {
-      // Leave logic (always all day)
       evt = cal.createAllDayEvent(title, new Date(data.startDate), new Date(new Date(data.endDate).getTime() + 86400000), opts);
     }
     eventIds.push(cal.getId() + "|" + evt.getId());
