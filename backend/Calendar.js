@@ -2,11 +2,26 @@
 // Calendar.js - Google Calendar Logic
 // ==========================================
 
+function applyTemplate(templateStr, dataObj) {
+  if (!templateStr) return '';
+  var result = templateStr;
+  for (var key in dataObj) {
+      var regex = new RegExp('{' + key + '}', 'g');
+      result = result.replace(regex, dataObj[key] || '');
+  }
+  return result.replace(/\s+/g, ' ').trim(); // cleanup extra spaces
+}
+
 function createGCalEvents(data, props) {
   var eventIds =[];
-  var leaveTypes = JSON.parse(props.getProperty('leaveTypes') || "[]");
-  var isEvent = leaveTypes.indexOf(data.leaveType) === -1; 
   
+  var eventTypes = JSON.parse(props.getProperty('eventTypes') || "[]");
+  var typeObj = eventTypes.filter(function(t) { return t.name === data.leaveType; })[0];
+  var isEvent = typeObj ? typeObj.style === 'event' : false;
+  
+  var templates = JSON.parse(props.getProperty('displayTemplates') || "{}");
+  var titleTemplate = isEvent ? (templates.gcalEventTitle || '{Type} - {Name}, {Attendees} {HalfDay}') : (templates.gcalLeaveTitle || '{Type} - {Name} {HalfDay}');
+
   var attendeesStr = "";
   if (data.attendees) {
     try {
@@ -16,26 +31,38 @@ function createGCalEvents(data, props) {
       }
     } catch(e) {}
   }
+  
+  var hdStr = "";
+  if (data.halfDay && data.halfDay !== 'None' && data.halfDay !== 'NONE') {
+      hdStr = "(" + data.halfDay + ")";
+  }
+  
+  var locCountryStr = data.country ? data.country + (data.state ? " (" + data.state + ")" : "") : (data.location || "");
+
+  var templateData = {
+      Name: data.name,
+      Dept: data.departments.join(', '),
+      Type: data.leaveType,
+      HalfDay: hdStr,
+      Location: data.location || '',
+      Country: data.country || '',
+      State: data.state || '',
+      Covering: data.coveringPerson || '',
+      Attendees: attendeesStr,
+      Remarks: data.remarks || ''
+  };
 
   data.departments.forEach(function(deptName) {
     var cals = CalendarApp.getCalendarsByName(deptName);
     var cal = cals.length > 0 ? cals[0] : CalendarApp.createCalendar(deptName);
     
-    var activityStr = data.leaveType;
-    if (!isEvent && data.leaveType === 'Overseas Leave' && data.country) {
-      activityStr += " (" + data.country + ")";
-    }
-    
-    var title = activityStr + " - " + data.name;
-    if (attendeesStr) title += ", " + attendeesStr;
-    if (!isEvent && data.halfDay !== 'None' && data.halfDay !== 'NONE') title += " (" + data.halfDay + ")";
+    var title = applyTemplate(titleTemplate, templateData);
+    // Fallback if template is empty
+    if (!title) title = data.leaveType + " - " + data.name;
     
     var opts = {};
     if (isEvent && data.location) opts.location = data.location;
-    
-    if (!isEvent && data.leaveType === 'Overseas Leave' && data.country) {
-      opts.description = "Location: " + data.country + (data.state ? " (" + data.state + ")" : "");
-    }
+    if (!isEvent && locCountryStr) opts.description = "Location: " + locCountryStr;
     
     var evt;
     if (isEvent) {
