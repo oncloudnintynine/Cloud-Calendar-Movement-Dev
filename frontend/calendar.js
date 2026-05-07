@@ -7,11 +7,22 @@ window.myAgendaDirty = true;
 window.isProgrammaticScroll = false;
 window.progScrollTimeout = null;
 
-// Pauses the scroll spy temporarily during programmatic navigation to prevent race conditions
 function setProgrammaticScroll() {
     window.isProgrammaticScroll = true;
     clearTimeout(window.progScrollTimeout);
     window.progScrollTimeout = setTimeout(() => { window.isProgrammaticScroll = false; }, 1000);
+}
+
+function applyAcronymsFront(text) {
+  if (!text || !window.appAcronyms) return text;
+  let result = text;
+  for (let key in window.appAcronyms) {
+    if (!key) continue;
+    const escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(`\\b${escapedKey}\\b`, "gi");
+    result = result.replace(regex, window.appAcronyms[key]);
+  }
+  return result;
 }
 
 function toggleDashView(mode) {
@@ -96,7 +107,7 @@ function selectDate(ctx, y, m, d) {
    if (dashViewMode === 'month') {
        toggleDashView('agenda');
    } else {
-       renderDashboard(); // Re-render triggers scrolling and info-all updates
+       renderDashboard(); 
    }
  } else { 
    myDate = new Date(y, m, d); 
@@ -135,7 +146,7 @@ function updateMiniCalendarSelection(ctx, d) {
 let scrollTimeoutDash, scrollTimeoutMy;
 
 function handleAgendaScroll(ctx) {
-   if (window.isProgrammaticScroll) return; // Prevent race conditions on momentum scroll
+   if (window.isProgrammaticScroll) return; 
    
    const isDash = ctx === 'dash';
    clearTimeout(isDash ? scrollTimeoutDash : scrollTimeoutMy);
@@ -150,13 +161,11 @@ function handleAgendaScroll(ctx) {
        const containerTop = containerRect.top;
        const containerBottom = containerRect.bottom;
        
-       // Detect if scrolled to the absolute bottom (fixes blindspot issue)
        const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 5;
        
        let topDateStr = null;
        
        if (isAtBottom) {
-           // Find the last visible element touching the bottom
            for (let i = groups.length - 1; i >= 0; i--) {
                const rect = groups[i].getBoundingClientRect();
                if (rect.top < containerBottom) {
@@ -165,7 +174,6 @@ function handleAgendaScroll(ctx) {
                }
            }
        } else {
-           // Standard scroll spy detecting elements hitting the top
            for (const group of groups) {
                const rect = group.getBoundingClientRect();
                if (rect.top >= containerTop && rect.top <= containerTop + 100) {
@@ -204,7 +212,10 @@ function isEventOnDate(l, targetDate) {
  if (l.Status === 'Cancelled') return false;
  const s = new Date(l.StartDate); s.setHours(0,0,0,0);
  const e = new Date(l.EndDate); e.setHours(0,0,0,0);
- const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
+ 
+ const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
+ const isEvent = typeObj ? typeObj.isEvent : false;
+
  if (!isEvent || !l.HalfDay || l.HalfDay === 'NONE' || l.HalfDay === 'None') return targetDate >= s && targetDate <= e;
  
  const untilStr = l.UntilDate;
@@ -278,8 +289,9 @@ function buildFullMonthGrid(monthDate, data, ctx) {
  let instances =[];
  data.forEach(l => {
      if (l.Status === 'Cancelled') return;
-     const isLeave = window.appLeaveTypes && window.appLeaveTypes.includes(l.LeaveType);
-     const isEvent = !isLeave;
+     const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
+     const isEvent = typeObj ? typeObj.isEvent : false;
+     const isLeave = !isEvent;
      const isRepeating = isEvent && l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None';
 
      let evStart = new Date(l.StartDate); evStart.setHours(0,0,0,0);
@@ -349,6 +361,8 @@ function buildFullMonthGrid(monthDate, data, ctx) {
      segments.forEach(seg => {
          const color = seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white');
          const title = seg.isLeave ? `${seg.l.Name.split(' ')[0]} : ${seg.l.LeaveType}` : seg.l.LeaveType;
+         const appliedTitle = applyAcronymsFront(title);
+         
          const left = (seg.sDay / 7) * 100;
          const width = (seg.len / 7) * 100;
          const topOffset = (seg.slot * 20) + 26; 
@@ -360,7 +374,7 @@ function buildFullMonthGrid(monthDate, data, ctx) {
             else if (seg.eDay === 6) rounded = 'rounded-l-sm';
          }
 
-         html += `<div class="absolute h-[18px] px-1 text-[10px] md:text-[11px] font-bold leading-tight truncate shadow-sm pointer-events-auto cursor-pointer border-b border-black/10 ${color} ${rounded}" style="left: calc(${left}% + 1px); width: calc(${width}% - 2px); top: ${topOffset}px;" onclick="selectDate('${ctx}', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${title}">${title}</div>`;
+         html += `<div class="absolute h-[18px] px-1 text-[10px] md:text-[11px] font-bold leading-tight truncate shadow-sm pointer-events-auto cursor-pointer border-b border-black/10 ${color} ${rounded}" style="left: calc(${left}% + 1px); width: calc(${width}% - 2px); top: ${topOffset}px;" onclick="selectDate('${ctx}', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${appliedTitle}">${appliedTitle}</div>`;
      });
      html += `</div></div>`; 
  }
@@ -389,7 +403,9 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
  if (!items || items.length === 0) return isCompactInfoAll ? '' : `<p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>`;
  
  return items.map(l => {
-   const isEvent = window.appLeaveTypes && !window.appLeaveTypes.includes(l.LeaveType);
+   const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
+   const isEvent = typeObj ? typeObj.isEvent : false;
+
    let timeStr = "";
    if (isEvent) {
      if (l.IsAllDay === 'TRUE') {
@@ -416,15 +432,33 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
    if (l.Attendees) {
      try {
        const attArr = JSON.parse(l.Attendees);
-       if (attArr && attArr.length > 0) attendeesDisplay = attArr.map(a => a.type === 'group' ? a.name.replace('zz ', '') : a.name).join(', ');
+       if (attArr && attArr.length > 0) attendeesDisplay = attArr.map(a => a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name).join(', ');
      } catch(e) {}
    }
+   
+   let titleRaw = window.appAgendaTemplate || '{EventType} - {Name} ({Department})';
+   if (isMyCalendar) titleRaw = '{EventType}'; 
+   
+   let titleStr = titleRaw
+      .replace(/{EventType}/g, l.LeaveType || "")
+      .replace(/{Name}/g, l.Name || "")
+      .replace(/{Department}/g, l.Department || "")
+      .replace(/{Attendees}/g, attendeesDisplay || "")
+      .replace(/{Location}/g, l.Location || l.Country || "")
+      .replace(/{Time}/g, timeStr || "");
+
+   titleStr = titleStr.replace(/,\s*(?=[,\)]|$)/g, "").replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
+   if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
+   
+   const finalTitle = applyAcronymsFront(titleStr);
+   const finalLocation = applyAcronymsFront(l.Location);
+   const finalCountry = applyAcronymsFront(l.Country);
 
    if (isCompactInfoAll) {
        return `<div class="border border-blue-200 dark:border-blue-900/50 p-2.5 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
-         <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${l.LeaveType}</h3>
+         <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${finalTitle}</h3>
          <p class="text-[11px] text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
-         ${l.Location ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
+         ${finalLocation ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
          ${attendeesDisplay ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
          ${l.Remarks ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
        </div>`;
@@ -432,13 +466,13 @@ function buildAgendaHtml(items, isMyCalendar, isCompactInfoAll) {
 
    return `<div class="border border-gray-200 dark:border-darkborder p-3 md:p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
      <div class="flex justify-between items-start mb-2">
-       <h3 class="font-bold text-sm md:text-base">${isMyCalendar ? (l.LeaveType||'') : (l.Name||'') + ' <span class="font-normal text-gray-500 dark:text-darkmuted text-xs md:text-sm">(' + (l.Department||'') + ')</span>'}</h3>
-       <span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
+       <h3 class="font-bold text-sm md:text-base">${finalTitle}</h3>
+       <span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight shrink-0 ml-2 ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
      </div>
-     <p class="font-medium text-xs md:text-sm text-gray-700 dark:text-darktext">${isMyCalendar ? '' : (l.LeaveType||'') + ' '}${!isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? '('+l.HalfDay+')' : ''}</p>
+     ${!isMyCalendar && isLeave && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-xs md:text-sm text-gray-700 dark:text-darktext">(${l.HalfDay})</p>` : ''}
      <p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
-     ${isEvent && l.Location ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${l.Location}</p>` : ''}
-     ${!isEvent && l.Country ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${l.Country} ${l.State ? `(${l.State})` : ''}</p>` : ''}
+     ${isEvent && finalLocation ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
+     ${!isEvent && finalCountry ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${finalCountry} ${l.State ? `(${l.State})` : ''}</p>` : ''}
      ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
      ${attendeesDisplay ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
      ${l.Remarks ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
@@ -482,7 +516,6 @@ function generateContinuousAgenda(ctx, data) {
     container.addEventListener('scroll', ctx === 'dash' ? () => handleAgendaScroll('dash') : () => handleAgendaScroll('my'));
 }
 
-// Dynamically inserts an empty day group if it doesn't already exist to prevent full DOM rebuilds
 function ensureAgendaDateExists(ctx, targetDateObj) {
     const y = targetDateObj.getFullYear();
     const m = targetDateObj.getMonth();
@@ -506,7 +539,6 @@ function ensureAgendaDateExists(ctx, targetDateObj) {
                 <p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>
             </div>`;
 
-        // Insert chronologically without rebuilding the whole list
         const allGroups = Array.from(container.querySelectorAll('.agenda-day-group'));
         let inserted = false;
         for (let i = 0; i < allGroups.length; i++) {
@@ -535,7 +567,20 @@ function renderDashboard() {
      if (l.Attendees) {
        try {
          const att = JSON.parse(l.Attendees);
-         return att.some(a => (a.type === 'contact' && String(a.id) === String(user.phone)) || (a.type === 'group' && user.departments.includes(a.dept)));
+         return att.some(a => {
+            if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
+            if (a.type === 'group') {
+                if (a.dept === 'Custom') {
+                    const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+                    return customG && customG.members.includes(String(user.phone));
+                } else if (a.name.startsWith('zz KAH:')) {
+                    return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+                } else {
+                    return user.departments.includes(a.dept);
+                }
+            }
+            return false;
+         });
        } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
      }
      return false;
@@ -545,7 +590,7 @@ function renderDashboard() {
  }
  
  if (q) {
-   const fuse = new Fuse(filtered, { keys:['Name', 'LeaveType'] });
+   const fuse = new Fuse(filtered, { keys:['Name', 'LeaveType', 'Location', 'Country'] });
    filtered = fuse.search(q).map(res => res.item);
  }
  
@@ -591,7 +636,20 @@ function renderMyLeaves() {
    if (l.Attendees) {
      try {
        const att = JSON.parse(l.Attendees);
-       return att.some(a => (a.type === 'contact' && String(a.id) === String(user.phone)) || (a.type === 'group' && user.departments.includes(a.dept)));
+       return att.some(a => {
+            if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
+            if (a.type === 'group') {
+                if (a.dept === 'Custom') {
+                    const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+                    return customG && customG.members.includes(String(user.phone));
+                } else if (a.name.startsWith('zz KAH:')) {
+                    return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+                } else {
+                    return user.departments.includes(a.dept);
+                }
+            }
+            return false;
+       });
      } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
    }
    return false;
