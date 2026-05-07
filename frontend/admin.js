@@ -20,64 +20,74 @@ function insertAtCursor(inputId, text) {
 }
 
 function populateAdminSettingsForm(settings) {
-document.getElementById('set-kah-limit').value = settings.kahLimit;
-document.getElementById('set-appr-email').value = settings.approvingAuthority;
-document.getElementById('set-kah-subject').value = settings.kahEmailSubject || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
-document.getElementById('set-kah-body').value = settings.kahEmailBody || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.";
+try {
+    const safeSet = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    
+    safeSet('set-kah-limit', settings.kahLimit);
+    safeSet('set-appr-email', settings.approvingAuthority);
+    safeSet('set-kah-subject', settings.kahEmailSubject || "Leave Requires Approval: KAH Limit Crossed for {Unit}");
+    safeSet('set-kah-body', settings.kahEmailBody || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.");
 
-document.getElementById('set-user-keyword').value = settings.userKeyword || 'peace';
-document.getElementById('set-github-repo').value = settings.githubRepo || '';
-document.getElementById('set-backup-folder').value = settings.backupFolder || '';
-document.getElementById('set-github-token').value = ''; // Never populate token for security
+    safeSet('set-user-keyword', settings.userKeyword || 'peace');
+    safeSet('set-github-repo', settings.githubRepo || '');
+    safeSet('set-backup-folder', settings.backupFolder || '');
+    safeSet('set-github-token', ''); // Never populate token for security
 
-document.getElementById('set-gcal-template').value = settings.gcalTemplate || '{EventType} - {Name}, {Attendees} {Time}';
-document.getElementById('set-agenda-template').value = settings.agendaTemplate || '{EventType} - {Name} ({Department})';
+    safeSet('set-gcal-template', settings.gcalTemplate || '{EventType} - {Name}, {Attendees} {Time}');
+    safeSet('set-agenda-template', settings.agendaTemplate || '{EventType} - {Name} ({Department})');
 
-const radios = document.getElementsByName('app-mode');
-radios.forEach(r => { if(r.value === appMode) r.checked = true; });
+    const radios = document.getElementsByName('app-mode');
+    if (radios) {
+        radios.forEach(r => { if(r.value === appMode) r.checked = true; });
+    }
 
-tempMenuOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
-renderMenuOrder();
+    tempMenuOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+    renderMenuOrder();
 
-tempTypicalEventTypes = settings.typicalEventTypes ||[];
-renderTypicalEventTypes();
+    tempTypicalEventTypes = settings.typicalEventTypes ||[];
+    renderTypicalEventTypes();
 
-// Handle legacy flat acronyms vs new object acronyms
-tempAcronyms = {};
-if (settings.acronyms) {
-   for (let key in settings.acronyms) {
-       let val = settings.acronyms[key];
-       if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
-       else tempAcronyms[key] = val;
-   }
-}
-renderAcronyms();
+    // Handle legacy flat acronyms vs new object acronyms
+    tempAcronyms = {};
+    if (settings.acronyms) {
+       for (let key in settings.acronyms) {
+           let val = settings.acronyms[key];
+           if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
+           else tempAcronyms[key] = val;
+       }
+    }
+    renderAcronyms();
 
-adminKAHList = settings.kahList ||[];
-customKahGroups = settings.customKahGroups ||[];
-renderKAHSelected();
-renderCustomKahGroups();
+    adminKAHList = settings.kahList ||[];
+    customKahGroups = settings.customKahGroups ||[];
+    renderKAHSelected();
+    renderCustomKahGroups();
 
-tempAdminSectionsOrder = settings.adminSectionsOrder && settings.adminSectionsOrder.length 
-? settings.adminSectionsOrder 
-:['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'code-backup'];
+    tempAdminSectionsOrder = settings.adminSectionsOrder && settings.adminSectionsOrder.length 
+    ? settings.adminSectionsOrder 
+    :['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'code-backup'];
 
-const container = document.getElementById('admin-sections-container');
-if (container) {
- tempAdminSectionsOrder.forEach(id => {
-   const el = container.querySelector(`[data-section="${id}"]`);
-   if (el) container.appendChild(el);
- });
- 
- if (window.adminSectionsSortable) window.adminSectionsSortable.destroy();
- window.adminSectionsSortable = new Sortable(container, {
-   animation: 150,
-   handle: '.section-handle',
-   ghostClass: 'opacity-50',
-   onEnd: function () {
-     tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
-   }
- });
+    const container = document.getElementById('admin-sections-container');
+    if (container) {
+     tempAdminSectionsOrder.forEach(id => {
+       const el = container.querySelector(`[data-section="${id}"]`);
+       if (el) container.appendChild(el);
+     });
+     
+     if (window.adminSectionsSortable) window.adminSectionsSortable.destroy();
+     if (typeof Sortable !== 'undefined') {
+         window.adminSectionsSortable = new Sortable(container, {
+           animation: 150,
+           handle: '.section-handle',
+           ghostClass: 'opacity-50',
+           onEnd: function () {
+             tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
+           }
+         });
+     }
+    }
+} catch(e) {
+    console.error("Error populating admin form:", e);
 }
 }
 
@@ -102,25 +112,41 @@ list.innerHTML = tempMenuOrder.map((id) => `
  <div data-id="${id}" class="flex justify-between items-center bg-white dark:bg-darksurface p-3 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm cursor-grab">
    <div class="flex items-center space-x-3 w-full">
      <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted handle cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-     <span class="font-bold text-gray-700 dark:text-darktext">${TAB_NAMES[id]}</span>
+     <span class="font-bold text-gray-700 dark:text-darktext">${TAB_NAMES[id] || id}</span>
    </div>
  </div>
 `).join('');
 if(window.menuSortable) window.menuSortable.destroy();
-window.menuSortable = new Sortable(list, { animation: 150, handle: '.handle', ghostClass: 'opacity-50', onEnd: function () { tempMenuOrder = Array.from(list.children).map(el => el.dataset.id); } });
+if (typeof Sortable !== 'undefined') {
+    window.menuSortable = new Sortable(list, { animation: 150, handle: '.handle', ghostClass: 'opacity-50', onEnd: function () { tempMenuOrder = Array.from(list.children).map(el => el.dataset.id); } });
+}
 }
 
 function renderTypicalEventTypes() {
 const list = document.getElementById('typical-event-types-list');
 if(!list) return;
-list.innerHTML = tempTypicalEventTypes.map((t, i) => {
- const isFixed = FIXED_TYPICAL_EVENTS.includes(t.name);
- return `
+
+let html = '';
+tempTypicalEventTypes.forEach((t, i) => {
+ const safeName = t?.name || '';
+ const isFixed = FIXED_TYPICAL_EVENTS.includes(safeName);
+ 
+ let locHtml = '<div class="flex-grow"></div>';
+ if (safeName === 'Meeting') {
+     locHtml = `<input type="text" value="${t.defaultLoc || ''}" onchange="updateTypicalEventType(${i}, 'defaultLoc', this.value)" placeholder="Default Location" class="flex-grow min-w-[100px] border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm">`;
+ }
+ 
+ let removeBtnHtml = '<div class="w-6 shrink-0 ml-auto hidden sm:block"></div>';
+ if (!isFixed) {
+     removeBtnHtml = `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-red-700 p-1 rounded-lg transition shrink-0 ml-auto" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
+ }
+
+ html += `
  <div data-idx="${i}" class="flex flex-col sm:flex-row items-start sm:items-center gap-2 bg-white dark:bg-darksurface p-3 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
    <div class="flex items-center w-full sm:w-auto gap-2">
      <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
      ${isFixed ? `<div class="w-2 sm:w-0 shrink-0"></div>` : ''}
-     <input type="text" value="${t.name}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow sm:w-32 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm font-semibold" ${isFixed ? 'disabled' : ''}>
+     <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow sm:w-32 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm font-semibold" ${isFixed ? 'disabled' : ''}>
    </div>
    
    <div class="flex items-center w-full sm:w-auto gap-2 flex-grow">
@@ -129,27 +155,31 @@ list.innerHTML = tempTypicalEventTypes.map((t, i) => {
         <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
      </select>
      
-     ${t.name === 'Meeting' ? `<input type="text" value="${t.defaultLoc || ''}" onchange="updateTypicalEventType(${i}, 'defaultLoc', this.value)" placeholder="Default Location" class="flex-grow min-w-[100px] border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm">` : `<div class="flex-grow"></div>`}
+     ${locHtml}
      
-     ${!isFixed ? `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-red-700 p-1 rounded-lg transition shrink-0 ml-auto" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : `<div class="w-6 shrink-0 ml-auto hidden sm:block"></div>`}
+     ${removeBtnHtml}
    </div>
  </div>
-`}).join('');
+ `;
+});
+list.innerHTML = html;
 
 if(window.eventTypeSortable) window.eventTypeSortable.destroy();
-window.eventTypeSortable = new Sortable(list, { 
- animation: 150, 
- handle: '.handle-event-type', 
- ghostClass: 'opacity-50', 
- onEnd: function () { 
-   const newArr =[];
-   Array.from(list.children).forEach(el => {
-     newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
-   });
-   tempTypicalEventTypes = newArr;
-   renderTypicalEventTypes();
- } 
-});
+if (typeof Sortable !== 'undefined') {
+    window.eventTypeSortable = new Sortable(list, { 
+     animation: 150, 
+     handle: '.handle-event-type', 
+     ghostClass: 'opacity-50', 
+     onEnd: function () { 
+       const newArr =[];
+       Array.from(list.children).forEach(el => {
+         newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
+       });
+       tempTypicalEventTypes = newArr;
+       renderTypicalEventTypes();
+     } 
+    });
+}
 }
 
 function addTypicalEventType() {
@@ -176,7 +206,7 @@ renderTypicalEventTypes();
 function updateTypicalEventType(idx, field, val) {
 if (field === 'name' && FIXED_TYPICAL_EVENTS.includes(tempTypicalEventTypes[idx].name)) return;
 tempTypicalEventTypes[idx][field] = val;
-if (field === 'isEvent') renderTypicalEventTypes(); // re-render to disable/enable location
+if (field === 'isEvent') renderTypicalEventTypes(); 
 }
 
 function renderAcronyms() {
