@@ -3,15 +3,17 @@
 // ==========================================
 
 function toggleInfoAll(forceState) {
-  isInfoAll = forceState !== undefined ? forceState : !isInfoAll;
-  const btn = document.getElementById('form-event-infoall-btn');
-  if(isInfoAll) {
-      btn.classList.add('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border-blue-300', 'dark:border-blue-600');
-      btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-400', 'dark:border-gray-500');
-  } else {
-      btn.classList.remove('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border-blue-300', 'dark:border-blue-600');
-      btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-400', 'dark:border-gray-500');
-  }
+  isInfoAll = forceState !== undefined ? forceState : !isInfoAll;['form-event-infoall-btn', 'form-combined-infoall-btn'].forEach(id => {
+      const btn = document.getElementById(id);
+      if(!btn) return;
+      if(isInfoAll) {
+          btn.classList.add('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border-blue-300', 'dark:border-blue-600');
+          btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-400', 'dark:border-gray-500');
+      } else {
+          btn.classList.remove('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border-blue-300', 'dark:border-blue-600');
+          btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-400', 'dark:border-gray-500');
+      }
+  });
 }
 
 function toggleEventAllDay() {
@@ -19,15 +21,62 @@ function toggleEventAllDay() {
   updateButtonLabels();
 }
 
+function toggleCombinedAllDay() {
+  appData.combined.isAllDay = document.getElementById('form-combined-allday').checked;
+  updateButtonLabels();
+}
+
 function openEventPicker(field) {
   openPicker(appData.event.isAllDay ? 'date' : 'datetime', 'event', field);
 }
 
-function toggleRepeatUntil() {
-  const val = document.getElementById('form-event-repeat').value;
-  const container = document.getElementById('event-until-container');
+function toggleRepeatUntil(ctx = 'event') {
+  const val = document.getElementById(`form-${ctx}-repeat`).value;
+  const container = document.getElementById(`${ctx}-until-container`);
   if(val === 'NONE') container.classList.add('hidden-view');
   else container.classList.remove('hidden-view');
+}
+
+function toggleCombinedRepeatUntil() {
+  toggleRepeatUntil('combined');
+}
+
+function toggleCombinedFields() {
+  const typeInput = document.getElementById('form-combined-type');
+  if(!typeInput) return;
+  const val = typeInput.value;
+  const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === val) : null;
+  const isEvent = typeObj ? typeObj.isEvent : true;
+
+  const eventFields = document.getElementById('combined-event-fields');
+  const leaveFields = document.getElementById('combined-leave-fields');
+  const locationInput = document.getElementById('form-combined-location');
+  const coverInput = document.getElementById('form-combined-cover');
+  const btnInfoAll = document.getElementById('form-combined-infoall-btn');
+  
+  if (isEvent) {
+    eventFields.classList.remove('hidden-view');
+    leaveFields.classList.add('hidden-view');
+    btnInfoAll.classList.remove('hidden-view');
+    coverInput.required = false;
+    
+    if (val === 'Meeting' && (!locationInput.value || locationInput.value.trim() === '')) {
+      locationInput.value = 'Office';
+    }
+  } else {
+    eventFields.classList.add('hidden-view');
+    leaveFields.classList.remove('hidden-view');
+    btnInfoAll.classList.add('hidden-view');
+    coverInput.required = true;
+    
+    const overseas = document.getElementById('combined-overseas-fields');
+    const cInput = document.getElementById('form-combined-country');
+    if (val === 'Overseas Leave' || val === 'Official Trip') { 
+      overseas.classList.remove('hidden-view'); cInput.required = true; 
+    } else { 
+      overseas.classList.add('hidden-view'); cInput.required = false; 
+    }
+  }
 }
 
 // --- Admin Submit on Behalf Logic ---
@@ -67,15 +116,15 @@ function clearBehalf(ctx) {
 }
 
 // --- Attendees Form Logic ---
-function searchAttendees() {
-  const q = document.getElementById('form-event-attendee-search').value;
-  const resC = document.getElementById('attendees-results');
+function searchAttendees(ctx) {
+  const q = document.getElementById(`form-${ctx}-attendee-search`).value;
+  const resC = document.getElementById(`${ctx}-attendees-results`);
   if(!q || !fuseAttendees) { resC.classList.add('hidden-view'); return; }
   
   const results = fuseAttendees.search(q).slice(0, 6).map(r => r.item);
   if (results.length > 0) {
     resC.innerHTML = results.map(item => `
-      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="selectAttendee('${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}')">
+      <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}')">
         <span class="font-semibold">${item.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${item.dept})</span>
       </div>
     `).join('');
@@ -85,36 +134,36 @@ function searchAttendees() {
   }
 }
 
-function selectAttendee(id, name, dept, type) {
+function selectAttendee(ctx, id, name, dept, type) {
   if (!eventAttendees.some(a => a.id === id)) { 
     eventAttendees.push({ id, name, dept, type }); 
-    renderAttendees(); 
+    renderAttendees(ctx); 
   }
-  document.getElementById('form-event-attendee-search').value = '';
-  document.getElementById('attendees-results').classList.add('hidden-view');
+  document.getElementById(`form-${ctx}-attendee-search`).value = '';
+  document.getElementById(`${ctx}-attendees-results`).classList.add('hidden-view');
 }
 
-function removeAttendee(id) { 
+function removeAttendee(ctx, id) { 
   eventAttendees = eventAttendees.filter(a => a.id !== id); 
-  renderAttendees(); 
+  renderAttendees(ctx); 
 }
 
-function renderAttendees() {
-  const c = document.getElementById('attendees-chip-container');
+function renderAttendees(ctx) {
+  const c = document.getElementById(`${ctx}-attendees-chip-container`);
   if(c) {
     c.innerHTML = eventAttendees.map(a => `
       <div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-full px-3 py-1 text-sm font-semibold">
         ${a.name}
-        <button type="button" onclick="removeAttendee('${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
+        <button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
       </div>
     `).join('');
   }
 }
 
 // --- Covering Person Form Logic ---
-function searchCovering() {
-  const q = document.getElementById('form-leave-cover').value;
-  const resC = document.getElementById('cover-results-leave');
+function searchCovering(ctx) {
+  const q = document.getElementById(`form-${ctx}-cover`).value;
+  const resC = document.getElementById(`cover-results-${ctx}`);
   if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
   
   const uniques =[...new Set(fuseAllContacts._docs.map(d=>d.name))];
@@ -122,16 +171,16 @@ function searchCovering() {
   
   const results = quickFuse.search(q).slice(0, 5).map(r => r.item.name);
   if (results.length > 0) {
-    resC.innerHTML = results.map(n => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover font-medium" onclick="selectCovering('${n.replace(/'/g, "\\'")}')">${n}</div>`).join('');
+    resC.innerHTML = results.map(n => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover font-medium" onclick="selectCovering('${ctx}', '${n.replace(/'/g, "\\'")}')">${n}</div>`).join('');
     resC.classList.remove('hidden-view');
   } else {
     resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
   }
 }
 
-function selectCovering(name) { 
-  document.getElementById('form-leave-cover').value = name; 
-  document.getElementById('cover-results-leave').classList.add('hidden-view'); 
+function selectCovering(ctx, name) { 
+  document.getElementById(`form-${ctx}-cover`).value = name; 
+  document.getElementById(`cover-results-${ctx}`).classList.add('hidden-view'); 
 }
 
 // --- Form Submission & Edits ---
@@ -139,8 +188,10 @@ function triggerEdit(id) {
   const l = allLeaves.find(x => x.ID === id);
   if(!l) return;
   currentEditId = id;
-  const isEvent = window.appLeaveTypes ? !window.appLeaveTypes.includes(l.LeaveType) : false;
-  const ctx = isEvent ? 'event' : 'leave';
+  const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
+  const isEvent = typeObj ? typeObj.isEvent : false;
+  
+  const ctx = appMode === 'combined' ? 'combined' : (isEvent ? 'event' : 'leave');
 
   appData[ctx].startD = new Date(l.StartDate);
   appData[ctx].endD = new Date(l.EndDate);
@@ -149,16 +200,23 @@ function triggerEdit(id) {
     selectBehalf(ctx, l.Name, l.Phone, l.Department);
   }
 
+  const typeEl = document.getElementById(`form-${ctx}-type`) || document.getElementById(`form-${ctx}-name`);
+  if (typeEl) typeEl.value = l.LeaveType;
+  
+  if (appMode === 'combined') {
+      toggleCombinedFields();
+  } else if (!isEvent) {
+      toggleOverseasFields('leave');
+  }
+
   if (isEvent) {
-    appData.event.isAllDay = l.IsAllDay === 'TRUE';
-    appData.event.untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(l.EndDate);
-    document.getElementById('form-event-allday').checked = appData.event.isAllDay;
-    document.getElementById('form-event-name').value = l.LeaveType;
-    document.getElementById('form-event-location').value = l.Location || 'Office';
-    document.getElementById('form-event-remarks').value = l.Remarks || '';
-    document.getElementById('form-event-repeat').value = l.HalfDay || 'NONE'; 
+    appData[ctx].isAllDay = l.IsAllDay === 'TRUE';
+    appData[ctx].untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(l.EndDate);
+    document.getElementById(`form-${ctx}-allday`).checked = appData[ctx].isAllDay;
+    document.getElementById(`form-${ctx}-location`).value = l.Location || 'Office';
+    document.getElementById(`form-${ctx}-repeat`).value = l.HalfDay || 'NONE'; 
     toggleInfoAll(l.InfoAll === 'TRUE');
-    toggleRepeatUntil();
+    toggleRepeatUntil(ctx);
     
     eventAttendees =[];
     if(l.Attendees) {
@@ -172,19 +230,11 @@ function triggerEdit(id) {
         });
       }
     }
-    renderAttendees();
-    
-    document.getElementById('submit-event-btn').innerText = "Update Event";
-    document.getElementById('cancel-edit-event-btn').classList.remove('hidden-view');
+    renderAttendees(ctx);
   } else {
-    document.getElementById('form-leave-type').value = l.LeaveType;
-    document.getElementById('form-leave-cover').value = l.CoveringPerson;
-    document.getElementById('form-leave-country').value = l.Country || '';
-    document.getElementById('form-leave-state').value = l.State || '';
-    document.getElementById('form-leave-remarks').value = l.Remarks || '';
-    document.getElementById('submit-leave-btn').innerText = "Update Record";
-    document.getElementById('cancel-edit-leave-btn').classList.remove('hidden-view');
-    toggleOverseasFields();
+    document.getElementById(`form-${ctx}-cover`).value = l.CoveringPerson;
+    document.getElementById(`form-${ctx}-country`).value = l.Country || '';
+    document.getElementById(`form-${ctx}-state`).value = l.State || '';
     
     let start = 'AM', end = 'PM';
     if (l.HalfDay === 'AM') end = 'AM';
@@ -192,59 +242,81 @@ function triggerEdit(id) {
     else if (l.HalfDay === 'Start PM, End AM') { start = 'PM'; end = 'AM'; }
     else if (l.HalfDay === 'Start PM') start = 'PM';
     else if (l.HalfDay === 'End AM') end = 'AM';
-    appData.leave.startAMPM = start; appData.leave.endAMPM = end;
-    updateTimeSliderVisual('start', start); updateTimeSliderVisual('end', end);
+    appData[ctx].startAMPM = start; appData[ctx].endAMPM = end;
+    updateTimeSliderVisual('start', start, ctx); updateTimeSliderVisual('end', end, ctx);
   }
+  
+  document.getElementById(`form-${ctx}-remarks`).value = l.Remarks || '';
+  document.getElementById(`submit-${ctx}-btn`).innerText = "Update Record";
+  document.getElementById(`cancel-edit-${ctx}-btn`).classList.remove('hidden-view');
   
   updateButtonLabels();
   switchTab(`submit-${ctx}`);
   
-  setTimeout(() => {['form-leave-remarks', 'form-event-remarks'].forEach(id => {
-      const el = document.getElementById(id);
-      if(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
-    });
+  setTimeout(() => {
+    const el = document.getElementById(`form-${ctx}-remarks`);
+    if(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
   }, 50);
 }
 
 function cancelEditMode() {
   currentEditId = null; 
-  initDates();
-  document.getElementById('leave-form').reset(); 
-  document.getElementById('event-form').reset();['form-leave-remarks', 'form-event-remarks'].forEach(id => { 
+  initDates();['leave-form', 'event-form', 'combined-form'].forEach(id => {
+      const form = document.getElementById(id);
+      if(form) form.reset();
+  });['form-leave-remarks', 'form-event-remarks', 'form-combined-remarks'].forEach(id => { 
     const el = document.getElementById(id); 
     if(el) el.style.height='auto'; 
   });
 
   appData.leave.startAMPM = 'AM'; appData.leave.endAMPM = 'PM';
+  appData.combined.startAMPM = 'AM'; appData.combined.endAMPM = 'PM';
   appData.event.isAllDay = false;
-  document.getElementById('form-event-allday').checked = false;
+  appData.combined.isAllDay = false;
   
-  updateTimeSliderVisual('start', 'AM'); updateTimeSliderVisual('end', 'PM');
-  toggleOverseasFields();
+  ['form-event-allday', 'form-combined-allday'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.checked = false;
+  });
+  
+  updateTimeSliderVisual('start', 'AM', 'leave'); updateTimeSliderVisual('end', 'PM', 'leave');
+  updateTimeSliderVisual('start', 'AM', 'combined'); updateTimeSliderVisual('end', 'PM', 'combined');
+  
+  if (appMode === 'combined') toggleCombinedFields();
+  else toggleOverseasFields('leave');
+
   toggleInfoAll(false);
-  toggleRepeatUntil();
+  toggleRepeatUntil('event');
+  toggleRepeatUntil('combined');
   
   clearBehalf('leave');
   clearBehalf('event');
+  clearBehalf('combined');
   
-  eventAttendees =[]; renderAttendees();
+  eventAttendees =[]; 
+  renderAttendees('event');
+  renderAttendees('combined');
 
-  document.getElementById('submit-leave-btn').innerText = "Save Record";
-  document.getElementById('cancel-edit-leave-btn').classList.add('hidden-view');
-  document.getElementById('submit-event-btn').innerText = "Save Event";
-  document.getElementById('cancel-edit-event-btn').classList.add('hidden-view');
+  ['leave', 'event', 'combined'].forEach(ctx => {
+      const btn = document.getElementById(`submit-${ctx}-btn`);
+      const cancelBtn = document.getElementById(`cancel-edit-${ctx}-btn`);
+      if (btn) btn.innerText = "Save Record";
+      if (cancelBtn) cancelBtn.classList.add('hidden-view');
+  });
+
   switchTab(appMode === 'unified' ? 'dashboard' : 'my-leaves');
 }
 
-function toggleAMPM(type) {
-  appData.leave[`${type}AMPM`] = appData.leave[`${type}AMPM`] === 'AM' ? 'PM' : 'AM'; 
-  updateTimeSliderVisual(type, appData.leave[`${type}AMPM`]);
+function toggleAMPM(type, ctx) {
+  appData[ctx][`${type}AMPM`] = appData[ctx][`${type}AMPM`] === 'AM' ? 'PM' : 'AM'; 
+  updateTimeSliderVisual(type, appData[ctx][`${type}AMPM`], ctx);
 }
 
-function updateTimeSliderVisual(type, val) {
-  const slider = document.getElementById(`${type}-leave-slider`);
-  const tAM = document.getElementById(`${type}-leave-am`);
-  const tPM = document.getElementById(`${type}-leave-pm`);
+function updateTimeSliderVisual(type, val, ctx) {
+  const slider = document.getElementById(`${type}-${ctx}-slider`);
+  const tAM = document.getElementById(`${type}-${ctx}-am`);
+  const tPM = document.getElementById(`${type}-${ctx}-pm`);
+  if (!slider || !tAM || !tPM) return;
   const act = 'text-white', inact =['text-gray-500', 'dark:text-darkmuted'];
   if (val === 'PM') {
     slider.classList.add('translate-x-full');
@@ -257,21 +329,20 @@ function updateTimeSliderVisual(type, val) {
   }
 }
 
-function toggleOverseasFields() {
-  const type = document.getElementById('form-leave-type').value;
-  const el = document.getElementById('overseas-fields');
-  const cInput = document.getElementById('form-leave-country');
+function toggleOverseasFields(ctx) {
+  const type = document.getElementById(`form-${ctx}-type`).value;
+  const el = document.getElementById(`${ctx}-overseas-fields`);
+  const cInput = document.getElementById(`form-${ctx}-country`);
   if (type === 'Overseas Leave' || type === 'Official Trip') { 
     el.classList.remove('hidden-view'); cInput.required = true; 
   } else { 
-    el.classList.add('hidden-view'); cInput.required = false; cInput.value = ''; document.getElementById('form-leave-state').value = ''; 
+    el.classList.add('hidden-view'); cInput.required = false; cInput.value = ''; document.getElementById(`form-${ctx}-state`).value = ''; 
   }
 }
 
 async function submitForm(ctx) {
   showLoader(true);
   
-  // Resolve Target User
   let targetName = user.name;
   let targetPhone = user.phone;
   let targetDepts = new Set(user.departments);
@@ -285,8 +356,12 @@ async function submitForm(ctx) {
     showLoader(false); return;
   }
 
-  if (ctx === 'leave') {
-    const coverInput = document.getElementById('form-leave-cover').value.trim();
+  const typeValue = document.getElementById(`form-${ctx}-type`) ? document.getElementById(`form-${ctx}-type`).value : document.getElementById(`form-${ctx}-name`).value;
+  const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === typeValue) : null;
+  const isEvent = ctx === 'event' || (ctx === 'combined' && typeObj && typeObj.isEvent);
+
+  if (!isEvent) {
+    const coverInput = document.getElementById(`form-${ctx}-cover`).value.trim();
     if (!validContactNames.includes(coverInput.toLowerCase())) {
       alert("Please select a valid Covering Person from the dropdown list.");
       showLoader(false); return;
@@ -303,38 +378,46 @@ async function submitForm(ctx) {
   let finalInfoAll = false;
   let eventIsAllDay = false;
   let eventUntilDate = '';
+  let coveringPerson = 'N/A';
+  let country = '';
+  let state = '';
 
-  if (ctx === 'leave') {
-    const isSameDay = appData.leave.startD.toDateString() === appData.leave.endD.toDateString();
+  if (!isEvent) {
+    const isSameDay = appData[ctx].startD.toDateString() === appData[ctx].endD.toDateString();
     if (isSameDay) {
-      if (appData.leave.startAMPM === 'AM' && appData.leave.endAMPM === 'AM') calculatedHalfDay = 'AM';
-      else if (appData.leave.startAMPM === 'PM' && appData.leave.endAMPM === 'PM') calculatedHalfDay = 'PM';
+      if (appData[ctx].startAMPM === 'AM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'AM';
+      else if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'PM') calculatedHalfDay = 'PM';
     } else {
-      if (appData.leave.startAMPM === 'PM' && appData.leave.endAMPM === 'AM') calculatedHalfDay = 'Start PM, End AM';
-      else if (appData.leave.startAMPM === 'PM') calculatedHalfDay = 'Start PM';
-      else if (appData.leave.endAMPM === 'AM') calculatedHalfDay = 'End AM';
+      if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'Start PM, End AM';
+      else if (appData[ctx].startAMPM === 'PM') calculatedHalfDay = 'Start PM';
+      else if (appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'End AM';
     }
+    coveringPerson = document.getElementById(`form-${ctx}-cover`).value.trim();
+    country = document.getElementById(`form-${ctx}-country`) ? document.getElementById(`form-${ctx}-country`).value : '';
+    state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`form-${ctx}-state`).value : '';
   } else {
-    calculatedHalfDay = document.getElementById('form-event-repeat').value; 
-    loc = document.getElementById('form-event-location').value;
+    calculatedHalfDay = document.getElementById(`form-${ctx}-repeat`).value; 
+    loc = document.getElementById(`form-${ctx}-location`).value;
     finalInfoAll = isInfoAll;
-    eventIsAllDay = appData.event.isAllDay;
+    eventIsAllDay = appData[ctx].isAllDay;
     
     if (calculatedHalfDay !== 'NONE') {
-      eventUntilDate = toLocalISO(appData.event.untilD);
+      eventUntilDate = toLocalISO(appData[ctx].untilD);
     }
     
-    eventAttendees.forEach(a => { targetDepts.add(a.dept); });
+    eventAttendees.forEach(a => { 
+        if (a.dept !== 'Custom') targetDepts.add(a.dept); 
+    });
     finalAttendeesStr = JSON.stringify(eventAttendees);
   }
 
   const payload = {
     id: currentEditId, name: targetName, phone: targetPhone, departments: Array.from(targetDepts),
-    leaveType: ctx === 'leave' ? document.getElementById('form-leave-type').value : document.getElementById('form-event-name').value,
+    leaveType: typeValue,
     startDate: sDate, endDate: eDate, halfDay: calculatedHalfDay, 
-    coveringPerson: ctx === 'leave' ? document.getElementById('form-leave-cover').value.trim() : 'N/A',
-    country: ctx === 'leave' ? document.getElementById('form-leave-country').value : '',
-    state: ctx === 'leave' ? document.getElementById('form-leave-state').value : '',
+    coveringPerson: coveringPerson,
+    country: country,
+    state: state,
     remarks: document.getElementById(`form-${ctx}-remarks`).value,
     location: loc,
     attendees: finalAttendeesStr,
