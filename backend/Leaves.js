@@ -192,36 +192,23 @@ function cancelLeave(data) {
 }
 
 function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeaders) {
- var eventTypes = JSON.parse(props.getProperty('eventTypes') || "[]");
- var typeObj = eventTypes.filter(function(t) { return t.name === data.leaveType; })[0];
- if (!typeObj || !typeObj.isKAH) return false; // Only run check if event type is flagged as KAH
+ if (data.leaveType !== 'Overseas Leave' && data.leaveType !== 'Official Trip') return false;
  
  var headers = preloadedHeaders || verifySchema(sheet);
  var rows = preloadedRows || sheet.getDataRange().getValues();
  var kahList = JSON.parse(props.getProperty('kahList') || "[]");
- var customGroups = JSON.parse(props.getProperty('kahCustomGroups') || "[]");
  var limit = parseInt(props.getProperty('kahLimit') || "50");
  
- // Find which Units and Custom Groups this user represents as KAH
  var userKAHData = kahList.filter(function(k) { return String(k.phone) === String(data.phone); });
- var userCustomGroups = customGroups.filter(function(cg) { return cg.phones.indexOf(String(data.phone)) !== -1; });
- 
- if (userKAHData.length === 0 && userCustomGroups.length === 0) return false;
+ if (userKAHData.length === 0) return false;
 
  var exceededDepts =[];
 
- // Helper to check a specific group (Unit or Custom)
- function evaluateGroup(groupName, isCustom) {
-   var totalKahInGroup = 0;
+ userKAHData.forEach(function(userKAH) {
+   var dept = userKAH.dept;
+   var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
    
-   if (isCustom) {
-       var cg = customGroups.filter(function(c) { return c.groupName === groupName; })[0];
-       if (cg) totalKahInGroup = cg.phones.length;
-   } else {
-       totalKahInGroup = kahList.filter(function(k) { return k.dept === groupName; }).length;
-   }
-   
-   if (totalKahInGroup === 0) return;
+   if (totalKahInDept === 0) return;
    
    var overlappingKAHPhones =[String(data.phone)];
    
@@ -235,17 +222,9 @@ function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeade
 
      if (rStatus === 'Cancelled' || rId === skipId) continue;
      
-     var rTypeObj = eventTypes.filter(function(t) { return t.name === rType; })[0];
-     if (rTypeObj && rTypeObj.isKAH) {
-       var isKAHForGroup = false;
-       if (isCustom) {
-           var rCg = customGroups.filter(function(c) { return c.groupName === groupName; })[0];
-           if (rCg && rCg.phones.indexOf(String(rPhone)) !== -1) isKAHForGroup = true;
-       } else {
-           isKAHForGroup = kahList.some(function(k) { return String(k.phone) === String(rPhone) && k.dept === groupName; });
-       }
-       
-       if (isKAHForGroup) {
+     if (rType === 'Overseas Leave' || rType === 'Official Trip') {
+       var isKAHForDept = kahList.some(function(k) { return String(k.phone) === String(rPhone) && k.dept === dept; });
+       if (isKAHForDept) {
          var dStart = new Date(data.startDate), dEnd = new Date(data.endDate);
          if (dStart <= rEnd && dEnd >= rStart) {
            if (overlappingKAHPhones.indexOf(String(rPhone)) === -1) {
@@ -256,41 +235,35 @@ function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeade
      }
    }
    
-   if (((overlappingKAHPhones.length) / totalKahInGroup) * 100 > limit) {
-     exceededDepts.push(groupName);
+   if (((overlappingKAHPhones.length) / totalKahInDept) * 100 > limit) {
+     exceededDepts.push(dept);
    }
- }
-
- // Evaluate Units
- userKAHData.forEach(function(u) { evaluateGroup(u.dept, false); });
- // Evaluate Custom Groups
- userCustomGroups.forEach(function(cg) { evaluateGroup(cg.groupName, true); });
+ });
 
  if (exceededDepts.length > 0) {
    var deptStr = exceededDepts.join(', ');
    
    if (!data._isRecalculation) {
      var subjectTemplate = props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}";
-     var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {LeaveType} but KAH limit was crossed for {Unit}.";
+     var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.";
+     var acronyms = JSON.parse(props.getProperty('acronyms') || "{}");
      
-     var fmtStart = Utilities.formatDate(new Date(data.startDate), Session.getScriptTimeZone(), "dd MMM yyyy");
-     var fmtEnd = Utilities.formatDate(new Date(data.endDate), Session.getScriptTimeZone(), "dd MMM yyyy");
-     
-     var replacements = {
-         '{Name}': data.name,
-         '{LeaveType}': data.leaveType,
-         '{Unit}': deptStr,
-         '{StartDate}': fmtStart,
-         '{EndDate}': fmtEnd,
-         '{Remarks}': data.remarks || 'None'
-     };
-     
-     var finalSubject = subjectTemplate;
-     var finalBody = bodyTemplate;
-     for (var key in replacements) {
-         finalSubject = finalSubject.replace(new RegExp(key, 'g'), replacements[key]);
-         finalBody = finalBody.replace(new RegExp(key, 'g'), replacements[key]);
-     }
+     var finalSubject = subjectTemplate
+         .replace(/{Name}/g, data.name || "")
+         .replace(/{EventType}/g, data.leaveType || "")
+         .replace(/{Unit}/g, deptStr || "")
+         .replace(/{Location}/g, data.location || data.country || "")
+         .replace(/{Remarks}/g, data.remarks || "");
+         
+     var finalBody = bodyTemplate
+         .replace(/{Name}/g, data.name || "")
+         .replace(/{EventType}/g, data.leaveType || "")
+         .replace(/{Unit}/g, deptStr || "")
+         .replace(/{Location}/g, data.location || data.country || "")
+         .replace(/{Remarks}/g, data.remarks || "");
+
+     finalSubject = applyAcronyms(finalSubject, acronyms);
+     finalBody = applyAcronyms(finalBody, acronyms);
      
      MailApp.sendEmail(props.getProperty('approvingAuthority'), finalSubject, finalBody);
    }
@@ -299,7 +272,6 @@ function checkKahLimit(data, props, sheet, skipId, preloadedRows, preloadedHeade
  return false;
 }
 
-// Systematically recalculates limits dynamically across all future leaves when Admin updates KAH settings
 function recalculateAllKahStatuses(props) {
   var sheetId = props.getProperty('dbSheetId');
   if (!sheetId) return;
@@ -312,8 +284,6 @@ function recalculateAllKahStatuses(props) {
   var now = new Date();
   now.setHours(0, 0, 0, 0);
   var statusColIdx = headers.indexOf('Status');
-  
-  var eventTypes = JSON.parse(props.getProperty('eventTypes') || "[]");
 
   for (var i = 1; i < rows.length; i++) {
     var rId = rows[i][headers.indexOf('ID')];
@@ -321,13 +291,9 @@ function recalculateAllKahStatuses(props) {
     var rType = rows[i][headers.indexOf('LeaveType')];
     var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
     
-    // Ignore past & cancelled leaves
     if (rStatus === 'Cancelled' || rEnd < now) continue;
     
-    var rTypeObj = eventTypes.filter(function(t) { return t.name === rType; })[0];
-    
-    // If it's a KAH event type, test it
-    if (rTypeObj && rTypeObj.isKAH) {
+    if (rType === 'Overseas Leave' || rType === 'Official Trip') {
       var dataMock = {
          id: rId,
          phone: rows[i][headers.indexOf('Phone')],
@@ -341,7 +307,6 @@ function recalculateAllKahStatuses(props) {
       var kahExceededDept = checkKahLimit(dataMock, props, sheet, rId, rows, headers);
       var newStatus = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
       
-      // Update DB and Memory state smoothly if state changed (Limits breached or restored)
       if (rStatus !== newStatus) {
          sheet.getRange(i + 1, statusColIdx + 1).setValue(newStatus);
          rows[i][statusColIdx] = newStatus; 
