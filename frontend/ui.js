@@ -28,7 +28,7 @@ function applyMenuOrder(orderArr) {
    orderArr.forEach(id => {
      const btn = document.getElementById(`menu-${id}`);
      if (btn) {
-       if (appMode === 'combined' && ['submit-leave', 'submit-event'].includes(id)) {
+       if (appMode === 'combined' &&['submit-leave', 'submit-event'].includes(id)) {
          btn.classList.add('hidden');
        } else if (appMode === 'separated' && id === 'submit-combined') {
          btn.classList.add('hidden');
@@ -152,10 +152,10 @@ function updateButtonLabels() {
  checkAndUpdate('btn-event-end', appData.event.isAllDay ? formatDisplayDate(appData.event.endD) : formatDisplayDateTime(appData.event.endD));
  checkAndUpdate('btn-event-until', formatDisplayDate(appData.event.untilD));
 
- checkAndUpdate('btn-combined-leave-start', formatDisplayDate(appData.combined.startD));
- checkAndUpdate('btn-combined-leave-end', formatDisplayDate(appData.combined.endD));
  checkAndUpdate('btn-combined-event-start', appData.combined.isAllDay ? formatDisplayDate(appData.combined.startD) : formatDisplayDateTime(appData.combined.startD));
  checkAndUpdate('btn-combined-event-end', appData.combined.isAllDay ? formatDisplayDate(appData.combined.endD) : formatDisplayDateTime(appData.combined.endD));
+ checkAndUpdate('btn-combined-leave-start', formatDisplayDate(appData.combined.startD));
+ checkAndUpdate('btn-combined-leave-end', formatDisplayDate(appData.combined.endD));
  checkAndUpdate('btn-combined-until', formatDisplayDate(appData.combined.untilD));
 
  checkAndUpdate('btn-parade-target', formatDisplayDateTime(appData.parade.targetD));
