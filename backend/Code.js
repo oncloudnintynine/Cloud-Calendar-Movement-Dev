@@ -4,12 +4,12 @@
 
 function INITIAL_SETUP() {
 try {
- People.ContactGroups.list({ pageSize: 1 });
- People.People.Connections.list('people/me', { pageSize: 1, personFields: 'names' });
- CalendarApp.getAllCalendars();
- MailApp.getRemainingDailyQuota();
- DriveApp.getFiles(1);
- DocumentApp.create('dummy'); 
+People.ContactGroups.list({ pageSize: 1 });
+People.People.Connections.list('people/me', { pageSize: 1, personFields: 'names' });
+CalendarApp.getAllCalendars();
+MailApp.getRemainingDailyQuota();
+DriveApp.getFiles(1);
+DocumentApp.create('dummy'); 
 } catch(e) {}
 
 var props = PropertiesService.getScriptProperties();
@@ -21,20 +21,20 @@ if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringi
 if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'code-backup']));
 
 if (!props.getProperty('typicalEventTypes')) {
- var oldLeaveTypes = JSON.parse(props.getProperty('leaveTypes') || "[]");
- var defaultTypes =[
-   {name: 'Meeting', isEvent: true, defaultLoc: 'Conference Room'},
-   {name: 'Others', isEvent: true},
-   {name: 'Official Trip', isEvent: false},
-   {name: 'Overseas Leave', isEvent: false},
-   {name: 'Local Leave', isEvent: false}
- ];
- oldLeaveTypes.forEach(function(lt) {
-   if (!defaultTypes.some(function(dt) { return dt.name === lt; })) {
-     defaultTypes.push({name: lt, isEvent: false});
-   }
- });
- props.setProperty('typicalEventTypes', JSON.stringify(defaultTypes));
+var oldLeaveTypes = JSON.parse(props.getProperty('leaveTypes') || "[]");
+var defaultTypes =[
+  {name: 'Meeting', isEvent: true, defaultLoc: 'Conference Room'},
+  {name: 'Others', isEvent: true},
+  {name: 'Official Trip', isEvent: false},
+  {name: 'Overseas Leave', isEvent: false},
+  {name: 'Local Leave', isEvent: false}
+];
+oldLeaveTypes.forEach(function(lt) {
+  if (!defaultTypes.some(function(dt) { return dt.name === lt; })) {
+    defaultTypes.push({name: lt, isEvent: false});
+  }
+});
+props.setProperty('typicalEventTypes', JSON.stringify(defaultTypes));
 }
 
 if (!props.getProperty('kahEmailSubject')) props.setProperty('kahEmailSubject', 'Leave Requires Approval: KAH Limit Crossed for {Unit}');
@@ -51,12 +51,12 @@ if (!props.getProperty('companyStructure')) props.setProperty('companyStructure'
 
 var dbId = props.getProperty('dbSheetId');
 if (!dbId) {
- var ss = SpreadsheetApp.create("Company_Leaves_DB");
- var sheet = ss.getActiveSheet();
- sheet.appendRow(['ID', 'Timestamp', 'Phone', 'Name', 'Department', 'LeaveType', 'StartDate', 'EndDate', 'HalfDay', 'CoveringPerson', 'Country', 'State', 'Remarks', 'Status', 'EventIDs', 'Location', 'Attendees', 'InfoAll', 'IsAllDay', 'UntilDate', 'LocationDetails']);
- props.setProperty('dbSheetId', ss.getId());
+var ss = SpreadsheetApp.create("Company_Leaves_DB");
+var sheet = ss.getActiveSheet();
+sheet.appendRow(['ID', 'Timestamp', 'Phone', 'Name', 'Department', 'LeaveType', 'StartDate', 'EndDate', 'HalfDay', 'CoveringPerson', 'Country', 'State', 'Remarks', 'Status', 'EventIDs', 'Location', 'Attendees', 'InfoAll', 'IsAllDay', 'UntilDate', 'LocationDetails']);
+props.setProperty('dbSheetId', ss.getId());
 } else {
- verifySchema(SpreadsheetApp.openById(dbId).getActiveSheet());
+verifySchema(SpreadsheetApp.openById(dbId).getActiveSheet());
 }
 }
 
@@ -74,16 +74,33 @@ return headers;
 function applyAcronyms(text, acronymsObj) {
 if (!text || !acronymsObj) return text;
 var result = text;
-for (var key in acronymsObj) {
+
+var acronymKeys = Object.keys(acronymsObj);
+
+// Sort by length of full text descending to avoid partial replacements of nested words
+acronymKeys.sort(function(a, b) {
+  var fullA = typeof acronymsObj[a] === 'object' ? (acronymsObj[a].full || "") : (acronymsObj[a] || "");
+  var fullB = typeof acronymsObj[b] === 'object' ? (acronymsObj[b].full || "") : (acronymsObj[b] || "");
+  return fullB.length - fullA.length;
+});
+
+for (var i = 0; i < acronymKeys.length; i++) {
+  var key = acronymKeys[i];
   if (!key) continue;
   var val = acronymsObj[key];
   var full = typeof val === 'object' ? val.full : val;
   var active = typeof val === 'object' ? val.active : true; 
-  if (!active) continue;
+  
+  if (!active || !full) continue;
 
-  var escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-  var regex = new RegExp("\\b" + escapedKey + "\\b", "gi");
-  result = result.replace(regex, full);
+  var escapedFull = full.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  
+  // Safe boundary application. Avoids regex breaking when full phrases contain punctuation.
+  var prefix = /^[\w\u00C0-\u017F]/.test(full) ? "\\b" : "";
+  var suffix = /[\w\u00C0-\u017F]$/.test(full) ? "\\b" : "";
+  
+  var regex = new RegExp(prefix + escapedFull + suffix, "gi");
+  result = result.replace(regex, key);
 }
 return result;
 }
@@ -97,43 +114,43 @@ var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'upda
 if (needsLock) lock.waitLock(15000); 
 
 try {
- var data = payload.data || {};
- var credentials = payload.credentials || {};
- var responseData = {};
+var data = payload.data || {};
+var credentials = payload.credentials || {};
+var responseData = {};
 
- var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'backupCode', 'updateUser', 'deleteUser', 'updateUserUnits'];
- if (secureActions.indexOf(action) !== -1) {
-   if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
-   
-   var checkPass = data.adminPass || credentials.pass;
-   var verifiedUser = handleLogin({ password: checkPass });
-   
-   if (verifiedUser.role !== 'admin' && String(verifiedUser.phone) !== String(credentials.phone)) {
-     throw new Error("Unauthorized: Invalid credentials");
-   }
-   
-   data._userRole = verifiedUser.role;
-   data._userPhone = verifiedUser.phone;
- }
+var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'backupCode', 'updateUser', 'deleteUser', 'updateUserUnits'];
+if (secureActions.indexOf(action) !== -1) {
+  if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
+  
+  var checkPass = data.adminPass || credentials.pass;
+  var verifiedUser = handleLogin({ password: checkPass });
+  
+  if (verifiedUser.role !== 'admin' && String(verifiedUser.phone) !== String(credentials.phone)) {
+    throw new Error("Unauthorized: Invalid credentials");
+  }
+  
+  data._userRole = verifiedUser.role;
+  data._userPhone = verifiedUser.phone;
+}
 
- if (action === 'login') responseData = handleLogin(data);
- else if (action === 'getSettings') responseData = getSettings(data);
- else if (action === 'saveSettings') responseData = saveSettings(data);
- else if (action === 'submitLeave') responseData = submitLeave(data);
- else if (action === 'editLeave') responseData = editLeave(data);
- else if (action === 'getLeaves') responseData = getLeaves(data);
- else if (action === 'cancelLeave') responseData = cancelLeave(data);
- else if (action === 'backupCode') responseData = backupCode(data);
- else if (action === 'registerUser') responseData = registerUser(data);
- else if (action === 'updateUser') responseData = updateUser(data);
- else if (action === 'deleteUser') responseData = deleteUser(data);
- else if (action === 'updateUserUnits') responseData = updateUserUnits(data);
+if (action === 'login') responseData = handleLogin(data);
+else if (action === 'getSettings') responseData = getSettings(data);
+else if (action === 'saveSettings') responseData = saveSettings(data);
+else if (action === 'submitLeave') responseData = submitLeave(data);
+else if (action === 'editLeave') responseData = editLeave(data);
+else if (action === 'getLeaves') responseData = getLeaves(data);
+else if (action === 'cancelLeave') responseData = cancelLeave(data);
+else if (action === 'backupCode') responseData = backupCode(data);
+else if (action === 'registerUser') responseData = registerUser(data);
+else if (action === 'updateUser') responseData = updateUser(data);
+else if (action === 'deleteUser') responseData = deleteUser(data);
+else if (action === 'updateUserUnits') responseData = updateUserUnits(data);
 
- return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
+return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
 } catch (err) {
- return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message })).setMimeType(ContentService.MimeType.JSON);
+return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message })).setMimeType(ContentService.MimeType.JSON);
 } finally {
- if (needsLock) lock.releaseLock();
+if (needsLock) lock.releaseLock();
 }
 }
 
