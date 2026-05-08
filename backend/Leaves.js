@@ -206,40 +206,68 @@ if (userKAHData.length === 0) return false;
 
 var exceededDepts =[];
 
-userKAHData.forEach(function(userKAH) {
- var dept = userKAH.dept;
- var totalKahInDept = kahList.filter(function(k) { return k.dept === dept; }).length;
- 
- if (totalKahInDept === 0) return;
- 
- var overlappingKAHPhones =[String(data.phone)];
- 
- for (var i = 1; i < rows.length; i++) {
-   var rId = rows[i][headers.indexOf('ID')];
-   var rType = rows[i][headers.indexOf('LeaveType')];
-   var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
-   var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
-   var rPhone = rows[i][headers.indexOf('Phone')];
-   var rStatus = rows[i][headers.indexOf('Status')];
+// Parse requested dates once
+var reqStart = new Date(data.startDate);
+reqStart.setHours(0, 0, 0, 0);
+var reqEnd = new Date(data.endDate);
+reqEnd.setHours(23, 59, 59, 999);
 
-   if (rStatus === 'Cancelled' || rId === skipId) continue;
-   
-   if (rType === 'Overseas Leave' || rType === 'Official Trip') {
-     var isKAHForDept = kahList.some(function(k) { return String(k.phone) === String(rPhone) && k.dept === dept; });
-     if (isKAHForDept) {
-       var dStart = new Date(data.startDate), dEnd = new Date(data.endDate);
-       if (dStart <= rEnd && dEnd >= rStart) {
-         if (overlappingKAHPhones.indexOf(String(rPhone)) === -1) {
-           overlappingKAHPhones.push(String(rPhone));
-         }
-       }
-     }
-   }
- }
- 
- if (((overlappingKAHPhones.length) / totalKahInDept) * 100 > limit) {
-   exceededDepts.push(dept);
- }
+// Cache other KAH leaves to prevent string parsing in tight loops
+var otherKAHLeaves =[];
+for (var i = 1; i < rows.length; i++) {
+    var rId = rows[i][headers.indexOf('ID')];
+    var rStatus = rows[i][headers.indexOf('Status')];
+    if (rStatus === 'Cancelled' || rId === skipId) continue;
+    
+    var rType = rows[i][headers.indexOf('LeaveType')];
+    if (rType === 'Overseas Leave' || rType === 'Official Trip') {
+        var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
+        rStart.setHours(0, 0, 0, 0);
+        var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
+        rEnd.setHours(23, 59, 59, 999);
+        
+        // Skip leaves that don't overlap the request range at all
+        if (rStart > reqEnd || rEnd < reqStart) continue;
+
+        otherKAHLeaves.push({
+            phone: String(rows[i][headers.indexOf('Phone')]),
+            start: rStart,
+            end: rEnd
+        });
+    }
+}
+
+userKAHData.forEach(function(userKAH) {
+    var dept = userKAH.dept;
+    var deptKAHPhones = kahList.filter(function(k) { return k.dept === dept; }).map(function(k) { return String(k.phone); });
+    var totalKahInDept = deptKAHPhones.length;
+    
+    if (totalKahInDept === 0) return;
+    
+    var maxConcurrentOut = 0;
+
+    // FIX: Day-by-Day Peak Concurrency Calculation
+    // Instead of lumping all overlap events together, we walk through each day of the request
+    // and find the maximum number of KAH members concurrently out on any single day.
+    for (var current = new Date(reqStart); current <= reqEnd; current.setDate(current.getDate() + 1)) {
+        var outToday = [String(data.phone)]; // Applicant is out today
+        
+        otherKAHLeaves.forEach(function(l) {
+            if (l.start <= current && l.end >= current) {
+                if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
+                    outToday.push(l.phone);
+                }
+            }
+        });
+        
+        if (outToday.length > maxConcurrentOut) {
+            maxConcurrentOut = outToday.length;
+        }
+    }
+    
+    if ((maxConcurrentOut / totalKahInDept) * 100 > limit) {
+        exceededDepts.push(dept);
+    }
 });
 
 if (exceededDepts.length > 0) {
@@ -250,18 +278,22 @@ if (exceededDepts.length > 0) {
    var bodyTemplate = props.getProperty('kahEmailBody') || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.";
    var acronyms = JSON.parse(props.getProperty('acronyms') || "{}");
    
+   // FIX: Inject locationDetails into KAH emails
+   var fullLoc = data.location || data.country || "";
+   if (data.locationDetails) fullLoc += " - " + data.locationDetails;
+
    var finalSubject = subjectTemplate
        .replace(/{Name}/g, data.name || "")
        .replace(/{EventType}/g, data.leaveType || "")
        .replace(/{Unit}/g, deptStr || "")
-       .replace(/{Location}/g, data.location || data.country || "")
+       .replace(/{Location}/g, fullLoc)
        .replace(/{Remarks}/g, data.remarks || "");
        
    var finalBody = bodyTemplate
        .replace(/{Name}/g, data.name || "")
        .replace(/{EventType}/g, data.leaveType || "")
        .replace(/{Unit}/g, deptStr || "")
-       .replace(/{Location}/g, data.location || data.country || "")
+       .replace(/{Location}/g, fullLoc)
        .replace(/{Remarks}/g, data.remarks || "");
 
    finalSubject = applyAcronyms(finalSubject, acronyms);

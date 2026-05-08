@@ -238,7 +238,9 @@ if (l.HalfDay === 'DAILY') return true;
 if (l.HalfDay === 'WEEKDAY') return targetDate.getDay() !== 0 && targetDate.getDay() !== 6;
 
 const diffTime = targetDate.getTime() - s.getTime();
-const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+// FIX: Changed from Math.floor to Math.round to prevent Daylight Savings / Timezone drift bugs 
+// causing recurring weekly events to skip weeks
+const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
 if (l.HalfDay === 'WEEKLY') return diffDays % 7 === 0;
 if (l.HalfDay === 'MONTHLY') return targetDate.getDate() === s.getDate();
