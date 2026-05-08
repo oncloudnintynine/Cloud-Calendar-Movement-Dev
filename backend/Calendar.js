@@ -25,9 +25,10 @@ var timeStr = "";
 if (!isEvent && data.halfDay !== 'None' && data.halfDay !== 'NONE') timeStr = "(" + data.halfDay + ")";
 
 // Inject Meeting Details directly into the EventType variable so it applies to the Title Template seamlessly
-var displayType = data.leaveType || "";
-if (data.leaveType === 'Meeting' && data.remarks) {
-    displayType = data.leaveType + ": " + data.remarks;
+var safeType = (data.leaveType || "").trim();
+var displayType = safeType;
+if (safeType === 'Meeting' && data.remarks) {
+    displayType = safeType + ": " + data.remarks.trim();
 }
 
 data.departments.forEach(function(deptName) {
