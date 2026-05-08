@@ -51,6 +51,7 @@ const isEvent = typeObj ? typeObj.isEvent : true;
 const eventFields = document.getElementById('combined-event-fields');
 const leaveFields = document.getElementById('combined-leave-fields');
 const locationInput = document.getElementById('form-combined-location');
+const locDetailsInput = document.getElementById('form-combined-location-details');
 const coverInput = document.getElementById('form-combined-cover');
 const btnInfoAll = document.getElementById('form-combined-infoall-btn');
 const remarksInput = document.getElementById('form-combined-remarks');
@@ -256,6 +257,10 @@ if (isEvent) {
   appData[ctx].untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(l.EndDate);
   document.getElementById(`form-${ctx}-allday`).checked = appData[ctx].isAllDay;
   document.getElementById(`form-${ctx}-location`).value = l.Location || 'Office';
+  
+  const locDetEl = document.getElementById(`form-${ctx}-location-details`);
+  if (locDetEl) locDetEl.value = l.LocationDetails || '';
+
   document.getElementById(`form-${ctx}-repeat`).value = l.HalfDay || 'NONE'; 
   toggleInfoAll(l.InfoAll === 'TRUE');
   toggleRepeatUntil(ctx);
@@ -412,6 +417,7 @@ const eDate = toLocalISO(appData[ctx].endD);
 
 let calculatedHalfDay = 'None';
 let loc = '';
+let locDetails = '';
 let finalAttendeesStr = '';
 let finalInfoAll = false;
 let eventIsAllDay = false;
@@ -436,6 +442,10 @@ if (!isEvent) {
 } else {
   calculatedHalfDay = document.getElementById(`form-${ctx}-repeat`).value; 
   loc = document.getElementById(`form-${ctx}-location`).value;
+  
+  const locDetEl = document.getElementById(`form-${ctx}-location-details`);
+  if (locDetEl) locDetails = locDetEl.value.trim();
+  
   finalInfoAll = isInfoAll;
   eventIsAllDay = appData[ctx].isAllDay;
   
@@ -458,6 +468,7 @@ const payload = {
   state: state,
   remarks: document.getElementById(`form-${ctx}-remarks`).value,
   location: loc,
+  locationDetails: locDetails,
   attendees: finalAttendeesStr,
   infoAll: finalInfoAll,
   isAllDay: eventIsAllDay,

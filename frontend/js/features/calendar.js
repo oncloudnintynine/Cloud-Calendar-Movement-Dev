@@ -132,11 +132,15 @@ function updateMiniCalendarSelection(ctx, d) {
      const cellDay = parseInt(cell.dataset.day);
      const isToday = cell.dataset.istoday === 'true';
      
-     cell.className = `cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-medium ${isToday ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500' : 'hover:bg-gray-200 dark:hover:bg-darkhover'}`;
+     let baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-medium ";
+     if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
+     else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
      
      if (cellDay === d) {
-         cell.className = `cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-bold bg-blue-600 text-white shadow-md`;
+         baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-bold bg-blue-600 text-white shadow-md ";
      }
+     
+     cell.className = baseClass;
      
      const hasEvent = cell.dataset.hasevent === 'true';
      if (hasEvent) {
@@ -365,6 +369,10 @@ for (let w = new Date(startDate); w <= endDate; w.setDate(w.getDate() + 7)) {
    html += `<div class="absolute top-8 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">`;
    segments.forEach(seg => {
        const color = seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white');
+       
+       let locStr = seg.l.Location || '';
+       if (seg.l.LocationDetails) locStr += ` - ${seg.l.LocationDetails}`;
+
        const title = seg.isLeave ? `${seg.l.Name.split(' ')[0]} : ${seg.l.LeaveType}` : seg.l.LeaveType;
        const appliedTitle = applyAcronymsFront(title);
        
@@ -441,6 +449,9 @@ return items.map(l => {
    } catch(e) {}
  }
  
+ let locStr = l.Location || '';
+ if (l.LocationDetails) locStr += ` - ${l.LocationDetails}`;
+ 
  let titleRaw = window.appAgendaTemplate || '{EventType} - {Name} ({Department})';
  if (isMyCalendar) titleRaw = '{EventType}'; 
  
@@ -449,14 +460,14 @@ return items.map(l => {
     .replace(/{Name}/g, l.Name || "")
     .replace(/{Department}/g, l.Department || "")
     .replace(/{Attendees}/g, attendeesDisplay || "")
-    .replace(/{Location}/g, l.Location || l.Country || "")
+    .replace(/{Location}/g, locStr || l.Country || "")
     .replace(/{Time}/g, timeStr || "");
 
  titleStr = titleStr.replace(/,\s*(?=[,\)]|$)/g, "").replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
  if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
  
  const finalTitle = applyAcronymsFront(titleStr);
- const finalLocation = applyAcronymsFront(l.Location);
+ const finalLocation = applyAcronymsFront(locStr);
  const finalCountry = applyAcronymsFront(l.Country);
 
  if (isCompactInfoAll) {
@@ -595,7 +606,7 @@ if (d === 'MY_CALENDAR') {
 }
 
 if (q) {
- const fuse = new Fuse(filtered, { keys:['Name', 'LeaveType', 'Location', 'Country'] });
+ const fuse = new Fuse(filtered, { keys:['Name', 'LeaveType', 'Location', 'LocationDetails', 'Country'] });
  filtered = fuse.search(q).map(res => res.item);
 }
 
