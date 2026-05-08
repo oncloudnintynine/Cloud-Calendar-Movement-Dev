@@ -61,16 +61,34 @@ try {
     let locationStr = 'Office';
 
     if (activeRecords.length > 0) {
-      const r = activeRecords[0];
-      const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === r.LeaveType) : null;
-      const isEvent = typeObj ? typeObj.isEvent : false;
+      // Prioritize out-of-office events over in-office events
+      let activeRecord = activeRecords[0]; 
       
+      for (const rec of activeRecords) {
+         const tObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === rec.LeaveType) : null;
+         const isEvt = tObj ? tObj.isEvent : false;
+         let checkLoc = isEvt ? (rec.Location || 'Event') : (rec.LeaveType || 'Leave');
+         
+         if (String(checkLoc).toLowerCase() !== 'office') {
+             activeRecord = rec; // Out of office found, let it win
+             break;
+         }
+      }
+
+      const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === activeRecord.LeaveType) : null;
+      const isEvent = typeObj ? typeObj.isEvent : false;
+
       if (isEvent) {
-        locationStr = r.Location || 'Event';
-        isOffice = String(locationStr).toLowerCase() === 'office';
+        // Also fix the missing LocationDetails logic here
+        locationStr = activeRecord.Location || 'Event';
+        if (activeRecord.LocationDetails) {
+            locationStr += ` - ${activeRecord.LocationDetails}`;
+        }
+        // Check only the base Location field to determine isOffice
+        isOffice = String(activeRecord.Location || '').toLowerCase() === 'office';
       } else {
-        locationStr = r.LeaveType || 'Leave';
-        if (r.Country) locationStr += ` (${r.Country})`;
+        locationStr = activeRecord.LeaveType || 'Leave';
+        if (activeRecord.Country) locationStr += ` (${activeRecord.Country})`;
         isOffice = false;
       }
     }
