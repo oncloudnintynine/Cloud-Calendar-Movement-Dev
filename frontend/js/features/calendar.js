@@ -389,8 +389,7 @@ for (let w = new Date(startDate); w <= endDate; w.setDate(w.getDate() + 7)) {
       let locStr = seg.l.Location || '';
       if (seg.l.LocationDetails) locStr += ` - ${seg.l.LocationDetails}`;
 
-      const displayType = seg.l.LeaveType === 'Meeting' && seg.l.Remarks ? `${seg.l.LeaveType}: ${seg.l.Remarks}` : seg.l.LeaveType;
-      const title = seg.isLeave ? `${seg.l.Name.split(' ')[0]} : ${displayType}` : displayType;
+      const title = seg.isLeave ? `${seg.l.Name.split(' ')[0]} : ${seg.l.LeaveType}` : seg.l.LeaveType;
       const appliedTitle = applyAcronymsFront(title);
       
       const left = (seg.sDay / 7) * 100;
@@ -469,26 +468,16 @@ if (l.Attendees) {
 let locStr = l.Location || '';
 if (l.LocationDetails) locStr += ` - ${l.LocationDetails}`;
 
-let displayType = l.LeaveType || "";
-let showRemarksInBody = l.Remarks ? true : false;
-
-// Inject remarks into the header title for Meetings
-if (l.LeaveType === 'Meeting' && l.Remarks) {
-    displayType = l.LeaveType + ": " + l.Remarks;
-    showRemarksInBody = false; // Hide from body to prevent redundancy
-}
-
 let titleRaw = window.appAgendaTemplate || '{EventType} - {Name} ({Department})';
 if (isMyCalendar) titleRaw = '{EventType}'; 
 
 let titleStr = titleRaw
-   .replace(/{EventType}/g, displayType)
+   .replace(/{EventType}/g, l.LeaveType || "")
    .replace(/{Name}/g, l.Name || "")
    .replace(/{Department}/g, l.Department || "")
    .replace(/{Attendees}/g, attendeesDisplay || "")
    .replace(/{Location}/g, locStr || l.Country || "")
-   .replace(/{Time}/g, timeStr || "")
-   .replace(/{Remarks}/g, l.Remarks || "");
+   .replace(/{Time}/g, timeStr || "");
 
 titleStr = titleStr.replace(/,\s*(?=[,\)]|$)/g, "").replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
 if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
@@ -503,7 +492,7 @@ if (isCompactInfoAll) {
       <p class="text-[11px] text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
       ${finalLocation ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
       ${attendeesDisplay ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
-      ${showRemarksInBody ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
+      ${l.Remarks ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
     </div>`;
 }
 
@@ -518,7 +507,7 @@ return `<div class="border border-gray-300 dark:border-darkborder p-3 md:p-4 rou
   ${!isEvent && finalCountry ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${finalCountry} ${l.State ? `(${l.State})` : ''}</p>` : ''}
   ${isMyCalendar && !isEvent && l.CoveringPerson && l.CoveringPerson !== 'N/A' ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Covering:</span> ${l.CoveringPerson}</p>` : ''}
   ${attendeesDisplay ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
-  ${showRemarksInBody ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
+  ${l.Remarks ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
   ${actionBtns}
 </div>`;
 }).join('');
