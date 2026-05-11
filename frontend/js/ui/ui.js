@@ -6,8 +6,8 @@ function toggleMenu() {
 const menu = document.getElementById('slide-menu');
 const panel = document.getElementById('slide-menu-panel');
 if (menu.classList.contains('hidden-view')) {
- menu.classList.remove('hidden-view');
- setTimeout(() => { panel.classList.remove('-translate-x-full'); }, 10);
+menu.classList.remove('hidden-view');
+setTimeout(() => { panel.classList.remove('-translate-x-full'); }, 10);
 } else closeMenu();
 }
 
@@ -25,29 +25,29 @@ const btnLeave = document.getElementById('unified-btn-leave');
 const btnEvent = document.getElementById('unified-btn-event');
 
 if(menuContainer) {
- orderArr.forEach(id => {
-   const btn = document.getElementById(`menu-${id}`);
-   if (btn) {
-     if (appMode === 'combined' &&['submit-leave', 'submit-event'].includes(id)) {
-       btn.classList.add('hidden');
-     } else if (appMode === 'separated' && id === 'submit-combined') {
-       btn.classList.add('hidden');
-     } else {
-       btn.classList.remove('hidden');
-       menuContainer.appendChild(btn);
-     }
-   }
- });
+orderArr.forEach(id => {
+  const btn = document.getElementById(`menu-${id}`);
+  if (btn) {
+    if (appMode === 'combined' && ['submit-leave', 'submit-event', 'my-leaves'].includes(id)) {
+      btn.classList.add('hidden');
+    } else if (appMode === 'separated' && id === 'submit-combined') {
+      btn.classList.add('hidden');
+    } else {
+      btn.classList.remove('hidden');
+      menuContainer.appendChild(btn);
+    }
+  }
+});
 }
 
 if (appMode === 'combined') {
- if(btnCombined) btnCombined.classList.remove('hidden');
- if(btnLeave) btnLeave.classList.add('hidden');
- if(btnEvent) btnEvent.classList.add('hidden');
+if(btnCombined) btnCombined.classList.remove('hidden');
+if(btnLeave) btnLeave.classList.add('hidden');
+if(btnEvent) btnEvent.classList.add('hidden');
 } else {
- if(btnCombined) btnCombined.classList.add('hidden');
- if(btnLeave) btnLeave.classList.remove('hidden');
- if(btnEvent) btnEvent.classList.remove('hidden');
+if(btnCombined) btnCombined.classList.add('hidden');
+if(btnLeave) btnLeave.classList.remove('hidden');
+if(btnEvent) btnEvent.classList.remove('hidden');
 }
 }
 
@@ -59,7 +59,7 @@ const view = document.getElementById(`view-${tabId}`);
 if (view) { view.classList.remove('hidden-view'); view.classList.add('flex'); }
 
 document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
- btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
+btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
 });
 
 const activeMenu = document.getElementById(`menu-${tabId}`);
@@ -67,26 +67,26 @@ if (activeMenu && activeMenu.tagName === 'BUTTON') activeMenu.classList.add('bg-
 
 const titleEl = document.getElementById('active-tab-title');
 if (titleEl) {
- if (currentEditId && tabId.startsWith('submit-')) titleEl.innerText = "Update Record";
- else titleEl.innerText = TAB_NAMES[tabId] || '';
+if (currentEditId && tabId.startsWith('submit-')) titleEl.innerText = "Update Record";
+else titleEl.innerText = TAB_NAMES[tabId] || '';
 }
 
 const deptNav = document.getElementById('dash-dept-nav');
 const controlsWrapper = document.getElementById('dash-controls-wrapper');
 
 if (controlsWrapper) {
- if (tabId === 'dashboard' || tabId === 'my-leaves') {
-     if (tabId === 'dashboard') {
-         if (deptNav) deptNav.classList.remove('hidden');
-     } else {
-         if (deptNav) deptNav.classList.add('hidden');
-     }
-     controlsWrapper.classList.remove('hidden');
-     controlsWrapper.classList.add('flex');
- } else {
-     controlsWrapper.classList.add('hidden');
-     controlsWrapper.classList.remove('flex');
- }
+if (tabId === 'dashboard' || tabId === 'my-leaves') {
+    if (tabId === 'dashboard') {
+        if (deptNav) deptNav.classList.remove('hidden');
+    } else {
+        if (deptNav) deptNav.classList.add('hidden');
+    }
+    controlsWrapper.classList.remove('hidden');
+    controlsWrapper.classList.add('flex');
+} else {
+    controlsWrapper.classList.add('hidden');
+    controlsWrapper.classList.remove('flex');
+}
 }
 
 if (tabId === 'parade-state' && typeof renderParadeState === 'function') renderParadeState();
@@ -106,9 +106,9 @@ const el = document.getElementById(id);
 const isPassword = el.type === 'password';
 el.type = isPassword ? 'text' : 'password';
 if (btnElement) {
- btnElement.innerHTML = isPassword 
-   ? `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
-   : `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
+btnElement.innerHTML = isPassword 
+  ? `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>`
+  : `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
 }
 }
 
@@ -173,12 +173,12 @@ setTimeout(() => { updateApp(); }, 300);
 
 async function updateApp() {
 if ('serviceWorker' in navigator) {
- try { 
-   const regs = await navigator.serviceWorker.getRegistrations(); 
-   for (let reg of regs) await reg.unregister(); 
-   const names = await caches.keys(); 
-   for (let name of names) await caches.delete(name); 
- } catch(err) {}
+try { 
+  const regs = await navigator.serviceWorker.getRegistrations(); 
+  for (let reg of regs) await reg.unregister(); 
+  const names = await caches.keys(); 
+  for (let name of names) await caches.delete(name); 
+} catch(err) {}
 }
 window.location.href = window.location.pathname + '?v=' + new Date().getTime();
 }

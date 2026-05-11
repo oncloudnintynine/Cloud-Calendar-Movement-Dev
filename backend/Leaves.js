@@ -27,7 +27,7 @@ row[headers.indexOf('LeaveType')] = data.leaveType;
 row[headers.indexOf('StartDate')] = data.startDate;
 row[headers.indexOf('EndDate')] = data.endDate;
 row[headers.indexOf('HalfDay')] = data.halfDay;
-row[headers.indexOf('CoveringPerson')] = data.coveringPerson;
+row[headers.indexOf('CoveringPerson')] = ''; // Deprecated
 row[headers.indexOf('Country')] = data.country || '';
 row[headers.indexOf('State')] = data.state || '';
 row[headers.indexOf('Remarks')] = data.remarks || '';
@@ -90,7 +90,7 @@ if (rows[i][headers.indexOf('ID')] === data.id) {
   newRow[headers.indexOf('StartDate')] = data.startDate;
   newRow[headers.indexOf('EndDate')] = data.endDate;
   newRow[headers.indexOf('HalfDay')] = data.halfDay;
-  newRow[headers.indexOf('CoveringPerson')] = data.coveringPerson;
+  newRow[headers.indexOf('CoveringPerson')] = ''; // Deprecated
   newRow[headers.indexOf('Country')] = data.country || '';
   newRow[headers.indexOf('State')] = data.state || '';
   newRow[headers.indexOf('Remarks')] = data.remarks || '';
