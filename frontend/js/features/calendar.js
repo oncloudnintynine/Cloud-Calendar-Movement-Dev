@@ -252,8 +252,6 @@ if (l.HalfDay === 'DAILY') return true;
 if (l.HalfDay === 'WEEKDAY') return targetDate.getDay() !== 0 && targetDate.getDay() !== 6;
 
 const diffTime = targetDate.getTime() - s.getTime();
-// FIX: Changed from Math.floor to Math.round to prevent Daylight Savings / Timezone drift bugs 
-// causing recurring weekly events to skip weeks
 const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
 if (l.HalfDay === 'WEEKLY') return diffDays % 7 === 0;
@@ -631,7 +629,36 @@ filtered = filtered.filter(l => {
   return false;
 });
 } else if (d) {
-filtered = filtered.filter(l => String(l.Department||'').includes(d));
+filtered = filtered.filter(l => {
+  if (String(l.Department||'').includes(d)) return true;
+  
+  // Robustly check Attendees JSON to restore visibility if getLeaves overwrote the Department column
+  if (l.Attendees) {
+    try {
+      const att = JSON.parse(l.Attendees);
+      return att.some(a => {
+        if (a.dept && String(a.dept).includes(d)) return true;
+        if (a.type === 'group' && a.dept === 'Custom') {
+           const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+           if (customG) {
+               return customG.members.some(phone => {
+                   const contact = companyContacts.find(c => String(c.phone) === String(phone));
+                   return contact && contact.dept && String(contact.dept).includes(d);
+               });
+           }
+        }
+        return false;
+      });
+    } catch(e) {
+       const phones = String(l.Attendees).split(',');
+       return phones.some(phone => {
+           const contact = companyContacts.find(c => String(c.phone) === String(phone.trim()));
+           return contact && contact.dept && String(contact.dept).includes(d);
+       });
+    }
+  }
+  return false;
+});
 }
 
 if (q) {
