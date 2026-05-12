@@ -389,7 +389,13 @@ for (let w = new Date(startDate); w <= endDate; w.setDate(w.getDate() + 7)) {
 
       const safeType = (seg.l.LeaveType || "").trim();
       const displayType = safeType === 'Meeting' && seg.l.Remarks ? `${safeType}: ${seg.l.Remarks.trim()}` : safeType;
-      const title = seg.isLeave ? `${seg.l.Name.split(' ')[0]} : ${displayType}` : displayType;
+      
+      let dispName = applyAcronymsFront(seg.l.Name || "");
+      if (dispName === (seg.l.Name || "")) {
+          dispName = dispName.split(' ')[0];
+      }
+      
+      const title = seg.isLeave ? `${dispName} : ${displayType}` : displayType;
       const appliedTitle = applyAcronymsFront(title);
       
       const left = (seg.sDay / 7) * 100;
@@ -461,7 +467,10 @@ let attendeesDisplay = '';
 if (l.Attendees) {
   try {
     const attArr = JSON.parse(l.Attendees);
-    if (attArr && attArr.length > 0) attendeesDisplay = attArr.map(a => a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name).join(', ');
+    if (attArr && attArr.length > 0) {
+        attendeesDisplay = attArr.map(a => a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name).join(', ');
+        attendeesDisplay = applyAcronymsFront(attendeesDisplay);
+    }
   } catch(e) {}
 }
 
