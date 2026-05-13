@@ -463,8 +463,14 @@ timeStr = `${formatDisplayDate(new Date(l.StartDate))} to ${formatDisplayDate(ne
 }
 
 let actionBtns = '';
+let compactActionBtns = '';
 if ((String(l.Phone) === String(user.phone) || user.role === 'admin') && l.Status !== 'Cancelled') {
-actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t border-gray-200 dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
+ actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t border-gray-200 dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
+ 
+ compactActionBtns = `<div class="flex space-x-2 mt-2 pt-2 border-t border-blue-200 dark:border-blue-800/50">
+   <button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-200/50 dark:bg-blue-800/40 hover:bg-blue-300/50 dark:hover:bg-blue-800/60 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700 px-3 py-1 rounded-md transition text-xs">Edit</button>
+   <button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="font-bold bg-red-100/80 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 px-3 py-1 rounded-md transition text-xs">Cancel</button>
+ </div>`;
 }
 
 let attendeesDisplay = '';
@@ -541,6 +547,7 @@ if (isCompactInfoAll) {
     ${finalLocation ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
     ${finalAttendees ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${finalAttendees}</p>` : ''}
     ${showRemarksInBody ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
+    ${compactActionBtns}
   </div>`;
 }
 
