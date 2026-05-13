@@ -7,11 +7,11 @@ isInfoAll = forceState !== undefined ? forceState : !isInfoAll;['form-event-info
    const btn = document.getElementById(id);
    if(!btn) return;
    if(isInfoAll) {
-       btn.classList.add('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border-blue-400', 'dark:border-blue-600');
-       btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-500');
+       btn.className = 'shrink-0 border-2 border-red-500 bg-red-500 text-white rounded-lg px-3 py-2 font-bold text-xs shadow-md transition whitespace-nowrap';
+       btn.innerHTML = '📢 Info All: ON';
    } else {
-       btn.classList.remove('bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-700', 'dark:text-blue-300', 'border-blue-400', 'dark:border-blue-600');
-       btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-500');
+       btn.className = 'shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 font-bold text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-gray-100 dark:hover:bg-darkhover transition whitespace-nowrap';
+       btn.innerHTML = '📌 Info All: OFF';
    }
 });
 }

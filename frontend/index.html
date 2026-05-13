@@ -160,9 +160,9 @@ tailwind.config = {
       </div>
 
       <div class="flex-grow flex flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border border-gray-200 dark:border-darkborder p-3 min-h-0 h-full relative">
-        <div id="dash-infoall-container" class="hidden-view shrink-0 mb-2 pb-2 border-b-2 border-dashed border-gray-200 dark:border-darkborder">
-          <h4 class="font-bold text-xs text-blue-600 dark:text-blue-400 mb-1 uppercase tracking-wide">📌 Info All Events</h4>
-          <div id="dash-infoall-list" class="max-h-32 overflow-y-auto space-y-1 pr-1"></div>
+        <div id="dash-infoall-container" class="hidden-view shrink-0 mb-3 pb-3 border-b-2 border-dashed border-red-200 dark:border-red-900/30 w-full overflow-hidden">
+          <h4 class="font-bold text-xs text-red-600 dark:text-red-400 mb-2 uppercase tracking-wide flex items-center"><span class="mr-1 text-base">📢</span> Key Highlights This Month</h4>
+          <div id="dash-infoall-list" class="flex overflow-x-auto gap-3 pb-1 scrollbar-hide snap-x"></div>
         </div>
         <div id="dash-agenda" class="flex-1 overflow-y-auto space-y-3 pr-1 pb-10 scrollbar-hide"></div>
       </div>
@@ -238,7 +238,7 @@ tailwind.config = {
             <label class="block font-semibold mb-1 text-sm">Event Type</label>
             <select id="form-combined-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition cursor-pointer font-bold text-blue-700 dark:text-blue-400" onchange="toggleCombinedFields()" required></select>
           </div>
-          <button type="button" id="form-combined-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 font-bold text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-darkhover transition">Info All</button>
+          <button type="button" id="form-combined-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#1a1a1a] text-gray-500 dark:text-gray-400 rounded-lg px-3 py-2 font-bold text-xs hover:bg-gray-100 dark:hover:bg-darkhover transition whitespace-nowrap">📌 Info All: OFF</button>
         </div>
 
         <div>
@@ -430,7 +430,7 @@ tailwind.config = {
             <label class="block font-semibold mb-1 text-sm">Event Type</label>
             <select id="form-event-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition cursor-pointer" required></select>
           </div>
-          <button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 font-bold text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-darkhover transition">Info All</button>
+          <button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#1a1a1a] text-gray-500 dark:text-gray-400 rounded-lg px-3 py-2 font-bold text-xs hover:bg-gray-100 dark:hover:bg-darkhover transition whitespace-nowrap">📌 Info All: OFF</button>
         </div>
 
         <div>
@@ -626,24 +626,6 @@ tailwind.config = {
           <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
         </div>
         <div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
-      </div>
-
-      <div data-section="code-backup" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="font-bold text-base text-indigo-600 dark:text-indigo-400">Code Backup</h3>
-          <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-        </div>
-        <div class="space-y-3">
-          <div>
-            <label class="block font-semibold mb-1 text-xs">GitHub Repo <span class="text-gray-500">(owner/repo)</span></label>
-            <input type="text" id="set-github-repo" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition" placeholder="e.g. oncloudnintynine/Cloud-Calendar-Movement-Dev">
-          </div>
-          <div>
-            <label class="block font-semibold mb-1 text-xs">Backup Drive Folder ID</label>
-            <input type="text" id="set-backup-folder" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition" placeholder="Paste Folder ID or URL here">
-          </div>
-          <button onclick="triggerCodeBackup()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm">One-Click Backup</button>
-        </div>
       </div>
 
     </div>
@@ -869,17 +851,17 @@ tailwind.config = {
 
 </main>
 
-<script src="js/core/config.js?v=51"></script>
-<script src="js/core/state.js?v=51"></script>
-<script src="js/core/api.js?v=51"></script>
-<script src="js/core/auth.js?v=51"></script>
-<script src="js/ui/ui.js?v=51"></script>
-<script src="js/features/calendar.js?v=51"></script>
-<script src="js/features/parade.js?v=51"></script>
-<script src="js/ui/forms.js?v=51"></script>
-<script src="js/ui/picker.js?v=51"></script>
-<script src="js/admin/admin.js?v=51"></script>
-<script src="js/admin/structure.js?v=51"></script> 
-<script src="js/core/app.js?v=51"></script>
+<script src="js/core/config.js?v=52"></script>
+<script src="js/core/state.js?v=52"></script>
+<script src="js/core/api.js?v=52"></script>
+<script src="js/core/auth.js?v=52"></script>
+<script src="js/ui/ui.js?v=52"></script>
+<script src="js/features/calendar.js?v=52"></script>
+<script src="js/features/parade.js?v=52"></script>
+<script src="js/ui/forms.js?v=52"></script>
+<script src="js/ui/picker.js?v=52"></script>
+<script src="js/admin/admin.js?v=52"></script>
+<script src="js/admin/structure.js?v=52"></script> 
+<script src="js/core/app.js?v=52"></script>
 </body>
 </html>
