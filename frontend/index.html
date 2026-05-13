@@ -246,14 +246,14 @@ tailwind.config = {
           <textarea id="form-combined-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
         </div>
         
+        <div id="combined-attendees-wrapper" class="relative hidden-view">
+          <label class="block font-semibold mb-1 text-sm text-blue-700 dark:text-blue-400">Attendees <span class="text-[10px] font-normal text-blue-500 dark:text-blue-500">(Optional)</span></label>
+          <div id="combined-attendees-chip-container" class="flex flex-wrap gap-1.5 mb-1.5 empty:hidden"></div>
+          <input type="text" id="form-combined-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-lg py-2 px-3 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800/50 transition text-sm font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('combined')">
+          <div id="combined-attendees-results" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-blue-400 dark:border-blue-600 rounded-lg shadow-2xl hidden-view max-h-40 overflow-y-auto mt-1"></div>
+        </div>
+        
         <div id="combined-event-fields" class="space-y-4 hidden-view">
-          <div class="relative">
-            <label class="block font-semibold mb-1 text-sm text-blue-700 dark:text-blue-400">Attendees <span class="text-[10px] font-normal text-blue-500 dark:text-blue-500">(Optional)</span></label>
-            <div id="combined-attendees-chip-container" class="flex flex-wrap gap-1.5 mb-1.5 empty:hidden"></div>
-            <input type="text" id="form-combined-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-lg py-2 px-3 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800/50 transition text-sm font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('combined')">
-            <div id="combined-attendees-results" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-blue-400 dark:border-blue-600 rounded-lg shadow-2xl hidden-view max-h-40 overflow-y-auto mt-1"></div>
-          </div>
-          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="block font-semibold mb-1 text-sm">Location</label>
@@ -302,12 +302,12 @@ tailwind.config = {
         </div>
 
         <div id="combined-leave-fields" class="space-y-4 hidden-view">
-          <div class="flex space-x-2">
+          <div class="flex space-x-2 w-full" id="combined-leave-time-start">
             <div class="flex-grow">
               <label class="block font-semibold mb-1 text-sm">Start Date</label>
               <button type="button" id="btn-combined-leave-start" onclick="openPicker('date', 'combined', 'start')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date</button>
             </div>
-            <div class="w-24 shrink-0">
+            <div class="w-24 shrink-0" id="combined-leave-ampm-start">
               <label class="block font-semibold mb-1 text-center text-sm">Time</label>
               <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('start', 'combined')">
                 <div id="start-combined-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform"></div>
@@ -317,12 +317,12 @@ tailwind.config = {
             </div>
           </div>
           
-          <div class="flex space-x-2">
+          <div class="flex space-x-2 w-full" id="combined-leave-time-end">
             <div class="flex-grow">
               <label class="block font-semibold mb-1 text-sm">End Date</label>
               <button type="button" id="btn-combined-leave-end" onclick="openPicker('date', 'combined', 'end')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date</button>
             </div>
-            <div class="w-24 shrink-0">
+            <div class="w-24 shrink-0" id="combined-leave-ampm-end">
               <label class="block font-semibold mb-1 text-center text-sm">Time</label>
               <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('end', 'combined')">
                 <div id="end-combined-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform translate-x-full"></div>
@@ -365,13 +365,20 @@ tailwind.config = {
           <label class="block font-semibold mb-1 text-sm">Remarks</label>
           <textarea id="form-leave-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
         </div>
+        
+        <div id="leave-attendees-wrapper" class="relative hidden-view">
+          <label class="block font-semibold mb-1 text-sm text-blue-700 dark:text-blue-400">Attendees <span class="text-[10px] font-normal text-blue-500 dark:text-blue-500">(Optional)</span></label>
+          <div id="leave-attendees-chip-container" class="flex flex-wrap gap-1.5 mb-1.5 empty:hidden"></div>
+          <input type="text" id="form-leave-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-lg py-2 px-3 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800/50 transition text-sm font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('leave')">
+          <div id="leave-attendees-results" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-blue-400 dark:border-blue-600 rounded-lg shadow-2xl hidden-view max-h-40 overflow-y-auto mt-1"></div>
+        </div>
 
-        <div class="flex space-x-2">
+        <div class="flex space-x-2" id="leave-time-start">
           <div class="flex-grow">
             <label class="block font-semibold mb-1 text-sm">Start Date</label>
             <button type="button" id="btn-leave-start" onclick="openPicker('date', 'leave', 'start')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date</button>
           </div>
-          <div class="w-24 shrink-0">
+          <div class="w-24 shrink-0" id="leave-ampm-start">
             <label class="block font-semibold mb-1 text-center text-sm">Time</label>
             <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('start', 'leave')">
               <div id="start-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform"></div>
@@ -380,12 +387,12 @@ tailwind.config = {
             </div>
           </div>
         </div>
-        <div class="flex space-x-2">
+        <div class="flex space-x-2" id="leave-time-end">
           <div class="flex-grow">
             <label class="block font-semibold mb-1 text-sm">End Date</label>
             <button type="button" id="btn-leave-end" onclick="openPicker('date', 'leave', 'end')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date</button>
           </div>
-          <div class="w-24 shrink-0">
+          <div class="w-24 shrink-0" id="leave-ampm-end">
             <label class="block font-semibold mb-1 text-center text-sm">Time</label>
             <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('end', 'leave')">
               <div id="end-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform translate-x-full"></div>
@@ -431,7 +438,7 @@ tailwind.config = {
           <textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
         </div>
         
-        <div class="relative">
+        <div id="event-attendees-wrapper" class="relative">
           <label class="block font-semibold mb-1 text-sm text-blue-700 dark:text-blue-400">Attendees <span class="text-[10px] font-normal text-blue-500 dark:text-blue-500">(Optional)</span></label>
           <div id="event-attendees-chip-container" class="flex flex-wrap gap-1.5 mb-1.5 empty:hidden"></div>
           <input type="text" id="form-event-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-lg py-2 px-3 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800/50 transition text-sm font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('event')">
@@ -594,8 +601,11 @@ tailwind.config = {
           <h3 class="font-bold text-base text-blue-600 dark:text-blue-400">Admin Password</h3>
           <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
         </div>
-        <div>
-          <input type="password" id="set-admin-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm" placeholder="Leave blank to keep current">
+        <div class="relative">
+          <input type="password" id="set-admin-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 pr-10 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm" placeholder="Leave blank to keep current">
+          <button onclick="togglePassword('set-admin-pass', this)" class="absolute right-2 top-2 text-gray-500 dark:text-darkmuted p-1">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+          </button>
         </div>
       </div>
 
@@ -616,6 +626,24 @@ tailwind.config = {
           <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
         </div>
         <div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+      </div>
+
+      <div data-section="code-backup" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-base text-indigo-600 dark:text-indigo-400">Code Backup</h3>
+          <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block font-semibold mb-1 text-xs">GitHub Repo <span class="text-gray-500">(owner/repo)</span></label>
+            <input type="text" id="set-github-repo" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition" placeholder="e.g. oncloudnintynine/Cloud-Calendar-Movement-Dev">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-xs">Backup Drive Folder ID</label>
+            <input type="text" id="set-backup-folder" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition" placeholder="Paste Folder ID or URL here">
+          </div>
+          <button onclick="triggerCodeBackup()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm">One-Click Backup</button>
+        </div>
       </div>
 
     </div>
@@ -780,8 +808,14 @@ tailwind.config = {
       
       <div class="flex-grow flex flex-col min-h-[40vh] border-b border-gray-200 dark:border-darkborder">
          <div class="sticky top-0 bg-gray-100 dark:bg-[#1a1a1a] p-2 border-b border-gray-200 dark:border-darkborder z-10 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-2">
-             <h3 class="font-bold text-sm md:text-base text-gray-800 dark:text-gray-200">Manage Units & Personnel</h3>
-             <div class="flex space-x-2">
+             <div class="flex items-center justify-between w-full md:w-auto">
+                 <h3 class="font-bold text-sm md:text-base text-gray-800 dark:text-gray-200 pr-2">Manage Units & Personnel</h3>
+                 <div class="flex items-center bg-gray-200 dark:bg-darkborder rounded p-0.5 shrink-0 ml-auto md:ml-2">
+                     <button id="btn-struct-personnel" onclick="toggleStructureView('personnel')" class="px-2 py-1 rounded font-bold text-xs bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Personnel</button>
+                     <button id="btn-struct-tree" onclick="toggleStructureView('tree')" class="px-2 py-1 rounded font-bold text-xs text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 transition">Tree</button>
+                 </div>
+             </div>
+             <div class="flex space-x-2 mt-2 md:mt-0">
                <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="w-full md:w-48 border-2 border-gray-300 dark:border-gray-500 rounded-lg p-1.5 text-xs bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase">
                <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 rounded-lg transition text-xs border border-transparent">Add</button>
              </div>
@@ -789,7 +823,7 @@ tailwind.config = {
          <div id="structure-builder-list" class="flex-grow overflow-y-auto p-2 space-y-2 bg-gray-50 dark:bg-darkinput pb-6"></div>
       </div>
       
-      <div class="h-[20%] flex flex-col min-h-[90px] shrink-0 bg-white dark:bg-darksurface">
+      <div id="unassigned-wrapper" class="h-[20%] flex flex-col min-h-[90px] shrink-0 bg-white dark:bg-darksurface">
          <div class="sticky top-0 bg-red-50 dark:bg-red-900/20 p-2 border-b border-red-200 dark:border-red-800 z-10 shadow-sm">
              <h3 class="font-bold text-sm text-red-600 dark:text-red-400">Unassigned Personnel</h3>
          </div>
@@ -834,17 +868,17 @@ tailwind.config = {
 
 </main>
 
-<script src="js/core/config.js?v=47"></script>
-<script src="js/core/state.js?v=47"></script>
-<script src="js/core/api.js?v=47"></script>
-<script src="js/core/auth.js?v=47"></script>
-<script src="js/ui/ui.js?v=47"></script>
-<script src="js/features/calendar.js?v=47"></script>
-<script src="js/features/parade.js?v=47"></script>
-<script src="js/ui/forms.js?v=47"></script>
-<script src="js/ui/picker.js?v=47"></script>
-<script src="js/admin/admin.js?v=47"></script>
-<script src="js/admin/structure.js?v=47"></script> 
-<script src="js/core/app.js?v=47"></script>
+<script src="js/core/config.js?v=48"></script>
+<script src="js/core/state.js?v=48"></script>
+<script src="js/core/api.js?v=48"></script>
+<script src="js/core/auth.js?v=48"></script>
+<script src="js/ui/ui.js?v=48"></script>
+<script src="js/features/calendar.js?v=48"></script>
+<script src="js/features/parade.js?v=48"></script>
+<script src="js/ui/forms.js?v=48"></script>
+<script src="js/ui/picker.js?v=48"></script>
+<script src="js/admin/admin.js?v=48"></script>
+<script src="js/admin/structure.js?v=48"></script> 
+<script src="js/core/app.js?v=48"></script>
 </body>
 </html>

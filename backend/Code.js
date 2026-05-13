@@ -110,7 +110,7 @@ var lock = LockService.getScriptLock();
 var payload = JSON.parse(e.postData.contents);
 var action = payload.action;
 
-var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings'].indexOf(action) !== -1;
+var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit'].indexOf(action) !== -1;
 if (needsLock) lock.waitLock(15000); 
 
 try {
@@ -118,7 +118,7 @@ var data = payload.data || {};
 var credentials = payload.credentials || {};
 var responseData = {};
 
-var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'backupCode', 'updateUser', 'deleteUser', 'updateUserUnits'];
+var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'backupCode', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit'];
 if (secureActions.indexOf(action) !== -1) {
   if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
   
@@ -145,6 +145,7 @@ else if (action === 'registerUser') responseData = registerUser(data);
 else if (action === 'updateUser') responseData = updateUser(data);
 else if (action === 'deleteUser') responseData = deleteUser(data);
 else if (action === 'updateUserUnits') responseData = updateUserUnits(data);
+else if (action === 'renameUnit') responseData = renameUnit(data);
 
 return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
 } catch (err) {

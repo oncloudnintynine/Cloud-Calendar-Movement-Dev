@@ -140,8 +140,6 @@ for(var i = 0; i < rows.length; i++) {
 var obj = {};
 headers.forEach(function(h, idx) { obj[h] = rows[i][idx]; });
 
-// Merging logic: Combine actual creator's unit with any attendee units
-// so that the auto-sync doesn't accidentally overwrite/delete attendee links.
 var currentActualDepts = phoneToDepts[obj.Phone] ? phoneToDepts[obj.Phone].split(',') :[];
 var attDepts =[];
 
@@ -231,13 +229,11 @@ if (userKAHData.length === 0) return false;
 
 var exceededDepts =[];
 
-// Parse requested dates once
 var reqStart = new Date(data.startDate);
 reqStart.setHours(0, 0, 0, 0);
 var reqEnd = new Date(data.endDate);
 reqEnd.setHours(23, 59, 59, 999);
 
-// Cache other KAH leaves to prevent string parsing in tight loops
 var otherKAHLeaves =[];
 for (var i = 1; i < rows.length; i++) {
    var rId = rows[i][headers.indexOf('ID')];
@@ -251,7 +247,6 @@ for (var i = 1; i < rows.length; i++) {
        var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
        rEnd.setHours(23, 59, 59, 999);
        
-       // Skip leaves that don't overlap the request range at all
        if (rStart > reqEnd || rEnd < reqStart) continue;
 
        otherKAHLeaves.push({
@@ -271,9 +266,8 @@ userKAHData.forEach(function(userKAH) {
    
    var maxConcurrentOut = 0;
 
-   // Day-by-Day Peak Concurrency Calculation
    for (var current = new Date(reqStart); current <= reqEnd; current.setDate(current.getDate() + 1)) {
-       var outToday =[String(data.phone)]; // Applicant is out today
+       var outToday =[String(data.phone)]; 
        
        otherKAHLeaves.forEach(function(l) {
            if (l.start <= current && l.end >= current) {

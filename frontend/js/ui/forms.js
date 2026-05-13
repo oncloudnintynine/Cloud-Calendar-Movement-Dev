@@ -51,10 +51,16 @@ const isEvent = typeObj ? typeObj.isEvent : true;
 const eventFields = document.getElementById('combined-event-fields');
 const leaveFields = document.getElementById('combined-leave-fields');
 const locationInput = document.getElementById('form-combined-location');
-const locDetailsInput = document.getElementById('form-combined-location-details');
 const btnInfoAll = document.getElementById('form-combined-infoall-btn');
 const remarksInput = document.getElementById('form-combined-remarks');
 const remarksLabel = document.getElementById('label-combined-remarks');
+const attWrap = document.getElementById('combined-attendees-wrapper');
+
+if (isEvent || val === 'Official Trip') {
+ attWrap.classList.remove('hidden-view');
+} else {
+ attWrap.classList.add('hidden-view');
+}
 
 if (isEvent) {
  eventFields.classList.remove('hidden-view');
@@ -88,6 +94,16 @@ if (isEvent) {
    overseas.classList.remove('hidden-view'); cInput.required = true; 
  } else { 
    overseas.classList.add('hidden-view'); cInput.required = false; 
+ }
+ 
+ const leaveTimeStart = document.getElementById('combined-leave-time-start');
+ const leaveTimeEnd = document.getElementById('combined-leave-time-end');
+ if (val === 'Official Trip') {
+     if(leaveTimeStart) leaveTimeStart.classList.add('hidden-view');
+     if(leaveTimeEnd) leaveTimeEnd.classList.add('hidden-view');
+ } else {
+     if(leaveTimeStart) leaveTimeStart.classList.remove('hidden-view');
+     if(leaveTimeEnd) leaveTimeEnd.classList.remove('hidden-view');
  }
 }
 }
@@ -153,7 +169,7 @@ inputEl.classList.add('ring-2', 'ring-blue-500');
 const results = fuseAttendees.search(q).slice(0, 6).map(r => r.item);
 if (results.length > 0) {
  resC.innerHTML = results.map(item => `
-   <div class="p-3 border-b border-gray-200 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}')">
+   <div class="p-3 border-b border-gray-200 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}')">
      <span class="font-semibold text-blue-800 dark:text-blue-300">${item.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${item.dept})</span>
    </div>
  `).join('');
@@ -163,9 +179,9 @@ if (results.length > 0) {
 }
 }
 
-function selectAttendee(ctx, id, name, dept, type) {
+function selectAttendee(ctx, id, name, dept, type, expandedNames) {
 if (!eventAttendees.some(a => a.id === id)) { 
- eventAttendees.push({ id, name, dept, type }); 
+ eventAttendees.push({ id, name, dept, type, expandedNames }); 
  renderAttendees(ctx); 
 }
 const inputEl = document.getElementById(`form-${ctx}-attendee-search`);
@@ -217,19 +233,7 @@ if (appMode === 'combined') {
    toggleOverseasFields('leave');
 }
 
-if (isEvent) {
- appData[ctx].isAllDay = l.IsAllDay === 'TRUE';
- appData[ctx].untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(l.EndDate);
- document.getElementById(`form-${ctx}-allday`).checked = appData[ctx].isAllDay;
- document.getElementById(`form-${ctx}-location`).value = l.Location || 'Office';
- 
- const locDetEl = document.getElementById(`form-${ctx}-location-details`);
- if (locDetEl) locDetEl.value = l.LocationDetails || '';
-
- document.getElementById(`form-${ctx}-repeat`).value = l.HalfDay || 'NONE'; 
- toggleInfoAll(l.InfoAll === 'TRUE');
- toggleRepeatUntil(ctx);
- 
+if (isEvent || l.LeaveType === 'Official Trip') {
  eventAttendees =[];
  if(l.Attendees) {
    try {
@@ -243,6 +247,20 @@ if (isEvent) {
    }
  }
  renderAttendees(ctx);
+}
+
+if (isEvent) {
+ appData[ctx].isAllDay = l.IsAllDay === 'TRUE';
+ appData[ctx].untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(l.EndDate);
+ document.getElementById(`form-${ctx}-allday`).checked = appData[ctx].isAllDay;
+ document.getElementById(`form-${ctx}-location`).value = l.Location || 'Office';
+ 
+ const locDetEl = document.getElementById(`form-${ctx}-location-details`);
+ if (locDetEl) locDetEl.value = l.LocationDetails || '';
+
+ document.getElementById(`form-${ctx}-repeat`).value = l.HalfDay || 'NONE'; 
+ toggleInfoAll(l.InfoAll === 'TRUE');
+ toggleRepeatUntil(ctx);
 } else {
  document.getElementById(`form-${ctx}-country`).value = l.Country || '';
  document.getElementById(`form-${ctx}-state`).value = l.State || '';
@@ -304,6 +322,7 @@ clearBehalf('combined');
 
 eventAttendees =[]; 
 renderAttendees('event');
+renderAttendees('leave');
 renderAttendees('combined');['leave', 'event', 'combined'].forEach(ctx => {
    const btn = document.getElementById(`submit-${ctx}-btn`);
    const cancelBtn = document.getElementById(`cancel-edit-${ctx}-btn`);
@@ -340,10 +359,24 @@ function toggleOverseasFields(ctx) {
 const type = document.getElementById(`form-${ctx}-type`).value;
 const el = document.getElementById(`${ctx}-overseas-fields`);
 const cInput = document.getElementById(`form-${ctx}-country`);
+const attWrap = document.getElementById(`${ctx}-attendees-wrapper`);
+const timeStart = document.getElementById(`${ctx}-time-start`);
+const timeEnd = document.getElementById(`${ctx}-time-end`);
+
 if (type === 'Overseas Leave' || type === 'Official Trip') { 
  el.classList.remove('hidden-view'); cInput.required = true; 
 } else { 
  el.classList.add('hidden-view'); cInput.required = false; cInput.value = ''; document.getElementById(`form-${ctx}-state`).value = ''; 
+}
+
+if (type === 'Official Trip') {
+ if(attWrap) attWrap.classList.remove('hidden-view');
+ if(timeStart) timeStart.classList.add('hidden-view');
+ if(timeEnd) timeEnd.classList.add('hidden-view');
+} else {
+ if(attWrap) attWrap.classList.add('hidden-view');
+ if(timeStart) timeStart.classList.remove('hidden-view');
+ if(timeEnd) timeEnd.classList.remove('hidden-view');
 }
 }
 
@@ -378,22 +411,32 @@ let finalAttendeesStr = '';
 let finalInfoAll = false;
 let eventIsAllDay = false;
 let eventUntilDate = '';
-let coveringPerson = '';
 let country = '';
 let state = '';
 
 if (!isEvent) {
- const isSameDay = appData[ctx].startD.toDateString() === appData[ctx].endD.toDateString();
- if (isSameDay) {
-   if (appData[ctx].startAMPM === 'AM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'AM';
-   else if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'PM') calculatedHalfDay = 'PM';
+ if (typeValue === 'Official Trip') {
+   calculatedHalfDay = 'None';
  } else {
-   if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'Start PM, End AM';
-   else if (appData[ctx].startAMPM === 'PM') calculatedHalfDay = 'Start PM';
-   else if (appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'End AM';
+   const isSameDay = appData[ctx].startD.toDateString() === appData[ctx].endD.toDateString();
+   if (isSameDay) {
+     if (appData[ctx].startAMPM === 'AM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'AM';
+     else if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'PM') calculatedHalfDay = 'PM';
+   } else {
+     if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'Start PM, End AM';
+     else if (appData[ctx].startAMPM === 'PM') calculatedHalfDay = 'Start PM';
+     else if (appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'End AM';
+   }
  }
  country = document.getElementById(`form-${ctx}-country`) ? document.getElementById(`form-${ctx}-country`).value : '';
  state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`form-${ctx}-state`).value : '';
+ 
+ if (typeValue === 'Official Trip') {
+    eventAttendees.forEach(a => { 
+        if (a.dept !== 'Custom') targetDepts.add(a.dept); 
+    });
+    finalAttendeesStr = JSON.stringify(eventAttendees);
+ }
 } else {
  calculatedHalfDay = document.getElementById(`form-${ctx}-repeat`).value; 
  loc = document.getElementById(`form-${ctx}-location`).value;
@@ -418,7 +461,7 @@ const payload = {
  id: currentEditId, name: targetName, phone: targetPhone, departments: Array.from(targetDepts),
  leaveType: typeValue,
  startDate: sDate, endDate: eDate, halfDay: calculatedHalfDay, 
- coveringPerson: coveringPerson,
+ coveringPerson: '',
  country: country,
  state: state,
  remarks: document.getElementById(`form-${ctx}-remarks`).value,

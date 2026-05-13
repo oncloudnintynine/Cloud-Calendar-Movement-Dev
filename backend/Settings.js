@@ -10,65 +10,65 @@ var allContacts =[];
 var phoneToDepts = {};
 
 cg.connections.forEach(function(person) {
-  var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.phoneNumbers[0].value.replace(/\D/g, '').slice(-8) : "";
-  if (phone && person.names && person.names.length > 0) {
-    var name = cleanName(person.names[0].displayName);
-    if (person.memberships) {
-      var depts =[];
-      person.memberships.forEach(function(m) {
-        if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-          var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
-          if (gName) depts.push(gName);
-        }
-      });
-      if (depts.length > 0) {
-        var deptsStr = depts.join(',');
-        phoneToDepts[phone] = deptsStr;
-        
-        var bdayStr = "";
-        if (person.birthdays && person.birthdays.length > 0 && person.birthdays[0].date) {
-          var d = person.birthdays[0].date;
-          if (d.year && d.month && d.day) {
-            bdayStr = d.year + "-" + ('0' + d.month).slice(-2) + "-" + ('0' + d.day).slice(-2);
-          }
-        }
-        
-        allContacts.push({ name: name, phone: phone, dept: deptsStr, resourceName: person.resourceName, birthday: bdayStr });
-      }
-    }
-  }
+ var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.phoneNumbers[0].value.replace(/\D/g, '').slice(-8) : "";
+ if (phone && person.names && person.names.length > 0) {
+   var name = cleanName(person.names[0].displayName);
+   if (person.memberships) {
+     var depts =[];
+     person.memberships.forEach(function(m) {
+       if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+         var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+         if (gName) depts.push(gName);
+       }
+     });
+     if (depts.length > 0) {
+       var deptsStr = depts.join(',');
+       phoneToDepts[phone] = deptsStr;
+       
+       var bdayStr = "";
+       if (person.birthdays && person.birthdays.length > 0 && person.birthdays[0].date) {
+         var d = person.birthdays[0].date;
+         if (d.year && d.month && d.day) {
+           bdayStr = d.year + "-" + ('0' + d.month).slice(-2) + "-" + ('0' + d.day).slice(-2);
+         }
+       }
+       
+       allContacts.push({ name: name, phone: phone, dept: deptsStr, resourceName: person.resourceName, birthday: bdayStr });
+     }
+   }
+ }
 });
 
 var rawKahList = JSON.parse(props.getProperty('kahList') || "[]");
 var syncedKahList = rawKahList.map(function(k) {
-  if (phoneToDepts[k.phone] && phoneToDepts[k.phone] !== k.dept) {
-    k.dept = phoneToDepts[k.phone];
-  }
-  return k;
+ if (phoneToDepts[k.phone] && phoneToDepts[k.phone] !== k.dept) {
+   k.dept = phoneToDepts[k.phone];
+ }
+ return k;
 });
 props.setProperty('kahList', JSON.stringify(syncedKahList));
 
 return {
-  kahLimit: props.getProperty('kahLimit'),
-  approvingAuthority: props.getProperty('approvingAuthority'),
-  kahList: syncedKahList,
-  kahEmailSubject: props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}",
-  kahEmailBody: props.getProperty('kahEmailBody') || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.",
-  
-  typicalEventTypes: JSON.parse(props.getProperty('typicalEventTypes') || "[]"),
-  gcalTemplate: props.getProperty('gcalTemplate') || '{EventType} - {Name}, {Attendees} {Time}',
-  agendaTemplate: props.getProperty('agendaTemplate') || '{EventType} - {Name} ({Department})',
-  acronyms: JSON.parse(props.getProperty('acronyms') || "{}"),
-  customKahGroups: JSON.parse(props.getProperty('customKahGroups') || "[]"),
-  
-  menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
-  adminSectionsOrder: JSON.parse(props.getProperty('adminSectionsOrder') || "null"),
-  githubRepo: props.getProperty('githubRepo') || '',
-  backupFolder: props.getProperty('backupFolder') || '',
-  userKeyword: props.getProperty('userKeyword') || 'peace',
-  appMode: props.getProperty('appMode') || 'combined',
-  companyStructure: JSON.parse(props.getProperty('companyStructure') || "{}"),
-  allContacts: allContacts
+ kahLimit: props.getProperty('kahLimit'),
+ approvingAuthority: props.getProperty('approvingAuthority'),
+ kahList: syncedKahList,
+ kahEmailSubject: props.getProperty('kahEmailSubject') || "Leave Requires Approval: KAH Limit Crossed for {Unit}",
+ kahEmailBody: props.getProperty('kahEmailBody') || "User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.",
+ 
+ typicalEventTypes: JSON.parse(props.getProperty('typicalEventTypes') || "[]"),
+ gcalTemplate: props.getProperty('gcalTemplate') || '{EventType} - {Name}, {Attendees} {Time}',
+ agendaTemplate: props.getProperty('agendaTemplate') || '{EventType} - {Name} ({Department})',
+ acronyms: JSON.parse(props.getProperty('acronyms') || "{}"),
+ customKahGroups: JSON.parse(props.getProperty('customKahGroups') || "[]"),
+ 
+ menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
+ adminSectionsOrder: JSON.parse(props.getProperty('adminSectionsOrder') || "null"),
+ githubRepo: props.getProperty('githubRepo') || '',
+ backupFolder: props.getProperty('backupFolder') || '',
+ userKeyword: props.getProperty('userKeyword') || 'peace',
+ appMode: props.getProperty('appMode') || 'combined',
+ companyStructure: JSON.parse(props.getProperty('companyStructure') || "{}"),
+ allContacts: allContacts
 };
 }
 
@@ -80,13 +80,13 @@ var triggerKahRecalc = false;
 
 if (data.newAdminPass) props.setProperty('adminPassword', data.newAdminPass);
 if (data.kahLimit !== undefined) {
-    props.setProperty('kahLimit', data.kahLimit.toString());
-    triggerKahRecalc = true;
+   props.setProperty('kahLimit', data.kahLimit.toString());
+   triggerKahRecalc = true;
 }
 if (data.approvingAuthority !== undefined) props.setProperty('approvingAuthority', data.approvingAuthority);
 if (data.kahList !== undefined) {
-    props.setProperty('kahList', JSON.stringify(data.kahList));
-    triggerKahRecalc = true;
+   props.setProperty('kahList', JSON.stringify(data.kahList));
+   triggerKahRecalc = true;
 }
 if (data.kahEmailSubject !== undefined) props.setProperty('kahEmailSubject', data.kahEmailSubject);
 if (data.kahEmailBody !== undefined) props.setProperty('kahEmailBody', data.kahEmailBody);
@@ -106,7 +106,7 @@ if (data.githubRepo !== undefined) props.setProperty('githubRepo', data.githubRe
 if (data.backupFolder !== undefined) props.setProperty('backupFolder', data.backupFolder);
 
 if (triggerKahRecalc && typeof recalculateAllKahStatuses === 'function') {
-    recalculateAllKahStatuses(props);
+   recalculateAllKahStatuses(props);
 }
 
 return { updated: true };
@@ -116,8 +116,8 @@ function deleteUser(data) {
 if (data._userRole !== 'admin') throw new Error("Unauthorized");
 if (!data.resourceName) throw new Error("Missing contact identifier.");
 try {
-  People.People.deleteContact(data.resourceName);
-  invalidateContactsCache();
+ People.People.deleteContact(data.resourceName);
+ invalidateContactsCache();
 } catch(e) { throw new Error("Failed to delete user: " + e.message); }
 return { success: true };
 }
@@ -127,48 +127,128 @@ if (data._userRole !== 'admin') throw new Error("Unauthorized");
 var cg = getContactsAndGroups();
 
 for (var resName in data.changes) {
-  var newUnit = data.changes[resName];
-  var targetGroupId = null;
-  
-  if (newUnit !== "UNASSIGNED") {
-    for (var grpRes in cg.groupMap) {
-      if (cg.groupMap[grpRes].toUpperCase() === newUnit.toUpperCase()) {
-        targetGroupId = grpRes; break;
-      }
-    }
-    if (!targetGroupId) {
-      var newGroup = People.ContactGroups.create({ contactGroup: { name: newUnit } });
-      targetGroupId = newGroup.resourceName;
-      cg.groupMap[targetGroupId] = newUnit;
-    }
-  }
+ var newUnit = data.changes[resName];
+ var targetGroupId = null;
+ 
+ if (newUnit !== "UNASSIGNED") {
+   for (var grpRes in cg.groupMap) {
+     if (cg.groupMap[grpRes].toUpperCase() === newUnit.toUpperCase()) {
+       targetGroupId = grpRes; break;
+     }
+   }
+   if (!targetGroupId) {
+     var newGroup = People.ContactGroups.create({ contactGroup: { name: newUnit } });
+     targetGroupId = newGroup.resourceName;
+     cg.groupMap[targetGroupId] = newUnit;
+   }
+ }
 
-  var contact = People.People.get(resName, { personFields: 'names,memberships' });
-  var currentGroupIds =[];
-  if (contact.memberships) {
-    contact.memberships.forEach(function(m) {
-      if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-        currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
-      }
-    });
-  }
+ var contact = People.People.get(resName, { personFields: 'names,memberships' });
+ var currentGroupIds =[];
+ if (contact.memberships) {
+   contact.memberships.forEach(function(m) {
+     if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+       currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
+     }
+   });
+ }
 
-  var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId && cg.groupMap[id]; });
-  var toAdd = targetGroupId && currentGroupIds.indexOf(targetGroupId) === -1 ?[resName] :[];
+ var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId && cg.groupMap[id]; });
+ var toAdd = targetGroupId && currentGroupIds.indexOf(targetGroupId) === -1 ?[resName] :[];
 
-  if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
-  if (toRemove.length > 0) {
-    toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove:[resName] }, gId); });
-  }
-  
-  if (contact.names && contact.names.length > 0) {
-     var nameObj = contact.names[0];
-     var cleanName = (nameObj.displayName || nameObj.givenName || "").replace(/\s*\(.*?\)\s*/g, '').trim();
-     nameObj.givenName = newUnit !== "UNASSIGNED" ? cleanName + " (Cloud Group : " + newUnit + ")" : cleanName;
-     contact.names =[nameObj];
-     try { People.People.updateContact(contact, resName, { updatePersonFields: 'names' }); } catch(e) {}
-  }
+ if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
+ if (toRemove.length > 0) {
+   toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove:[resName] }, gId); });
+ }
+ 
+ if (contact.names && contact.names.length > 0) {
+    var nameObj = contact.names[0];
+    var cleanName = (nameObj.displayName || nameObj.givenName || "").replace(/\s*\(.*?\)\s*/g, '').trim();
+    nameObj.givenName = newUnit !== "UNASSIGNED" ? cleanName + " (Cloud Group : " + newUnit + ")" : cleanName;
+    contact.names =[nameObj];
+    try { People.People.updateContact(contact, resName, { updatePersonFields: 'names' }); } catch(e) {}
+ }
 }
 invalidateContactsCache();
 return { success: true };
+}
+
+function renameUnit(data) {
+  if (data._userRole !== 'admin') throw new Error("Unauthorized");
+  var oldName = data.oldName;
+  var newName = data.newName;
+  if (!oldName || !newName || oldName === newName) return { success: true };
+
+  var props = PropertiesService.getScriptProperties();
+  
+  // 1. Update companyStructure
+  var structArr = JSON.parse(props.getProperty('companyStructure') || "[]");
+  if (!Array.isArray(structArr)) structArr = Object.keys(structArr);
+  var newStructArr = structArr.map(function(path) {
+      if (path === oldName) return newName;
+      if (path.startsWith(oldName + '-')) return newName + path.substring(oldName.length);
+      return path;
+  });
+  props.setProperty('companyStructure', JSON.stringify(newStructArr));
+
+  // 2. Update Google Contacts Group and Member GivenNames
+  var cg = getContactsAndGroups();
+  var groupId = null;
+  for (var grpRes in cg.groupMap) {
+      if (cg.groupMap[grpRes].toUpperCase() === oldName.toUpperCase()) {
+          groupId = grpRes; 
+          break;
+      }
+  }
+  if (groupId) {
+      try { People.ContactGroups.update({ contactGroup: { name: newName } }, groupId); } catch(e) {}
+      cg.connections.forEach(function(contact) {
+          var inGroup = false;
+          if (contact.memberships) {
+              contact.memberships.forEach(function(m) {
+                  if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName === groupId) inGroup = true;
+              });
+          }
+          if (inGroup && contact.names && contact.names.length > 0) {
+              var nameObj = contact.names[0];
+              var clean = (nameObj.displayName || nameObj.givenName || "").replace(/\s*\(.*?\)\s*/g, '').trim();
+              nameObj.givenName = clean + " (Cloud Group : " + newName + ")";
+              try { People.People.updateContact(contact, contact.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
+          }
+      });
+  }
+
+  // 3. Update Calendar Name
+  var cals = CalendarApp.getCalendarsByName(oldName);
+  if (cals.length > 0) {
+      try { cals[0].setName(newName); } catch(e) {}
+  }
+
+  // 4. Update Database Sheet (Department column)
+  var sheetId = props.getProperty('dbSheetId');
+  if (sheetId) {
+      var sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+      var dataRange = sheet.getDataRange();
+      var values = dataRange.getValues();
+      var headers = values[0];
+      var deptIdx = headers.indexOf('Department');
+      if (deptIdx !== -1) {
+          for (var i = 1; i < values.length; i++) {
+              var depts = (values[i][deptIdx] || "").split(',');
+              var changed = false;
+              for (var d = 0; d < depts.length; d++) {
+                  if (depts[d].trim().toUpperCase() === oldName.toUpperCase()) {
+                      depts[d] = newName; 
+                      changed = true;
+                  }
+              }
+              if (changed) {
+                  sheet.getRange(i + 1, deptIdx + 1).setValue(depts.join(','));
+              }
+          }
+      }
+  }
+  
+  invalidateContactsCache();
+  return { success: true };
 }

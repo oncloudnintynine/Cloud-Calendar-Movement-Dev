@@ -33,6 +33,10 @@ document.addEventListener('click', function(e) {
    const resCA = document.getElementById('combined-attendees-results');
    if(resCA) resCA.classList.add('hidden-view');
  }
+ if(!e.target.closest('#form-leave-attendee-search') && !e.target.closest('#leave-attendees-results')) {
+   const resLA = document.getElementById('leave-attendees-results');
+   if(resLA) resLA.classList.add('hidden-view');
+ }
  if(!e.target.closest('#kah-search') && !e.target.closest('#kah-results')) {
    const resK = document.getElementById('kah-results');
    if(resK) resK.classList.add('hidden-view');
@@ -141,16 +145,21 @@ try {
    
    let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
    uniqueDepts.forEach(dept => {
-     attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group' });
+     attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group', expandedNames: `All in ${dept}` });
    });
 
    window.appCustomKahGroups.forEach(g => {
-     attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group' });
+     const customNames = g.members.map(phone => {
+         const c = companyContacts.find(contact => String(contact.phone) === String(phone));
+         return c ? c.name : phone;
+     }).join(', ');
+     attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
    });
 
    const kahUnits =[...new Set(window.appKahList.map(k => k.dept))];
    kahUnits.forEach(dept => {
-     attendeeOptions.push({ id: `kah_unit_${dept}`, name: `zz KAH: ${dept}`, dept: dept, type: 'group' });
+     const unitNames = window.appKahList.filter(k => k.dept === dept).map(k => k.name).join(', ');
+     attendeeOptions.push({ id: `kah_unit_${dept}`, name: `zz KAH: ${dept}`, dept: dept, type: 'group', expandedNames: unitNames });
    });
    
    fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });

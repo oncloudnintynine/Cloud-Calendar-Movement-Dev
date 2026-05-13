@@ -16,7 +16,9 @@ if (data.attendees) {
  try {
    var att = JSON.parse(data.attendees);
    if (att && att.length > 0) {
-     attendeesStr = att.map(function(a) { return a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name; }).join(', ');
+     attendeesStr = att.map(function(a) { 
+       return a.expandedNames ? a.expandedNames : (a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name); 
+     }).join(', ');
    }
  } catch(e) {}
 }
@@ -24,7 +26,6 @@ if (data.attendees) {
 var timeStr = "";
 if (!isEvent && data.halfDay !== 'None' && data.halfDay !== 'NONE') timeStr = "(" + data.halfDay + ")";
 
-// Inject Meeting Details directly into the EventType variable so it applies to the Title Template seamlessly
 var safeType = (data.leaveType || "").trim();
 var displayType = safeType;
 if (safeType === 'Meeting' && data.remarks) {
