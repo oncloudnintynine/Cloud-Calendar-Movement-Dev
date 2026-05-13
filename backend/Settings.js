@@ -163,9 +163,9 @@ for (var resName in data.changes) {
  
  if (contact.names && contact.names.length > 0) {
     var nameObj = contact.names[0];
-    var cleanName = (nameObj.displayName || nameObj.givenName || "").replace(/\s*\(.*?\)\s*/g, '').trim();
-    nameObj.givenName = newUnit !== "UNASSIGNED" ? cleanName + " (Cloud Group : " + newUnit + ")" : cleanName;
-    contact.names =[nameObj];
+    var cleanNm = cleanName(nameObj.displayName || nameObj.givenName || "");
+    // FIX: Provide a fresh array with only givenName to explicitly erase any orphaned familyName strings
+    contact.names = [{ givenName: newUnit !== "UNASSIGNED" ? cleanNm + " (Cloud Group : " + newUnit + ")" : cleanNm }];
     try { People.People.updateContact(contact, resName, { updatePersonFields: 'names' }); } catch(e) {}
  }
 }
@@ -220,8 +220,8 @@ function renameUnit(data) {
           contactsToMove.push(contact.resourceName);
           if (contact.names && contact.names.length > 0) {
               var nameObj = contact.names[0];
-              var clean = (nameObj.displayName || nameObj.givenName || "").replace(/\s*\(.*?\)\s*/g, '').trim();
-              nameObj.givenName = clean + " (Cloud Group : " + newName + ")";
+              var clean = cleanName(nameObj.displayName || nameObj.givenName || "");
+              contact.names = [{ givenName: clean + " (Cloud Group : " + newName + ")" }];
               try { People.People.updateContact(contact, contact.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
           }
       }
@@ -330,9 +330,8 @@ function forceSyncContacts(data) {
       
       if (contact.names && contact.names.length > 0) {
           var nameObj = contact.names[0];
-          var cleanName = (fc.name || nameObj.displayName || nameObj.givenName || "").replace(/\s*\(.*?\)\s*/g, '').trim();
-          nameObj.givenName = targetUnit !== "UNASSIGNED" ? cleanName + " (Cloud Group : " + targetUnit + ")" : cleanName;
-          contact.names = [nameObj];
+          var cleanNm = cleanName(fc.name || nameObj.displayName || nameObj.givenName || "");
+          contact.names = [{ givenName: targetUnit !== "UNASSIGNED" ? cleanNm + " (Cloud Group : " + targetUnit + ")" : cleanNm }];
           try { People.People.updateContact(contact, fc.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
       }
   });
