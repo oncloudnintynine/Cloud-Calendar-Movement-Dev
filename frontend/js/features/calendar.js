@@ -19,27 +19,27 @@ let result = text;
 
 // Sort by length of full text descending to avoid partial replacements of nested words
 const keys = Object.keys(window.appAcronyms).sort((a, b) => {
-   const fullA = typeof window.appAcronyms[a] === 'object' ? (window.appAcronyms[a].full || '') : (window.appAcronyms[a] || '');
-   const fullB = typeof window.appAcronyms[b] === 'object' ? (window.appAcronyms[b].full || '') : (window.appAcronyms[b] || '');
-   return fullB.length - fullA.length;
+  const fullA = typeof window.appAcronyms[a] === 'object' ? (window.appAcronyms[a].full || '') : (window.appAcronyms[a] || '');
+  const fullB = typeof window.appAcronyms[b] === 'object' ? (window.appAcronyms[b].full || '') : (window.appAcronyms[b] || '');
+  return fullB.length - fullA.length;
 });
 
 for (let key of keys) {
- if (!key) continue;
- let val = window.appAcronyms[key];
- let full = typeof val === 'object' ? val.full : val;
- let active = typeof val === 'object' ? val.active : true;
- 
- if (!active || !full) continue;
- 
- const escapedFull = full.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
- 
- // Safe boundary application. Avoids regex breaking when full phrases contain punctuation.
- const prefix = /^[\w\u00C0-\u017F]/.test(full) ? "\\b" : "";
- const suffix = /[\w\u00C0-\u017F]$/.test(full) ? "\\b" : "";
- 
- const regex = new RegExp(prefix + escapedFull + suffix, "gi");
- result = result.replace(regex, key);
+if (!key) continue;
+let val = window.appAcronyms[key];
+let full = typeof val === 'object' ? val.full : val;
+let active = typeof val === 'object' ? val.active : true;
+
+if (!active || !full) continue;
+
+const escapedFull = full.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
+// Safe boundary application. Avoids regex breaking when full phrases contain punctuation.
+const prefix = /^[\w\u00C0-\u017F]/.test(full) ? "\\b" : "";
+const suffix = /[\w\u00C0-\u017F]$/.test(full) ? "\\b" : "";
+
+const regex = new RegExp(prefix + escapedFull + suffix, "gi");
+result = result.replace(regex, key);
 }
 return result;
 }
@@ -70,14 +70,14 @@ btnMonth.classList.add(...activeClass); btnMonth.classList.remove(...inactiveCla
 btnAgenda.classList.remove(...activeClass); btnAgenda.classList.add(...inactiveClass);
 
 if (dashWrapMonth) {
-   dashWrapMonth.classList.remove('hidden-view');
-   dashWrapMonth.classList.add('flex');
+  dashWrapMonth.classList.remove('hidden-view');
+  dashWrapMonth.classList.add('flex');
 }
 if (dashWrapAgenda) dashWrapAgenda.classList.add('hidden-view');
 
 if (myWrapMonth) {
-   myWrapMonth.classList.remove('hidden-view');
-   myWrapMonth.classList.add('flex');
+  myWrapMonth.classList.remove('hidden-view');
+  myWrapMonth.classList.add('flex');
 }
 if (myWrapAgenda) myWrapAgenda.classList.add('hidden-view');
 }
@@ -99,7 +99,7 @@ renderMyLeaves();
 
 const paradeView = document.getElementById('view-parade-state');
 if(paradeView && !paradeView.classList.contains('hidden-view') && typeof renderParadeState === 'function') {
- renderParadeState(); 
+renderParadeState(); 
 }
 } catch (err) { console.error("Error loading leaves data: ", err); }
 }
@@ -107,15 +107,15 @@ if(paradeView && !paradeView.classList.contains('hidden-view') && typeof renderP
 function changeMonth(ctx, offset) {
 setProgrammaticScroll();
 if (ctx === 'dash') { 
- dashMonth.setMonth(dashMonth.getMonth() + offset); 
- dashDate = new Date(dashMonth.getFullYear(), dashMonth.getMonth(), 1);
- window.agendaDirty = true;
- renderDashboard(); 
+dashMonth.setMonth(dashMonth.getMonth() + offset); 
+dashDate = new Date(dashMonth.getFullYear(), dashMonth.getMonth(), 1);
+window.agendaDirty = true;
+renderDashboard(); 
 } else { 
- myMonth.setMonth(myMonth.getMonth() + offset); 
- myDate = new Date(myMonth.getFullYear(), myMonth.getMonth(), 1);
- window.myAgendaDirty = true;
- renderMyLeaves(); 
+myMonth.setMonth(myMonth.getMonth() + offset); 
+myDate = new Date(myMonth.getFullYear(), myMonth.getMonth(), 1);
+window.myAgendaDirty = true;
+renderMyLeaves(); 
 }
 }
 
@@ -124,16 +124,16 @@ setProgrammaticScroll();
 if (ctx === 'dash') { 
 dashDate = new Date(y, m, d); 
 if (dashViewMode === 'month') {
-   toggleDashView('agenda');
+  toggleDashView('agenda');
 } else {
-   renderDashboard(); 
+  renderDashboard(); 
 }
 } else { 
 myDate = new Date(y, m, d); 
 if (dashViewMode === 'month') {
-   toggleDashView('agenda');
+  toggleDashView('agenda');
 } else {
-   renderMyLeaves();
+  renderMyLeaves();
 }
 }
 }
@@ -143,26 +143,26 @@ const grid = document.getElementById(`${ctx}-cal-grid`);
 if (!grid) return;
 const cells = grid.querySelectorAll('.cal-day-cell');
 cells.forEach(cell => {
-   const cellDay = parseInt(cell.dataset.day);
-   const isToday = cell.dataset.istoday === 'true';
-   
-   let baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-medium ";
-   if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
-   else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
-   
-   if (cellDay === d) {
-       baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-bold bg-blue-600 text-white shadow-md ";
-   }
-   
-   cell.className = baseClass;
-   
-   const hasEvent = cell.dataset.hasevent === 'true';
-   if (hasEvent) {
-       const dotColor = cellDay === d ? 'bg-white' : 'bg-blue-500';
-       cell.innerHTML = `${cellDay}<div class="absolute bottom-0 w-1 h-1 ${dotColor} rounded-full"></div>`;
-   } else {
-       cell.innerHTML = `${cellDay}`;
-   }
+  const cellDay = parseInt(cell.dataset.day);
+  const isToday = cell.dataset.istoday === 'true';
+  
+  let baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-medium ";
+  if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
+  else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
+  
+  if (cellDay === d) {
+      baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 mx-auto rounded-full cursor-pointer transition-colors text-[10px] font-bold bg-blue-600 text-white shadow-md ";
+  }
+  
+  cell.className = baseClass;
+  
+  const hasEvent = cell.dataset.hasevent === 'true';
+  if (hasEvent) {
+      const dotColor = cellDay === d ? 'bg-white' : 'bg-blue-500';
+      cell.innerHTML = `${cellDay}<div class="absolute bottom-0 w-1 h-1 ${dotColor} rounded-full"></div>`;
+  } else {
+      cell.innerHTML = `${cellDay}`;
+  }
 });
 }
 
@@ -175,60 +175,60 @@ const isDash = ctx === 'dash';
 clearTimeout(isDash ? scrollTimeoutDash : scrollTimeoutMy);
 
 const timeout = setTimeout(() => {
-   const container = document.getElementById(`${ctx}-agenda`);
-   if (!container) return;
-   const groups = Array.from(container.querySelectorAll('.agenda-day-group'));
-   if (groups.length === 0) return;
+  const container = document.getElementById(`${ctx}-agenda`);
+  if (!container) return;
+  const groups = Array.from(container.querySelectorAll('.agenda-day-group'));
+  if (groups.length === 0) return;
 
-   const containerRect = container.getBoundingClientRect();
-   const containerTop = containerRect.top;
-   const containerBottom = containerRect.bottom;
-   
-   const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 5;
-   
-   let topDateStr = null;
-   
-   if (isAtBottom) {
-       for (let i = groups.length - 1; i >= 0; i--) {
-           const rect = groups[i].getBoundingClientRect();
-           if (rect.top < containerBottom) {
-               topDateStr = groups[i].dataset.date; 
-               break;
-           }
-       }
-   } else {
-       for (const group of groups) {
-           const rect = group.getBoundingClientRect();
-           if (rect.top >= containerTop && rect.top <= containerTop + 100) {
-               topDateStr = group.dataset.date; break;
-           } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
-               topDateStr = group.dataset.date; break;
-           }
-       }
-   }
-   
-   if (topDateStr) {
-       const[y, m, d] = topDateStr.split('-').map(Number);
-       const targetDate = isDash ? dashDate : myDate;
-       const targetMonth = isDash ? dashMonth : myMonth;
-       
-       if (targetDate.getDate() !== d || targetDate.getMonth() !== (m-1) || targetDate.getFullYear() !== y) {
-           if (isDash) dashDate = new Date(y, m - 1, d);
-           else myDate = new Date(y, m - 1, d);
-           
-           if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
-               if (isDash) {
-                   dashMonth = new Date(y, m - 1, 1);
-               } else {
-                   myMonth = new Date(y, m - 1, 1);
-               }
-               renderMiniCalendar(ctx);
-               updateInfoAllDisplay(ctx);
-           } else {
-               updateMiniCalendarSelection(ctx, d);
-           }
-       }
-   }
+  const containerRect = container.getBoundingClientRect();
+  const containerTop = containerRect.top;
+  const containerBottom = containerRect.bottom;
+  
+  const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) < 5;
+  
+  let topDateStr = null;
+  
+  if (isAtBottom) {
+      for (let i = groups.length - 1; i >= 0; i--) {
+          const rect = groups[i].getBoundingClientRect();
+          if (rect.top < containerBottom) {
+              topDateStr = groups[i].dataset.date; 
+              break;
+          }
+      }
+  } else {
+      for (const group of groups) {
+          const rect = group.getBoundingClientRect();
+          if (rect.top >= containerTop && rect.top <= containerTop + 100) {
+              topDateStr = group.dataset.date; break;
+          } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
+              topDateStr = group.dataset.date; break;
+          }
+      }
+  }
+  
+  if (topDateStr) {
+      const[y, m, d] = topDateStr.split('-').map(Number);
+      const targetDate = isDash ? dashDate : myDate;
+      const targetMonth = isDash ? dashMonth : myMonth;
+      
+      if (targetDate.getDate() !== d || targetDate.getMonth() !== (m-1) || targetDate.getFullYear() !== y) {
+          if (isDash) dashDate = new Date(y, m - 1, d);
+          else myDate = new Date(y, m - 1, d);
+          
+          if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
+              if (isDash) {
+                  dashMonth = new Date(y, m - 1, 1);
+              } else {
+                  myMonth = new Date(y, m - 1, 1);
+              }
+              renderMiniCalendar(ctx);
+              updateInfoAllDisplay(ctx);
+          } else {
+              updateMiniCalendarSelection(ctx, d);
+          }
+      }
+  }
 }, 50);
 
 if (isDash) scrollTimeoutDash = timeout;
@@ -310,112 +310,112 @@ startDate.setDate(startDate.getDate() - startDate.getDay());
 
 const endDate = new Date(lastDay);
 if (endDate.getDay() !== 6) {
- endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
 }
 
 let instances =[];
 data.forEach(l => {
- if (l.Status === 'Cancelled') return;
- const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
- const isEvent = typeObj ? typeObj.isEvent : false;
- const isLeave = !isEvent;
- const isRepeating = isEvent && l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None';
+if (l.Status === 'Cancelled') return;
+const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
+const isEvent = typeObj ? typeObj.isEvent : false;
+const isLeave = !isEvent;
+const isRepeating = isEvent && l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None';
 
- let evStart = new Date(l.StartDate); evStart.setHours(0,0,0,0);
- let evEnd = new Date(l.EndDate); evEnd.setHours(0,0,0,0);
+let evStart = new Date(l.StartDate); evStart.setHours(0,0,0,0);
+let evEnd = new Date(l.EndDate); evEnd.setHours(0,0,0,0);
 
- if (isRepeating) {
-     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-         if (isEventOnDate(l, d)) {
-             instances.push({ l: l, start: new Date(d), end: new Date(d), isLeave: isLeave });
-         }
-     }
- } else {
-     if (evStart <= endDate && evEnd >= startDate) {
-         let clampedStart = new Date(Math.max(evStart, startDate));
-         let clampedEnd = new Date(Math.min(evEnd, endDate));
-         instances.push({ l: l, start: clampedStart, end: clampedEnd, isLeave: isLeave });
-     }
- }
+if (isRepeating) {
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        if (isEventOnDate(l, d)) {
+            instances.push({ l: l, start: new Date(d), end: new Date(d), isLeave: isLeave });
+        }
+    }
+} else {
+    if (evStart <= endDate && evEnd >= startDate) {
+        let clampedStart = new Date(Math.max(evStart, startDate));
+        let clampedEnd = new Date(Math.min(evEnd, endDate));
+        instances.push({ l: l, start: clampedStart, end: clampedEnd, isLeave: isLeave });
+    }
+}
 });
 
 let html = '<div class="flex flex-col flex-grow bg-gray-200 dark:bg-darkborder gap-px border border-gray-300 dark:border-darkborder rounded overflow-hidden shadow-inner">';
 
 for (let w = new Date(startDate); w <= endDate; w.setDate(w.getDate() + 7)) {
- let weekEnd = new Date(w); weekEnd.setDate(weekEnd.getDate() + 6);
- let weekInstances = instances.filter(inst => inst.start <= weekEnd && inst.end >= w);
+let weekEnd = new Date(w); weekEnd.setDate(weekEnd.getDate() + 6);
+let weekInstances = instances.filter(inst => inst.start <= weekEnd && inst.end >= w);
 
- let segments = weekInstances.map(inst => {
-     let sDay = Math.max(0, Math.floor((inst.start - w) / 86400000));
-     let eDay = Math.min(6, Math.floor((inst.end - w) / 86400000));
-     return { ...inst, sDay, eDay, len: eDay - sDay + 1 };
- });
+let segments = weekInstances.map(inst => {
+    let sDay = Math.max(0, Math.floor((inst.start - w) / 86400000));
+    let eDay = Math.min(6, Math.floor((inst.end - w) / 86400000));
+    return { ...inst, sDay, eDay, len: eDay - sDay + 1 };
+});
 
- segments.sort((a, b) => b.len - a.len || a.sDay - b.sDay);
+segments.sort((a, b) => b.len - a.len || a.sDay - b.sDay);
 
- let slots =[];
- segments.forEach(seg => {
-     let slotIdx = 0;
-     while (true) {
-         if (!slots[slotIdx]) slots[slotIdx] =[];
-         let conflict = false;
-         for (let i = seg.sDay; i <= seg.eDay; i++) {
-             if (slots[slotIdx][i]) { conflict = true; break; }
-         }
-         if (!conflict) {
-             for (let i = seg.sDay; i <= seg.eDay; i++) slots[slotIdx][i] = true;
-             seg.slot = slotIdx;
-             break;
-         }
-         slotIdx++;
-     }
- });
+let slots =[];
+segments.forEach(seg => {
+    let slotIdx = 0;
+    while (true) {
+        if (!slots[slotIdx]) slots[slotIdx] =[];
+        let conflict = false;
+        for (let i = seg.sDay; i <= seg.eDay; i++) {
+            if (slots[slotIdx][i]) { conflict = true; break; }
+        }
+        if (!conflict) {
+            for (let i = seg.sDay; i <= seg.eDay; i++) slots[slotIdx][i] = true;
+            seg.slot = slotIdx;
+            break;
+        }
+        slotIdx++;
+    }
+});
 
- let rowHeight = Math.max(80, (slots.length * 20) + 30);
- html += `<div class="flex-1 relative bg-white dark:bg-darksurface flex min-h-[${rowHeight}px]">`;
- 
- for (let i = 0; i < 7; i++) {
-     let curD = new Date(w); curD.setDate(curD.getDate() + i);
-     let isToday = curD.toDateString() === new Date().toDateString();
-     let isCurMonth = curD.getMonth() === m;
-     let bg = isCurMonth ? '' : 'bg-gray-50/50 dark:bg-[#151515]';
-     html += `<div class="flex-1 border-r border-gray-200 last:border-r-0 dark:border-darkborder ${bg} p-1" onclick="selectDate('${ctx}', ${curD.getFullYear()}, ${curD.getMonth()}, ${curD.getDate()})">
-        <div class="text-[11px] font-bold ${isToday ? 'bg-blue-600 text-white rounded-full w-[22px] h-[22px] mx-auto flex items-center justify-center shadow-md' : 'text-gray-500 dark:text-darkmuted text-center'}">${curD.getDate()}</div>
-     </div>`;
- }
+let rowHeight = Math.max(80, (slots.length * 20) + 30);
+html += `<div class="flex-1 relative bg-white dark:bg-darksurface flex min-h-[${rowHeight}px]">`;
 
- html += `<div class="absolute top-8 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">`;
- segments.forEach(seg => {
-     const color = seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white');
-     
-     let locStr = seg.l.Location || '';
-     if (seg.l.LocationDetails) locStr += ` - ${seg.l.LocationDetails}`;
+for (let i = 0; i < 7; i++) {
+    let curD = new Date(w); curD.setDate(curD.getDate() + i);
+    let isToday = curD.toDateString() === new Date().toDateString();
+    let isCurMonth = curD.getMonth() === m;
+    let bg = isCurMonth ? '' : 'bg-gray-50/50 dark:bg-[#151515]';
+    html += `<div class="flex-1 border-r border-gray-200 last:border-r-0 dark:border-darkborder ${bg} p-1" onclick="selectDate('${ctx}', ${curD.getFullYear()}, ${curD.getMonth()}, ${curD.getDate()})">
+       <div class="text-[11px] font-bold ${isToday ? 'bg-blue-600 text-white rounded-full w-[22px] h-[22px] mx-auto flex items-center justify-center shadow-md' : 'text-gray-500 dark:text-darkmuted text-center'}">${curD.getDate()}</div>
+    </div>`;
+}
 
-     const safeType = (seg.l.LeaveType || "").trim();
-     const displayType = safeType === 'Meeting' && seg.l.Remarks ? `${safeType}: ${seg.l.Remarks.trim()}` : safeType;
-     
-     let dispName = applyAcronymsFront(seg.l.Name || "");
-     if (dispName === (seg.l.Name || "")) {
-         dispName = dispName.split(' ')[0];
-     }
-     
-     const title = seg.isLeave ? `${dispName} : ${displayType}` : displayType;
-     const appliedTitle = applyAcronymsFront(title);
-     
-     const left = (seg.sDay / 7) * 100;
-     const width = (seg.len / 7) * 100;
-     const topOffset = (seg.slot * 20) + 26; 
+html += `<div class="absolute top-8 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">`;
+segments.forEach(seg => {
+    const color = seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white');
+    
+    let locStr = seg.l.Location || '';
+    if (seg.l.LocationDetails) locStr += ` - ${seg.l.LocationDetails}`;
 
-     let rounded = 'rounded-sm';
-     if (seg.len > 1) {
-        if (seg.sDay === 0 && seg.eDay === 6) rounded = 'rounded-none';
-        else if (seg.sDay === 0) rounded = 'rounded-r-sm';
-        else if (seg.eDay === 6) rounded = 'rounded-l-sm';
-     }
+    const safeType = (seg.l.LeaveType || "").trim();
+    const displayType = safeType === 'Meeting' && seg.l.Remarks ? `${safeType}: ${seg.l.Remarks.trim()}` : safeType;
+    
+    let dispName = applyAcronymsFront(seg.l.Name || "");
+    if (dispName === (seg.l.Name || "")) {
+        dispName = dispName.split(' ')[0];
+    }
+    
+    const title = seg.isLeave ? `${dispName} : ${displayType}` : displayType;
+    const appliedTitle = applyAcronymsFront(title);
+    
+    const left = (seg.sDay / 7) * 100;
+    const width = (seg.len / 7) * 100;
+    const topOffset = (seg.slot * 20) + 26; 
 
-     html += `<div class="absolute h-[18px] px-1 text-[10px] md:text-[11px] font-bold leading-tight truncate shadow-sm pointer-events-auto cursor-pointer border-b border-black/10 ${color} ${rounded}" style="left: calc(${left}% + 1px); width: calc(${width}% - 2px); top: ${topOffset}px;" onclick="selectDate('${ctx}', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${appliedTitle}">${appliedTitle}</div>`;
- });
- html += `</div></div>`; 
+    let rounded = 'rounded-sm';
+    if (seg.len > 1) {
+       if (seg.sDay === 0 && seg.eDay === 6) rounded = 'rounded-none';
+       else if (seg.sDay === 0) rounded = 'rounded-r-sm';
+       else if (seg.eDay === 6) rounded = 'rounded-l-sm';
+    }
+
+    html += `<div class="absolute h-[18px] px-1 text-[10px] md:text-[11px] font-bold leading-tight truncate shadow-sm pointer-events-auto cursor-pointer border-b border-black/10 ${color} ${rounded}" style="left: calc(${left}% + 1px); width: calc(${width}% - 2px); top: ${topOffset}px;" onclick="selectDate('${ctx}', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${appliedTitle}">${appliedTitle}</div>`;
+});
+html += `</div></div>`; 
 }
 html += '</div>';
 return html;
@@ -447,59 +447,59 @@ const isEvent = typeObj ? typeObj.isEvent : false;
 
 let timeStr = "";
 if (isEvent) {
- if (l.IsAllDay === 'TRUE') {
-   const sD = formatDisplayDate(new Date(l.StartDate));
-   const eD = formatDisplayDate(new Date(l.EndDate));
-   timeStr = sD === eD ? `${sD} (All Day)` : `${sD} to ${eD} (All Day)`;
- } else {
-   timeStr = `${formatDisplayDateTime(new Date(l.StartDate))} to ${formatDisplayDateTime(new Date(l.EndDate))}`;
- }
- if (l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None') {
-    timeStr += ` <span class="font-bold text-purple-600 dark:text-purple-400">↻ ${l.HalfDay}</span>`;
-    if (l.UntilDate) timeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
- }
+if (String(l.IsAllDay).toUpperCase() === 'TRUE') {
+  const sD = formatDisplayDate(new Date(l.StartDate));
+  const eD = formatDisplayDate(new Date(l.EndDate));
+  timeStr = sD === eD ? `${sD} (All Day)` : `${sD} to ${eD} (All Day)`;
 } else {
- timeStr = `${formatDisplayDate(new Date(l.StartDate))} to ${formatDisplayDate(new Date(l.EndDate))}`;
+  timeStr = `${formatDisplayDateTime(new Date(l.StartDate))} to ${formatDisplayDateTime(new Date(l.EndDate))}`;
+}
+if (l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None') {
+   timeStr += ` <span class="font-bold text-purple-600 dark:text-purple-400">↻ ${l.HalfDay}</span>`;
+   if (l.UntilDate) timeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
+}
+} else {
+timeStr = `${formatDisplayDate(new Date(l.StartDate))} to ${formatDisplayDate(new Date(l.EndDate))}`;
 }
 
 let actionBtns = '';
 if ((String(l.Phone) === String(user.phone) || user.role === 'admin') && l.Status !== 'Cancelled') {
- actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t border-gray-200 dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
+actionBtns = `<div class="flex space-x-3 mt-3 pt-3 border-t border-gray-200 dark:border-darkborder"><button onclick="triggerEdit('${l.ID}')" class="font-bold bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 px-4 py-1.5 rounded-lg transition">Edit</button><button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="font-bold bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 px-4 py-1.5 rounded-lg transition">Cancel</button></div>`;
 }
 
 let attendeesDisplay = '';
 if (l.Attendees) {
- try {
-   const attArr = JSON.parse(l.Attendees);
-   if (attArr && attArr.length > 0) {
-       attendeesDisplay = attArr.map(a => {
-           if (a.expandedNames) return a.expandedNames;
-           
-           if (a.type === 'group') {
-               if (a.name.startsWith('zz KAH:')) {
-                   const dept = a.dept;
-                   if (dept === 'Custom') {
-                       const gName = a.name.replace('zz KAH: ', '').trim();
-                       const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
-                       if (cGrp) {
-                           return cGrp.members.map(ph => {
-                               const c = companyContacts.find(x => String(x.phone) === String(ph));
-                               return c ? c.name : ph;
-                           }).join(', ');
-                       }
-                   } else {
-                       const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
-                       if (kahMems.length > 0) return kahMems.join(', ');
-                   }
-               } else if (a.name.startsWith('zz All in ')) {
-                   return a.name.replace('zz ', '');
-               }
-               return a.name.replace('zz KAH: ', '').replace('zz ', '');
-           }
-           return a.name;
-       }).join(', ');
-   }
- } catch(e) {}
+try {
+  const attArr = JSON.parse(l.Attendees);
+  if (attArr && attArr.length > 0) {
+      attendeesDisplay = attArr.map(a => {
+          if (a.expandedNames) return a.expandedNames;
+          
+          if (a.type === 'group') {
+              if (a.name.startsWith('zz KAH:')) {
+                  const dept = a.dept;
+                  if (dept === 'Custom') {
+                      const gName = a.name.replace('zz KAH: ', '').trim();
+                      const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
+                      if (cGrp) {
+                          return cGrp.members.map(ph => {
+                              const c = companyContacts.find(x => String(x.phone) === String(ph));
+                              return c ? c.name : ph;
+                          }).join(', ');
+                      }
+                  } else {
+                      const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
+                      if (kahMems.length > 0) return kahMems.join(', ');
+                  }
+              } else if (a.name.startsWith('zz All in ')) {
+                  return a.name.replace('zz ', '');
+              }
+              return a.name.replace('zz KAH: ', '').replace('zz ', '');
+          }
+          return a.name;
+      }).join(', ');
+  }
+} catch(e) {}
 }
 
 let locStr = l.Location || '';
@@ -510,21 +510,21 @@ let displayType = safeType;
 let showRemarksInBody = l.Remarks ? true : false;
 
 if (safeType === 'Meeting' && l.Remarks) {
-   displayType = safeType + ": " + l.Remarks.trim();
-   showRemarksInBody = false; 
+  displayType = safeType + ": " + l.Remarks.trim();
+  showRemarksInBody = false; 
 }
 
 let titleRaw = window.appAgendaTemplate || '{EventType} - {Name} ({Department})';
 if (isMyCalendar) titleRaw = '{EventType}'; 
 
 let titleStr = titleRaw
-  .replace(/{EventType}/g, displayType)
-  .replace(/{Name}/g, l.Name || "")
-  .replace(/{Department}/g, l.Department || "")
-  .replace(/{Attendees}/g, attendeesDisplay || "")
-  .replace(/{Location}/g, locStr || l.Country || "")
-  .replace(/{Time}/g, timeStr || "")
-  .replace(/{Remarks}/g, l.Remarks || "");
+ .replace(/{EventType}/g, displayType)
+ .replace(/{Name}/g, l.Name || "")
+ .replace(/{Department}/g, l.Department || "")
+ .replace(/{Attendees}/g, attendeesDisplay || "")
+ .replace(/{Location}/g, locStr || l.Country || "")
+ .replace(/{Time}/g, timeStr || "")
+ .replace(/{Remarks}/g, l.Remarks || "");
 
 titleStr = titleStr.replace(/,\s*(?=[,\)]|$)/g, "").replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
 if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
@@ -535,62 +535,62 @@ const finalCountry = applyAcronymsFront(l.Country);
 const finalAttendees = applyAcronymsFront(attendeesDisplay);
 
 if (isCompactInfoAll) {
-   return `<div class="border border-blue-300 dark:border-blue-800 p-2.5 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
-     <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${finalTitle}</h3>
-     <p class="text-[11px] text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
-     ${finalLocation ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
-     ${finalAttendees ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${finalAttendees}</p>` : ''}
-     ${showRemarksInBody ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
-   </div>`;
+  return `<div class="border border-blue-300 dark:border-blue-800 p-2.5 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
+    <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${finalTitle}</h3>
+    <p class="text-[11px] text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
+    ${finalLocation ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
+    ${finalAttendees ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${finalAttendees}</p>` : ''}
+    ${showRemarksInBody ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
+  </div>`;
 }
 
 return `<div class="border border-gray-300 dark:border-darkborder p-3 md:p-4 rounded-xl shadow-sm bg-gray-50 dark:bg-darkinput flex flex-col">
- <div class="flex justify-between items-start mb-2">
-   <h3 class="font-bold text-sm md:text-base">${finalTitle}</h3>
-   <span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight shrink-0 ml-2 ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
- </div>
- ${!isMyCalendar && !isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-xs md:text-sm text-gray-700 dark:text-darktext">(${l.HalfDay})</p>` : ''}
- <p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
- ${isEvent && finalLocation ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
- ${!isEvent && finalCountry ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${finalCountry} ${l.State ? `(${l.State})` : ''}</p>` : ''}
- ${finalAttendees ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${finalAttendees}</p>` : ''}
- ${showRemarksInBody ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
- ${actionBtns}
+<div class="flex justify-between items-start mb-2">
+  <h3 class="font-bold text-sm md:text-base">${finalTitle}</h3>
+  <span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight shrink-0 ml-2 ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
+</div>
+${!isMyCalendar && !isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-xs md:text-sm text-gray-700 dark:text-darktext">(${l.HalfDay})</p>` : ''}
+<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
+${isEvent && finalLocation ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
+${!isEvent && finalCountry ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${finalCountry} ${l.State ? `(${l.State})` : ''}</p>` : ''}
+${finalAttendees ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${finalAttendees}</p>` : ''}
+${showRemarksInBody ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
+${actionBtns}
 </div>`;
 }).join('');
 }
 
 function updateInfoAllDisplay(ctx) {
-  const infoAllContainer = document.getElementById(`${ctx}-infoall-container`);
-  const infoAllList = document.getElementById(`${ctx}-infoall-list`);
-  const infoAllTitle = document.getElementById(`${ctx}-infoall-title`);
+ const infoAllContainer = document.getElementById(`${ctx}-infoall-container`);
+ const infoAllList = document.getElementById(`${ctx}-infoall-list`);
+ const infoAllTitle = document.getElementById(`${ctx}-infoall-title`);
 
-  if (!infoAllContainer || !infoAllList) return;
+ if (!infoAllContainer || !infoAllList) return;
 
-  const targetMonth = ctx === 'dash' ? dashMonth : myMonth;
-  const mStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
-  const mEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
-  
-  const data = ctx === 'dash' ? window.dashFilteredLeaves : window.myFilteredLeaves;
+ const targetMonth = ctx === 'dash' ? dashMonth : myMonth;
+ const mStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+ const mEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
+ 
+ const data = ctx === 'dash' ? window.dashFilteredLeaves : window.myFilteredLeaves;
 
-  const infoAllEvents = data.filter(l => {
-      if (l.InfoAll !== 'TRUE') return false;
-      for (let d = new Date(mStart); d <= mEnd; d.setDate(d.getDate() + 1)) {
-          if (isEventOnDate(l, d)) return true;
-      }
-      return false;
-  });
+ const infoAllEvents = data.filter(l => {
+     if (String(l.InfoAll).toUpperCase() !== 'TRUE') return false;
+     for (let d = new Date(mStart); d <= mEnd; d.setDate(d.getDate() + 1)) {
+         if (isEventOnDate(l, d)) return true;
+     }
+     return false;
+ });
 
-  if (infoAllEvents.length > 0) {
-      if (infoAllTitle) {
-          infoAllTitle.innerText = `📌 Info All Events (${mos[targetMonth.getMonth()]} ${targetMonth.getFullYear()})`;
-      }
-      infoAllEvents.sort((a, b) => new Date(a.StartDate) - new Date(b.StartDate));
-      infoAllList.innerHTML = buildAgendaHtml(infoAllEvents, ctx === 'my', true);
-      infoAllContainer.classList.remove('hidden-view');
-  } else {
-      infoAllContainer.classList.add('hidden-view');
-  }
+ if (infoAllEvents.length > 0) {
+     if (infoAllTitle) {
+         infoAllTitle.innerText = `📌 Info All Events (${mos[targetMonth.getMonth()]} ${targetMonth.getFullYear()})`;
+     }
+     infoAllEvents.sort((a, b) => new Date(a.StartDate) - new Date(b.StartDate));
+     infoAllList.innerHTML = buildAgendaHtml(infoAllEvents, ctx === 'my', true);
+     infoAllContainer.classList.remove('hidden-view');
+ } else {
+     infoAllContainer.classList.add('hidden-view');
+ }
 }
 
 function generateContinuousAgenda(ctx, data) {
@@ -603,23 +603,23 @@ const end = new Date(targetDate.getFullYear(), targetDate.getMonth() + 6, 0);
 
 let html = '';
 for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const dayEvents = data.filter(l => l.InfoAll !== 'TRUE' && isEventOnDate(l, d));
-    
-    if (dayEvents.length > 0 || d.toDateString() === targetDate.toDateString()) {
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        
-        html += `
-        <div class="agenda-day-group mb-6" data-date="${yyyy}-${mm}-${dd}">
-            <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2 shadow-sm">
-                <h3 class="font-bold text-sm md:text-base text-blue-600 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
-            </div>
-            <div class="space-y-2">
-                ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
-            </div>
-        </div>`;
-    }
+   const dayEvents = data.filter(l => String(l.InfoAll).toUpperCase() !== 'TRUE' && isEventOnDate(l, d));
+   
+   if (dayEvents.length > 0 || d.toDateString() === targetDate.toDateString()) {
+       const yyyy = d.getFullYear();
+       const mm = String(d.getMonth() + 1).padStart(2, '0');
+       const dd = String(d.getDate()).padStart(2, '0');
+       
+       html += `
+       <div class="agenda-day-group mb-6" data-date="${yyyy}-${mm}-${dd}">
+           <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2 shadow-sm">
+               <h3 class="font-bold text-sm md:text-base text-blue-600 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
+           </div>
+           <div class="space-y-2">
+               ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
+           </div>
+       </div>`;
+   }
 }
 
 container.innerHTML = html || `<p class="text-gray-500 dark:text-darkmuted text-center mt-6">No records found.</p>`;
@@ -640,27 +640,27 @@ if (!container) return null;
 let group = container.querySelector(`.agenda-day-group[data-date="${dateStr}"]`);
 
 if (!group) {
-    group = document.createElement('div');
-    group.className = 'agenda-day-group mb-6';
-    group.dataset.date = dateStr;
-    group.innerHTML = `
-        <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2 shadow-sm">
-            <h3 class="font-bold text-sm md:text-base text-blue-600 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
-        </div>
-        <div class="space-y-2">
-            <p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>
-        </div>`;
+   group = document.createElement('div');
+   group.className = 'agenda-day-group mb-6';
+   group.dataset.date = dateStr;
+   group.innerHTML = `
+       <div class="sticky top-0 bg-white dark:bg-darksurface z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2 shadow-sm">
+           <h3 class="font-bold text-sm md:text-base text-blue-600 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
+       </div>
+       <div class="space-y-2">
+           <p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>
+       </div>`;
 
-    const allGroups = Array.from(container.querySelectorAll('.agenda-day-group'));
-    let inserted = false;
-    for (let i = 0; i < allGroups.length; i++) {
-        if (allGroups[i].dataset.date > dateStr) {
-            container.insertBefore(group, allGroups[i]);
-            inserted = true;
-            break;
-        }
-    }
-    if (!inserted) container.appendChild(group);
+   const allGroups = Array.from(container.querySelectorAll('.agenda-day-group'));
+   let inserted = false;
+   for (let i = 0; i < allGroups.length; i++) {
+       if (allGroups[i].dataset.date > dateStr) {
+           container.insertBefore(group, allGroups[i]);
+           inserted = true;
+           break;
+       }
+   }
+   if (!inserted) container.appendChild(group);
 }
 return group;
 }
@@ -675,60 +675,60 @@ let filtered = allLeaves.filter(l => l.Status !== 'Cancelled');
 
 if (d === 'MY_CALENDAR') {
 filtered = filtered.filter(l => {
- if (l.InfoAll === 'TRUE') return true;
- if (String(l.Phone) === String(user.phone)) return true;
- if (l.Attendees) {
-   try {
-     const att = JSON.parse(l.Attendees);
-     return att.some(a => {
-        if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
-        if (a.type === 'group') {
-            if (a.dept === 'Custom') {
-                const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-                return customG && customG.members.includes(String(user.phone));
-            } else if (a.name.startsWith('zz KAH:')) {
-                return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
-            } else {
-                return (user.departments ||[]).includes(a.dept); // Safety fallback
-            }
-        }
-        return false;
-     });
-   } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
- }
- return false;
+if (String(l.InfoAll).toUpperCase() === 'TRUE') return true;
+if (String(l.Phone) === String(user.phone)) return true;
+if (l.Attendees) {
+  try {
+    const att = JSON.parse(l.Attendees);
+    return att.some(a => {
+       if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
+       if (a.type === 'group') {
+           if (a.dept === 'Custom') {
+               const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+               return customG && customG.members.includes(String(user.phone));
+           } else if (a.name.startsWith('zz KAH:')) {
+               return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+           } else {
+               return (user.departments ||[]).includes(a.dept); // Safety fallback
+           }
+       }
+       return false;
+    });
+  } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
+}
+return false;
 });
 } else if (d) {
 filtered = filtered.filter(l => {
- if (l.InfoAll === 'TRUE') return true;
- if (String(l.Department||'').includes(d)) return true;
- 
- // Robustly check Attendees JSON to restore visibility if getLeaves overwrote the Department column
- if (l.Attendees) {
-   try {
-     const att = JSON.parse(l.Attendees);
-     return att.some(a => {
-       if (a.dept && String(a.dept).includes(d)) return true;
-       if (a.type === 'group' && a.dept === 'Custom') {
-          const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-          if (customG) {
-              return customG.members.some(phone => {
-                  const contact = companyContacts.find(c => String(c.phone) === String(phone));
-                  return contact && contact.dept && String(contact.dept).includes(d);
-              });
-          }
-       }
-       return false;
+if (String(l.InfoAll).toUpperCase() === 'TRUE') return true;
+if (String(l.Department||'').includes(d)) return true;
+
+// Robustly check Attendees JSON to restore visibility if getLeaves overwrote the Department column
+if (l.Attendees) {
+  try {
+    const att = JSON.parse(l.Attendees);
+    return att.some(a => {
+      if (a.dept && String(a.dept).includes(d)) return true;
+      if (a.type === 'group' && a.dept === 'Custom') {
+         const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+         if (customG) {
+             return customG.members.some(phone => {
+                 const contact = companyContacts.find(c => String(c.phone) === String(phone));
+                 return contact && contact.dept && String(contact.dept).includes(d);
+             });
+         }
+      }
+      return false;
+    });
+  } catch(e) {
+     const phones = String(l.Attendees).split(',');
+     return phones.some(phone => {
+         const contact = companyContacts.find(c => String(c.phone) === String(phone.trim()));
+         return contact && contact.dept && String(contact.dept).includes(d);
      });
-   } catch(e) {
-      const phones = String(l.Attendees).split(',');
-      return phones.some(phone => {
-          const contact = companyContacts.find(c => String(c.phone) === String(phone.trim()));
-          return contact && contact.dept && String(contact.dept).includes(d);
-      });
-   }
- }
- return false;
+  }
+}
+return false;
 });
 }
 
@@ -740,54 +740,54 @@ filtered = fuse.search(q).map(res => res.item);
 window.dashFilteredLeaves = filtered;
 
 if (dashViewMode === 'agenda') {
- renderMiniCalendar('dash');
- 
- if (window.agendaDirty) {
-     generateContinuousAgenda('dash', filtered);
-     window.agendaDirty = false;
- }
- 
- const agendaEl = document.getElementById('dash-agenda');
- if (agendaEl) {
-     setTimeout(() => {
-         const group = ensureAgendaDateExists('dash', dashDate);
-         if (group) group.scrollIntoView({ behavior: 'smooth' });
-     }, 10);
- }
+renderMiniCalendar('dash');
 
- updateInfoAllDisplay('dash');
+if (window.agendaDirty) {
+    generateContinuousAgenda('dash', filtered);
+    window.agendaDirty = false;
+}
+
+const agendaEl = document.getElementById('dash-agenda');
+if (agendaEl) {
+    setTimeout(() => {
+        const group = ensureAgendaDateExists('dash', dashDate);
+        if (group) group.scrollIntoView({ behavior: 'smooth' });
+    }, 10);
+}
+
+updateInfoAllDisplay('dash');
 } else {
- const monthTitleEl = document.getElementById('dash-month-title');
- if (monthTitleEl) monthTitleEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
- 
- const monthGridEl = document.getElementById('dash-month-grid');
- if (monthGridEl) monthGridEl.innerHTML = buildFullMonthGrid(dashMonth, filtered, 'dash');
+const monthTitleEl = document.getElementById('dash-month-title');
+if (monthTitleEl) monthTitleEl.innerText = mos[dashMonth.getMonth()] + ' ' + dashMonth.getFullYear();
+
+const monthGridEl = document.getElementById('dash-month-grid');
+if (monthGridEl) monthGridEl.innerHTML = buildFullMonthGrid(dashMonth, filtered, 'dash');
 }
 }
 
 function renderMyLeaves() {
 const my = allLeaves.filter(l => {
 if (l.Status === 'Cancelled') return false;
-if (l.InfoAll === 'TRUE') return true;
+if (String(l.InfoAll).toUpperCase() === 'TRUE') return true;
 if (String(l.Phone) === String(user.phone)) return true;
 if (l.Attendees) {
- try {
-   const att = JSON.parse(l.Attendees);
-   return att.some(a => {
-        if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
-        if (a.type === 'group') {
-            if (a.dept === 'Custom') {
-                const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-                return customG && customG.members.includes(String(user.phone));
-            } else if (a.name.startsWith('zz KAH:')) {
-                return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
-            } else {
-                return (user.departments ||[]).includes(a.dept); // Safety fallback
-            }
-        }
-        return false;
-   });
- } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
+try {
+  const att = JSON.parse(l.Attendees);
+  return att.some(a => {
+       if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
+       if (a.type === 'group') {
+           if (a.dept === 'Custom') {
+               const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+               return customG && customG.members.includes(String(user.phone));
+           } else if (a.name.startsWith('zz KAH:')) {
+               return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+           } else {
+               return (user.departments ||[]).includes(a.dept); // Safety fallback
+           }
+       }
+       return false;
+  });
+} catch(e) { return String(l.Attendees).includes(String(user.phone)); }
 }
 return false;
 });
@@ -795,25 +795,25 @@ return false;
 window.myFilteredLeaves = my;
 
 if (dashViewMode === 'agenda') {
- renderMiniCalendar('my');
- if (window.myAgendaDirty) {
-     generateContinuousAgenda('my', my);
-     window.myAgendaDirty = false;
- }
+renderMiniCalendar('my');
+if (window.myAgendaDirty) {
+    generateContinuousAgenda('my', my);
+    window.myAgendaDirty = false;
+}
 
- const agendaEl = document.getElementById('my-agenda');
- if (agendaEl) {
-     setTimeout(() => {
-         const group = ensureAgendaDateExists('my', myDate);
-         if (group) group.scrollIntoView({ behavior: 'smooth' });
-     }, 10);
- }
- updateInfoAllDisplay('my');
+const agendaEl = document.getElementById('my-agenda');
+if (agendaEl) {
+    setTimeout(() => {
+        const group = ensureAgendaDateExists('my', myDate);
+        if (group) group.scrollIntoView({ behavior: 'smooth' });
+    }, 10);
+}
+updateInfoAllDisplay('my');
 } else {
- const monthTitleEl = document.getElementById('my-month-title');
- if (monthTitleEl) monthTitleEl.innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
- 
- const monthGridEl = document.getElementById('my-month-grid');
- if (monthGridEl) monthGridEl.innerHTML = buildFullMonthGrid(myMonth, my, 'my');
+const monthTitleEl = document.getElementById('my-month-title');
+if (monthTitleEl) monthTitleEl.innerText = mos[myMonth.getMonth()] + ' ' + myMonth.getFullYear();
+
+const monthGridEl = document.getElementById('my-month-grid');
+if (monthGridEl) monthGridEl.innerHTML = buildFullMonthGrid(myMonth, my, 'my');
 }
 }
