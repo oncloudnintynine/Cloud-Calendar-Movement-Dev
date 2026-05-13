@@ -468,7 +468,6 @@ if (l.Attendees) {
   try {
     const attArr = JSON.parse(l.Attendees);
     if (attArr && attArr.length > 0) {
-        // FIX: Extract expandedNames if it exists. Provide strong dynamic fallback for legacy events.
         attendeesDisplay = attArr.map(a => {
             if (a.expandedNames) return a.expandedNames;
             
@@ -506,9 +505,10 @@ let safeType = (l.LeaveType || "").trim();
 let displayType = safeType;
 let showRemarksInBody = l.Remarks ? true : false;
 
+// Inject remarks into the header title for Meetings
 if (safeType === 'Meeting' && l.Remarks) {
     displayType = safeType + ": " + l.Remarks.trim();
-    showRemarksInBody = false; 
+    showRemarksInBody = false; // Hide from body to prevent redundancy
 }
 
 let titleRaw = window.appAgendaTemplate || '{EventType} - {Name} ({Department})';
@@ -532,12 +532,13 @@ const finalCountry = applyAcronymsFront(l.Country);
 const finalAttendees = applyAcronymsFront(attendeesDisplay);
 
 if (isCompactInfoAll) {
-    return `<div class="border border-blue-300 dark:border-blue-800 p-2.5 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
-      <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${finalTitle}</h3>
-      <p class="text-[11px] text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
-      ${finalLocation ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
-      ${finalAttendees ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${finalAttendees}</p>` : ''}
-      ${showRemarksInBody ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
+    const startDateObj = new Date(l.StartDate);
+    return `<div class="min-w-[220px] max-w-[280px] snap-center shrink-0 border-2 border-red-300 dark:border-red-800 p-3 rounded-xl shadow-md bg-red-50 dark:bg-red-900/20 flex flex-col cursor-pointer transition hover:bg-red-100 dark:hover:bg-red-900/40" onclick="selectDate('dash', ${startDateObj.getFullYear()}, ${startDateObj.getMonth()}, ${startDateObj.getDate()})">
+      <div class="text-xs font-bold text-red-600 dark:text-red-400 mb-1">${formatDisplayDate(startDateObj)}</div>
+      <h3 class="font-bold text-sm text-gray-900 dark:text-gray-100 mb-1 line-clamp-2">${finalTitle}</h3>
+      <p class="text-[11px] text-gray-700 dark:text-gray-300"><span class="font-semibold">Time:</span> ${timeStr}</p>
+      ${finalLocation ? `<p class="text-[11px] text-gray-700 dark:text-gray-300 mt-0.5 truncate"><span class="font-semibold">Loc:</span> ${finalLocation}</p>` : ''}
+      ${finalAttendees ? `<p class="text-[11px] text-gray-700 dark:text-gray-300 mt-0.5 truncate"><span class="font-semibold">Att:</span> ${finalAttendees}</p>` : ''}
     </div>`;
 }
 
@@ -665,7 +666,6 @@ filtered = filtered.filter(l => {
 filtered = filtered.filter(l => {
   if (String(l.Department||'').includes(d)) return true;
   
-  // Robustly check Attendees JSON to restore visibility if getLeaves overwrote the Department column
   if (l.Attendees) {
     try {
       const att = JSON.parse(l.Attendees);
@@ -717,9 +717,22 @@ if (dashViewMode === 'agenda') {
       }, 10);
   }
 
-  const infoAllEvents = filtered.filter(l => l.InfoAll === 'TRUE' && isEventOnDate(l, dashDate));
+  // Month-wide Info All Filter
+  const startOfMonth = new Date(dashMonth.getFullYear(), dashMonth.getMonth(), 1);
+  const endOfMonth = new Date(dashMonth.getFullYear(), dashMonth.getMonth() + 1, 0, 23, 59, 59, 999);
+  
+  const infoAllEvents = filtered.filter(l => {
+      if (l.InfoAll !== 'TRUE') return false;
+      const sDate = new Date(l.StartDate); sDate.setHours(0,0,0,0);
+      const eDate = new Date(l.EndDate); eDate.setHours(23,59,59,999);
+      return sDate <= endOfMonth && eDate >= startOfMonth;
+  });
+  
+  infoAllEvents.sort((a, b) => new Date(a.StartDate) - new Date(b.StartDate));
+
   const infoAllContainer = document.getElementById('dash-infoall-container');
   const infoAllList = document.getElementById('dash-infoall-list');
+  
   if (infoAllEvents.length > 0 && infoAllContainer && infoAllList) {
       infoAllList.innerHTML = buildAgendaHtml(infoAllEvents, false, true);
       infoAllContainer.classList.remove('hidden-view');

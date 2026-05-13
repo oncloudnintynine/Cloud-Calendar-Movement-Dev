@@ -61,7 +61,6 @@ try {
    let locationStr = 'Office';
 
    if (activeRecords.length > 0) {
-     // FIX: Prioritize out-of-office events over in-office background events
      let activeRecord = activeRecords[0]; 
      
      for (const rec of activeRecords) {
@@ -70,7 +69,7 @@ try {
         let checkLoc = isEvt ? (rec.Location || 'Event') : (rec.LeaveType || 'Leave');
         
         if (String(checkLoc).toLowerCase() !== 'office') {
-            activeRecord = rec; // Out of office found, let it win priority
+            activeRecord = rec; 
             break;
         }
      }
@@ -80,7 +79,6 @@ try {
 
      if (isEvent) {
        locationStr = activeRecord.Location || 'Event';
-       // FIX: Ensure LocationDetails are propagated into the Parade State View
        if (activeRecord.LocationDetails) {
            locationStr += ` - ${activeRecord.LocationDetails}`;
        }

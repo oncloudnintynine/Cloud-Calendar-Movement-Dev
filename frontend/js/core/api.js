@@ -15,30 +15,29 @@ setTimeout(() => el.classList.add('hidden'), 5000);
 
 async function apiCall(action, data = {}) {
 try {
-  // Send credentials automatically. Gracefully handle admin users who lack a phone number.
-  let credentials = {};
-  if (user && user.pass) {
-      credentials = { phone: user.phone || '', pass: user.pass };
-  }
+ let credentials = {};
+ if (user && user.pass) {
+     credentials = { phone: user.phone || '', pass: user.pass };
+ }
 
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    redirect: 'follow',
-    body: JSON.stringify({ action, data, credentials })
-  });
-  
-  const result = await response.json();
-  
-  if (!result.success) {
-      throw new Error(result.error);
-  }
-  
-  return result.data;
+ const response = await fetch(API_URL, {
+   method: 'POST',
+   headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+   redirect: 'follow',
+   body: JSON.stringify({ action, data, credentials })
+ });
+ 
+ const result = await response.json();
+ 
+ if (!result.success) {
+     throw new Error(result.error);
+ }
+ 
+ return result.data;
 } catch (err) {
-  if(err.message.includes('Failed to fetch')) {
-    alert("Network Error or Google Permissions Expired.\nIf you are the Administrator, please open the script editor and run INITIAL_SETUP().");
-  }
-  throw err;
+ if(err.message.includes('Failed to fetch')) {
+   alert("Network Error or Google Permissions Expired.\nIf you are the Administrator, please open the script editor and run INITIAL_SETUP().");
+ }
+ throw err;
 }
 }
