@@ -468,8 +468,33 @@ if (l.Attendees) {
   try {
     const attArr = JSON.parse(l.Attendees);
     if (attArr && attArr.length > 0) {
-        attendeesDisplay = attArr.map(a => a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name).join(', ');
-        attendeesDisplay = applyAcronymsFront(attendeesDisplay);
+        // FIX: Extract expandedNames if it exists. Provide strong dynamic fallback for legacy events.
+        attendeesDisplay = attArr.map(a => {
+            if (a.expandedNames) return a.expandedNames;
+            
+            if (a.type === 'group') {
+                if (a.name.startsWith('zz KAH:')) {
+                    const dept = a.dept;
+                    if (dept === 'Custom') {
+                        const gName = a.name.replace('zz KAH: ', '').trim();
+                        const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
+                        if (cGrp) {
+                            return cGrp.members.map(ph => {
+                                const c = companyContacts.find(x => String(x.phone) === String(ph));
+                                return c ? c.name : ph;
+                            }).join(', ');
+                        }
+                    } else {
+                        const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
+                        if (kahMems.length > 0) return kahMems.join(', ');
+                    }
+                } else if (a.name.startsWith('zz All in ')) {
+                    return a.name.replace('zz ', '');
+                }
+                return a.name.replace('zz KAH: ', '').replace('zz ', '');
+            }
+            return a.name;
+        }).join(', ');
     }
   } catch(e) {}
 }
@@ -481,10 +506,9 @@ let safeType = (l.LeaveType || "").trim();
 let displayType = safeType;
 let showRemarksInBody = l.Remarks ? true : false;
 
-// Inject remarks into the header title for Meetings
 if (safeType === 'Meeting' && l.Remarks) {
     displayType = safeType + ": " + l.Remarks.trim();
-    showRemarksInBody = false; // Hide from body to prevent redundancy
+    showRemarksInBody = false; 
 }
 
 let titleRaw = window.appAgendaTemplate || '{EventType} - {Name} ({Department})';
@@ -505,13 +529,14 @@ if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
 const finalTitle = applyAcronymsFront(titleStr);
 const finalLocation = applyAcronymsFront(locStr);
 const finalCountry = applyAcronymsFront(l.Country);
+const finalAttendees = applyAcronymsFront(attendeesDisplay);
 
 if (isCompactInfoAll) {
     return `<div class="border border-blue-300 dark:border-blue-800 p-2.5 rounded-xl shadow-sm bg-blue-50/50 dark:bg-blue-900/10 flex flex-col">
       <h3 class="font-bold text-sm text-blue-800 dark:text-blue-300 mb-0.5">${finalTitle}</h3>
       <p class="text-[11px] text-gray-500 dark:text-darkmuted"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
       ${finalLocation ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
-      ${attendeesDisplay ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
+      ${finalAttendees ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${finalAttendees}</p>` : ''}
       ${showRemarksInBody ? `<p class="text-[11px] text-gray-500 dark:text-darkmuted mt-0.5 italic">"${l.Remarks}"</p>` : ''}
     </div>`;
 }
@@ -525,7 +550,7 @@ return `<div class="border border-gray-300 dark:border-darkborder p-3 md:p-4 rou
   <p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Time:</span> ${timeStr}</p>
   ${isEvent && finalLocation ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Location:</span> ${finalLocation}</p>` : ''}
   ${!isEvent && finalCountry ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Country:</span> ${finalCountry} ${l.State ? `(${l.State})` : ''}</p>` : ''}
-  ${attendeesDisplay ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${attendeesDisplay}</p>` : ''}
+  ${finalAttendees ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1"><span class="font-semibold text-gray-700 dark:text-darktext">Attendees:</span> ${finalAttendees}</p>` : ''}
   ${showRemarksInBody ? `<p class="text-xs md:text-sm text-gray-500 dark:text-darkmuted mt-1 italic">"${l.Remarks}"</p>` : ''}
   ${actionBtns}
 </div>`;
