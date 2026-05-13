@@ -276,3 +276,32 @@ try {
  window.location.reload();
 } catch (err) { alert("Error saving: " + err.message); showLoader(false); }
 }
+
+async function forceOverwriteContacts() {
+if (!confirm("WARNING: This will perform a 100% overwrite of Google Contacts using the current App data. All App users will be renamed and re-tagged to the groups shown here.\n\nProceed only if Google Contacts has drifted from the app.")) return;
+
+showLoader(true);
+
+const payloadContacts = companyContacts.map(c => {
+    return {
+        resourceName: c.resourceName,
+        name: c.name.replace(/'/g, "\\'"),
+        unit: getEffectiveDept(c)
+    };
+});
+
+const payload = {
+    adminPass: user.pass,
+    structure: companyStructure,
+    contacts: payloadContacts
+};
+
+try {
+    await apiCall('forceSyncContacts', payload);
+    alert("Google Contacts successfully overwritten & synchronized with App data!");
+    window.location.reload();
+} catch (err) {
+    alert("Error syncing contacts: " + err.message);
+    showLoader(false);
+}
+}

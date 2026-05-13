@@ -175,8 +175,8 @@ return { success: true };
 
 function renameUnit(data) {
   if (data._userRole !== 'admin') throw new Error("Unauthorized");
-  var oldName = data.oldName;
-  var newName = data.newName;
+  var oldName = data.oldName.trim();
+  var newName = data.newName.trim().toUpperCase();
   if (!oldName || !newName || oldName === newName) return { success: true };
 
   var props = PropertiesService.getScriptProperties();
@@ -191,31 +191,51 @@ function renameUnit(data) {
   });
   props.setProperty('companyStructure', JSON.stringify(newStructArr));
 
-  // 2. Update Google Contacts Group and Member GivenNames
+  // 2. Google Contacts - Dynamic Group Migration
   var cg = getContactsAndGroups();
-  var groupId = null;
+  var oldGroupId = null;
+  var newGroupId = null;
+  
   for (var grpRes in cg.groupMap) {
-      if (cg.groupMap[grpRes].toUpperCase() === oldName.toUpperCase()) {
-          groupId = grpRes; 
-          break;
-      }
+      if (cg.groupMap[grpRes].toUpperCase() === oldName.toUpperCase()) oldGroupId = grpRes;
+      if (cg.groupMap[grpRes].toUpperCase() === newName) newGroupId = grpRes;
   }
-  if (groupId) {
-      try { People.ContactGroups.update({ contactGroup: { name: newName } }, groupId); } catch(e) {}
-      cg.connections.forEach(function(contact) {
-          var inGroup = false;
-          if (contact.memberships) {
-              contact.memberships.forEach(function(m) {
-                  if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName === groupId) inGroup = true;
-              });
-          }
-          if (inGroup && contact.names && contact.names.length > 0) {
+  
+  if (!newGroupId) {
+      var newGroup = People.ContactGroups.create({ contactGroup: { name: newName } });
+      newGroupId = newGroup.resourceName;
+      cg.groupMap[newGroupId] = newName;
+  }
+  
+  var contactsToMove =[];
+  cg.connections.forEach(function(contact) {
+      var inOldGroup = false;
+      if (contact.memberships) {
+          contact.memberships.forEach(function(m) {
+              if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName === oldGroupId) inOldGroup = true;
+          });
+      }
+      
+      if (inOldGroup) {
+          contactsToMove.push(contact.resourceName);
+          if (contact.names && contact.names.length > 0) {
               var nameObj = contact.names[0];
               var clean = (nameObj.displayName || nameObj.givenName || "").replace(/\s*\(.*?\)\s*/g, '').trim();
               nameObj.givenName = clean + " (Cloud Group : " + newName + ")";
               try { People.People.updateContact(contact, contact.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
           }
-      });
+      }
+  });
+  
+  if (contactsToMove.length > 0) {
+      try { People.ContactGroups.Members.modify({ resourceNamesToAdd: contactsToMove }, newGroupId); } catch(e) {}
+      if (oldGroupId) {
+          try { People.ContactGroups.Members.modify({ resourceNamesToRemove: contactsToMove }, oldGroupId); } catch(e) {}
+      }
+  }
+  
+  if (oldGroupId && oldGroupId !== newGroupId) {
+      try { People.ContactGroups.delete(oldGroupId, { deleteContacts: false }); } catch(e) {}
   }
 
   // 3. Update Calendar Name
@@ -248,6 +268,74 @@ function renameUnit(data) {
           }
       }
   }
+  
+  invalidateContactsCache();
+  return { success: true };
+}
+
+function forceSyncContacts(data) {
+  if (data._userRole !== 'admin') throw new Error("Unauthorized");
+  var cg = getContactsAndGroups();
+  var structure = data.structure ||[]; 
+  var frontendContacts = data.contacts ||[]; 
+  
+  var structureGroupIds = {};
+  structure.forEach(function(unit) {
+      var foundId = null;
+      for (var grpRes in cg.groupMap) {
+          if (cg.groupMap[grpRes].toUpperCase() === unit.toUpperCase()) {
+              foundId = grpRes; break;
+          }
+      }
+      if (!foundId) {
+          var newGroup = People.ContactGroups.create({ contactGroup: { name: unit } });
+          foundId = newGroup.resourceName;
+          cg.groupMap[foundId] = unit;
+      }
+      structureGroupIds[unit.toUpperCase()] = foundId;
+  });
+  
+  frontendContacts.forEach(function(fc) {
+      var contact;
+      try {
+          contact = People.People.get(fc.resourceName, { personFields: 'names,memberships' });
+      } catch(e) { return; } 
+      
+      var targetUnit = (fc.unit || "UNASSIGNED").toUpperCase();
+      var targetGroupId = structureGroupIds[targetUnit] || null;
+      
+      var currentGroupIds =[];
+      if (contact.memberships) {
+          contact.memberships.forEach(function(m) {
+              if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+                  currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
+              }
+          });
+      }
+      
+      var toRemove = currentGroupIds.filter(function(id) { 
+          return id !== targetGroupId && cg.groupMap[id]; 
+      });
+      
+      var toAdd = targetGroupId && currentGroupIds.indexOf(targetGroupId) === -1 ? [fc.resourceName] :[];
+      
+      if (toAdd.length > 0) {
+          try { People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId); } catch(e) {}
+      }
+      if (toRemove.length > 0) {
+          toRemove.forEach(function(gId) { 
+              try { People.ContactGroups.Members.modify({ resourceNamesToRemove: [fc.resourceName] }, gId); } catch(e) {}
+          });
+      }
+      
+      if (contact.names && contact.names.length > 0) {
+          var nameObj = contact.names[0];
+          var cleanName = (fc.name || nameObj.displayName || nameObj.givenName || "").replace(/\s*\(.*?\)\s*/g, '').trim();
+          nameObj.givenName = targetUnit !== "UNASSIGNED" ? cleanName + " (Cloud Group : " + targetUnit + ")" : cleanName;
+          contact.names = [nameObj];
+          try { People.People.updateContact(contact, fc.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
+      }
+  });
   
   invalidateContactsCache();
   return { success: true };

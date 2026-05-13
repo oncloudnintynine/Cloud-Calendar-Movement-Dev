@@ -438,7 +438,7 @@ tailwind.config = {
           <textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
         </div>
         
-        <div id="event-attendees-wrapper" class="relative">
+        <div class="relative">
           <label class="block font-semibold mb-1 text-sm text-blue-700 dark:text-blue-400">Attendees <span class="text-[10px] font-normal text-blue-500 dark:text-blue-500">(Optional)</span></label>
           <div id="event-attendees-chip-container" class="flex flex-wrap gap-1.5 mb-1.5 empty:hidden"></div>
           <input type="text" id="form-event-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-lg py-2 px-3 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800/50 transition text-sm font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('event')">
@@ -830,8 +830,9 @@ tailwind.config = {
          <div id="unassigned-board" class="flex-grow overflow-y-auto p-2 pb-6"></div>
       </div>
 
-      <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
-          <button onclick="saveCompanyStructure()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow transition text-sm border border-transparent">Save Assignments</button>
+      <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20 flex space-x-2">
+          <button onclick="saveCompanyStructure()" class="flex-grow bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow transition text-sm border border-transparent">Save Assignments</button>
+          <button onclick="forceOverwriteContacts()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 rounded-lg shadow transition text-sm border border-transparent" title="100% Overwrite Google Contacts">Force Sync G-Contacts</button>
       </div>
 
     </div>
@@ -868,17 +869,17 @@ tailwind.config = {
 
 </main>
 
-<script src="js/core/config.js?v=48"></script>
-<script src="js/core/state.js?v=48"></script>
-<script src="js/core/api.js?v=48"></script>
-<script src="js/core/auth.js?v=48"></script>
-<script src="js/ui/ui.js?v=48"></script>
-<script src="js/features/calendar.js?v=48"></script>
-<script src="js/features/parade.js?v=48"></script>
-<script src="js/ui/forms.js?v=48"></script>
-<script src="js/ui/picker.js?v=48"></script>
-<script src="js/admin/admin.js?v=48"></script>
-<script src="js/admin/structure.js?v=48"></script> 
-<script src="js/core/app.js?v=48"></script>
+<script src="js/core/config.js?v=49"></script>
+<script src="js/core/state.js?v=49"></script>
+<script src="js/core/api.js?v=49"></script>
+<script src="js/core/auth.js?v=49"></script>
+<script src="js/ui/ui.js?v=49"></script>
+<script src="js/features/calendar.js?v=49"></script>
+<script src="js/features/parade.js?v=49"></script>
+<script src="js/ui/forms.js?v=49"></script>
+<script src="js/ui/picker.js?v=49"></script>
+<script src="js/admin/admin.js?v=49"></script>
+<script src="js/admin/structure.js?v=49"></script> 
+<script src="js/core/app.js?v=49"></script>
 </body>
 </html>
