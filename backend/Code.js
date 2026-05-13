@@ -23,16 +23,16 @@ if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOr
 if (!props.getProperty('typicalEventTypes')) {
 var oldLeaveTypes = JSON.parse(props.getProperty('leaveTypes') || "[]");
 var defaultTypes =[
-  {name: 'Meeting', isEvent: true, defaultLoc: 'Conference Room'},
-  {name: 'Others', isEvent: true},
-  {name: 'Official Trip', isEvent: false},
-  {name: 'Overseas Leave', isEvent: false},
-  {name: 'Local Leave', isEvent: false}
+ {name: 'Meeting', isEvent: true, defaultLoc: 'Conference Room'},
+ {name: 'Others', isEvent: true},
+ {name: 'Official Trip', isEvent: false},
+ {name: 'Overseas Leave', isEvent: false},
+ {name: 'Local Leave', isEvent: false}
 ];
 oldLeaveTypes.forEach(function(lt) {
-  if (!defaultTypes.some(function(dt) { return dt.name === lt; })) {
-    defaultTypes.push({name: lt, isEvent: false});
-  }
+ if (!defaultTypes.some(function(dt) { return dt.name === lt; })) {
+   defaultTypes.push({name: lt, isEvent: false});
+ }
 });
 props.setProperty('typicalEventTypes', JSON.stringify(defaultTypes));
 }
@@ -42,6 +42,10 @@ if (!props.getProperty('kahEmailBody')) props.setProperty('kahEmailBody', 'User 
 
 if (!props.getProperty('gcalTemplate')) props.setProperty('gcalTemplate', '{EventType} - {Name}, {Attendees} {Time}');
 if (!props.getProperty('agendaTemplate')) props.setProperty('agendaTemplate', '{EventType} - {Name} ({Department})');
+if (!props.getProperty('agendaDetailsTemplate')) props.setProperty('agendaDetailsTemplate', 'Time: {Time}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}');
+if (!props.getProperty('infoAllTemplate')) props.setProperty('infoAllTemplate', '{EventType} - {Name} ({Department})');
+if (!props.getProperty('infoAllDetailsTemplate')) props.setProperty('infoAllDetailsTemplate', 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}');
+
 if (!props.getProperty('acronyms')) props.setProperty('acronyms', JSON.stringify({}));
 if (!props.getProperty('customKahGroups')) props.setProperty('customKahGroups', JSON.stringify([]));
 
@@ -79,28 +83,28 @@ var acronymKeys = Object.keys(acronymsObj);
 
 // Sort by length of full text descending to avoid partial replacements of nested words
 acronymKeys.sort(function(a, b) {
-  var fullA = typeof acronymsObj[a] === 'object' ? (acronymsObj[a].full || "") : (acronymsObj[a] || "");
-  var fullB = typeof acronymsObj[b] === 'object' ? (acronymsObj[b].full || "") : (acronymsObj[b] || "");
-  return fullB.length - fullA.length;
+ var fullA = typeof acronymsObj[a] === 'object' ? (acronymsObj[a].full || "") : (acronymsObj[a] || "");
+ var fullB = typeof acronymsObj[b] === 'object' ? (acronymsObj[b].full || "") : (acronymsObj[b] || "");
+ return fullB.length - fullA.length;
 });
 
 for (var i = 0; i < acronymKeys.length; i++) {
-  var key = acronymKeys[i];
-  if (!key) continue;
-  var val = acronymsObj[key];
-  var full = typeof val === 'object' ? val.full : val;
-  var active = typeof val === 'object' ? val.active : true; 
-  
-  if (!active || !full) continue;
+ var key = acronymKeys[i];
+ if (!key) continue;
+ var val = acronymsObj[key];
+ var full = typeof val === 'object' ? val.full : val;
+ var active = typeof val === 'object' ? val.active : true; 
+ 
+ if (!active || !full) continue;
 
-  var escapedFull = full.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-  
-  // Safe boundary application. Avoids regex breaking when full phrases contain punctuation.
-  var prefix = /^[\w\u00C0-\u017F]/.test(full) ? "\\b" : "";
-  var suffix = /[\w\u00C0-\u017F]$/.test(full) ? "\\b" : "";
-  
-  var regex = new RegExp(prefix + escapedFull + suffix, "gi");
-  result = result.replace(regex, key);
+ var escapedFull = full.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+ 
+ // Safe boundary application. Avoids regex breaking when full phrases contain punctuation.
+ var prefix = /^[\w\u00C0-\u017F]/.test(full) ? "\\b" : "";
+ var suffix = /[\w\u00C0-\u017F]$/.test(full) ? "\\b" : "";
+ 
+ var regex = new RegExp(prefix + escapedFull + suffix, "gi");
+ result = result.replace(regex, key);
 }
 return result;
 }
@@ -120,17 +124,17 @@ var responseData = {};
 
 var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'backupCode', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts'];
 if (secureActions.indexOf(action) !== -1) {
-  if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
-  
-  var checkPass = data.adminPass || credentials.pass;
-  var verifiedUser = handleLogin({ password: checkPass });
-  
-  if (verifiedUser.role !== 'admin' && String(verifiedUser.phone) !== String(credentials.phone)) {
-    throw new Error("Unauthorized: Invalid credentials");
-  }
-  
-  data._userRole = verifiedUser.role;
-  data._userPhone = verifiedUser.phone;
+ if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
+ 
+ var checkPass = data.adminPass || credentials.pass;
+ var verifiedUser = handleLogin({ password: checkPass });
+ 
+ if (verifiedUser.role !== 'admin' && String(verifiedUser.phone) !== String(credentials.phone)) {
+   throw new Error("Unauthorized: Invalid credentials");
+ }
+ 
+ data._userRole = verifiedUser.role;
+ data._userPhone = verifiedUser.phone;
 }
 
 if (action === 'login') responseData = handleLogin(data);
