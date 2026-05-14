@@ -72,7 +72,7 @@ To allow GitHub to push updates directly to Google Apps Script automatically, yo
   * Next, run: `clasp login --no-localhost`
   * The terminal will provide a long Google URL. Ctrl+Click (or Cmd+Click) to open it in a new tab.
   * Log in with the Google Account hosting your Apps Script backend and click **Allow**.
-  * Copy the authorization code provided by Google, paste it back into your Codespace terminal, and hit **Enter**.
+  * Copy the resulting URL, paste it back into your Codespace terminal, and hit **Enter**.
   * Run: `cat ~/.clasprc.json`
   * Copy the *entire* JSON output block shown in the terminal. You can now close and delete the Codespace.
 2. **Retrieve Project IDs:**
