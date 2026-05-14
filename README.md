@@ -64,19 +64,24 @@ Cloud Moves is a serverless, Progressive Web App (PWA) built to manage company p
 
 ## 🤖 Step 3: CI/CD Setup (Automated Backend Deployment)
 
-To allow GitHub to push updates directly to Google Apps Script, you must configure `clasp` (Google's CLI tool) and add secrets to your repository.
+To allow GitHub to push updates directly to Google Apps Script automatically, you must generate `clasp` (Google's CLI tool) credentials. You can do this entirely in your browser using **GitHub Codespaces** without needing to install anything locally.
 
-1. **Install and Authenticate Clasp Locally:**
-  * Make sure you have Node.js installed. Run: `npm install -g @google/clasp`
-  * Run: `clasp login`
-  * Log in with the Google Account hosting the Apps Script. This generates a `~/.clasprc.json` file on your computer.
+1. **Generate Clasp Credentials via GitHub Codespaces:**
+  * On your GitHub repository page, click the green **<> Code** button, switch to the **Codespaces** tab, and click **Create codespace on main**. A browser-based VS Code environment will open.
+  * In the terminal at the bottom, run: `npm install -g @google/clasp`
+  * Next, run: `clasp login --no-localhost`
+  * The terminal will provide a long Google URL. Ctrl+Click (or Cmd+Click) to open it in a new tab.
+  * Log in with the Google Account hosting your Apps Script backend and click **Allow**.
+  * Copy the authorization code provided by Google, paste it back into your Codespace terminal, and hit **Enter**.
+  * Run: `cat ~/.clasprc.json`
+  * Copy the *entire* JSON output block shown in the terminal. You can now close and delete the Codespace.
 2. **Retrieve Project IDs:**
-  * **Script ID**: Found in GAS Project Settings (gear icon) under "IDs".
+  * **Script ID**: Found in your GAS Project Settings (gear icon) under "IDs".
   * **Deployment ID**: Found via GAS Deploy -> Manage deployments.
 3. **Configure GitHub Secrets:**
   * Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions**.
   * Add the following Repository Secrets:
-    * `CLASP_CREDS`: Paste the *entire* contents of your local `~/.clasprc.json` file.
+    * `CLASP_CREDS`: Paste the JSON copied from Step 1.
     * `SCRIPT_ID`: Paste your Script ID.
     * `DEPLOYMENT_ID`: Paste your Deployment ID.
 4. **How it works:**
