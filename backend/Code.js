@@ -18,7 +18,7 @@ if (!props.getProperty('kahLimit')) props.setProperty('kahLimit', '50');
 if (!props.getProperty('approvingAuthority')) props.setProperty('approvingAuthority', Session.getActiveUser().getEmail());
 if (!props.getProperty('kahList')) props.setProperty('kahList', JSON.stringify([]));
 if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringify(['dashboard', 'parade-state', 'my-leaves', 'submit-combined']));
-if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order', 'code-backup']));
+if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order']));
 
 if (!props.getProperty('typicalEventTypes')) {
 var oldLeaveTypes = JSON.parse(props.getProperty('leaveTypes') || "[]");
@@ -31,7 +31,7 @@ var defaultTypes =[
 ];
 oldLeaveTypes.forEach(function(lt) {
 if (!defaultTypes.some(function(dt) { return dt.name === lt; })) {
-  defaultTypes.push({name: lt, isEvent: false});
+ defaultTypes.push({name: lt, isEvent: false});
 }
 });
 props.setProperty('typicalEventTypes', JSON.stringify(defaultTypes));
@@ -122,7 +122,7 @@ var data = payload.data || {};
 var credentials = payload.credentials || {};
 var responseData = {};
 
-var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'backupCode', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts'];
+var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts'];
 if (secureActions.indexOf(action) !== -1) {
 if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
 
@@ -130,7 +130,7 @@ var checkPass = data.adminPass || credentials.pass;
 var verifiedUser = handleLogin({ password: checkPass });
 
 if (verifiedUser.role !== 'admin' && String(verifiedUser.phone) !== String(credentials.phone)) {
-  throw new Error("Unauthorized: Invalid credentials");
+ throw new Error("Unauthorized: Invalid credentials");
 }
 
 data._userRole = verifiedUser.role;
@@ -144,7 +144,6 @@ else if (action === 'submitLeave') responseData = submitLeave(data);
 else if (action === 'editLeave') responseData = editLeave(data);
 else if (action === 'getLeaves') responseData = getLeaves(data);
 else if (action === 'cancelLeave') responseData = cancelLeave(data);
-else if (action === 'backupCode') responseData = backupCode(data);
 else if (action === 'registerUser') responseData = registerUser(data);
 else if (action === 'updateUser') responseData = updateUser(data);
 else if (action === 'deleteUser') responseData = deleteUser(data);
