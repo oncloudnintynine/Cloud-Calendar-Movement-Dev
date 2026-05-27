@@ -274,8 +274,11 @@ colors: {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <div>
         <label class="block font-semibold mb-1 text-sm">Location</label>
-        <input type="text" id="form-combined-location" value="Office" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm">
-        <div class="flex items-center space-x-2 mt-2">
+        <select id="form-combined-location" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm cursor-pointer" onchange="toggleMeetingRoomCheckbox('combined')">
+          <option value="Office">Office</option>
+          <option value="Others">Others</option>
+        </select>
+        <div id="combined-meeting-room-wrapper" class="flex items-center space-x-2 mt-2">
           <input type="checkbox" id="form-combined-meeting-room" class="w-4 h-4 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-blue-500">
           <label for="form-combined-meeting-room" class="font-bold text-xs text-blue-700 dark:text-blue-400 cursor-pointer select-none">🏢 Book Cloud Meeting Room</label>
         </div>
@@ -469,8 +472,11 @@ colors: {
   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
     <div>
       <label class="block font-semibold mb-1 text-sm">Location</label>
-      <input type="text" id="form-event-location" value="Office" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm" required>
-      <div class="flex items-center space-x-2 mt-2">
+      <select id="form-event-location" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm cursor-pointer" onchange="toggleMeetingRoomCheckbox('event')" required>
+        <option value="Office">Office</option>
+        <option value="Others">Others</option>
+      </select>
+      <div id="event-meeting-room-wrapper" class="flex items-center space-x-2 mt-2">
         <input type="checkbox" id="form-event-meeting-room" class="w-4 h-4 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-blue-500">
         <label for="form-event-meeting-room" class="font-bold text-xs text-blue-700 dark:text-blue-400 cursor-pointer select-none">🏢 Book Cloud Meeting Room</label>
       </div>
@@ -955,17 +961,17 @@ colors: {
 
 </main>
 
-<script src="js/core/config.js?v=57"></script>
-<script src="js/core/state.js?v=57"></script>
-<script src="js/core/api.js?v=57"></script>
-<script src="js/core/auth.js?v=57"></script>
-<script src="js/ui/ui.js?v=57"></script>
-<script src="js/features/calendar.js?v=57"></script>
-<script src="js/features/parade.js?v=57"></script>
-<script src="js/ui/forms.js?v=57"></script>
-<script src="js/ui/picker.js?v=57"></script>
-<script src="js/admin/admin.js?v=57"></script>
-<script src="js/admin/structure.js?v=57"></script> 
-<script src="js/core/app.js?v=57"></script>
+<script src="js/core/config.js?v=58"></script>
+<script src="js/core/state.js?v=58"></script>
+<script src="js/core/api.js?v=58"></script>
+<script src="js/core/auth.js?v=58"></script>
+<script src="js/ui/ui.js?v=58"></script>
+<script src="js/features/calendar.js?v=58"></script>
+<script src="js/features/parade.js?v=58"></script>
+<script src="js/ui/forms.js?v=58"></script>
+<script src="js/ui/picker.js?v=58"></script>
+<script src="js/admin/admin.js?v=58"></script>
+<script src="js/admin/structure.js?v=58"></script> 
+<script src="js/core/app.js?v=58"></script>
 </body>
 </html>

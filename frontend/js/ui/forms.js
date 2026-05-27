@@ -43,6 +43,21 @@ function toggleCombinedRepeatUntil() {
 toggleRepeatUntil('combined');
 }
 
+function toggleMeetingRoomCheckbox(ctx) {
+const locEl = document.getElementById(`form-${ctx}-location`);
+const wrapper = document.getElementById(`${ctx}-meeting-room-wrapper`);
+const checkbox = document.getElementById(`form-${ctx}-meeting-room`);
+
+if (locEl && wrapper) {
+    if (locEl.value === 'Others') {
+        wrapper.classList.add('hidden-view');
+        if (checkbox) checkbox.checked = false;
+    } else {
+        wrapper.classList.remove('hidden-view');
+    }
+}
+}
+
 function toggleCombinedFields() {
 const typeInput = document.getElementById('form-combined-type');
 if(!typeInput) return;
@@ -70,7 +85,10 @@ leaveFields.classList.add('hidden-view');
 btnInfoAll.classList.remove('hidden-view');
 
 if (!locationInput.value || locationInput.value.trim() === '') {
-locationInput.value = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'Office';
+  let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'Office';
+  if (defLoc !== 'Office' && defLoc !== 'Others') defLoc = 'Others';
+  locationInput.value = defLoc;
+  toggleMeetingRoomCheckbox('combined');
 }
 
 if (val === 'Meeting') {
@@ -255,7 +273,14 @@ if (isEvent) {
 appData[ctx].isAllDay = String(l.IsAllDay).toUpperCase() === 'TRUE';
 appData[ctx].untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(l.EndDate);
 document.getElementById(`form-${ctx}-allday`).checked = appData[ctx].isAllDay;
-document.getElementById(`form-${ctx}-location`).value = l.Location || 'Office';
+
+const locEl = document.getElementById(`form-${ctx}-location`);
+if (locEl) {
+    let val = l.Location || 'Office';
+    if (val !== 'Office' && val !== 'Others') val = 'Others';
+    locEl.value = val;
+    toggleMeetingRoomCheckbox(ctx);
+}
 
 const locDetEl = document.getElementById(`form-${ctx}-location-details`);
 if (locDetEl) locDetEl.value = l.LocationDetails || '';
@@ -303,9 +328,11 @@ if(form) form.reset();
 });['form-leave-remarks', 'form-event-remarks', 'form-combined-remarks'].forEach(id => { 
 const el = document.getElementById(id); 
 if(el) el.style.height='auto'; 
-});['form-event-meeting-room', 'form-combined-meeting-room'].forEach(id => {
-const el = document.getElementById(id);
-if (el) el.checked = false;
+});['event', 'combined'].forEach(ctx => {
+const locEl = document.getElementById(`form-${ctx}-location`);
+if (locEl) { locEl.value = 'Office'; toggleMeetingRoomCheckbox(ctx); }
+const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
+if (meetRoomCb) meetRoomCb.checked = false;
 });
 
 appData.leave.startAMPM = 'AM'; appData.leave.endAMPM = 'PM';
@@ -425,7 +452,7 @@ let country = '';
 let state = '';
 
 const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
-if (meetRoomCb && meetRoomCb.checked) {
+if (meetRoomCb && meetRoomCb.checked && document.getElementById(`form-${ctx}-location`).value !== 'Others') {
    targetDepts.add('Cloud Meeting Room');
 }
 
