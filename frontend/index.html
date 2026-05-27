@@ -76,10 +76,11 @@ colors: {
 
 <div id="slide-menu" class="fixed inset-0 bg-black/60 z-50 hidden-view" onclick="if(event.target.id === 'slide-menu') closeMenu()">
 <div id="slide-menu-panel" class="bg-white dark:bg-darksurface w-72 h-full shadow-2xl flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out">
-<div class="p-5 border-b border-gray-200 dark:border-darkborder flex justify-between items-center">
+<div class="p-5 border-b border-gray-200 dark:border-darkborder flex justify-between items-center shrink-0">
 <span class="font-bold text-blue-600 dark:text-blue-400 text-xl">Menu</span>
 <button onclick="closeMenu()" class="text-gray-500 dark:text-darkmuted p-2 hover:bg-gray-100 dark:hover:bg-darkhover rounded-full transition"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
 </div>
+
 <div class="flex flex-col py-2 overflow-y-auto flex-grow" id="slide-menu-items">
 <button onclick="switchTab('dashboard')" id="menu-dashboard" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">Dashboard</button>
 <button onclick="switchTab('parade-state')" id="menu-parade-state" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">Parade State</button>
@@ -94,10 +95,13 @@ colors: {
   <button onclick="switchTab('admin-structure')" id="menu-admin-structure" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Organisational Structure</button>
   <button onclick="switchTab('admin-event-templates')" id="menu-admin-event-templates" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Event Types & Templates</button>
   <button onclick="switchTab('admin-acronyms')" id="menu-admin-acronyms" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Acronyms / Shortforms</button>
-  
-  <a href="https://oncloudnintynine.github.io/Fail-Safe-Code-Updater/" target="_blank" id="menu-code-updater" class="w-full text-left px-6 py-4 font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-base transition block">Code Backup/Restore/Update ↗</a>
 </div>
 </div>
+
+<div id="menu-maintenance-group" class="hidden border-t border-gray-200 dark:border-darkborder shrink-0 bg-gray-50 dark:bg-darksurface pb-safe">
+  <a href="https://oncloudnintynine.github.io/Fail-Safe-Code-Updater/" target="_blank" class="w-full text-left px-6 py-4 font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-base transition block">App Code Maintenance ↗</a>
+</div>
+
 </div>
 </div>
 
@@ -109,10 +113,14 @@ colors: {
 <h2 class="text-2xl font-bold mb-1 text-center">Welcome</h2>
 <p class="text-center text-sm text-gray-500 dark:text-darkmuted mb-6">Enter your password to continue</p>
 <div id="login-alert" class="hidden bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 text-sm p-3 rounded-xl mb-4 text-center"></div>
-<div class="mb-6 relative">
+<div class="mb-6">
   <label class="block font-medium mb-2">Password</label>
-  <input type="password" id="login-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800/50 pr-12 transition">
-  <button onclick="togglePassword('login-pass', this)" class="absolute right-3 top-9 text-gray-500 dark:text-darkmuted p-1"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+  <div class="relative">
+    <input type="password" id="login-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 pr-12 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800/50 transition">
+    <button type="button" onclick="togglePassword('login-pass', this)" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-darkmuted p-2 focus:outline-none">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+    </button>
+  </div>
 </div>
 <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition text-lg">Login</button>
 <div class="mt-5 text-center">
@@ -570,6 +578,15 @@ colors: {
   </div>
 </div>
 
+<div data-section="dashboard-filter-order" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
+  <div class="flex justify-between items-center mb-3">
+    <h3 class="font-bold text-base text-blue-600 dark:text-blue-400">Dashboard Dropdown Order</h3>
+    <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+  </div>
+  <p class="text-[10px] text-gray-500 mt-1 mb-2 leading-tight font-medium">Drag to sort how departments appear in the dashboard filter list.</p>
+  <div id="dashboard-filter-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+</div>
+
 <div data-section="register-user" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
   <div class="flex justify-between items-center mb-3">
     <h3 class="font-bold text-base text-emerald-600 dark:text-emerald-400">Register New User</h3>
@@ -652,7 +669,7 @@ colors: {
   </div>
   <div class="relative">
     <input type="password" id="set-admin-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 pr-10 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm" placeholder="Leave blank to keep current">
-    <button onclick="togglePassword('set-admin-pass', this)" class="absolute right-2 top-2 text-gray-500 dark:text-darkmuted p-1">
+    <button type="button" onclick="togglePassword('set-admin-pass', this)" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-darkmuted p-1 focus:outline-none">
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
     </button>
   </div>
@@ -961,17 +978,17 @@ colors: {
 
 </main>
 
-<script src="js/core/config.js?v=58"></script>
-<script src="js/core/state.js?v=58"></script>
-<script src="js/core/api.js?v=58"></script>
-<script src="js/core/auth.js?v=58"></script>
-<script src="js/ui/ui.js?v=58"></script>
-<script src="js/features/calendar.js?v=58"></script>
-<script src="js/features/parade.js?v=58"></script>
-<script src="js/ui/forms.js?v=58"></script>
-<script src="js/ui/picker.js?v=58"></script>
-<script src="js/admin/admin.js?v=58"></script>
-<script src="js/admin/structure.js?v=58"></script> 
-<script src="js/core/app.js?v=58"></script>
+<script src="js/core/config.js?v=59"></script>
+<script src="js/core/state.js?v=59"></script>
+<script src="js/core/api.js?v=59"></script>
+<script src="js/core/auth.js?v=59"></script>
+<script src="js/ui/ui.js?v=59"></script>
+<script src="js/features/calendar.js?v=59"></script>
+<script src="js/features/parade.js?v=59"></script>
+<script src="js/ui/forms.js?v=59"></script>
+<script src="js/ui/picker.js?v=59"></script>
+<script src="js/admin/admin.js?v=59"></script>
+<script src="js/admin/structure.js?v=59"></script> 
+<script src="js/core/app.js?v=59"></script>
 </body>
 </html>

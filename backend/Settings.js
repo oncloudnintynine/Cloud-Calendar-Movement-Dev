@@ -66,6 +66,7 @@ acronyms: JSON.parse(props.getProperty('acronyms') || "{}"),
 customKahGroups: JSON.parse(props.getProperty('customKahGroups') || "[]"),
 
 landingPage: props.getProperty('landingPage') || 'dashboard',
+dashboardDeptOrder: JSON.parse(props.getProperty('dashboardDeptOrder') || "[]"),
 menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
 adminSectionsOrder: JSON.parse(props.getProperty('adminSectionsOrder') || "null"),
 userKeyword: props.getProperty('userKeyword') || 'peace',
@@ -105,6 +106,7 @@ if (data.acronyms !== undefined) props.setProperty('acronyms', JSON.stringify(da
 if (data.customKahGroups !== undefined) props.setProperty('customKahGroups', JSON.stringify(data.customKahGroups));
 
 if (data.landingPage !== undefined) props.setProperty('landingPage', data.landingPage);
+if (data.dashboardDeptOrder !== undefined) props.setProperty('dashboardDeptOrder', JSON.stringify(data.dashboardDeptOrder));
 if (data.userKeyword !== undefined) props.setProperty('userKeyword', data.userKeyword);
 if (data.appMode !== undefined) props.setProperty('appMode', data.appMode);
 if (data.companyStructure !== undefined) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));

@@ -95,6 +95,7 @@ window.appInfoAllTemplate = settings.infoAllTemplate !== undefined && settings.i
 window.appInfoAllDetailsTemplate = settings.infoAllDetailsTemplate !== undefined && settings.infoAllDetailsTemplate !== null ? settings.infoAllDetailsTemplate : 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}';
 appMode = settings.appMode || 'combined';
 window.appLandingPage = settings.landingPage || 'dashboard';
+window.appDashboardDeptOrder = settings.dashboardDeptOrder || [];
 
 window.kahPhones = (settings.kahList ||[]).map(k => String(k.phone));
 window.appKahList = settings.kahList ||[];
@@ -119,22 +120,33 @@ if (user.role !== 'admin' && companyContacts.length > 0) {
  }
 }
 
-let allUnits = new Set(companyStructure);
-if (allUnits.size === 0 && companyContacts.length > 0) {
+let allUnits = new Set();
+if(companyStructure) {
+  (Array.isArray(companyStructure) ? companyStructure : Object.keys(companyStructure)).forEach(d => allUnits.add(d));
+}
+if (companyContacts.length > 0) {
 companyContacts.forEach(c => {
  if (c.dept && c.dept !== 'Unassigned') {
-   allUnits.add(c.dept.toUpperCase());
+   c.dept.split(',').forEach(d => allUnits.add(d.trim().toUpperCase()));
  }
 });
-companyStructure = Array.from(allUnits);
 }
+
+companyStructure = Array.from(allUnits);
 // Universal Meeting Room Injection
 allUnits.add('Cloud Meeting Room');
 
 const uniqueDepts = Array.from(allUnits).sort((a, b) => {
+ const idxA = window.appDashboardDeptOrder.indexOf(a);
+ const idxB = window.appDashboardDeptOrder.indexOf(b);
+ 
+ if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+ if (idxA !== -1) return -1;
+ if (idxB !== -1) return 1;
+ 
  if (a.toUpperCase() === 'HQ') return -1;
  if (b.toUpperCase() === 'HQ') return 1;
- if (a === 'Cloud Meeting Room') return -1; // Keep just below HQ
+ if (a === 'Cloud Meeting Room') return -1; 
  return a.localeCompare(b);
 });
 
@@ -185,12 +197,14 @@ fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
 
 if (user.role === 'admin') {
 document.getElementById('menu-admin-group').classList.remove('hidden');
+document.getElementById('menu-maintenance-group').classList.remove('hidden');
 document.getElementById('admin-behalf-leave').classList.remove('hidden-view');
 document.getElementById('admin-behalf-event').classList.remove('hidden-view');
 document.getElementById('admin-behalf-combined').classList.remove('hidden-view');
 if(typeof populateAdminSettingsForm === 'function') populateAdminSettingsForm(settings);
 } else {
 document.getElementById('menu-admin-group').classList.add('hidden');
+document.getElementById('menu-maintenance-group').classList.add('hidden');
 document.getElementById('admin-behalf-leave').classList.add('hidden-view');
 document.getElementById('admin-behalf-event').classList.add('hidden-view');
 document.getElementById('admin-behalf-combined').classList.add('hidden-view');

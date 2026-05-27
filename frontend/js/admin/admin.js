@@ -42,6 +42,23 @@ if (radios) {
    radios.forEach(r => { if(r.value === appMode) r.checked = true; });
 }
 
+let allDepts = new Set(companyStructure);
+if(companyContacts) {
+   companyContacts.forEach(c => {
+      if(c.dept && c.dept !== 'Unassigned') {
+          c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
+      }
+   });
+}
+allDepts.add('Cloud Meeting Room');
+
+tempDashboardDeptOrder = settings.dashboardDeptOrder || [];
+allDepts.forEach(d => {
+   if (!tempDashboardDeptOrder.includes(d)) tempDashboardDeptOrder.push(d);
+});
+tempDashboardDeptOrder = tempDashboardDeptOrder.filter(d => allDepts.has(d));
+renderDashboardFilterOrder();
+
 tempMenuOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
 renderMenuOrder();
 
@@ -65,7 +82,7 @@ renderCustomKahGroups();
 
 tempAdminSectionsOrder = (settings.adminSectionsOrder && settings.adminSectionsOrder.length 
 ? settings.adminSectionsOrder 
-:['landing-page', 'app-mode', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order']).filter(s => s !== 'code-backup');
+:['landing-page', 'app-mode', 'dashboard-filter-order', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order']).filter(s => s !== 'code-backup');
 
 const container = document.getElementById('admin-sections-container');
 if (container) {
@@ -103,6 +120,23 @@ companyContacts = settings.allContacts;
 fuseAllContacts = new Fuse(settings.allContacts, { keys:['name', 'dept', 'phone'], threshold: 0.3 });
 }
 } catch (err) { alertError('login-alert', err.message); }
+}
+
+function renderDashboardFilterOrder() {
+const list = document.getElementById('dashboard-filter-order-list');
+if(!list) return;
+list.innerHTML = tempDashboardDeptOrder.map((id) => `
+<div data-id="${id}" class="flex justify-between items-center bg-white dark:bg-darksurface p-3 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm cursor-grab">
+<div class="flex items-center space-x-3 w-full">
+<svg class="w-5 h-5 text-gray-400 dark:text-darkmuted handle cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+<span class="font-bold text-gray-700 dark:text-darktext">${id}</span>
+</div>
+</div>
+`).join('');
+if(window.dashFilterSortable) window.dashFilterSortable.destroy();
+if (typeof Sortable !== 'undefined') {
+window.dashFilterSortable = new Sortable(list, { animation: 150, handle: '.handle', ghostClass: 'opacity-50', onEnd: function () { tempDashboardDeptOrder = Array.from(list.children).map(el => el.dataset.id); } });
+}
 }
 
 function renderMenuOrder() {
@@ -498,6 +532,7 @@ document.getElementsByName('app-mode').forEach(r => { if(r.checked) selectedMode
 const payload = {
 adminPass: user.pass, newAdminPass: newPass, appMode: selectedMode,
 landingPage: document.getElementById('set-landing-page').value,
+dashboardDeptOrder: tempDashboardDeptOrder,
 userKeyword: document.getElementById('set-user-keyword').value.trim() || 'peace',
 menuOrder: tempMenuOrder,
 adminSectionsOrder: tempAdminSectionsOrder

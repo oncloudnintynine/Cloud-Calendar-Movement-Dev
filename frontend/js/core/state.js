@@ -17,6 +17,7 @@ let adminKAHList =[];
 let customKahGroups =[];
 let tempMenuOrder =[];
 let tempAdminSectionsOrder =[];
+let tempDashboardDeptOrder =[];
 let eventAttendees =[]; 
 let isInfoAll = false;
 
