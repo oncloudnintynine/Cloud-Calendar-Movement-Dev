@@ -422,12 +422,19 @@ showLoader(true);
 
 let targetName = user.name;
 let targetPhone = user.phone;
-let targetDepts = new Set(user.departments ||[]);
+let targetDepts = new Set();
+
+if (user.departments) {
+  user.departments.forEach(d => { if (d) targetDepts.add(d.trim()); });
+}
 
 if (user.role === 'admin' && adminBehalfUser) {
 targetName = adminBehalfUser.name;
 targetPhone = adminBehalfUser.phone;
-targetDepts = new Set([adminBehalfUser.dept]);
+targetDepts = new Set();
+if (adminBehalfUser.dept) {
+    adminBehalfUser.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+}
 } else if (user.role === 'admin' && !adminBehalfUser) {
 alert("Admin: Please select a user to submit on behalf of.");
 showLoader(false); return;
@@ -475,7 +482,9 @@ state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`
 
 if (typeValue === 'Official Trip') {
  eventAttendees.forEach(a => { 
-     if (a.dept !== 'Custom') targetDepts.add(a.dept); 
+     if (a.dept !== 'Custom' && a.dept) {
+         a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+     } 
  });
  finalAttendeesStr = JSON.stringify(eventAttendees);
 }
@@ -494,7 +503,9 @@ eventUntilDate = toLocalISO(appData[ctx].untilD);
 }
 
 eventAttendees.forEach(a => { 
-  if (a.dept !== 'Custom') targetDepts.add(a.dept); 
+  if (a.dept !== 'Custom' && a.dept) {
+      a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+  } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
 }
