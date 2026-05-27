@@ -262,7 +262,7 @@ if (locDetEl) locDetEl.value = l.LocationDetails || '';
 
 const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
 if (meetRoomCb) {
-  meetRoomCb.checked = (l.Department || '').includes('Meeting Room');
+  meetRoomCb.checked = (l.Department || '').includes('Cloud Meeting Room');
 }
 
 document.getElementById(`form-${ctx}-repeat`).value = l.HalfDay || 'NONE'; 
@@ -426,7 +426,7 @@ let state = '';
 
 const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
 if (meetRoomCb && meetRoomCb.checked) {
-   targetDepts.add('Meeting Room');
+   targetDepts.add('Cloud Meeting Room');
 }
 
 if (!isEvent) {

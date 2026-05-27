@@ -129,12 +129,12 @@ companyContacts.forEach(c => {
 companyStructure = Array.from(allUnits);
 }
 // Universal Meeting Room Injection
-allUnits.add('Meeting Room');
+allUnits.add('Cloud Meeting Room');
 
 const uniqueDepts = Array.from(allUnits).sort((a, b) => {
  if (a.toUpperCase() === 'HQ') return -1;
  if (b.toUpperCase() === 'HQ') return 1;
- if (a === 'Meeting Room') return -1; // Keep just below HQ
+ if (a === 'Cloud Meeting Room') return -1; // Keep just below HQ
  return a.localeCompare(b);
 });
 

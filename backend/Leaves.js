@@ -161,9 +161,9 @@ attDepts.forEach(function(d) {
  if (currentActualDepts.indexOf(d) === -1) currentActualDepts.push(d);
 });
 
-if (obj.Department && obj.Department.indexOf('Meeting Room') !== -1) {
-  if (currentActualDepts.indexOf('Meeting Room') === -1) {
-    currentActualDepts.push('Meeting Room');
+if (obj.Department && obj.Department.indexOf('Cloud Meeting Room') !== -1) {
+  if (currentActualDepts.indexOf('Cloud Meeting Room') === -1) {
+    currentActualDepts.push('Cloud Meeting Room');
   }
 }
 
