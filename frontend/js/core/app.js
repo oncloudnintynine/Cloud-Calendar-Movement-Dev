@@ -14,19 +14,19 @@ if (metaTheme) metaTheme.setAttribute('content', wantsDark ? '#121212' : '#fffff
 // Environment Banner Logic
 const devBanner = document.getElementById('dev-banner');
 if (devBanner && ENV !== 'Prod') {
-  devBanner.classList.remove('hidden');
-  devBanner.innerText = `${ENV.toUpperCase()} MODE`;
-  if (ENV === 'Exp') {
-      devBanner.classList.remove('bg-red-600');
-      devBanner.classList.add('bg-purple-600');
-  }
+ devBanner.classList.remove('hidden');
+ devBanner.innerText = `${ENV.toUpperCase()} MODE`;
+ if (ENV === 'Exp') {
+     devBanner.classList.remove('bg-red-600');
+     devBanner.classList.add('bg-purple-600');
+ }
 }
 
 if (user) {
 if (!user.pass) {
-  logout(); 
+ logout(); 
 } else {
-  showApp(); 
+ showApp(); 
 }
 } else {
 showLogin();
@@ -94,6 +94,7 @@ window.appAgendaDetailsTemplate = settings.agendaDetailsTemplate !== undefined &
 window.appInfoAllTemplate = settings.infoAllTemplate !== undefined && settings.infoAllTemplate !== null ? settings.infoAllTemplate : '{EventType} - {Name} ({Department})';
 window.appInfoAllDetailsTemplate = settings.infoAllDetailsTemplate !== undefined && settings.infoAllDetailsTemplate !== null ? settings.infoAllDetailsTemplate : 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}';
 appMode = settings.appMode || 'combined';
+window.appLandingPage = settings.landingPage || 'dashboard';
 
 window.kahPhones = (settings.kahList ||[]).map(k => String(k.phone));
 window.appKahList = settings.kahList ||[];
@@ -103,35 +104,38 @@ companyStructure = settings.companyStructure ? (Array.isArray(settings.companySt
 companyContacts = settings.allContacts ||[];
 
 const typeOptionsHtml = window.appTypicalEventTypes.map(t => `<option value="${t.name}">${t.name}</option>`).join('');['form-leave-type', 'form-event-type', 'form-combined-type'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.innerHTML = typeOptionsHtml;
+ const el = document.getElementById(id);
+ if (el) el.innerHTML = typeOptionsHtml;
 });
 
 const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
 applyMenuOrder(mOrder);
 
 if (user.role !== 'admin' && companyContacts.length > 0) {
-  const myContact = companyContacts.find(c => c.phone == user.phone);
-  if (myContact && myContact.dept) {
-      user.departments = myContact.dept.split(',').map(s=>s.trim());
-      localStorage.setItem('user', JSON.stringify(user));
-  }
+ const myContact = companyContacts.find(c => c.phone == user.phone);
+ if (myContact && myContact.dept) {
+     user.departments = myContact.dept.split(',').map(s=>s.trim());
+     localStorage.setItem('user', JSON.stringify(user));
+ }
 }
 
 let allUnits = new Set(companyStructure);
 if (allUnits.size === 0 && companyContacts.length > 0) {
 companyContacts.forEach(c => {
-  if (c.dept && c.dept !== 'Unassigned') {
-    allUnits.add(c.dept.toUpperCase());
-  }
+ if (c.dept && c.dept !== 'Unassigned') {
+   allUnits.add(c.dept.toUpperCase());
+ }
 });
 companyStructure = Array.from(allUnits);
 }
+// Universal Meeting Room Injection
+allUnits.add('Meeting Room');
 
 const uniqueDepts = Array.from(allUnits).sort((a, b) => {
-  if (a.toUpperCase() === 'HQ') return -1;
-  if (b.toUpperCase() === 'HQ') return 1;
-  return a.localeCompare(b);
+ if (a.toUpperCase() === 'HQ') return -1;
+ if (b.toUpperCase() === 'HQ') return 1;
+ if (a === 'Meeting Room') return -1; // Keep just below HQ
+ return a.localeCompare(b);
 });
 
 const deptNav = document.getElementById('dash-dept-nav');
@@ -159,21 +163,21 @@ fuseAllContacts = new Fuse(companyContacts, { keys:['name', 'dept', 'phone'], th
 
 let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
 uniqueDepts.forEach(dept => {
-  attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group', expandedNames: `All in ${dept}` });
+ attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group', expandedNames: `All in ${dept}` });
 });
 
 window.appCustomKahGroups.forEach(g => {
-  const customNames = g.members.map(phone => {
-      const c = companyContacts.find(contact => String(contact.phone) === String(phone));
-      return c ? c.name : phone;
-  }).join(', ');
-  attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
+ const customNames = g.members.map(phone => {
+     const c = companyContacts.find(contact => String(contact.phone) === String(phone));
+     return c ? c.name : phone;
+ }).join(', ');
+ attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
 });
 
 const kahUnits =[...new Set(window.appKahList.map(k => k.dept))];
 kahUnits.forEach(dept => {
-  const unitNames = window.appKahList.filter(k => k.dept === dept).map(k => k.name).join(', ');
-  attendeeOptions.push({ id: `kah_unit_${dept}`, name: `zz KAH: ${dept}`, dept: dept, type: 'group', expandedNames: unitNames });
+ const unitNames = window.appKahList.filter(k => k.dept === dept).map(k => k.name).join(', ');
+ attendeeOptions.push({ id: `kah_unit_${dept}`, name: `zz KAH: ${dept}`, dept: dept, type: 'group', expandedNames: unitNames });
 });
 
 fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
@@ -196,7 +200,11 @@ await loadLeavesData();
 
 if (typeof toggleCombinedFields === 'function') toggleCombinedFields();
 
-switchTab(user.role === 'admin' ? 'admin' : mOrder[0]); 
+let targetTab = window.appLandingPage;
+if (appMode === 'separated' && targetTab === 'submit-combined') targetTab = 'submit-leave';
+if (appMode === 'combined' && (targetTab === 'submit-leave' || targetTab === 'submit-event')) targetTab = 'submit-combined';
+
+switchTab(user.role === 'admin' ? 'admin' : targetTab); 
 
 } catch(e) {
 console.error("Error loading settings: ", e);
