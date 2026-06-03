@@ -20,7 +20,7 @@ if (!props.getProperty('kahList')) props.setProperty('kahList', JSON.stringify([
 if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringify(['dashboard', 'parade-state', 'my-leaves', 'submit-combined']));
 if (!props.getProperty('landingPage')) props.setProperty('landingPage', 'dashboard');
 if (!props.getProperty('dashboardDeptOrder')) props.setProperty('dashboardDeptOrder', JSON.stringify([]));
-if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['landing-page', 'app-mode', 'dashboard-filter-order', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order']));
+if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['landing-page', 'app-mode', 'dashboard-filter-order', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'contact-format', 'menu-order']));
 
 if (!props.getProperty('typicalEventTypes')) {
 var oldLeaveTypes = JSON.parse(props.getProperty('leaveTypes') || "[]");
@@ -47,6 +47,7 @@ if (props.getProperty('agendaTemplate') === null) props.setProperty('agendaTempl
 if (props.getProperty('agendaDetailsTemplate') === null) props.setProperty('agendaDetailsTemplate', 'Time: {Time}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}');
 if (props.getProperty('infoAllTemplate') === null) props.setProperty('infoAllTemplate', '{EventType} - {Name} ({Department})');
 if (props.getProperty('infoAllDetailsTemplate') === null) props.setProperty('infoAllDetailsTemplate', 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}');
+if (!props.getProperty('contactNameFormat')) props.setProperty('contactNameFormat', '{Name} (Cloud Group : {Unit})');
 
 if (!props.getProperty('acronyms')) props.setProperty('acronyms', JSON.stringify({}));
 if (!props.getProperty('customKahGroups')) props.setProperty('customKahGroups', JSON.stringify([]));
