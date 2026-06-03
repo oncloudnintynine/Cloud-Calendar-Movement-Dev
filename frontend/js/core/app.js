@@ -14,19 +14,19 @@ if (metaTheme) metaTheme.setAttribute('content', wantsDark ? '#121212' : '#fffff
 // Environment Banner Logic
 const devBanner = document.getElementById('dev-banner');
 if (devBanner && ENV !== 'Prod') {
- devBanner.classList.remove('hidden');
- devBanner.innerText = `${ENV.toUpperCase()} MODE`;
- if (ENV === 'Exp') {
-     devBanner.classList.remove('bg-red-600');
-     devBanner.classList.add('bg-purple-600');
- }
+devBanner.classList.remove('hidden');
+devBanner.innerText = `${ENV.toUpperCase()} MODE`;
+if (ENV === 'Exp') {
+    devBanner.classList.remove('bg-red-600');
+    devBanner.classList.add('bg-purple-600');
+}
 }
 
 if (user) {
 if (!user.pass) {
- logout(); 
+logout(); 
 } else {
- showApp(); 
+showApp(); 
 }
 } else {
 showLogin();
@@ -93,9 +93,18 @@ window.appAgendaTemplate = settings.agendaTemplate !== undefined && settings.age
 window.appAgendaDetailsTemplate = settings.agendaDetailsTemplate !== undefined && settings.agendaDetailsTemplate !== null ? settings.agendaDetailsTemplate : 'Time: {Time}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}';
 window.appInfoAllTemplate = settings.infoAllTemplate !== undefined && settings.infoAllTemplate !== null ? settings.infoAllTemplate : '{EventType} - {Name} ({Department})';
 window.appInfoAllDetailsTemplate = settings.infoAllDetailsTemplate !== undefined && settings.infoAllDetailsTemplate !== null ? settings.infoAllDetailsTemplate : 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}';
+window.appContactNameFormat = settings.contactNameFormat || '{Name} (Cloud Group : {Unit})';
 appMode = settings.appMode || 'combined';
 window.appLandingPage = settings.landingPage || 'dashboard';
 window.appDashboardDeptOrder = settings.dashboardDeptOrder || [];
+
+window.formatContactName = function(name, dept) {
+if (!name) return "";
+if (!window.appContactNameFormat) return name;
+let primaryDept = dept ? dept.split(',')[0].trim() : '';
+if (!primaryDept || primaryDept === 'Unassigned' || primaryDept === 'UNASSIGNED') return name;
+return window.appContactNameFormat.replace(/{Name}/g, name).replace(/{Unit}/g, primaryDept);
+};
 
 window.kahPhones = (settings.kahList ||[]).map(k => String(k.phone));
 window.appKahList = settings.kahList ||[];
@@ -105,30 +114,30 @@ companyStructure = settings.companyStructure ? (Array.isArray(settings.companySt
 companyContacts = settings.allContacts ||[];
 
 const typeOptionsHtml = window.appTypicalEventTypes.map(t => `<option value="${t.name}">${t.name}</option>`).join('');['form-leave-type', 'form-event-type', 'form-combined-type'].forEach(id => {
- const el = document.getElementById(id);
- if (el) el.innerHTML = typeOptionsHtml;
+const el = document.getElementById(id);
+if (el) el.innerHTML = typeOptionsHtml;
 });
 
 const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
 applyMenuOrder(mOrder);
 
 if (user.role !== 'admin' && companyContacts.length > 0) {
- const myContact = companyContacts.find(c => c.phone == user.phone);
- if (myContact && myContact.dept) {
-     user.departments = myContact.dept.split(',').map(s=>s.trim());
-     localStorage.setItem('user', JSON.stringify(user));
- }
+const myContact = companyContacts.find(c => c.phone == user.phone);
+if (myContact && myContact.dept) {
+    user.departments = myContact.dept.split(',').map(s=>s.trim());
+    localStorage.setItem('user', JSON.stringify(user));
+}
 }
 
 let allUnits = new Set();
 if(companyStructure) {
-  (Array.isArray(companyStructure) ? companyStructure : Object.keys(companyStructure)).forEach(d => allUnits.add(d));
+ (Array.isArray(companyStructure) ? companyStructure : Object.keys(companyStructure)).forEach(d => allUnits.add(d));
 }
 if (companyContacts.length > 0) {
 companyContacts.forEach(c => {
- if (c.dept && c.dept !== 'Unassigned') {
-   c.dept.split(',').forEach(d => allUnits.add(d.trim().toUpperCase()));
- }
+if (c.dept && c.dept !== 'Unassigned') {
+  c.dept.split(',').forEach(d => allUnits.add(d.trim().toUpperCase()));
+}
 });
 }
 
@@ -137,17 +146,17 @@ companyStructure = Array.from(allUnits);
 allUnits.add('Cloud Meeting Room');
 
 const uniqueDepts = Array.from(allUnits).sort((a, b) => {
- const idxA = window.appDashboardDeptOrder.indexOf(a);
- const idxB = window.appDashboardDeptOrder.indexOf(b);
- 
- if (idxA !== -1 && idxB !== -1) return idxA - idxB;
- if (idxA !== -1) return -1;
- if (idxB !== -1) return 1;
- 
- if (a.toUpperCase() === 'HQ') return -1;
- if (b.toUpperCase() === 'HQ') return 1;
- if (a === 'Cloud Meeting Room') return -1; 
- return a.localeCompare(b);
+const idxA = window.appDashboardDeptOrder.indexOf(a);
+const idxB = window.appDashboardDeptOrder.indexOf(b);
+
+if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+if (idxA !== -1) return -1;
+if (idxB !== -1) return 1;
+
+if (a.toUpperCase() === 'HQ') return -1;
+if (b.toUpperCase() === 'HQ') return 1;
+if (a === 'Cloud Meeting Room') return -1; 
+return a.localeCompare(b);
 });
 
 const deptNav = document.getElementById('dash-dept-nav');
@@ -169,30 +178,34 @@ if (editUserUnit) editUserUnit.innerHTML = regOptions;
 unitsLoaded = true;
 
 if (companyContacts.length > 0) {
+companyContacts.forEach(c => {
+    c.formattedName = window.formatContactName(c.name, c.dept);
+});
+
 const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
 validContactNames = uniqueNames.map(n => n.toLowerCase());
-fuseAllContacts = new Fuse(companyContacts, { keys:['name', 'dept', 'phone'], threshold: 0.3 });
+fuseAllContacts = new Fuse(companyContacts, { keys:['formattedName', 'name', 'dept', 'phone'], threshold: 0.3 });
 
-let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, dept: c.dept, type: 'contact' }));
+let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, formattedName: c.formattedName, dept: c.dept, type: 'contact' }));
 uniqueDepts.forEach(dept => {
- attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, dept: dept, type: 'group', expandedNames: `All in ${dept}` });
+attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, formattedName: `zz All in ${dept}`, dept: dept, type: 'group', expandedNames: `All in ${dept}` });
 });
 
 window.appCustomKahGroups.forEach(g => {
- const customNames = g.members.map(phone => {
-     const c = companyContacts.find(contact => String(contact.phone) === String(phone));
-     return c ? c.name : phone;
- }).join(', ');
- attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
+const customNames = g.members.map(phone => {
+    const c = companyContacts.find(contact => String(contact.phone) === String(phone));
+    return c ? c.name : phone;
+}).join(', ');
+attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, formattedName: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
 });
 
 const kahUnits =[...new Set(window.appKahList.map(k => k.dept))];
 kahUnits.forEach(dept => {
- const unitNames = window.appKahList.filter(k => k.dept === dept).map(k => k.name).join(', ');
- attendeeOptions.push({ id: `kah_unit_${dept}`, name: `zz KAH: ${dept}`, dept: dept, type: 'group', expandedNames: unitNames });
+const unitNames = window.appKahList.filter(k => k.dept === dept).map(k => k.name).join(', ');
+attendeeOptions.push({ id: `kah_unit_${dept}`, name: `zz KAH: ${dept}`, formattedName: `zz KAH: ${dept}`, dept: dept, type: 'group', expandedNames: unitNames });
 });
 
-fuseAttendees = new Fuse(attendeeOptions, { keys:['name'], threshold: 0.3 });
+fuseAttendees = new Fuse(attendeeOptions, { keys:['formattedName', 'name'], threshold: 0.3 });
 }
 
 if (user.role === 'admin') {

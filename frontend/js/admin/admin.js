@@ -36,25 +36,26 @@ safeSet('set-agenda-details-template', settings.agendaDetailsTemplate || 'Time: 
 safeSet('set-infoall-template', settings.infoAllTemplate || '{EventType} - {Name} ({Department})');
 safeSet('set-infoall-details-template', settings.infoAllDetailsTemplate || 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}');
 safeSet('set-landing-page', settings.landingPage || 'dashboard');
+safeSet('set-contact-format', settings.contactNameFormat || '{Name} (Cloud Group : {Unit})');
 
 const radios = document.getElementsByName('app-mode');
 if (radios) {
-   radios.forEach(r => { if(r.value === appMode) r.checked = true; });
+  radios.forEach(r => { if(r.value === appMode) r.checked = true; });
 }
 
 let allDepts = new Set(companyStructure);
 if(companyContacts) {
-   companyContacts.forEach(c => {
-      if(c.dept && c.dept !== 'Unassigned') {
-          c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
-      }
-   });
+  companyContacts.forEach(c => {
+     if(c.dept && c.dept !== 'Unassigned') {
+         c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
+     }
+  });
 }
 allDepts.add('Cloud Meeting Room');
 
 tempDashboardDeptOrder = settings.dashboardDeptOrder || [];
 allDepts.forEach(d => {
-   if (!tempDashboardDeptOrder.includes(d)) tempDashboardDeptOrder.push(d);
+  if (!tempDashboardDeptOrder.includes(d)) tempDashboardDeptOrder.push(d);
 });
 tempDashboardDeptOrder = tempDashboardDeptOrder.filter(d => allDepts.has(d));
 renderDashboardFilterOrder();
@@ -67,11 +68,11 @@ renderTypicalEventTypes();
 
 tempAcronyms = {};
 if (settings.acronyms) {
-  for (let key in settings.acronyms) {
-      let val = settings.acronyms[key];
-      if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
-      else tempAcronyms[key] = val;
-  }
+ for (let key in settings.acronyms) {
+     let val = settings.acronyms[key];
+     if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
+     else tempAcronyms[key] = val;
+ }
 }
 renderAcronyms();
 
@@ -82,25 +83,25 @@ renderCustomKahGroups();
 
 tempAdminSectionsOrder = (settings.adminSectionsOrder && settings.adminSectionsOrder.length 
 ? settings.adminSectionsOrder 
-:['landing-page', 'app-mode', 'dashboard-filter-order', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'menu-order']).filter(s => s !== 'code-backup');
+:['landing-page', 'app-mode', 'dashboard-filter-order', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'contact-format', 'menu-order']).filter(s => s !== 'code-backup');
 
 const container = document.getElementById('admin-sections-container');
 if (container) {
 tempAdminSectionsOrder.forEach(id => {
-  const el = container.querySelector(`[data-section="${id}"]`);
-  if (el) container.appendChild(el);
+ const el = container.querySelector(`[data-section="${id}"]`);
+ if (el) container.appendChild(el);
 });
 
 if (window.adminSectionsSortable) window.adminSectionsSortable.destroy();
 if (typeof Sortable !== 'undefined') {
-    window.adminSectionsSortable = new Sortable(container, {
-      animation: 150,
-      handle: '.section-handle',
-      ghostClass: 'opacity-50',
-      onEnd: function () {
-        tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
-      }
-    });
+   window.adminSectionsSortable = new Sortable(container, {
+     animation: 150,
+     handle: '.section-handle',
+     ghostClass: 'opacity-50',
+     onEnd: function () {
+       tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
+     }
+   });
 }
 }
 } catch(e) {
@@ -117,7 +118,10 @@ populateAdminSettingsForm(settings);
 
 if(settings.allContacts) {
 companyContacts = settings.allContacts;
-fuseAllContacts = new Fuse(settings.allContacts, { keys:['name', 'dept', 'phone'], threshold: 0.3 });
+companyContacts.forEach(c => {
+    c.formattedName = window.formatContactName(c.name, c.dept);
+});
+fuseAllContacts = new Fuse(companyContacts, { keys:['formattedName', 'name', 'dept', 'phone'], threshold: 0.3 });
 }
 } catch (err) { alertError('login-alert', err.message); }
 }
@@ -185,8 +189,8 @@ ${isFixed ? `<div class="w-2 sm:w-0 shrink-0"></div>` : ''}
 
 <div class="flex items-center w-full sm:w-auto gap-2 flex-grow">
 <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="flex-grow sm:flex-grow-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-sm cursor-pointer shrink-0">
-   <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
-   <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
+  <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
+  <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
 </select>
 
 ${locHtml}
@@ -205,12 +209,12 @@ animation: 150,
 handle: '.handle-event-type', 
 ghostClass: 'opacity-50', 
 onEnd: function () { 
-  const newArr =[];
-  Array.from(list.children).forEach(el => {
-    newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
-  });
-  tempTypicalEventTypes = newArr;
-  renderTypicalEventTypes();
+ const newArr =[];
+ Array.from(list.children).forEach(el => {
+   newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
+ });
+ tempTypicalEventTypes = newArr;
+ renderTypicalEventTypes();
 } 
 });
 }
@@ -257,9 +261,9 @@ html += `
 
 <label class="flex items-center cursor-pointer shrink-0 ml-2" title="Toggle Active Status">
 <div class="relative">
-  <input type="checkbox" class="sr-only" ${acr.active ? 'checked' : ''} onchange="toggleAcronymActive('${key}')">
-  <div class="block bg-gray-300 dark:bg-gray-600 w-8 h-5 rounded-full transition-colors ${acr.active ? 'bg-green-500 dark:bg-green-600' : ''}"></div>
-  <div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${acr.active ? 'transform translate-x-3' : ''}"></div>
+ <input type="checkbox" class="sr-only" ${acr.active ? 'checked' : ''} onchange="toggleAcronymActive('${key}')">
+ <div class="block bg-gray-300 dark:bg-gray-600 w-8 h-5 rounded-full transition-colors ${acr.active ? 'bg-green-500 dark:bg-green-600' : ''}"></div>
+ <div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${acr.active ? 'transform translate-x-3' : ''}"></div>
 </div>
 </label>
 
@@ -273,8 +277,8 @@ list.innerHTML = html || '<p class="text-sm text-gray-500 dark:text-darkmuted it
 
 function toggleAcronymActive(key) {
 if (tempAcronyms[key]) {
-  tempAcronyms[key].active = !tempAcronyms[key].active;
-  renderAcronyms();
+ tempAcronyms[key].active = !tempAcronyms[key].active;
+ renderAcronyms();
 }
 }
 
@@ -302,7 +306,7 @@ const resC = document.getElementById('kah-results');
 if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
 const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if(results.length > 0) {
-resC.innerHTML = results.map(c => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')">${c.name} <span class="text-xs text-gray-500 ml-1">(${c.dept})</span></div>`).join('');
+resC.innerHTML = results.map(c => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')"><span class="font-semibold">${c.formattedName}</span></div>`).join('');
 resC.classList.remove('hidden-view');
 } else {
 resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
@@ -353,7 +357,7 @@ html += `<div class="mb-4"><h4 class="font-bold text-lg text-gray-800 dark:text-
 if (grouped[parent]['_direct']) {
 html += `<div class="space-y-1">`;
 grouped[parent]['_direct'].forEach(k => {
-    html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
+   html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
 });
 html += `</div>`;
 }
@@ -362,7 +366,7 @@ for (const child in grouped[parent]) {
 if (child !== '_direct') {
 html += `<h5 class="font-semibold text-sm text-gray-600 dark:text-gray-400 mt-2 mb-1 pl-2 border-l-2 border-blue-400">${child}</h5><div class="space-y-1">`;
 grouped[parent][child].forEach(k => {
-    html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
+   html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
 });
 html += `</div>`;
 }
@@ -378,21 +382,21 @@ if (!container) return;
 container.innerHTML = customKahGroups.map((g, i) => `
 <div class="border border-gray-300 dark:border-darkborder rounded-xl p-3 bg-gray-50 dark:bg-darkinput shadow-sm">
 <div class="flex justify-between items-center mb-2 border-b border-gray-300 dark:border-darkborder pb-1.5">
- <span class="font-bold text-blue-700 dark:text-blue-400 text-base">zz KAH: ${g.name}</span>
- <button onclick="removeCustomKahGroup(${i})" class="text-red-500 hover:text-red-700 text-xs font-bold transition">Delete Group</button>
+<span class="font-bold text-blue-700 dark:text-blue-400 text-base">zz KAH: ${g.name}</span>
+<button onclick="removeCustomKahGroup(${i})" class="text-red-500 hover:text-red-700 text-xs font-bold transition">Delete Group</button>
 </div>
 <div class="space-y-1.5 mb-3">
- ${g.members.map(phone => {
-    const contact = companyContacts.find(c => String(c.phone) === String(phone));
-    const name = contact ? contact.name : phone;
-    const dept = contact ? contact.dept : '';
-    return `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm text-sm"><span class="font-medium truncate">${name} <span class="text-xs text-gray-500 font-normal ml-1">(${dept})</span></span> <button onclick="removeKahGroupMember(${i}, '${phone}')" class="text-red-500 font-bold px-2">&times;</button></div>`;
- }).join('')}
- ${g.members.length === 0 ? '<p class="text-xs text-gray-500 dark:text-darkmuted italic text-center py-1">No members added yet.</p>' : ''}
+${g.members.map(phone => {
+   const contact = companyContacts.find(c => String(c.phone) === String(phone));
+   const name = contact ? contact.name : phone;
+   const dept = contact ? contact.dept : '';
+   return `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm text-sm"><span class="font-medium truncate">${name} <span class="text-xs text-gray-500 font-normal ml-1">(${dept})</span></span> <button onclick="removeKahGroupMember(${i}, '${phone}')" class="text-red-500 font-bold px-2">&times;</button></div>`;
+}).join('')}
+${g.members.length === 0 ? '<p class="text-xs text-gray-500 dark:text-darkmuted italic text-center py-1">No members added yet.</p>' : ''}
 </div>
 <div class="relative">
- <input type="text" id="kah-group-search-${i}" placeholder="Add personnel to group..." class="w-full text-sm py-1.5 px-3 border-2 border-gray-300 dark:border-gray-500 rounded-lg outline-none shadow-sm focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white transition" autocomplete="off" onkeyup="searchKahGroupMember(${i})">
- <div id="kah-group-results-${i}" class="absolute z-40 w-full bg-white dark:bg-darksurface border-x border-b border-gray-300 dark:border-darkborder rounded-b-lg shadow-xl max-h-32 overflow-y-auto hidden-view"></div>
+<input type="text" id="kah-group-search-${i}" placeholder="Add personnel to group..." class="w-full text-sm py-1.5 px-3 border-2 border-gray-300 dark:border-gray-500 rounded-lg outline-none shadow-sm focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white transition" autocomplete="off" onkeyup="searchKahGroupMember(${i})">
+<div id="kah-group-results-${i}" class="absolute z-40 w-full bg-white dark:bg-darksurface border-x border-b border-gray-300 dark:border-darkborder rounded-b-lg shadow-xl max-h-32 overflow-y-auto hidden-view"></div>
 </div>
 </div>
 `).join('');
@@ -423,7 +427,7 @@ if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
 
 const results = fuseAllContacts.search(q).slice(0, 4).map(r => r.item);
 if(results.length > 0) {
-resC.innerHTML = results.map(c => `<div class="p-2 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover text-sm" onclick="addKahGroupMember(${idx}, '${c.phone}')"><span class="font-semibold">${c.name}</span> <span class="text-xs text-gray-500 ml-1">(${c.dept})</span></div>`).join('');
+resC.innerHTML = results.map(c => `<div class="p-2 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover text-sm" onclick="addKahGroupMember(${idx}, '${c.phone}')"><span class="font-semibold">${c.formattedName}</span></div>`).join('');
 resC.classList.remove('hidden-view');
 } else {
 resC.innerHTML = `<div class="p-2 text-gray-500 text-sm">No match found</div>`; resC.classList.remove('hidden-view');
@@ -449,7 +453,7 @@ if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
 
 const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if(results.length > 0) {
-resC.innerHTML = results.map(c => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-400" onclick="selectUserToManage('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}', '${c.birthday || ''}')"><span class="font-semibold">${c.name}</span> <span class="text-xs opacity-75 ml-1">(${c.dept})</span></div>`).join('');
+resC.innerHTML = results.map(c => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-400" onclick="selectUserToManage('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}', '${c.birthday || ''}')"><span class="font-semibold">${c.formattedName}</span></div>`).join('');
 resC.classList.remove('hidden-view');
 } else {
 resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
@@ -533,6 +537,7 @@ const payload = {
 adminPass: user.pass, newAdminPass: newPass, appMode: selectedMode,
 landingPage: document.getElementById('set-landing-page').value,
 dashboardDeptOrder: tempDashboardDeptOrder,
+contactNameFormat: document.getElementById('set-contact-format').value.trim() || '{Name} (Cloud Group : {Unit})',
 userKeyword: document.getElementById('set-user-keyword').value.trim() || 'peace',
 menuOrder: tempMenuOrder,
 adminSectionsOrder: tempAdminSectionsOrder
