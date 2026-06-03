@@ -7,13 +7,13 @@ isInfoAll = forceState !== undefined ? forceState : !isInfoAll;['form-event-info
 const btn = document.getElementById(id);
 if(!btn) return;
 if(isInfoAll) {
-   btn.innerHTML = '📢 Info All (ON)';
-   btn.classList.add('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
-   btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
+  btn.innerHTML = '📢 Info All (ON)';
+  btn.classList.add('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
+  btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 } else {
-   btn.innerHTML = 'Info All';
-   btn.classList.remove('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
-   btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
+  btn.innerHTML = 'Info All';
+  btn.classList.remove('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
+  btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 }
 });
 }
@@ -49,12 +49,12 @@ const wrapper = document.getElementById(`${ctx}-meeting-room-wrapper`);
 const checkbox = document.getElementById(`form-${ctx}-meeting-room`);
 
 if (locEl && wrapper) {
-   if (locEl.value === 'Others') {
-       wrapper.classList.add('hidden-view');
-       if (checkbox) checkbox.checked = false;
-   } else {
-       wrapper.classList.remove('hidden-view');
-   }
+  if (locEl.value === 'Others') {
+      wrapper.classList.add('hidden-view');
+      if (checkbox) checkbox.checked = false;
+  } else {
+      wrapper.classList.remove('hidden-view');
+  }
 }
 }
 
@@ -85,20 +85,20 @@ leaveFields.classList.add('hidden-view');
 btnInfoAll.classList.remove('hidden-view');
 
 if (!locationInput.value || locationInput.value.trim() === '') {
- let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'Office';
- if (defLoc !== 'Office' && defLoc !== 'Others') defLoc = 'Others';
- locationInput.value = defLoc;
- toggleMeetingRoomCheckbox('combined');
+let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'Office';
+if (defLoc !== 'Office' && defLoc !== 'Others') defLoc = 'Others';
+locationInput.value = defLoc;
+toggleMeetingRoomCheckbox('combined');
 }
 
 if (val === 'Meeting') {
- remarksInput.required = true;
- remarksInput.placeholder = "Enter meeting agenda/description (Required)";
- remarksLabel.innerHTML = 'Meeting Description <span class="text-red-500">*</span>';
+remarksInput.required = true;
+remarksInput.placeholder = "Enter meeting agenda/description (Required)";
+remarksLabel.innerHTML = 'Meeting Description <span class="text-red-500">*</span>';
 } else {
- remarksInput.required = false;
- remarksInput.placeholder = "";
- remarksLabel.innerHTML = 'Remarks <span class="text-[10px] font-normal text-gray-500">(Optional)</span>';
+remarksInput.required = false;
+remarksInput.placeholder = "";
+remarksLabel.innerHTML = 'Remarks <span class="text-[10px] font-normal text-gray-500">(Optional)</span>';
 }
 } else {
 eventFields.classList.add('hidden-view');
@@ -119,11 +119,11 @@ overseas.classList.add('hidden-view'); cInput.required = false;
 const leaveTimeStart = document.getElementById('combined-leave-time-start');
 const leaveTimeEnd = document.getElementById('combined-leave-time-end');
 if (val === 'Official Trip') {
- if(leaveTimeStart) leaveTimeStart.classList.add('hidden-view');
- if(leaveTimeEnd) leaveTimeEnd.classList.add('hidden-view');
+if(leaveTimeStart) leaveTimeStart.classList.add('hidden-view');
+if(leaveTimeEnd) leaveTimeEnd.classList.add('hidden-view');
 } else {
- if(leaveTimeStart) leaveTimeStart.classList.remove('hidden-view');
- if(leaveTimeEnd) leaveTimeEnd.classList.remove('hidden-view');
+if(leaveTimeStart) leaveTimeStart.classList.remove('hidden-view');
+if(leaveTimeEnd) leaveTimeEnd.classList.remove('hidden-view');
 }
 }
 }
@@ -145,7 +145,7 @@ const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(c => `
 <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/30" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
- <span class="font-semibold text-emerald-800 dark:text-emerald-300">${c.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${c.dept})</span>
+<span class="font-semibold text-emerald-800 dark:text-emerald-300">${c.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${c.dept})</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
@@ -190,7 +190,7 @@ const results = fuseAttendees.search(q).slice(0, 6).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(item => `
 <div class="p-3 border-b border-gray-200 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}')">
- <span class="font-semibold text-blue-800 dark:text-blue-300">${item.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${item.dept})</span>
+<span class="font-semibold text-blue-800 dark:text-blue-300">${item.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${item.dept})</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
@@ -220,8 +220,8 @@ const c = document.getElementById(`${ctx}-attendees-chip-container`);
 if(c) {
 c.innerHTML = eventAttendees.map(a => `
 <div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-lg px-2 py-1 text-sm font-semibold shadow-sm">
- ${a.name}
- <button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
+${a.name}
+<button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
 </div>
 `).join('');
 }
@@ -257,13 +257,13 @@ if (isEvent || l.LeaveType === 'Official Trip') {
 eventAttendees =[];
 if(l.Attendees) {
 try {
- eventAttendees = JSON.parse(l.Attendees);
+eventAttendees = JSON.parse(l.Attendees);
 } catch(e) {
- const savedPhones = String(l.Attendees).split(',');
- savedPhones.forEach(ph => {
-   const contact = companyContacts.find(c => String(c.phone) === String(ph));
-   if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, dept: contact.dept, type: 'contact' });
- });
+const savedPhones = String(l.Attendees).split(',');
+savedPhones.forEach(ph => {
+  const contact = companyContacts.find(c => String(c.phone) === String(ph));
+  if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, dept: contact.dept, type: 'contact' });
+});
 }
 }
 renderAttendees(ctx);
@@ -276,10 +276,10 @@ document.getElementById(`form-${ctx}-allday`).checked = appData[ctx].isAllDay;
 
 const locEl = document.getElementById(`form-${ctx}-location`);
 if (locEl) {
-   let val = l.Location || 'Office';
-   if (val !== 'Office' && val !== 'Others') val = 'Others';
-   locEl.value = val;
-   toggleMeetingRoomCheckbox(ctx);
+  let val = l.Location || 'Office';
+  if (val !== 'Office' && val !== 'Others') val = 'Others';
+  locEl.value = val;
+  toggleMeetingRoomCheckbox(ctx);
 }
 
 const locDetEl = document.getElementById(`form-${ctx}-location-details`);
@@ -287,7 +287,7 @@ if (locDetEl) locDetEl.value = l.LocationDetails || '';
 
 const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
 if (meetRoomCb) {
- meetRoomCb.checked = (l.Department || '').includes('Cloud Meeting Room');
+meetRoomCb.checked = (l.Department || '').includes('Cloud Meeting Room');
 }
 
 document.getElementById(`form-${ctx}-repeat`).value = l.HalfDay || 'NONE'; 
@@ -417,15 +417,13 @@ if(timeEnd) timeEnd.classList.remove('hidden-view');
 }
 }
 
-async function submitForm(ctx) {
-showLoader(true);
-
+function submitForm(ctx) {
 let targetName = user.name;
 let targetPhone = user.phone;
 let targetDepts = new Set();
 
 if (user.departments) {
- user.departments.forEach(d => { if (d) targetDepts.add(d.trim()); });
+user.departments.forEach(d => { if (d) targetDepts.add(d.trim()); });
 }
 
 if (user.role === 'admin' && adminBehalfUser) {
@@ -433,11 +431,11 @@ targetName = adminBehalfUser.name;
 targetPhone = adminBehalfUser.phone;
 targetDepts = new Set();
 if (adminBehalfUser.dept) {
-   adminBehalfUser.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+  adminBehalfUser.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 }
 } else if (user.role === 'admin' && !adminBehalfUser) {
 alert("Admin: Please select a user to submit on behalf of.");
-showLoader(false); return;
+return;
 }
 
 const typeValue = document.getElementById(`form-${ctx}-type`) ? document.getElementById(`form-${ctx}-type`).value : document.getElementById(`form-${ctx}-name`).value;
@@ -450,8 +448,8 @@ const endCopy = new Date(appData[ctx].endD);
 
 // STRICT ZERO-OUT FOR NON-EVENTS
 if (!isEvent) {
-  startCopy.setHours(0, 0, 0, 0);
-  endCopy.setHours(0, 0, 0, 0);
+ startCopy.setHours(0, 0, 0, 0);
+ endCopy.setHours(0, 0, 0, 0);
 }
 
 const toLocalISO = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 19);
@@ -470,7 +468,7 @@ let state = '';
 
 const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
 if (meetRoomCb && meetRoomCb.checked && document.getElementById(`form-${ctx}-location`).value !== 'Others') {
-  targetDepts.add('Cloud Meeting Room');
+ targetDepts.add('Cloud Meeting Room');
 }
 
 if (!isEvent) {
@@ -479,12 +477,12 @@ calculatedHalfDay = 'None';
 } else {
 const isSameDay = startCopy.toDateString() === endCopy.toDateString();
 if (isSameDay) {
- if (appData[ctx].startAMPM === 'AM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'AM';
- else if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'PM') calculatedHalfDay = 'PM';
+if (appData[ctx].startAMPM === 'AM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'AM';
+else if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'PM') calculatedHalfDay = 'PM';
 } else {
- if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'Start PM, End AM';
- else if (appData[ctx].startAMPM === 'PM') calculatedHalfDay = 'Start PM';
- else if (appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'End AM';
+if (appData[ctx].startAMPM === 'PM' && appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'Start PM, End AM';
+else if (appData[ctx].startAMPM === 'PM') calculatedHalfDay = 'Start PM';
+else if (appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'End AM';
 }
 }
 country = document.getElementById(`form-${ctx}-country`) ? document.getElementById(`form-${ctx}-country`).value : '';
@@ -492,9 +490,9 @@ state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`
 
 if (typeValue === 'Official Trip') {
 eventAttendees.forEach(a => { 
-    if (a.dept !== 'Custom' && a.dept) {
-        a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
-    } 
+   if (a.dept !== 'Custom' && a.dept) {
+       a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+   } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
 }
@@ -513,15 +511,18 @@ eventUntilDate = toLocalISO(appData[ctx].untilD);
 }
 
 eventAttendees.forEach(a => { 
- if (a.dept !== 'Custom' && a.dept) {
-     a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
- } 
+if (a.dept !== 'Custom' && a.dept) {
+    a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+} 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
 }
 
+const isEdit = !!currentEditId;
+const targetId = currentEditId || generateLocalUUID();
+
 const payload = {
-id: currentEditId, name: targetName, phone: targetPhone, departments: Array.from(targetDepts),
+id: targetId, name: targetName, phone: targetPhone, departments: Array.from(targetDepts),
 leaveType: typeValue,
 startDate: sDate, endDate: eDate, halfDay: calculatedHalfDay, 
 coveringPerson: '',
@@ -536,31 +537,64 @@ isAllDay: eventIsAllDay,
 untilDate: eventUntilDate
 };
 
-try {
-const action = currentEditId ? 'editLeave' : 'submitLeave';
-const res = await apiCall(action, payload);
+// Optimistic UI Update
+const localMock = {
+ID: targetId,
+Timestamp: new Date().toISOString(),
+Phone: targetPhone,
+Name: targetName,
+Department: Array.from(targetDepts).join(','),
+LeaveType: typeValue,
+StartDate: sDate,
+EndDate: eDate,
+HalfDay: calculatedHalfDay,
+CoveringPerson: '',
+Country: country,
+State: state,
+Remarks: document.getElementById(`form-${ctx}-remarks`).value,
+Status: 'Pending (Syncing...)',
+EventIDs: '',
+Location: loc,
+LocationDetails: locDetails,
+Attendees: finalAttendeesStr,
+InfoAll: finalInfoAll ? 'TRUE' : 'FALSE',
+IsAllDay: eventIsAllDay ? 'TRUE' : 'FALSE',
+UntilDate: eventUntilDate
+};
 
-await loadLeavesData(); 
-const wasEdit = currentEditId;
-cancelEditMode(); 
-
-alert(res.status.includes('Cal Updated') || res.status.includes('Approved') ? `Record successfully ${wasEdit ? 'updated' : 'submitted'}!` : "Record marked as Pending due to constraints. Admin notified.");
-} catch (err) { 
-alert("Error: " + err.message); 
-} finally { 
-showLoader(false); 
+if (isEdit) {
+const existingIdx = allLeaves.findIndex(l => l.ID === targetId);
+if (existingIdx !== -1) {
+    allLeaves[existingIdx] = localMock;
 }
+} else {
+allLeaves.push(localMock);
 }
 
-async function cancelLeave(id, targetPhone) {
+window.agendaDirty = true;
+window.myAgendaDirty = true;
+
+renderDashboard();
+renderMyLeaves();
+
+// Automatically drop user back into dashboard seamlessly
+cancelEditMode();
+
+queueSyncAction(isEdit ? 'editLeave' : 'submitLeave', payload);
+}
+
+function cancelLeave(id, targetPhone) {
 if(!confirm("Are you sure you want to cancel this record?")) return;
-showLoader(true);
-try { 
-await apiCall('cancelLeave', { id: id, phone: targetPhone || user.phone }); 
-await loadLeavesData(); 
-} catch (err) {
-console.error(err);
-} finally { 
-showLoader(false); 
+
+// Optimistic UI Cancel
+const existingIdx = allLeaves.findIndex(l => l.ID === id);
+if (existingIdx !== -1) {
+allLeaves[existingIdx].Status = 'Cancelled';
+window.agendaDirty = true;
+window.myAgendaDirty = true;
+renderDashboard();
+renderMyLeaves();
 }
+
+queueSyncAction('cancelLeave', { id: id, phone: targetPhone || user.phone });
 }
