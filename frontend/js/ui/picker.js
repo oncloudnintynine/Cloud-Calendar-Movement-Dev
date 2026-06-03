@@ -22,10 +22,10 @@ if(!wrapper) return;
 const wheels = Array.from(wrapper.querySelectorAll('.wheel-container'));
 
 const getVal = (wheel) => {
- if(!wheel) return null;
- const items = wheel.querySelectorAll('.wheel-item');
- const centerIdx = Math.round(wheel.scrollTop / 40);
- return items[centerIdx] ? parseInt(items[centerIdx].dataset.val) : null;
+if(!wheel) return null;
+const items = wheel.querySelectorAll('.wheel-item');
+const centerIdx = Math.round(wheel.scrollTop / 40);
+return items[centerIdx] ? parseInt(items[centerIdx].dataset.val) : null;
 };
 
 const dayWheel = wheels.find(w => w.dataset.type === 'day');
@@ -45,13 +45,13 @@ appData[activePicker.ctx][activePicker.field + 'D'] = finalDate;
 appData[activePicker.ctx][activePicker.field + 'Selected'] = true;
 
 if (activePicker.ctx === 'parade') {
-   renderParadeState();
+  renderParadeState();
 } else {
-   if (activePicker.field === 'start') {
-     if (finalDate > appData[activePicker.ctx].endD) {
-       appData[activePicker.ctx].endD = new Date(finalDate);
-     }
-   }
+  if (activePicker.field === 'start') {
+    if (finalDate > appData[activePicker.ctx].endD) {
+      appData[activePicker.ctx].endD = new Date(finalDate);
+    }
+  }
 }
 
 updateButtonLabels(); 
@@ -73,7 +73,8 @@ const baseYear = isBirthday ? (new Date().getFullYear() - 99) : 2024;
 const years = Array.from({length: yearsLen}, (_, i) => ({ val: baseYear+i, label: baseYear+i }));
 
 const hours = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
-const mins = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') }));
+const min5 = Math.floor(cv.getMinutes() / 5) * 5;
+const mins = Array.from({length: 12}, (_, i) => ({ val: i*5, label: String(i*5).padStart(2,'0') }));
 
 const dw = createWheel(wrapper, 'day', days, cv.getDate());
 dw.dataset.maxDays = initialMaxDays;
@@ -81,12 +82,12 @@ createWheel(wrapper, 'month', months, cv.getMonth());
 createWheel(wrapper, 'year', years, cv.getFullYear());
 
 if (activePicker.type === 'datetime') {
- const sep = document.createElement('div');
- sep.className = 'w-px bg-gray-300 dark:bg-darkborder mx-2 h-3/4 my-auto relative z-20';
- wrapper.appendChild(sep);
+const sep = document.createElement('div');
+sep.className = 'w-px bg-gray-300 dark:bg-darkborder mx-2 h-3/4 my-auto relative z-20';
+wrapper.appendChild(sep);
 
- createWheel(wrapper, 'hour', hours, cv.getHours());
- createWheel(wrapper, 'min', mins, cv.getMinutes());
+createWheel(wrapper, 'hour', hours, cv.getHours());
+createWheel(wrapper, 'min', mins, min5);
 }
 }
 
@@ -96,10 +97,10 @@ const loops = 3;
 let html = `<div style="height: 76px;"></div>`; 
 let targetScrollIndex = 0;
 for (let loop = 0; loop < loops; loop++) {
- dataArr.forEach(item => {
-   if (loop === Math.floor(loops/2) && item.val === currentVal) targetScrollIndex = (loop * dataArr.length) + dataArr.indexOf(item);
-   html += `<div class="wheel-item text-xl cursor-pointer select-none flex items-center justify-center h-[40px]" data-val="${item.val}">${item.label}</div>`;
- });
+dataArr.forEach(item => {
+  if (loop === Math.floor(loops/2) && item.val === currentVal) targetScrollIndex = (loop * dataArr.length) + dataArr.indexOf(item);
+  html += `<div class="wheel-item text-xl cursor-pointer select-none flex items-center justify-center h-[40px]" data-val="${item.val}">${item.label}</div>`;
+});
 }
 html += `<div style="height: 76px;"></div>`;
 
@@ -107,9 +108,9 @@ container.style.scrollBehavior = 'auto';
 container.innerHTML = html; 
 
 requestAnimationFrame(() => {
- container.scrollTop = targetScrollIndex * 40;
- updateActiveItem(container);
- setTimeout(() => { container.style.scrollBehavior = 'smooth'; }, 100);
+container.scrollTop = targetScrollIndex * 40;
+updateActiveItem(container);
+setTimeout(() => { container.style.scrollBehavior = 'smooth'; }, 100);
 });
 }
 
@@ -118,10 +119,10 @@ const wrapperDiv = document.createElement('div');
 wrapperDiv.className = 'flex flex-col items-center flex-1 h-full relative z-10 min-w-0';
 
 if(type === 'hour' || type === 'min') {
-   const lbl = document.createElement('div');
-   lbl.className = 'absolute top-1 text-[11px] font-bold text-gray-400 dark:text-darkmuted z-30 pointer-events-none w-full text-center bg-gradient-to-b from-gray-50 dark:from-darkinput to-transparent pb-3 pt-1';
-   lbl.innerText = type === 'hour' ? 'HH' : 'MM';
-   wrapperDiv.appendChild(lbl);
+  const lbl = document.createElement('div');
+  lbl.className = 'absolute top-1 text-[11px] font-bold text-gray-400 dark:text-darkmuted z-30 pointer-events-none w-full text-center bg-gradient-to-b from-gray-50 dark:from-darkinput to-transparent pb-3 pt-1';
+  lbl.innerText = type === 'hour' ? 'HH' : 'MM';
+  wrapperDiv.appendChild(lbl);
 }
 
 const container = document.createElement('div');
@@ -135,29 +136,87 @@ wrapperDiv.appendChild(container);
 let scrollTimeout;
 let lastCenterIdx = -1;
 
+// Pointer Drag Events for Desktop UX
+let isDragging = false;
+let wasDragged = false;
+let startY = 0;
+let startScrollTop = 0;
+
+container.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    isDragging = true;
+    wasDragged = false;
+    container.style.scrollBehavior = 'auto';
+    container.style.scrollSnapType = 'none';
+    startY = e.pageY;
+    startScrollTop = container.scrollTop;
+});
+
+const stopDrag = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    container.style.scrollSnapType = 'y mandatory';
+    
+    // Snap to nearest
+    const currentIdx = Math.round(container.scrollTop / 40);
+    container.style.scrollBehavior = 'smooth';
+    container.scrollTop = currentIdx * 40;
+};
+
+container.addEventListener('pointerleave', stopDrag);
+container.addEventListener('pointerup', stopDrag);
+container.addEventListener('pointercancel', stopDrag);
+
+container.addEventListener('pointermove', (e) => {
+    if (!isDragging || e.pointerType !== 'mouse') return;
+    e.preventDefault();
+    const y = e.pageY;
+    const walk = (y - startY) * 1.5;
+    if (Math.abs(walk) > 5) wasDragged = true;
+    container.scrollTop = startScrollTop - walk;
+});
+
+// Click to center functionality
+container.addEventListener('click', (e) => {
+    if (wasDragged) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+    }
+    const item = e.target.closest('.wheel-item');
+    if (!item) return;
+    const allItems = Array.from(container.querySelectorAll('.wheel-item'));
+    const idx = allItems.indexOf(item);
+    if (idx !== -1) {
+        container.style.scrollBehavior = 'smooth';
+        container.scrollTop = idx * 40;
+    }
+});
+
 container.addEventListener('scroll', () => {
- const currentIdx = Math.round(container.scrollTop / 40);
+if (isDragging) return;
+const currentIdx = Math.round(container.scrollTop / 40);
 
- if (lastCenterIdx !== -1 && lastCenterIdx !== currentIdx) {
-   if (navigator.vibrate) navigator.vibrate(20);
- }
- lastCenterIdx = currentIdx;
+if (lastCenterIdx !== -1 && lastCenterIdx !== currentIdx) {
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+lastCenterIdx = currentIdx;
 
- clearTimeout(scrollTimeout);
- scrollTimeout = setTimeout(() => {
-   const len = parseInt(container.dataset.len);
-   const loops = 3; 
-   
-   // Recenter if nearing edges
-   if (currentIdx < len || currentIdx > (len * loops) - len) {
-     const middleBase = Math.floor(loops/2) * len;
-     container.style.scrollBehavior = 'auto'; 
-     container.scrollTop = (middleBase + (currentIdx % len)) * 40;
-     setTimeout(() => container.style.scrollBehavior = 'smooth', 50);
-   }
-   updateActiveItem(container);
-   if (type !== 'min') adjustWheels();
- }, 100);
+clearTimeout(scrollTimeout);
+scrollTimeout = setTimeout(() => {
+  const len = parseInt(container.dataset.len);
+  const loops = 3; 
+  
+  // Recenter if nearing edges
+  if (currentIdx < len || currentIdx > (len * loops) - len) {
+    const middleBase = Math.floor(loops/2) * len;
+    container.style.scrollBehavior = 'auto'; 
+    container.scrollTop = (middleBase + (currentIdx % len)) * 40;
+    setTimeout(() => container.style.scrollBehavior = 'smooth', 50);
+  }
+  updateActiveItem(container);
+  if (type !== 'min') adjustWheels();
+}, 100);
 });
 return container;
 }
@@ -175,10 +234,10 @@ const minWheel = wheels.find(w => w.dataset.type === 'min');
 if (!dayWheel || !monthWheel || !yearWheel) return;
 
 const getVal = (wheel) => {
- if(!wheel) return null;
- const items = wheel.querySelectorAll('.wheel-item');
- const centerIdx = Math.round(wheel.scrollTop / 40);
- return items[centerIdx] ? parseInt(items[centerIdx].dataset.val) : null;
+if(!wheel) return null;
+const items = wheel.querySelectorAll('.wheel-item');
+const centerIdx = Math.round(wheel.scrollTop / 40);
+return items[centerIdx] ? parseInt(items[centerIdx].dataset.val) : null;
 };
 
 let y = getVal(yearWheel);
@@ -192,63 +251,66 @@ if (m === null || y === null || d === null) return;
 let minM = 0, minD = 1, minH = 0, minMin = 0;
 
 if (activePicker.field === 'end' && activePicker.ctx !== 'parade') {
-   const startD = appData[activePicker.ctx].startD;
-   
-   if (y < startD.getFullYear()) {
-       y = startD.getFullYear();
-       populateWheel(yearWheel, Array.from({length: 15}, (_, i) => ({ val: Math.max(2024, y)+i, label: Math.max(2024, y)+i })), y);
-   }
-   
-   if (y === startD.getFullYear()) {
-       minM = startD.getMonth();
-       if (m < minM) {
-           m = minM;
-           const monthsArr = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
-           monthWheel.dataset.minVal = minM;
-           populateWheel(monthWheel, monthsArr, m);
-       }
-       
-       if (m === minM) {
-           minD = startD.getDate();
-           if (d < minD) d = minD;
-           
-           if (activePicker.type === 'datetime' && d === minD) {
-               minH = startD.getHours();
-               if (h < minH) {
-                   h = minH;
-                   if(hourWheel) {
-                     hourWheel.dataset.minVal = minH;
-                     populateWheel(hourWheel, Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH), h);
-                   }
-               }
-               
-               if (h === minH) {
-                   minMin = startD.getMinutes();
-                   if (min < minMin) {
-                       min = minMin;
-                       if(minWheel) {
-                         minWheel.dataset.minVal = minMin;
-                         populateWheel(minWheel, Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minMin), min);
-                       }
-                   }
-               }
-           }
-       }
-   }
+  const startD = appData[activePicker.ctx].startD;
+  
+  if (y < startD.getFullYear()) {
+      y = startD.getFullYear();
+      populateWheel(yearWheel, Array.from({length: 15}, (_, i) => ({ val: Math.max(2024, y)+i, label: Math.max(2024, y)+i })), y);
+  }
+  
+  if (y === startD.getFullYear()) {
+      minM = startD.getMonth();
+      if (m < minM) {
+          m = minM;
+          const monthsArr = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
+          monthWheel.dataset.minVal = minM;
+          populateWheel(monthWheel, monthsArr, m);
+      }
+      
+      if (m === minM) {
+          minD = startD.getDate();
+          if (d < minD) d = minD;
+          
+          if (activePicker.type === 'datetime' && d === minD) {
+              minH = startD.getHours();
+              if (h < minH) {
+                  h = minH;
+                  if(hourWheel) {
+                    hourWheel.dataset.minVal = minH;
+                    populateWheel(hourWheel, Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH), h);
+                  }
+              }
+              
+              if (h === minH) {
+                  minMin = startD.getMinutes();
+                  if (min < minMin) {
+                      min = minMin;
+                      if(minWheel) {
+                        minWheel.dataset.minVal = minMin;
+                        const minsArr = Array.from({length: 12}, (_, i) => ({ val: i*5, label: String(i*5).padStart(2,'0') })).filter(x => x.val >= minMin);
+                        let fallbackMin = Math.floor(min / 5) * 5;
+                        if (fallbackMin < minMin) fallbackMin = Math.ceil(minMin / 5) * 5;
+                        populateWheel(minWheel, minsArr, Math.max(fallbackMin, minMin));
+                      }
+                  }
+              }
+          }
+      }
+  }
 }
 
 if (activePicker.field === 'end' && activePicker.ctx !== 'parade') {
-   const startD = appData[activePicker.ctx].startD;
-   if (y > startD.getFullYear() || m > startD.getMonth()) minD = 1;
-   if (y > startD.getFullYear() || m > startD.getMonth() || d > startD.getDate()) minH = 0;
-   if (y > startD.getFullYear() || m > startD.getMonth() || d > startD.getDate() || h > startD.getHours()) minMin = 0;
+  const startD = appData[activePicker.ctx].startD;
+  if (y > startD.getFullYear() || m > startD.getMonth()) minD = 1;
+  if (y > startD.getFullYear() || m > startD.getMonth() || d > startD.getDate()) minH = 0;
+  if (y > startD.getFullYear() || m > startD.getMonth() || d > startD.getDate() || h > startD.getHours()) minMin = 0;
 }
 
 const currentMinM = parseInt(monthWheel.dataset.minVal || '0');
 if (currentMinM !== minM) {
-   monthWheel.dataset.minVal = minM;
-   const monthsArr = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
-   populateWheel(monthWheel, monthsArr, Math.max(m, minM));
+  monthWheel.dataset.minVal = minM;
+  const monthsArr = mos.map((l, i) => ({ val: i, label: l })).filter(x => x.val >= minM);
+  populateWheel(monthWheel, monthsArr, Math.max(m, minM));
 }
 
 const maxDays = new Date(y, m + 1, 0).getDate();
@@ -256,28 +318,30 @@ const currentMinD = parseInt(dayWheel.dataset.minVal || '1');
 const currentMaxD = parseInt(dayWheel.dataset.maxDays || '31');
 
 if (currentMinD !== minD || currentMaxD !== maxDays) {
-   dayWheel.dataset.minVal = minD;
-   dayWheel.dataset.maxDays = maxDays;
-   const daysArr = Array.from({length: maxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') })).filter(x => x.val >= minD);
-   populateWheel(dayWheel, daysArr, Math.max(d, minD));
+  dayWheel.dataset.minVal = minD;
+  dayWheel.dataset.maxDays = maxDays;
+  const daysArr = Array.from({length: maxDays}, (_, i) => ({ val: i+1, label: String(i+1).padStart(2,'0') })).filter(x => x.val >= minD);
+  populateWheel(dayWheel, daysArr, Math.max(d, minD));
 }
 
 if (hourWheel) {
-   const currentMinH = parseInt(hourWheel.dataset.minVal || '0');
-   if (currentMinH !== minH) {
-       hourWheel.dataset.minVal = minH;
-       const hoursArr = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH);
-       populateWheel(hourWheel, hoursArr, Math.max(h, minH));
-   }
+  const currentMinH = parseInt(hourWheel.dataset.minVal || '0');
+  if (currentMinH !== minH) {
+      hourWheel.dataset.minVal = minH;
+      const hoursArr = Array.from({length: 24}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minH);
+      populateWheel(hourWheel, hoursArr, Math.max(h, minH));
+  }
 }
 
 if (minWheel) {
-   const currentMinMin = parseInt(minWheel.dataset.minVal || '0');
-   if (currentMinMin !== minMin) {
-       minWheel.dataset.minVal = minMin;
-       const minsArr = Array.from({length: 60}, (_, i) => ({ val: i, label: String(i).padStart(2,'0') })).filter(x => x.val >= minMin);
-       populateWheel(minWheel, minsArr, Math.max(min, minMin));
-   }
+  const currentMinMin = parseInt(minWheel.dataset.minVal || '0');
+  if (currentMinMin !== minMin) {
+      minWheel.dataset.minVal = minMin;
+      const minsArr = Array.from({length: 12}, (_, i) => ({ val: i*5, label: String(i*5).padStart(2,'0') })).filter(x => x.val >= minMin);
+      let fallbackMin = Math.floor(min / 5) * 5;
+      if (fallbackMin < minMin) fallbackMin = Math.ceil(minMin / 5) * 5;
+      populateWheel(minWheel, minsArr, Math.max(fallbackMin, minMin));
+  }
 }
 }
 
