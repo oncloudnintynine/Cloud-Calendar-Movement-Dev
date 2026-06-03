@@ -445,7 +445,8 @@ for (let i = 0; i < 7; i++) {
 
 html += `<div class="absolute top-8 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">`;
 segments.forEach(seg => {
- const color = seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white');
+ const isPublicHoliday = seg.l.LeaveType === 'Public Holiday';
+ const color = isPublicHoliday ? 'bg-indigo-500 dark:bg-indigo-600 text-white' : (seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white'));
  
  let locStr = seg.l.Location || '';
  if (seg.l.LocationDetails) locStr += ` - ${seg.l.LocationDetails}`;
@@ -458,8 +459,8 @@ segments.forEach(seg => {
      dispName = dispName.split(' ')[0];
  }
  
- const title = seg.isLeave ? `${dispName} : ${displayType}` : displayType;
- const appliedTitle = applyAcronymsFront(title);
+ const titleRawStr = isPublicHoliday ? seg.l.Name : (seg.isLeave ? `${dispName} : ${displayType}` : displayType);
+ const appliedTitle = applyAcronymsFront(titleRawStr);
  
  const left = (seg.sDay / 7) * 100;
  const width = (seg.len / 7) * 100;
@@ -480,14 +481,16 @@ html += '</div>';
 return html;
 }
 
-function getBadgeClass(status) {
+function getBadgeClass(status, leaveType) {
+if(leaveType === 'Public Holiday') return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800';
 const safeStatus = String(status || '');
 if(safeStatus.includes('Pending')) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200 dark:border-orange-800';
 if(safeStatus.includes('Cancelled')) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800';
 return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800';
 }
 
-function formatStatusBadge(status) {
+function formatStatusBadge(status, leaveType) {
+if(leaveType === 'Public Holiday') return 'Holiday';
 let s = String(status || '').replace('Approved', 'Cal Updated');
 if (s.includes('KAH Limit Crossed')) {
 const match = s.match(/KAH Limit Crossed for (.*)\)/);
@@ -541,8 +544,9 @@ const ctx = isMyCalendar ? 'my' : 'dash';
 const isCollapsed = window.isAgendaCollapsed[ctx];
 
 return items.map(l => {
+const isPublicHoliday = l.LeaveType === 'Public Holiday';
 const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
-const isEvent = typeObj ? typeObj.isEvent : false;
+const isEvent = isPublicHoliday ? true : (typeObj ? typeObj.isEvent : false);
 
 let timeStr = "";
 if (isEvent) {
@@ -563,7 +567,7 @@ timeStr = `${formatDisplayDate(new Date(l.StartDate))} to ${formatDisplayDate(ne
 
 let actionBtns = '';
 let compactActionBtns = '';
-if ((String(l.Phone) === String(user.phone) || user.role === 'admin') && l.Status !== 'Cancelled') {
+if ((String(l.Phone) === String(user.phone) || user.role === 'admin') && l.Status !== 'Cancelled' && !isPublicHoliday) {
 actionBtns = `
 <button onclick="triggerEdit('${l.ID}')" class="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition shrink-0" title="Edit Record">
   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
@@ -633,7 +637,7 @@ displayType = safeType + ": " + l.Remarks.trim();
 let eventDesc = l.Remarks ? l.Remarks.trim() : displayType;
 
 const tplVars = {
-EventType: displayType,
+EventType: isPublicHoliday ? 'Public Holiday' : displayType,
 Name: l.Name || "",
 Department: l.Department || "",
 Attendees: applyAcronymsFront(attendeesDisplay) || "",
@@ -645,6 +649,7 @@ EventDescription: eventDesc
 
 let titleRaw = isInfoAllContext ? window.appInfoAllTemplate : window.appAgendaTemplate;
 if (isMyCalendar && !isInfoAllContext) titleRaw = '{EventType}'; 
+if (isPublicHoliday) titleRaw = '🇸🇬 {Name}';
 
 let titleStr = titleRaw
 .replace(/{EventType}/g, tplVars.EventType)
@@ -662,6 +667,8 @@ if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
 const finalTitle = applyAcronymsFront(titleStr);
 
 let detailsRaw = isInfoAllContext ? window.appInfoAllDetailsTemplate : window.appAgendaDetailsTemplate;
+if (isPublicHoliday) detailsRaw = '';
+
 const finalDetailsHtml = detailsRaw ? parseAndCleanTemplate(detailsRaw, tplVars) : '';
 
 const hasBody = finalDetailsHtml.trim() !== '' || (isInfoAllContext ? compactActionBtns !== '' : actionBtns !== '');
@@ -689,7 +696,7 @@ return `<div class="border border-gray-300 dark:border-darkborder p-3 md:p-4 rou
 ${!isMyCalendar && !isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-xs md:text-sm text-gray-700 dark:text-darktext mt-0.5">(${l.HalfDay})</p>` : ''}
 </div>
 <div class="flex items-center shrink-0">
-<span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status)}">${formatStatusBadge(l.Status)}</span>
+<span class="text-[10px] md:text-[11px] font-bold px-2 py-1 rounded text-center inline-block leading-tight ${getBadgeClass(l.Status, l.LeaveType)}">${formatStatusBadge(l.Status, l.LeaveType)}</span>
 ${hasBody ? `<svg class="w-5 h-5 ml-1.5 text-gray-400 dark:text-darkmuted transition-transform duration-200 chevron-icon shrink-0 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>` : ''}
 </div>
 </div>
