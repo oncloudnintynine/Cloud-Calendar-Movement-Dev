@@ -710,7 +710,7 @@ darkmuted: '#9ca3af'
   <h3 class="font-bold text-base text-blue-600 dark:text-blue-400">App Menu Order</h3>
   <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
 </div>
-<div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
+<div id="menu-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-darkborder"></div>
 </div>
 
 </div>
@@ -754,6 +754,7 @@ darkmuted: '#9ca3af'
         <button type="button" onclick="insertAtCursor('set-gcal-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
         <button type="button" onclick="insertAtCursor('set-gcal-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
         <button type="button" onclick="insertAtCursor('set-gcal-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+        <button type="button" onclick="insertAtCursor('set-gcal-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
         <button type="button" onclick="insertAtCursor('set-gcal-template', '{Time}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Time}</button>
         <button type="button" onclick="insertAtCursor('set-gcal-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
         <button type="button" onclick="insertAtCursor('set-gcal-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
@@ -772,6 +773,7 @@ darkmuted: '#9ca3af'
         <button type="button" onclick="insertAtCursor('set-agenda-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+        <button type="button" onclick="insertAtCursor('set-agenda-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-template', '{Time}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Time}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
@@ -788,6 +790,7 @@ darkmuted: '#9ca3af'
         <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+        <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Time}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Time}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
         <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
@@ -806,6 +809,7 @@ darkmuted: '#9ca3af'
         <button type="button" onclick="insertAtCursor('set-infoall-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+        <button type="button" onclick="insertAtCursor('set-infoall-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-template', '{Time}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Time}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
@@ -822,6 +826,7 @@ darkmuted: '#9ca3af'
         <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+        <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Time}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Time}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
         <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
@@ -997,17 +1002,17 @@ darkmuted: '#9ca3af'
 
 </main>
 
-<script src="frontend/js/core/config.js?v=68"></script>
-<script src="frontend/js/core/state.js?v=68"></script>
-<script src="frontend/js/core/api.js?v=68"></script>
-<script src="frontend/js/core/auth.js?v=68"></script>
-<script src="frontend/js/ui/ui.js?v=68"></script>
-<script src="frontend/js/features/calendar.js?v=68"></script>
-<script src="frontend/js/features/parade.js?v=68"></script>
-<script src="frontend/js/ui/forms.js?v=68"></script>
-<script src="frontend/js/ui/picker.js?v=68"></script>
-<script src="frontend/js/admin/admin.js?v=68"></script>
-<script src="frontend/js/admin/structure.js?v=68"></script> 
-<script src="frontend/js/core/app.js?v=68"></script>
+<script src="frontend/js/core/config.js?v=69"></script>
+<script src="frontend/js/core/state.js?v=69"></script>
+<script src="frontend/js/core/api.js?v=69"></script>
+<script src="frontend/js/core/auth.js?v=69"></script>
+<script src="frontend/js/ui/ui.js?v=69"></script>
+<script src="frontend/js/features/calendar.js?v=69"></script>
+<script src="frontend/js/features/parade.js?v=69"></script>
+<script src="frontend/js/ui/forms.js?v=69"></script>
+<script src="frontend/js/ui/picker.js?v=69"></script>
+<script src="frontend/js/admin/admin.js?v=69"></script>
+<script src="frontend/js/admin/structure.js?v=69"></script> 
+<script src="frontend/js/core/app.js?v=69"></script>
 </body>
 </html>
