@@ -621,7 +621,6 @@ if (attArr && attArr.length > 0) {
 }
 
 let locStr = l.Location || '';
-if (l.LocationDetails) locStr += ` - ${l.LocationDetails}`;
 
 if (!isEvent && l.LeaveType === 'Overseas Leave' && l.Country) {
 locStr = l.Country + (l.State ? ` (${l.State})` : "");
@@ -642,6 +641,7 @@ Name: l.Name || "",
 Department: l.Department || "",
 Attendees: applyAcronymsFront(attendeesDisplay) || "",
 Location: applyAcronymsFront(locStr) || "",
+LocationDetails: applyAcronymsFront(l.LocationDetails || "") || "",
 Time: timeStr || "",
 Remarks: l.Remarks || "",
 EventDescription: eventDesc
@@ -657,6 +657,7 @@ let titleStr = titleRaw
 .replace(/{Department}/g, tplVars.Department)
 .replace(/{Attendees}/g, tplVars.Attendees)
 .replace(/{Location}/g, tplVars.Location)
+.replace(/{LocationDetails}/g, tplVars.LocationDetails)
 .replace(/{Time}/g, tplVars.Time)
 .replace(/{Remarks}/g, tplVars.Remarks)
 .replace(/{EventDescription}/g, tplVars.EventDescription);
