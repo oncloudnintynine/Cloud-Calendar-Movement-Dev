@@ -38,18 +38,19 @@ companyContacts.forEach(contact => {
     if (l.Status === 'Cancelled') return false;
     
     let isTarget = false;
-    if (l.Phone == contact.phone) isTarget = true;
-    else if (l.Attendees) {
+    if (String(l.Phone).trim() === String(contact.phone).trim() || String(l.Name).trim() === String(contact.name).trim()) {
+        isTarget = true;
+    } else if (l.Attendees) {
       try {
         const att = JSON.parse(l.Attendees);
         isTarget = att.some(a => {
-            if (a.type === 'contact' && a.id == contact.phone) return true;
+            if (a.type === 'contact' && (String(a.id).trim() === String(contact.phone).trim() || String(a.name).trim() === String(contact.name).trim())) return true;
             if (a.type === 'group') {
                 if (a.dept === 'Custom') {
                     const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-                    return customG && customG.members.includes(String(contact.phone));
+                    return customG && customG.members.some(m => String(m).trim() === String(contact.phone).trim());
                 } else if (a.name.startsWith('zz KAH:')) {
-                    return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(contact.phone));
+                    return window.appKahList.some(k => k.dept === a.dept && String(k.phone).trim() === String(contact.phone).trim());
                 } else {
                     const contactDepts = (contact.dept || '').split(',').map(d => d.trim());
                     return contactDepts.includes(a.dept);
@@ -57,8 +58,9 @@ companyContacts.forEach(contact => {
             }
             return false;
         });
-      } catch(e) { isTarget = String(l.Attendees).includes(contact.phone); }
+      } catch(e) { isTarget = String(l.Attendees).includes(String(contact.phone).trim()); }
     }
+    
     if (!isTarget) return false;
     
     let sDate = new Date(l.StartDate);
@@ -66,12 +68,17 @@ companyContacts.forEach(contact => {
     const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
     const isEvent = typeObj ? typeObj.isEvent : false;
     
-    if (!isEvent) {
-        // Leave / Non-Event Logic
-        sDate.setHours(0, 0, 0, 0);
-        eDate.setHours(23, 59, 59, 999);
+    let isRepeating = false;
+    if (isEvent && l.HalfDay && ['DAILY', 'WEEKLY', 'MONTHLY', 'ANNUALLY', 'WEEKDAY'].includes(String(l.HalfDay).toUpperCase())) {
+        isRepeating = true;
+    }
+
+    if (!isEvent || (isEvent && !isRepeating)) {
+        if (!isEvent || String(l.IsAllDay).toUpperCase() === 'TRUE') {
+            sDate.setHours(0, 0, 0, 0);
+            eDate.setHours(23, 59, 59, 999);
+        }
         
-        // Handle HalfDay AM / PM Bounds
         if (l.HalfDay === 'AM') {
             eDate.setHours(12, 30, 0, 0); 
         } else if (l.HalfDay === 'PM') {
@@ -87,50 +94,40 @@ companyContacts.forEach(contact => {
         
         return now >= sDate && now <= eDate;
     } else {
-        // Event Logic
-        if (l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None') {
-            // Repeating Event
-            const untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(sDate.getTime() + 31536000000);
-            untilD.setHours(23, 59, 59, 999);
-            
-            if (now < sDate || now > untilD) return false;
-            
-            const targetDate = new Date(now);
-            targetDate.setHours(0,0,0,0);
-            const startDay = new Date(sDate);
-            startDay.setHours(0,0,0,0);
-            
-            let isDayMatch = false;
-            if (l.HalfDay === 'DAILY') isDayMatch = true;
-            else if (l.HalfDay === 'WEEKDAY') isDayMatch = (targetDate.getDay() !== 0 && targetDate.getDay() !== 6);
-            else if (l.HalfDay === 'WEEKLY') {
-                const diffDays = Math.round((targetDate.getTime() - startDay.getTime()) / 86400000);
-                isDayMatch = (diffDays % 7 === 0);
-            } else if (l.HalfDay === 'MONTHLY') isDayMatch = (targetDate.getDate() === startDay.getDate());
-            else if (l.HalfDay === 'ANNUALLY') isDayMatch = (targetDate.getMonth() === startDay.getMonth() && targetDate.getDate() === startDay.getDate());
-            
-            if (!isDayMatch) return false;
-            
-            // Time bounds
-            if (String(l.IsAllDay).toUpperCase() === 'TRUE') return true;
-            
-            const nowTime = now.getHours() * 60 + now.getMinutes();
-            const sTime = sDate.getHours() * 60 + sDate.getMinutes();
-            const eTime = eDate.getHours() * 60 + eDate.getMinutes();
-            return nowTime >= sTime && nowTime <= eTime;
-        } else {
-            // Non-repeating Event
-            if (String(l.IsAllDay).toUpperCase() === 'TRUE') {
-                sDate.setHours(0, 0, 0, 0);
-                eDate.setHours(23, 59, 59, 999);
-            }
-            return now >= sDate && now <= eDate;
-        }
+        const untilD = l.UntilDate ? new Date(l.UntilDate) : new Date(sDate.getTime() + 31536000000);
+        untilD.setHours(23, 59, 59, 999);
+        
+        if (now < sDate || now > untilD) return false;
+        
+        const targetDate = new Date(now);
+        targetDate.setHours(0,0,0,0);
+        const startDay = new Date(sDate);
+        startDay.setHours(0,0,0,0);
+        
+        let isDayMatch = false;
+        const hd = String(l.HalfDay).toUpperCase();
+        
+        if (hd === 'DAILY') isDayMatch = true;
+        else if (hd === 'WEEKDAY') isDayMatch = (targetDate.getDay() !== 0 && targetDate.getDay() !== 6);
+        else if (hd === 'WEEKLY') {
+            const diffDays = Math.round((targetDate.getTime() - startDay.getTime()) / 86400000);
+            isDayMatch = (diffDays % 7 === 0);
+        } else if (hd === 'MONTHLY') isDayMatch = (targetDate.getDate() === startDay.getDate());
+        else if (hd === 'ANNUALLY') isDayMatch = (targetDate.getMonth() === startDay.getMonth() && targetDate.getDate() === startDay.getDate());
+        
+        if (!isDayMatch) return false;
+        if (String(l.IsAllDay).toUpperCase() === 'TRUE') return true;
+        
+        const nowTime = now.getHours() * 60 + now.getMinutes();
+        const sTime = sDate.getHours() * 60 + sDate.getMinutes();
+        const eTime = eDate.getHours() * 60 + eDate.getMinutes();
+        return nowTime >= sTime && nowTime <= eTime;
     }
   });
   
   let isOffice = true;
   let locationStr = 'Office';
+  let halfDayIndicator = '';
 
   if (activeRecords.length > 0) {
     let activeRecord = activeRecords[0]; 
@@ -146,6 +143,11 @@ companyContacts.forEach(contact => {
        }
     }
 
+    const hd = activeRecord.HalfDay;
+    if (hd && !['NONE', 'None', 'DAILY', 'WEEKLY', 'MONTHLY', 'ANNUALLY', 'WEEKDAY'].includes(hd)) {
+        halfDayIndicator = ` (${hd})`;
+    }
+
     const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === activeRecord.LeaveType) : null;
     const isEvent = typeObj ? typeObj.isEvent : false;
 
@@ -154,17 +156,18 @@ companyContacts.forEach(contact => {
       if (activeRecord.LocationDetails) {
           locationStr += ` - ${activeRecord.LocationDetails}`;
       }
+      locationStr += halfDayIndicator;
       isOffice = String(activeRecord.Location || '').toLowerCase() === 'office';
     } else {
       locationStr = activeRecord.LeaveType || 'Leave';
       if (activeRecord.Country) locationStr += ` (${activeRecord.Country})`;
+      locationStr += halfDayIndicator;
       isOffice = false;
     }
   }
 
   if (isOffice) inOfficeGlobal++;
   
-  // Determine KAH status globally
   const isKAH = window.kahPhones && window.kahPhones.includes(String(contact.phone));
   
   const finalLocationStr = applyAcronymsFront(locationStr);
@@ -182,7 +185,6 @@ companyContacts.forEach(contact => {
 
 if (paradeHeader) paradeHeader.innerHTML = `Overall Parade State<br><span class="text-green-600 dark:text-green-400 font-bold">(${inOfficeGlobal} / ${totalGlobal})</span>`;
 
-// SORT RULE: 1. In Office, 2. KAH, 3. Alpha
 const sortMembers = (mems) => {
     mems.sort((a, b) => {
         if (a.isOffice && !b.isOffice) return -1;
