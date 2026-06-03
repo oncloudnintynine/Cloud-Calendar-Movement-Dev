@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cloud-moves-v61';
+const CACHE_NAME = 'cloud-moves-v63';
 
 const urlsToCache =[
 './',
@@ -42,11 +42,11 @@ self.addEventListener('activate', event => {
 const cacheWhitelist = [CACHE_NAME];
 event.waitUntil(
 caches.keys().then(cacheNames => {
- return Promise.all(
-   cacheNames.map(cacheName => {
-     if (cacheWhitelist.indexOf(cacheName) === -1) return caches.delete(cacheName);
-   })
- );
+return Promise.all(
+  cacheNames.map(cacheName => {
+    if (cacheWhitelist.indexOf(cacheName) === -1) return caches.delete(cacheName);
+  })
+);
 })
 );
 self.clients.claim();
