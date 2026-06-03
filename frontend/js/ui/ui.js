@@ -26,17 +26,17 @@ const btnEvent = document.getElementById('unified-btn-event');
 
 if(menuContainer) {
 orderArr.forEach(id => {
- const btn = document.getElementById(`menu-${id}`);
- if (btn) {
-   if (appMode === 'combined' && ['submit-leave', 'submit-event', 'my-leaves'].includes(id)) {
-     btn.classList.add('hidden');
-   } else if (appMode === 'separated' && id === 'submit-combined') {
-     btn.classList.add('hidden');
-   } else {
-     btn.classList.remove('hidden');
-     menuContainer.appendChild(btn);
-   }
- }
+const btn = document.getElementById(`menu-${id}`);
+if (btn) {
+  if (appMode === 'combined' && ['submit-leave', 'submit-event', 'my-leaves'].includes(id)) {
+    btn.classList.add('hidden');
+  } else if (appMode === 'separated' && id === 'submit-combined') {
+    btn.classList.add('hidden');
+  } else {
+    btn.classList.remove('hidden');
+    menuContainer.appendChild(btn);
+  }
+}
 });
 }
 
@@ -76,16 +76,16 @@ const controlsWrapper = document.getElementById('dash-controls-wrapper');
 
 if (controlsWrapper) {
 if (tabId === 'dashboard' || tabId === 'my-leaves') {
-   if (tabId === 'dashboard') {
-       if (deptNav) deptNav.classList.remove('hidden');
-   } else {
-       if (deptNav) deptNav.classList.add('hidden');
-   }
-   controlsWrapper.classList.remove('hidden');
-   controlsWrapper.classList.add('flex');
+  if (tabId === 'dashboard') {
+      if (deptNav) deptNav.classList.remove('hidden');
+  } else {
+      if (deptNav) deptNav.classList.add('hidden');
+  }
+  controlsWrapper.classList.remove('hidden');
+  controlsWrapper.classList.add('flex');
 } else {
-   controlsWrapper.classList.add('hidden');
-   controlsWrapper.classList.remove('flex');
+  controlsWrapper.classList.add('hidden');
+  controlsWrapper.classList.remove('flex');
 }
 }
 
@@ -107,8 +107,8 @@ const isPassword = el.type === 'password';
 el.type = isPassword ? 'text' : 'password';
 if (btnElement) {
 btnElement.innerHTML = isPassword 
- ? `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg>`
- : `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>`;
+? `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg>`
+: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>`;
 }
 }
 
@@ -168,17 +168,22 @@ checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ?
 function animateAndUpdate(btn) { 
 const icon = btn.querySelector('svg'); 
 if (icon) icon.classList.add('animate-spin'); 
-setTimeout(() => { updateApp(); }, 300); 
+setTimeout(async () => { 
+  await updateApp(); 
+  if (icon) icon.classList.remove('animate-spin'); 
+}, 300); 
 }
 
 async function updateApp() {
 if ('serviceWorker' in navigator) {
 try { 
- const regs = await navigator.serviceWorker.getRegistrations(); 
- for (let reg of regs) await reg.unregister(); 
- const names = await caches.keys(); 
- for (let name of names) await caches.delete(name); 
+const regs = await navigator.serviceWorker.getRegistrations(); 
+for (let reg of regs) await reg.unregister(); 
+if (window.caches) {
+  const names = await caches.keys(); 
+  for (let name of names) await caches.delete(name); 
+}
 } catch(err) {}
 }
-window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+window.location.reload();
 }
