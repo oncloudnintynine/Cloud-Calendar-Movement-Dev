@@ -14,7 +14,7 @@ throw new Error("Unauthorized to submit data on behalf of others.");
 var kahExceededDept = checkKahLimit(data, props, sheet);
 var status = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
 
-var id = Utilities.getUuid();
+var id = data.id || Utilities.getUuid(); // Use frontend generated ID if provided
 var eventIds = createGCalEvents(data, props);
 
 var row = new Array(headers.length).fill('');
@@ -110,6 +110,69 @@ return { status: status };
 throw new Error("Record not found");
 }
 
+function fetchSGHolidays() {
+var cache = CacheService.getScriptCache();
+var cached = cache.get("sg_holidays_json");
+if (cached) return JSON.parse(cached);
+
+var url = 'https://calendar.google.com/calendar/ical/en.sg%23holiday%40group.v.calendar.google.com/public/basic.ics';
+var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+if (res.getResponseCode() !== 200) return [];
+
+var ics = res.getContentText();
+var events = [];
+var lines = ics.split(/\r?\n/);
+var currentEvent = null;
+var yearLimitStart = new Date().getFullYear() - 1;
+
+for (var i=0; i<lines.length; i++) {
+  var line = lines[i];
+  if (line.indexOf('BEGIN:VEVENT') === 0) currentEvent = {};
+  else if (line.indexOf('END:VEVENT') === 0 && currentEvent) {
+    if (currentEvent.start && currentEvent.summary) {
+       var y = parseInt(currentEvent.start.substring(0,4), 10);
+       var m = parseInt(currentEvent.start.substring(4,6), 10) - 1;
+       var d = parseInt(currentEvent.start.substring(6,8), 10);
+       if (y >= yearLimitStart) {
+           var sDate = new Date(y, m, d);
+           var eDate = new Date(y, m, d, 23, 59, 59);
+           events.push({
+              ID: 'HOLIDAY_' + (currentEvent.uid || Utilities.getUuid()),
+              Timestamp: sDate.toISOString(),
+              Phone: 'SYSTEM',
+              Name: currentEvent.summary.replace(/\\,/g, ','),
+              Department: 'ALL',
+              LeaveType: 'Public Holiday',
+              StartDate: sDate.toISOString(),
+              EndDate: eDate.toISOString(),
+              HalfDay: 'NONE',
+              CoveringPerson: '',
+              Country: 'Singapore',
+              State: '',
+              Remarks: 'Singapore Public Holiday',
+              Status: 'Holiday',
+              EventIDs: '',
+              Location: 'Singapore',
+              Attendees: '',
+              InfoAll: 'TRUE',
+              IsAllDay: 'TRUE',
+              UntilDate: '',
+              LocationDetails: ''
+           });
+       }
+    }
+    currentEvent = null;
+  }
+  else if (currentEvent) {
+    if (line.indexOf('DTSTART;VALUE=DATE:') === 0) currentEvent.start = line.split(':')[1];
+    else if (line.indexOf('SUMMARY:') === 0) currentEvent.summary = line.substring(8);
+    else if (line.indexOf('UID:') === 0) currentEvent.uid = line.substring(4);
+  }
+}
+cache.put("sg_holidays_json", JSON.stringify(events), 21600); // 6 hour cache
+return events;
+}
+
 function getLeaves(data) {
 var props = PropertiesService.getScriptProperties();
 var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
@@ -136,9 +199,43 @@ if(depts.length > 0) phoneToDepts[phone] = depts.join(',');
 }
 });
 
+var now = new Date();
+var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
 for(var i = 0; i < rows.length; i++) {
 var obj = {};
 headers.forEach(function(h, idx) { obj[h] = rows[i][idx]; });
+
+// --- Check for GCal Deletions (Two-way sync logic) ---
+if (obj.Status !== 'Cancelled' && obj.EventIDs && new Date(obj.EndDate) >= todayStart) {
+  var eventPairs = String(obj.EventIDs).split(',');
+  var allDeleted = true;
+  for (var e = 0; e < eventPairs.length; e++) {
+      if (!eventPairs[e]) continue;
+      var parts = eventPairs[e].split('|');
+      if (parts.length === 2) {
+          try {
+              var cal = CalendarApp.getCalendarById(parts[0]);
+              if (cal) {
+                  var evt = cal.getEventById(parts[1]) || cal.getEventSeriesById(parts[1]);
+                  if (evt) {
+                      allDeleted = false;
+                      break; // At least one event still exists, keep active
+                  }
+              }
+          } catch(err) {
+              // Ignore API errors, assume exists to be safe
+              allDeleted = false; 
+          }
+      }
+  }
+  if (allDeleted && eventPairs.length > 0) {
+      obj.Status = 'Cancelled';
+      rows[i][headers.indexOf('Status')] = 'Cancelled';
+      updates = true;
+  }
+}
+// -----------------------------------------------------
 
 var currentActualDepts = phoneToDepts[obj.Phone] ? phoneToDepts[obj.Phone].split(',') :[];
 var attDepts =[];
@@ -182,53 +279,10 @@ if (updates) {
 sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
 }
 
-// Automatically fetch and inject Singapore Public Holidays
 try {
-var cache = CacheService.getScriptCache();
-var cachedHolidays = cache.get("sg_holidays");
-var holidays = [];
-
-if (cachedHolidays) {
-  holidays = JSON.parse(cachedHolidays);
-} else {
-  var year = new Date().getFullYear();
-  var holidayCal = CalendarApp.getCalendarById('en.sg#holiday@group.v.calendar.google.com');
-  if (holidayCal) {
-    var events = holidayCal.getEvents(new Date(year - 1, 0, 1), new Date(year + 2, 11, 31));
-    events.forEach(function(evt) {
-      var sDate = evt.getStartTime();
-      var eDate = new Date(evt.getEndTime().getTime() - 1000); 
-      holidays.push({
-        ID: 'HOLIDAY_' + evt.getId(),
-        Timestamp: sDate.toISOString(),
-        Phone: 'SYSTEM',
-        Name: evt.getTitle(),
-        Department: 'ALL',
-        LeaveType: 'Public Holiday',
-        StartDate: sDate.toISOString(),
-        EndDate: eDate.toISOString(),
-        HalfDay: 'NONE',
-        CoveringPerson: '',
-        Country: 'Singapore',
-        State: '',
-        Remarks: 'Singapore Public Holiday',
-        Status: 'Holiday',
-        EventIDs: '',
-        Location: 'Singapore',
-        Attendees: '',
-        InfoAll: 'TRUE',
-        IsAllDay: 'TRUE',
-        UntilDate: '',
-        LocationDetails: ''
-      });
-    });
-    cache.put("sg_holidays", JSON.stringify(holidays), 21600); 
-  }
-}
+var holidays = fetchSGHolidays();
 result = result.concat(holidays);
-} catch(e) {
-// Silent catch to prevent critical failure if calendar fetch drops
-}
+} catch(e) {}
 
 return result;
 }
