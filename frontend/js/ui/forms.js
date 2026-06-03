@@ -145,7 +145,7 @@ const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(c => `
 <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/30" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
-<span class="font-semibold text-emerald-800 dark:text-emerald-300">${c.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${c.dept})</span>
+<span class="font-semibold text-emerald-800 dark:text-emerald-300">${c.formattedName}</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
@@ -157,7 +157,7 @@ resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.cla
 function selectBehalf(ctx, name, phone, dept) {
 adminBehalfUser = { name, phone, dept };
 document.getElementById(`selected-behalf-${ctx}`).innerHTML = `
-<span>Submitting for: ${name} <span class="text-sm font-normal text-emerald-600">(${dept})</span></span>
+<span>Submitting for: ${window.formatContactName(name, dept)}</span>
 <button type="button" onclick="clearBehalf('${ctx}')" class="text-red-500 hover:bg-red-50 p-1 rounded transition">&times; clear</button>
 `;
 const inputEl = document.getElementById(`form-${ctx}-behalf-search`);
@@ -189,8 +189,8 @@ inputEl.classList.add('ring-2', 'ring-blue-500');
 const results = fuseAttendees.search(q).slice(0, 6).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(item => `
-<div class="p-3 border-b border-gray-200 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}')">
-<span class="font-semibold text-blue-800 dark:text-blue-300">${item.name}</span> <span class="text-xs text-gray-500 dark:text-darkmuted ml-1">(${item.dept})</span>
+<div class="p-3 border-b border-gray-200 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}', '${item.formattedName.replace(/'/g, "\\'")}')">
+<span class="font-semibold text-blue-800 dark:text-blue-300">${item.formattedName}</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
@@ -199,9 +199,9 @@ resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.cla
 }
 }
 
-function selectAttendee(ctx, id, name, dept, type, expandedNames) {
+function selectAttendee(ctx, id, name, dept, type, expandedNames, formattedName) {
 if (!eventAttendees.some(a => a.id === id)) { 
-eventAttendees.push({ id, name, dept, type, expandedNames }); 
+eventAttendees.push({ id, name, dept, type, expandedNames, formattedName }); 
 renderAttendees(ctx); 
 }
 const inputEl = document.getElementById(`form-${ctx}-attendee-search`);
@@ -220,7 +220,7 @@ const c = document.getElementById(`${ctx}-attendees-chip-container`);
 if(c) {
 c.innerHTML = eventAttendees.map(a => `
 <div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-lg px-2 py-1 text-sm font-semibold shadow-sm">
-${a.name}
+${a.formattedName || window.formatContactName(a.name, a.dept)}
 <button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
 </div>
 `).join('');
@@ -262,7 +262,7 @@ eventAttendees = JSON.parse(l.Attendees);
 const savedPhones = String(l.Attendees).split(',');
 savedPhones.forEach(ph => {
   const contact = companyContacts.find(c => String(c.phone) === String(ph));
-  if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, dept: contact.dept, type: 'contact' });
+  if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, formattedName: contact.formattedName, dept: contact.dept, type: 'contact' });
 });
 }
 }
