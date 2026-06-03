@@ -64,7 +64,9 @@ darkmuted: '#9ca3af'
 
 <div class="flex items-center justify-end space-x-1 min-w-0 flex-1">
 <span id="nav-user-name" class="font-semibold hidden md:block mr-1 text-sm truncate max-w-[100px] lg:max-w-[200px]"></span>
-<button onclick="toggleTheme()" class="text-xl p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-darkhover transition shrink-0">🌗</button>
+<button onclick="toggleTheme()" class="text-xl p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-darkhover transition shrink-0">
+<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+</button>
 <button onclick="animateAndUpdate(this)" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition shrink-0" title="Clear Cache">
 <svg class="w-5 h-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
 </button>
@@ -168,7 +170,7 @@ darkmuted: '#9ca3af'
   <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-0.5 font-medium flex-grow items-start"></div>
 </div>
 <div id="dash-infoall-container" class="flex-1 min-w-0 hidden-view flex flex-col bg-blue-50 dark:bg-blue-900/20 rounded-xl p-2 shadow-inner border border-blue-100 dark:border-blue-800 transition-all duration-300">
-  <h4 id="dash-infoall-title" class="font-bold text-[11px] md:text-xs text-blue-700 dark:text-blue-400 mb-1 uppercase tracking-wide flex items-center shrink-0"><span class="mr-1">📌</span> Info All</h4>
+  <h4 id="dash-infoall-title" class="font-bold text-[11px] md:text-xs text-blue-700 dark:text-blue-400 mb-1 uppercase tracking-wide flex items-center shrink-0"><svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.6V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v4.6a2 2 0 0 1-1.11 1.95l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg> Info All</h4>
   <div id="dash-infoall-list" class="flex-grow overflow-y-auto space-y-1.5 pr-1 text-xs scrollbar-hide"></div>
 </div>
 </div>
@@ -223,7 +225,7 @@ darkmuted: '#9ca3af'
   <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-0.5 font-medium flex-grow items-start"></div>
 </div>
 <div id="my-infoall-container" class="flex-1 min-w-0 hidden-view flex flex-col bg-blue-50 dark:bg-blue-900/20 rounded-xl p-2 shadow-inner border border-blue-100 dark:border-blue-800 transition-all duration-300">
-  <h4 id="my-infoall-title" class="font-bold text-[11px] md:text-xs text-blue-700 dark:text-blue-400 mb-1 uppercase tracking-wide flex items-center shrink-0"><span class="mr-1">📌</span> Info All</h4>
+  <h4 id="my-infoall-title" class="font-bold text-[11px] md:text-xs text-blue-700 dark:text-blue-400 mb-1 uppercase tracking-wide flex items-center shrink-0"><svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.6V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v4.6a2 2 0 0 1-1.11 1.95l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg> Info All</h4>
   <div id="my-infoall-list" class="flex-grow overflow-y-auto space-y-1.5 pr-1 text-xs scrollbar-hide"></div>
 </div>
 </div>
@@ -593,6 +595,17 @@ darkmuted: '#9ca3af'
 <div id="dashboard-filter-order-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-gray-600"></div>
 </div>
 
+<div data-section="contact-format" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
+<div class="flex justify-between items-center mb-3">
+  <h3 class="font-bold text-base text-emerald-600 dark:text-emerald-400">Google Contacts Name Format</h3>
+  <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+</div>
+<div>
+  <input type="text" id="set-contact-format" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm" placeholder="{Name} (Cloud Group : {Unit})">
+  <p class="text-[10px] text-gray-500 mt-1.5 leading-tight font-medium">Dictates exactly how user names are formatted when syncing with Google Contacts and displaying in the app. Use <span class="font-bold text-gray-700 dark:text-gray-300">{Name}</span> and <span class="font-bold text-gray-700 dark:text-gray-300">{Unit}</span> tags.</p>
+</div>
+</div>
+
 <div data-section="register-user" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
 <div class="flex justify-between items-center mb-3">
   <h3 class="font-bold text-base text-emerald-600 dark:text-emerald-400">Register New User</h3>
@@ -676,7 +689,7 @@ darkmuted: '#9ca3af'
 <div class="relative">
   <input type="password" id="set-admin-pass" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 pr-10 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm" placeholder="Leave blank to keep current">
   <button type="button" onclick="togglePassword('set-admin-pass', this)" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-darkmuted p-1 focus:outline-none">
-    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
   </button>
 </div>
 </div>
@@ -984,17 +997,17 @@ darkmuted: '#9ca3af'
 
 </main>
 
-<script src="frontend/js/core/config.js?v=67"></script>
-<script src="frontend/js/core/state.js?v=67"></script>
-<script src="frontend/js/core/api.js?v=67"></script>
-<script src="frontend/js/core/auth.js?v=67"></script>
-<script src="frontend/js/ui/ui.js?v=67"></script>
-<script src="frontend/js/features/calendar.js?v=67"></script>
-<script src="frontend/js/features/parade.js?v=67"></script>
-<script src="frontend/js/ui/forms.js?v=67"></script>
-<script src="frontend/js/ui/picker.js?v=67"></script>
-<script src="frontend/js/admin/admin.js?v=67"></script>
-<script src="frontend/js/admin/structure.js?v=67"></script> 
-<script src="frontend/js/core/app.js?v=67"></script>
+<script src="frontend/js/core/config.js?v=68"></script>
+<script src="frontend/js/core/state.js?v=68"></script>
+<script src="frontend/js/core/api.js?v=68"></script>
+<script src="frontend/js/core/auth.js?v=68"></script>
+<script src="frontend/js/ui/ui.js?v=68"></script>
+<script src="frontend/js/features/calendar.js?v=68"></script>
+<script src="frontend/js/features/parade.js?v=68"></script>
+<script src="frontend/js/ui/forms.js?v=68"></script>
+<script src="frontend/js/ui/picker.js?v=68"></script>
+<script src="frontend/js/admin/admin.js?v=68"></script>
+<script src="frontend/js/admin/structure.js?v=68"></script> 
+<script src="frontend/js/core/app.js?v=68"></script>
 </body>
 </html>
