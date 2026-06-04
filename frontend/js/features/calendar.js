@@ -589,20 +589,33 @@ const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t
 const isEvent = isPublicHoliday ? true : (typeObj ? typeObj.isEvent : false);
 
 let timeStr = "";
+let startTimeStr = "";
+let endTimeStr = "";
+
 if (isEvent) {
 if (String(l.IsAllDay).toUpperCase() === 'TRUE') {
 const sD = formatDisplayDate(new Date(l.StartDate));
 const eD = formatDisplayDate(new Date(l.EndDate));
 timeStr = sD === eD ? `${sD} (All Day)` : `${sD} to ${eD} (All Day)`;
+startTimeStr = sD + " (All Day)";
+endTimeStr = eD + " (All Day)";
 } else {
 timeStr = `${formatDisplayDateTime(new Date(l.StartDate))} to ${formatDisplayDateTime(new Date(l.EndDate))}`;
+startTimeStr = formatDisplayDateTime(new Date(l.StartDate));
+endTimeStr = formatDisplayDateTime(new Date(l.EndDate));
 }
 if (l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None') {
 timeStr += ` <span class="font-bold text-purple-600 dark:text-purple-400">↻ ${l.HalfDay}</span>`;
-if (l.UntilDate) timeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
+endTimeStr += ` <span class="font-bold text-purple-600 dark:text-purple-400">↻ ${l.HalfDay}</span>`;
+if (l.UntilDate) {
+    timeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
+    endTimeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
+}
 }
 } else {
 timeStr = `${formatDisplayDate(new Date(l.StartDate))} to ${formatDisplayDate(new Date(l.EndDate))}`;
+startTimeStr = formatDisplayDate(new Date(l.StartDate));
+endTimeStr = formatDisplayDate(new Date(l.EndDate));
 }
 
 let actionBtns = '';
@@ -683,6 +696,8 @@ Attendees: applyAcronymsFront(attendeesDisplay) || "",
 Location: applyAcronymsFront(locStr) || "",
 LocationDetails: applyAcronymsFront(l.LocationDetails || "") || "",
 Time: timeStr || "",
+StartTime: startTimeStr || "",
+EndTime: endTimeStr || "",
 Remarks: l.Remarks || "",
 EventDescription: eventDesc,
 Country: l.Country || "",
@@ -706,6 +721,8 @@ let titleStr = titleRaw
 .replace(/{Location}/g, tplVars.Location)
 .replace(/{LocationDetails}/g, tplVars.LocationDetails)
 .replace(/{Time}/g, tplVars.Time)
+.replace(/{StartTime}/g, tplVars.StartTime)
+.replace(/{EndTime}/g, tplVars.EndTime)
 .replace(/{Remarks}/g, tplVars.Remarks)
 .replace(/{EventDescription}/g, tplVars.EventDescription)
 .replace(/{Country}/g, tplVars.Country)
