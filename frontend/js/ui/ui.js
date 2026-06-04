@@ -28,14 +28,14 @@ if(menuContainer) {
 orderArr.forEach(id => {
 const btn = document.getElementById(`menu-${id}`);
 if (btn) {
-  if (appMode === 'combined' && ['submit-leave', 'submit-event', 'my-leaves'].includes(id)) {
-    btn.classList.add('hidden');
-  } else if (appMode === 'separated' && id === 'submit-combined') {
-    btn.classList.add('hidden');
-  } else {
-    btn.classList.remove('hidden');
-    menuContainer.appendChild(btn);
-  }
+ if (appMode === 'combined' && ['submit-leave', 'submit-event', 'my-leaves'].includes(id)) {
+   btn.classList.add('hidden');
+ } else if (appMode === 'separated' && id === 'submit-combined') {
+   btn.classList.add('hidden');
+ } else {
+   btn.classList.remove('hidden');
+   menuContainer.appendChild(btn);
+ }
 }
 });
 }
@@ -76,16 +76,16 @@ const controlsWrapper = document.getElementById('dash-controls-wrapper');
 
 if (controlsWrapper) {
 if (tabId === 'dashboard' || tabId === 'my-leaves') {
-  if (tabId === 'dashboard') {
-      if (deptNav) deptNav.classList.remove('hidden');
-  } else {
-      if (deptNav) deptNav.classList.add('hidden');
-  }
-  controlsWrapper.classList.remove('hidden');
-  controlsWrapper.classList.add('flex');
+ if (tabId === 'dashboard') {
+     if (deptNav) deptNav.classList.remove('hidden');
+ } else {
+     if (deptNav) deptNav.classList.add('hidden');
+ }
+ controlsWrapper.classList.remove('hidden');
+ controlsWrapper.classList.add('flex');
 } else {
-  controlsWrapper.classList.add('hidden');
-  controlsWrapper.classList.remove('flex');
+ controlsWrapper.classList.add('hidden');
+ controlsWrapper.classList.remove('flex');
 }
 }
 
@@ -122,14 +122,20 @@ if (isNaN(dateObj)) return '';
 return `${formatDisplayDate(dateObj)} ${String(dateObj.getHours()).padStart(2,'0')}:${String(dateObj.getMinutes()).padStart(2,'0')}`;
 }
 
-function initDates() {
+function getRoundedTime() {
 const now = new Date();
-const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+const ms = 1000 * 60 * 5; 
+return new Date(Math.ceil(now.getTime() / ms) * ms);
+}
 
-appData.leave.startD = new Date(now); appData.leave.endD = new Date(now);
-appData.event.startD = new Date(now); appData.event.endD = new Date(oneHourLater);
-appData.combined.startD = new Date(now); appData.combined.endD = new Date(oneHourLater);
-appData.parade.targetD = new Date(now);
+function initDates() {
+const nowRounded = getRoundedTime();
+const oneHourLater = new Date(nowRounded.getTime() + 60 * 60 * 1000);
+
+appData.leave.startD = new Date(nowRounded); appData.leave.endD = new Date(nowRounded);
+appData.event.startD = new Date(nowRounded); appData.event.endD = new Date(oneHourLater);
+appData.combined.startD = new Date(nowRounded); appData.combined.endD = new Date(oneHourLater);
+appData.parade.targetD = new Date(nowRounded);
 
 appData.register.birthdayD = new Date(2000, 0, 1);
 appData.adminRegister.birthdayD = new Date(2000, 0, 1);
@@ -169,8 +175,8 @@ function animateAndUpdate(btn) {
 const icon = btn.querySelector('svg'); 
 if (icon) icon.classList.add('animate-spin'); 
 setTimeout(async () => { 
-  await updateApp(); 
-  if (icon) icon.classList.remove('animate-spin'); 
+ await updateApp(); 
+ if (icon) icon.classList.remove('animate-spin'); 
 }, 300); 
 }
 
@@ -180,8 +186,8 @@ try {
 const regs = await navigator.serviceWorker.getRegistrations(); 
 for (let reg of regs) await reg.unregister(); 
 if (window.caches) {
-  const names = await caches.keys(); 
-  for (let name of names) await caches.delete(name); 
+ const names = await caches.keys(); 
+ for (let name of names) await caches.delete(name); 
 }
 } catch(err) {}
 }

@@ -6,7 +6,7 @@ function createGCalEvents(data, props) {
 var eventIds =[];
 var typicalEventTypes = JSON.parse(props.getProperty('typicalEventTypes') || "[]");
 var acronyms = JSON.parse(props.getProperty('acronyms') || "{}");
-var globalGcalTemplate = props.getProperty('gcalTemplate') || '{EventType} - {Name}, {Attendees} {Time}';
+var globalGcalTemplate = props.getProperty('gcalTemplate') || '{EventType} - {Name}, {Attendees}';
 
 var eventTypeObj = typicalEventTypes.filter(function(t) { return t.name === data.leaveType; })[0];
 var isEvent = eventTypeObj ? eventTypeObj.isEvent : false;
@@ -25,8 +25,27 @@ attendeesStr = att.map(function(a) {
 } catch(e) {}
 }
 
+var tz = "Asia/Singapore";
 var timeStr = "";
-if (!isEvent && data.halfDay !== 'None' && data.halfDay !== 'NONE') timeStr = "(" + data.halfDay + ")";
+var startTimeStr = "";
+var endTimeStr = "";
+
+if (isEvent) {
+if (data.isAllDay) {
+     startTimeStr = Utilities.formatDate(new Date(data.startDate), tz, "dd MMM yyyy") + " (All Day)";
+     endTimeStr = Utilities.formatDate(new Date(data.endDate), tz, "dd MMM yyyy") + " (All Day)";
+} else {
+     startTimeStr = Utilities.formatDate(new Date(data.startDate), tz, "dd MMM yyyy HH:mm");
+     endTimeStr = Utilities.formatDate(new Date(data.endDate), tz, "dd MMM yyyy HH:mm");
+}
+if (data.halfDay && data.halfDay !== 'NONE') {
+     endTimeStr += " ↻ " + data.halfDay + (data.untilDate ? " until " + Utilities.formatDate(new Date(data.untilDate), tz, "dd MMM yyyy") : "");
+}
+} else {
+timeStr = data.halfDay !== 'None' && data.halfDay !== 'NONE' ? "(" + data.halfDay + ")" : "";
+startTimeStr = Utilities.formatDate(new Date(data.startDate), tz, "dd MMM yyyy");
+endTimeStr = Utilities.formatDate(new Date(data.endDate), tz, "dd MMM yyyy");
+}
 
 var safeType = (data.leaveType || "").trim();
 var displayType = safeType;
@@ -70,6 +89,8 @@ var title = gcalTemplate
 .replace(/{Location}/g, locationStr || "")
 .replace(/{LocationDetails}/g, data.locationDetails || "")
 .replace(/{Time}/g, timeStr || "")
+.replace(/{StartTime}/g, startTimeStr || "")
+.replace(/{EndTime}/g, endTimeStr || "")
 .replace(/{Remarks}/g, data.remarks || "")
 .replace(/{EventDescription}/g, eventDesc)
 .replace(/{Country}/g, data.country || "")

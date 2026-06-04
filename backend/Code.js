@@ -42,11 +42,11 @@ props.setProperty('typicalEventTypes', JSON.stringify(defaultTypes));
 if (!props.getProperty('kahEmailSubject')) props.setProperty('kahEmailSubject', 'Leave Requires Approval: KAH Limit Crossed for {Unit}');
 if (!props.getProperty('kahEmailBody')) props.setProperty('kahEmailBody', 'User {Name} applied for {EventType} but KAH limit was crossed for {Unit}.');
 
-if (!props.getProperty('gcalTemplate')) props.setProperty('gcalTemplate', '{EventType} - {Name}, {Attendees} {Time}');
+if (!props.getProperty('gcalTemplate')) props.setProperty('gcalTemplate', '{EventType} - {Name}, {Attendees}');
 if (props.getProperty('agendaTemplate') === null) props.setProperty('agendaTemplate', '{EventType} - {Name} ({Department})');
-if (props.getProperty('agendaDetailsTemplate') === null) props.setProperty('agendaDetailsTemplate', 'Time: {Time}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}');
+if (props.getProperty('agendaDetailsTemplate') === null) props.setProperty('agendaDetailsTemplate', 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}');
 if (props.getProperty('infoAllTemplate') === null) props.setProperty('infoAllTemplate', '{EventType} - {Name} ({Department})');
-if (props.getProperty('infoAllDetailsTemplate') === null) props.setProperty('infoAllDetailsTemplate', 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}');
+if (props.getProperty('infoAllDetailsTemplate') === null) props.setProperty('infoAllDetailsTemplate', 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nEvent Description: {EventDescription}');
 if (!props.getProperty('contactNameFormat')) props.setProperty('contactNameFormat', '{Name} (Cloud Group : {Unit})');
 
 if (!props.getProperty('acronyms')) props.setProperty('acronyms', JSON.stringify({}));
