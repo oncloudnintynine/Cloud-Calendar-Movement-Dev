@@ -32,11 +32,11 @@ safeSet('set-kah-body', settings.kahEmailBody || "User {Name} applied for {Event
 
 safeSet('set-user-keyword', settings.userKeyword || 'peace');
 
-safeSet('set-gcal-template', settings.gcalTemplate || '{EventType} - {Name}, {Attendees} {Time}');
+safeSet('set-gcal-template', settings.gcalTemplate || '{EventType} - {Name}, {Attendees}');
 safeSet('set-agenda-template', settings.agendaTemplate || '{EventType} - {Name} ({Department})');
-safeSet('set-agenda-details-template', settings.agendaDetailsTemplate || 'Time: {Time}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}');
+safeSet('set-agenda-details-template', settings.agendaDetailsTemplate || 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}');
 safeSet('set-infoall-template', settings.infoAllTemplate || '{EventType} - {Name} ({Department})');
-safeSet('set-infoall-details-template', settings.infoAllDetailsTemplate || 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}');
+safeSet('set-infoall-details-template', settings.infoAllDetailsTemplate || 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nEvent Description: {EventDescription}');
 safeSet('set-landing-page', settings.landingPage || 'dashboard');
 safeSet('set-contact-format', settings.contactNameFormat || '{Name} (Cloud Group : {Unit})');
 
@@ -167,7 +167,7 @@ const list = document.getElementById('typical-event-types-list');
 if(!list) return;
 
 const buildChips = (inputId) => {
-    const vars = ['{EventType}','{Name}','{Attendees}','{Department}','{Location}','{LocationDetails}','{Country}','{State}','{Time}','{Remarks}','{EventDescription}'];
+    const vars = ['{EventType}','{Name}','{Attendees}','{Department}','{Location}','{LocationDetails}','{Country}','{State}','{StartTime}','{EndTime}','{Remarks}','{EventDescription}'];
     return `<div class="flex flex-wrap gap-1 mt-1.5 mb-2">` + 
         vars.map(v => `<button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>`).join('') + 
         `</div>`;
