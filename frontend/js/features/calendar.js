@@ -10,6 +10,9 @@ window.progScrollTimeout = null;
 window.isAgendaCollapsed = { dash: false, my: false };
 window.isTopWidgetsHidden = { dash: false, my: false };
 
+window.isDefaultDashAgendaSet = false;
+window.isDefaultMyAgendaSet = false;
+
 window.jumpToToday = function(ctx) {
 const today = new Date();
 today.setHours(0,0,0,0);
@@ -25,6 +28,25 @@ if (ctx === 'dash') {
     window.myAgendaDirty = true;
     if (dashViewMode === 'month') toggleDashView('agenda');
     else renderMyLeaves();
+}
+};
+
+window.scrollToAgendaDate = function(ctx, targetDateObj) {
+const container = document.getElementById(`${ctx}-agenda`);
+if (!container) return;
+
+// If the container is currently hidden (e.g. tab hasn't switched yet), wait and try again
+if (container.offsetParent === null) {
+    setTimeout(() => window.scrollToAgendaDate(ctx, targetDateObj), 50);
+    return;
+}
+
+setProgrammaticScroll();
+const group = ensureAgendaDateExists(ctx, targetDateObj);
+if (group) {
+    const cRect = container.getBoundingClientRect();
+    const gRect = group.getBoundingClientRect();
+    container.scrollTop += (gRect.top - cRect.top);
 }
 };
 
@@ -905,6 +927,10 @@ filtered = fuse.search(q).map(res => res.item);
 
 window.dashFilteredLeaves = filtered;
 
+if (!window.isDefaultDashAgendaSet) {
+window.isDefaultDashAgendaSet = true;
+}
+
 if (dashViewMode === 'agenda') {
 renderMiniCalendar('dash');
 
@@ -915,16 +941,7 @@ window.agendaDirty = false;
 
 const agendaEl = document.getElementById('dash-agenda');
 if (agendaEl) {
-setProgrammaticScroll();
-setTimeout(() => {
-    setProgrammaticScroll();
-    const group = ensureAgendaDateExists('dash', dashDate);
-    if (group) {
-        const cRect = agendaEl.getBoundingClientRect();
-        const gRect = group.getBoundingClientRect();
-        agendaEl.scrollTop += (gRect.top - cRect.top);
-    }
-}, 50);
+window.scrollToAgendaDate('dash', dashDate);
 }
 
 updateInfoAllDisplay('dash');
@@ -970,6 +987,10 @@ return false;
 
 window.myFilteredLeaves = my;
 
+if (!window.isDefaultMyAgendaSet) {
+window.isDefaultMyAgendaSet = true;
+}
+
 if (dashViewMode === 'agenda') {
 renderMiniCalendar('my');
 if (window.myAgendaDirty) {
@@ -979,16 +1000,7 @@ window.myAgendaDirty = false;
 
 const agendaEl = document.getElementById('my-agenda');
 if (agendaEl) {
-setProgrammaticScroll();
-setTimeout(() => {
-    setProgrammaticScroll();
-    const group = ensureAgendaDateExists('my', myDate);
-    if (group) {
-        const cRect = agendaEl.getBoundingClientRect();
-        const gRect = group.getBoundingClientRect();
-        agendaEl.scrollTop += (gRect.top - cRect.top);
-    }
-}, 50);
+window.scrollToAgendaDate('my', myDate);
 }
 
 updateInfoAllDisplay('my');
