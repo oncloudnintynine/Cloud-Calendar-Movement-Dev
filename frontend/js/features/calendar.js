@@ -684,7 +684,9 @@ Location: applyAcronymsFront(locStr) || "",
 LocationDetails: applyAcronymsFront(l.LocationDetails || "") || "",
 Time: timeStr || "",
 Remarks: l.Remarks || "",
-EventDescription: eventDesc
+EventDescription: eventDesc,
+Country: l.Country || "",
+State: l.State || ""
 };
 
 let titleRaw = isInfoAllContext ? window.appInfoAllTemplate : window.appAgendaTemplate;
@@ -700,7 +702,9 @@ let titleStr = titleRaw
 .replace(/{LocationDetails}/g, tplVars.LocationDetails)
 .replace(/{Time}/g, tplVars.Time)
 .replace(/{Remarks}/g, tplVars.Remarks)
-.replace(/{EventDescription}/g, tplVars.EventDescription);
+.replace(/{EventDescription}/g, tplVars.EventDescription)
+.replace(/{Country}/g, tplVars.Country)
+.replace(/{State}/g, tplVars.State);
 
 titleStr = titleStr.replace(/,\s*(?=[,\)]|$)/g, "").replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
 if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
