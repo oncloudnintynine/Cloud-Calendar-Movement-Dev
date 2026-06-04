@@ -549,7 +549,7 @@ for (let i = 0; i < lines.length; i++) {
 let line = lines[i];
 
 let hasVariables = false;
-let hasMissingValue = false;
+let hasPresentValue = false;
 
 // Extract all variables in the line
 const matches = line.match(/{.*?}/g) ||[];
@@ -559,19 +559,29 @@ for (let match of matches) {
   let varName = match.replace(/[{}]/g, '');
   let val = vars[varName] !== undefined ? vars[varName] : '';
   
-  // If a required variable in the line resolved to an empty string, we mark it missing
-  if (!val || val.trim() === '') {
-      hasMissingValue = true;
+  if (val && String(val).trim() !== '') {
+      hasPresentValue = true;
   }
   line = line.replace(match, val);
 }
 
-// Only keep the line if it didn't contain an empty variable (or if it had no variables)
-// This cleanly hides lines like "Location: {Location}" when Location is empty.
-if (hasVariables && hasMissingValue) continue;
+// Only skip the line if it contained variables and ALL of them were empty
+if (hasVariables && !hasPresentValue) continue;
 
 if (line.trim() !== '') {
-  validLines.push(`<p class="text-xs md:text-sm text-gray-600 dark:text-darkmuted mt-0.5">${line}</p>`);
+  // Cleanup artifacts like trailing commas, stray hyphens, empty parens left by missing variables
+  line = line.replace(/,\s*(?=[,\)]|$)/g, "")  // Remove trailing commas
+             .replace(/\(\s*\)/g, "")          // Remove empty parentheses
+             .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
+             .replace(/\s+/g, " ")             // Normalize spaces
+             .trim();
+  
+  if (line.endsWith('-')) line = line.slice(0, -1).trim();
+  if (line.endsWith(':')) line = line.slice(0, -1).trim();
+
+  if (line !== '') {
+      validLines.push(`<p class="text-xs md:text-sm text-gray-600 dark:text-darkmuted mt-0.5">${line}</p>`);
+  }
 }
 }
 return validLines.join('');
