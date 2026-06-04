@@ -40,22 +40,22 @@ safeSet('set-contact-format', settings.contactNameFormat || '{Name} (Cloud Group
 
 const radios = document.getElementsByName('app-mode');
 if (radios) {
-  radios.forEach(r => { if(r.value === appMode) r.checked = true; });
+ radios.forEach(r => { if(r.value === appMode) r.checked = true; });
 }
 
 let allDepts = new Set(companyStructure);
 if(companyContacts) {
-  companyContacts.forEach(c => {
-     if(c.dept && c.dept !== 'Unassigned') {
-         c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
-     }
-  });
+ companyContacts.forEach(c => {
+    if(c.dept && c.dept !== 'Unassigned') {
+        c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
+    }
+ });
 }
 allDepts.add('Cloud Meeting Room');
 
 tempDashboardDeptOrder = settings.dashboardDeptOrder || [];
 allDepts.forEach(d => {
-  if (!tempDashboardDeptOrder.includes(d)) tempDashboardDeptOrder.push(d);
+ if (!tempDashboardDeptOrder.includes(d)) tempDashboardDeptOrder.push(d);
 });
 tempDashboardDeptOrder = tempDashboardDeptOrder.filter(d => allDepts.has(d));
 renderDashboardFilterOrder();
@@ -68,11 +68,11 @@ renderTypicalEventTypes();
 
 tempAcronyms = {};
 if (settings.acronyms) {
- for (let key in settings.acronyms) {
-     let val = settings.acronyms[key];
-     if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
-     else tempAcronyms[key] = val;
- }
+for (let key in settings.acronyms) {
+    let val = settings.acronyms[key];
+    if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
+    else tempAcronyms[key] = val;
+}
 }
 renderAcronyms();
 
@@ -88,20 +88,20 @@ tempAdminSectionsOrder = (settings.adminSectionsOrder && settings.adminSectionsO
 const container = document.getElementById('admin-sections-container');
 if (container) {
 tempAdminSectionsOrder.forEach(id => {
- const el = container.querySelector(`[data-section="${id}"]`);
- if (el) container.appendChild(el);
+const el = container.querySelector(`[data-section="${id}"]`);
+if (el) container.appendChild(el);
 });
 
 if (window.adminSectionsSortable) window.adminSectionsSortable.destroy();
 if (typeof Sortable !== 'undefined') {
-   window.adminSectionsSortable = new Sortable(container, {
-     animation: 150,
-     handle: '.section-handle',
-     ghostClass: 'opacity-50',
-     onEnd: function () {
-       tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
-     }
-   });
+  window.adminSectionsSortable = new Sortable(container, {
+    animation: 150,
+    handle: '.section-handle',
+    ghostClass: 'opacity-50',
+    onEnd: function () {
+      tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
+    }
+  });
 }
 }
 } catch(e) {
@@ -119,7 +119,7 @@ populateAdminSettingsForm(settings);
 if(settings.allContacts) {
 companyContacts = settings.allContacts;
 companyContacts.forEach(c => {
-    c.formattedName = window.formatContactName(c.name, c.dept);
+   c.formattedName = window.formatContactName(c.name, c.dept);
 });
 fuseAllContacts = new Fuse(companyContacts, { keys:['formattedName', 'name', 'dept', 'phone'], threshold: 0.3 });
 }
@@ -176,27 +176,63 @@ locHtml = `<input type="text" value="${t.defaultLoc || ''}" onchange="updateTypi
 
 let removeBtnHtml = '<div class="w-6 shrink-0 ml-auto hidden sm:block"></div>';
 if (!isFixed) {
-removeBtnHtml = `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-red-700 p-1 rounded-lg transition shrink-0 ml-auto" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
+removeBtnHtml = `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg transition shrink-0 ml-auto" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
 }
 
+let templatesHtml = `
+<div class="w-full mt-2 pt-3 border-t border-gray-200 dark:border-darkborder hidden-view" id="event-type-tpl-${i}">
+   <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-3">
+       <div>
+           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">GCal Title Override</label>
+           <input type="text" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.gcalTemplate || ''}" onchange="updateTypicalEventType(${i}, 'gcalTemplate', this.value)">
+       </div>
+       <div>
+           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Title Override</label>
+           <input type="text" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.agendaTemplate || ''}" onchange="updateTypicalEventType(${i}, 'agendaTemplate', this.value)">
+       </div>
+       <div>
+           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Title Override</label>
+           <input type="text" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.infoAllTemplate || ''}" onchange="updateTypicalEventType(${i}, 'infoAllTemplate', this.value)">
+       </div>
+   </div>
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+       <div>
+           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Details Override</label>
+           <textarea class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'agendaDetailsTemplate', this.value)">${t.agendaDetailsTemplate || ''}</textarea>
+       </div>
+       <div>
+           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Details Override</label>
+           <textarea class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'infoAllDetailsTemplate', this.value)">${t.infoAllDetailsTemplate || ''}</textarea>
+       </div>
+   </div>
+</div>
+`;
+
 html += `
-<div data-idx="${i}" class="flex flex-col sm:flex-row items-start sm:items-center gap-2 bg-white dark:bg-darksurface p-3 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
-<div class="flex items-center w-full sm:w-auto gap-2">
-<svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-${isFixed ? `<div class="w-2 sm:w-0 shrink-0"></div>` : ''}
-<input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow sm:w-32 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm font-semibold" ${isFixed ? 'disabled' : ''}>
+<div data-idx="${i}" class="flex flex-col gap-2 bg-white dark:bg-darksurface p-3 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
+    <div class="flex items-center w-full sm:w-auto gap-2">
+    <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+    ${isFixed ? `<div class="w-2 sm:w-0 shrink-0"></div>` : ''}
+    <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow sm:w-32 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm font-semibold" ${isFixed ? 'disabled' : ''}>
+    </div>
+
+    <div class="flex items-center w-full sm:w-auto gap-2 flex-grow">
+    <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="flex-grow sm:flex-grow-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-sm cursor-pointer shrink-0">
+     <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
+     <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
+    </select>
+
+    ${locHtml}
+
+    ${removeBtnHtml}
+    
+    <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-500 hover:text-blue-700 p-1.5 rounded-lg transition shrink-0 ml-1 bg-blue-50 dark:bg-blue-900/30" title="Specific Templates">
+       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    </button>
+    </div>
 </div>
-
-<div class="flex items-center w-full sm:w-auto gap-2 flex-grow">
-<select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="flex-grow sm:flex-grow-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-sm cursor-pointer shrink-0">
-  <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
-  <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
-</select>
-
-${locHtml}
-
-${removeBtnHtml}
-</div>
+${templatesHtml}
 </div>
 `;
 });
@@ -209,12 +245,12 @@ animation: 150,
 handle: '.handle-event-type', 
 ghostClass: 'opacity-50', 
 onEnd: function () { 
- const newArr =[];
- Array.from(list.children).forEach(el => {
-   newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
- });
- tempTypicalEventTypes = newArr;
- renderTypicalEventTypes();
+const newArr =[];
+Array.from(list.children).forEach(el => {
+  newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
+});
+tempTypicalEventTypes = newArr;
+renderTypicalEventTypes();
 } 
 });
 }
@@ -243,7 +279,17 @@ renderTypicalEventTypes();
 
 function updateTypicalEventType(idx, field, val) {
 if (field === 'name' && FIXED_TYPICAL_EVENTS.includes(tempTypicalEventTypes[idx].name)) return;
-tempTypicalEventTypes[idx][field] = val;
+
+if (['gcalTemplate', 'agendaTemplate', 'agendaDetailsTemplate', 'infoAllTemplate', 'infoAllDetailsTemplate'].includes(field)) {
+    if (val === '') {
+        delete tempTypicalEventTypes[idx][field];
+    } else {
+        tempTypicalEventTypes[idx][field] = val;
+    }
+} else {
+    tempTypicalEventTypes[idx][field] = val;
+}
+
 if (field === 'isEvent') renderTypicalEventTypes(); 
 }
 
@@ -261,9 +307,9 @@ html += `
 
 <label class="flex items-center cursor-pointer shrink-0 ml-2" title="Toggle Active Status">
 <div class="relative">
- <input type="checkbox" class="sr-only" ${acr.active ? 'checked' : ''} onchange="toggleAcronymActive('${key}')">
- <div class="block bg-gray-300 dark:bg-gray-600 w-8 h-5 rounded-full transition-colors ${acr.active ? 'bg-green-500 dark:bg-green-600' : ''}"></div>
- <div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${acr.active ? 'transform translate-x-3' : ''}"></div>
+<input type="checkbox" class="sr-only" ${acr.active ? 'checked' : ''} onchange="toggleAcronymActive('${key}')">
+<div class="block bg-gray-300 dark:bg-gray-600 w-8 h-5 rounded-full transition-colors ${acr.active ? 'bg-green-500 dark:bg-green-600' : ''}"></div>
+<div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${acr.active ? 'transform translate-x-3' : ''}"></div>
 </div>
 </label>
 
@@ -277,8 +323,8 @@ list.innerHTML = html || '<p class="text-sm text-gray-500 dark:text-darkmuted it
 
 function toggleAcronymActive(key) {
 if (tempAcronyms[key]) {
- tempAcronyms[key].active = !tempAcronyms[key].active;
- renderAcronyms();
+tempAcronyms[key].active = !tempAcronyms[key].active;
+renderAcronyms();
 }
 }
 
@@ -357,7 +403,7 @@ html += `<div class="mb-4"><h4 class="font-bold text-lg text-gray-800 dark:text-
 if (grouped[parent]['_direct']) {
 html += `<div class="space-y-1">`;
 grouped[parent]['_direct'].forEach(k => {
-   html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
+  html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
 });
 html += `</div>`;
 }
@@ -366,7 +412,7 @@ for (const child in grouped[parent]) {
 if (child !== '_direct') {
 html += `<h5 class="font-semibold text-sm text-gray-600 dark:text-gray-400 mt-2 mb-1 pl-2 border-l-2 border-blue-400">${child}</h5><div class="space-y-1">`;
 grouped[parent][child].forEach(k => {
-   html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
+  html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
 });
 html += `</div>`;
 }
@@ -387,10 +433,10 @@ container.innerHTML = customKahGroups.map((g, i) => `
 </div>
 <div class="space-y-1.5 mb-3">
 ${g.members.map(phone => {
-   const contact = companyContacts.find(c => String(c.phone) === String(phone));
-   const name = contact ? contact.name : phone;
-   const dept = contact ? contact.dept : '';
-   return `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm text-sm"><span class="font-medium truncate">${name} <span class="text-xs text-gray-500 font-normal ml-1">(${dept})</span></span> <button onclick="removeKahGroupMember(${i}, '${phone}')" class="text-red-500 font-bold px-2">&times;</button></div>`;
+  const contact = companyContacts.find(c => String(c.phone) === String(phone));
+  const name = contact ? contact.name : phone;
+  const dept = contact ? contact.dept : '';
+  return `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm text-sm"><span class="font-medium truncate">${name} <span class="text-xs text-gray-500 font-normal ml-1">(${dept})</span></span> <button onclick="removeKahGroupMember(${i}, '${phone}')" class="text-red-500 font-bold px-2">&times;</button></div>`;
 }).join('')}
 ${g.members.length === 0 ? '<p class="text-xs text-gray-500 dark:text-darkmuted italic text-center py-1">No members added yet.</p>' : ''}
 </div>

@@ -17,17 +17,17 @@ window.jumpToToday = function(ctx) {
 const today = new Date();
 today.setHours(0,0,0,0);
 if (ctx === 'dash') {
-    dashDate = today;
-    dashMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    window.agendaDirty = true;
-    if (dashViewMode === 'month') toggleDashView('agenda');
-    else renderDashboard();
+   dashDate = today;
+   dashMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+   window.agendaDirty = true;
+   if (dashViewMode === 'month') toggleDashView('agenda');
+   else renderDashboard();
 } else {
-    myDate = today;
-    myMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    window.myAgendaDirty = true;
-    if (dashViewMode === 'month') toggleDashView('agenda');
-    else renderMyLeaves();
+   myDate = today;
+   myMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+   window.myAgendaDirty = true;
+   if (dashViewMode === 'month') toggleDashView('agenda');
+   else renderMyLeaves();
 }
 };
 
@@ -37,16 +37,16 @@ if (!container) return;
 
 // If the container is currently hidden (e.g. tab hasn't switched yet), wait and try again
 if (container.offsetParent === null) {
-    setTimeout(() => window.scrollToAgendaDate(ctx, targetDateObj), 50);
-    return;
+   setTimeout(() => window.scrollToAgendaDate(ctx, targetDateObj), 50);
+   return;
 }
 
 setProgrammaticScroll();
 const group = ensureAgendaDateExists(ctx, targetDateObj);
 if (group) {
-    const cRect = container.getBoundingClientRect();
-    const gRect = group.getBoundingClientRect();
-    container.scrollTop += (gRect.top - cRect.top);
+   const cRect = container.getBoundingClientRect();
+   const gRect = group.getBoundingClientRect();
+   container.scrollTop += (gRect.top - cRect.top);
 }
 };
 
@@ -56,11 +56,11 @@ const container = document.getElementById(`${ctx}-top-widgets-container`);
 const btn = document.getElementById(`${ctx}-toggle-widgets-btn`);
 
 if (window.isTopWidgetsHidden[ctx]) {
-   if(container) container.classList.add('hidden-view');
-   if(btn) btn.innerHTML = `<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg> Show Cal`;
+  if(container) container.classList.add('hidden-view');
+  if(btn) btn.innerHTML = `<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg> Show Cal`;
 } else {
-   if(container) container.classList.remove('hidden-view');
-   if(btn) btn.innerHTML = `<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal`;
+  if(container) container.classList.remove('hidden-view');
+  if(btn) btn.innerHTML = `<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal`;
 }
 };
 
@@ -71,11 +71,11 @@ const chevron = card.querySelector('.chevron-icon');
 if(!body) return;
 
 if(body.classList.contains('hidden-view')) {
-  body.classList.remove('hidden-view');
-  if(chevron) chevron.classList.add('rotate-180');
+ body.classList.remove('hidden-view');
+ if(chevron) chevron.classList.add('rotate-180');
 } else {
-  body.classList.add('hidden-view');
-  if(chevron) chevron.classList.remove('rotate-180');
+ body.classList.add('hidden-view');
+ if(chevron) chevron.classList.remove('rotate-180');
 }
 };
 
@@ -83,23 +83,23 @@ window.toggleAllAgendaCards = function(ctx) {
 window.isAgendaCollapsed[ctx] = !window.isAgendaCollapsed[ctx];
 const btn = document.getElementById(`${ctx}-expand-toggle-btn`);
 if(btn) {
-  btn.innerText = window.isAgendaCollapsed[ctx] ? 'Expand All' : 'Collapse All';
+ btn.innerText = window.isAgendaCollapsed[ctx] ? 'Expand All' : 'Collapse All';
 }
 
 const container = document.getElementById(`${ctx}-agenda`);
 const infoAllContainer = document.getElementById(`${ctx}-infoall-list`);
 
 const updateNodes = (parent) => {
-  if(!parent) return;
-  const cards = parent.querySelectorAll('.agenda-card-body');
-  const chevrons = parent.querySelectorAll('.chevron-icon');
-  if (window.isAgendaCollapsed[ctx]) {
-      cards.forEach(b => b.classList.add('hidden-view'));
-      chevrons.forEach(c => c.classList.remove('rotate-180'));
-  } else {
-      cards.forEach(b => b.classList.remove('hidden-view'));
-      chevrons.forEach(c => c.classList.add('rotate-180'));
-  }
+ if(!parent) return;
+ const cards = parent.querySelectorAll('.agenda-card-body');
+ const chevrons = parent.querySelectorAll('.chevron-icon');
+ if (window.isAgendaCollapsed[ctx]) {
+     cards.forEach(b => b.classList.add('hidden-view'));
+     chevrons.forEach(c => c.classList.remove('rotate-180'));
+ } else {
+     cards.forEach(b => b.classList.remove('hidden-view'));
+     chevrons.forEach(c => c.classList.add('rotate-180'));
+ }
 };
 
 updateNodes(container);
@@ -250,17 +250,17 @@ if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:te
 else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
 if (cellDay === d) {
-  baseClass = "cal-day-cell relative flex items-center justify-center w-6 h-6 mx-auto rounded-full cursor-pointer transition-colors text-xs font-bold bg-blue-600 text-white shadow-md ";
+ baseClass = "cal-day-cell relative flex items-center justify-center w-6 h-6 mx-auto rounded-full cursor-pointer transition-colors text-xs font-bold bg-blue-600 text-white shadow-md ";
 }
 
 cell.className = baseClass;
 
 const hasEvent = cell.dataset.hasevent === 'true';
 if (hasEvent) {
-  const dotColor = cellDay === d ? 'bg-white' : 'bg-blue-500';
-  cell.innerHTML = `${cellDay}<div class="absolute bottom-0 w-1 h-1 ${dotColor} rounded-full"></div>`;
+ const dotColor = cellDay === d ? 'bg-white' : 'bg-blue-500';
+ cell.innerHTML = `${cellDay}<div class="absolute bottom-0 w-1 h-1 ${dotColor} rounded-full"></div>`;
 } else {
-  cell.innerHTML = `${cellDay}`;
+ cell.innerHTML = `${cellDay}`;
 }
 });
 }
@@ -288,45 +288,45 @@ const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - conta
 let topDateStr = null;
 
 if (isAtBottom) {
-  for (let i = groups.length - 1; i >= 0; i--) {
-      const rect = groups[i].getBoundingClientRect();
-      if (rect.top < containerBottom) {
-          topDateStr = groups[i].dataset.date; 
-          break;
-      }
-  }
+ for (let i = groups.length - 1; i >= 0; i--) {
+     const rect = groups[i].getBoundingClientRect();
+     if (rect.top < containerBottom) {
+         topDateStr = groups[i].dataset.date; 
+         break;
+     }
+ }
 } else {
-  for (const group of groups) {
-      const rect = group.getBoundingClientRect();
-      if (rect.top >= containerTop && rect.top <= containerTop + 100) {
-          topDateStr = group.dataset.date; break;
-      } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
-          topDateStr = group.dataset.date; break;
-      }
-  }
+ for (const group of groups) {
+     const rect = group.getBoundingClientRect();
+     if (rect.top >= containerTop && rect.top <= containerTop + 100) {
+         topDateStr = group.dataset.date; break;
+     } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
+         topDateStr = group.dataset.date; break;
+     }
+ }
 }
 
 if (topDateStr) {
-  const[y, m, d] = topDateStr.split('-').map(Number);
-  const targetDate = isDash ? dashDate : myDate;
-  const targetMonth = isDash ? dashMonth : myMonth;
-  
-  if (targetDate.getDate() !== d || targetDate.getMonth() !== (m-1) || targetDate.getFullYear() !== y) {
-      if (isDash) dashDate = new Date(y, m - 1, d);
-      else myDate = new Date(y, m - 1, d);
-      
-      if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
-          if (isDash) {
-              dashMonth = new Date(y, m - 1, 1);
-          } else {
-              myMonth = new Date(y, m - 1, 1);
-          }
-          renderMiniCalendar(ctx);
-          updateInfoAllDisplay(ctx);
-      } else {
-          updateMiniCalendarSelection(ctx, d);
-      }
-  }
+ const[y, m, d] = topDateStr.split('-').map(Number);
+ const targetDate = isDash ? dashDate : myDate;
+ const targetMonth = isDash ? dashMonth : myMonth;
+ 
+ if (targetDate.getDate() !== d || targetDate.getMonth() !== (m-1) || targetDate.getFullYear() !== y) {
+     if (isDash) dashDate = new Date(y, m - 1, d);
+     else myDate = new Date(y, m - 1, d);
+     
+     if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
+         if (isDash) {
+             dashMonth = new Date(y, m - 1, 1);
+         } else {
+             myMonth = new Date(y, m - 1, 1);
+         }
+         renderMiniCalendar(ctx);
+         updateInfoAllDisplay(ctx);
+     } else {
+         updateMiniCalendarSelection(ctx, d);
+     }
+ }
 }
 }, 50);
 
@@ -425,15 +425,15 @@ let evEnd = new Date(l.EndDate); evEnd.setHours(0,0,0,0);
 
 if (isRepeating) {
 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    if (isEventOnDate(l, d)) {
-        instances.push({ l: l, start: new Date(d), end: new Date(d), isLeave: isLeave });
-    }
+   if (isEventOnDate(l, d)) {
+       instances.push({ l: l, start: new Date(d), end: new Date(d), isLeave: isLeave });
+   }
 }
 } else {
 if (evStart <= endDate && evEnd >= startDate) {
-    let clampedStart = new Date(Math.max(evStart, startDate));
-    let clampedEnd = new Date(Math.min(evEnd, endDate));
-    instances.push({ l: l, start: clampedStart, end: clampedEnd, isLeave: isLeave });
+   let clampedStart = new Date(Math.max(evStart, startDate));
+   let clampedEnd = new Date(Math.min(evEnd, endDate));
+   instances.push({ l: l, start: clampedStart, end: clampedEnd, isLeave: isLeave });
 }
 }
 });
@@ -456,17 +456,17 @@ let slots =[];
 segments.forEach(seg => {
 let slotIdx = 0;
 while (true) {
-    if (!slots[slotIdx]) slots[slotIdx] =[];
-    let conflict = false;
-    for (let i = seg.sDay; i <= seg.eDay; i++) {
-        if (slots[slotIdx][i]) { conflict = true; break; }
-    }
-    if (!conflict) {
-        for (let i = seg.sDay; i <= seg.eDay; i++) slots[slotIdx][i] = true;
-        seg.slot = slotIdx;
-        break;
-    }
-    slotIdx++;
+   if (!slots[slotIdx]) slots[slotIdx] =[];
+   let conflict = false;
+   for (let i = seg.sDay; i <= seg.eDay; i++) {
+       if (slots[slotIdx][i]) { conflict = true; break; }
+   }
+   if (!conflict) {
+       for (let i = seg.sDay; i <= seg.eDay; i++) slots[slotIdx][i] = true;
+       seg.slot = slotIdx;
+       break;
+   }
+   slotIdx++;
 }
 });
 
@@ -479,7 +479,7 @@ let isToday = curD.toDateString() === new Date().toDateString();
 let isCurMonth = curD.getMonth() === m;
 let bg = isCurMonth ? '' : 'bg-gray-50/50 dark:bg-[#151515]';
 html += `<div class="flex-1 border-r border-gray-200 last:border-r-0 dark:border-darkborder ${bg} p-1" onclick="selectDate('${ctx}', ${curD.getFullYear()}, ${curD.getMonth()}, ${curD.getDate()})">
-   <div class="text-[11px] font-bold ${isToday ? 'bg-blue-600 text-white rounded-full w-[22px] h-[22px] mx-auto flex items-center justify-center shadow-md' : 'text-gray-500 dark:text-darkmuted text-center'}">${curD.getDate()}</div>
+  <div class="text-[11px] font-bold ${isToday ? 'bg-blue-600 text-white rounded-full w-[22px] h-[22px] mx-auto flex items-center justify-center shadow-md' : 'text-gray-500 dark:text-darkmuted text-center'}">${curD.getDate()}</div>
 </div>`;
 }
 
@@ -496,7 +496,7 @@ const displayType = safeType === 'Meeting' && seg.l.Remarks ? `${safeType}: ${se
 
 let dispName = applyAcronymsFront(seg.l.Name || "");
 if (dispName === (seg.l.Name || "")) {
-    dispName = dispName.split(' ')[0];
+   dispName = dispName.split(' ')[0];
 }
 
 const titleRawStr = isPublicHoliday ? seg.l.Name : (seg.isLeave ? `${dispName} : ${displayType}` : displayType);
@@ -508,9 +508,9 @@ const topOffset = (seg.slot * 20) + 26;
 
 let rounded = 'rounded-sm';
 if (seg.len > 1) {
-   if (seg.sDay === 0 && seg.eDay === 6) rounded = 'rounded-none';
-   else if (seg.sDay === 0) rounded = 'rounded-r-sm';
-   else if (seg.eDay === 6) rounded = 'rounded-l-sm';
+  if (seg.sDay === 0 && seg.eDay === 6) rounded = 'rounded-none';
+  else if (seg.sDay === 0) rounded = 'rounded-r-sm';
+  else if (seg.eDay === 6) rounded = 'rounded-l-sm';
 }
 
 html += `<div class="absolute h-[18px] px-1 text-[10px] md:text-[11px] font-bold leading-tight truncate shadow-sm pointer-events-auto cursor-pointer border-b border-black/10 ${color} ${rounded}" style="left: calc(${left}% + 1px); width: calc(${width}% - 2px); top: ${topOffset}px;" onclick="selectDate('${ctx}', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${appliedTitle}">${appliedTitle}</div>`;
@@ -555,15 +555,15 @@ let hasMissingValue = false;
 const matches = line.match(/{.*?}/g) ||[];
 
 for (let match of matches) {
-   hasVariables = true;
-   let varName = match.replace(/[{}]/g, '');
-   let val = vars[varName] !== undefined ? vars[varName] : '';
-   
-   // If a required variable in the line resolved to an empty string, we mark it missing
-   if (!val || val.trim() === '') {
-       hasMissingValue = true;
-   }
-   line = line.replace(match, val);
+  hasVariables = true;
+  let varName = match.replace(/[{}]/g, '');
+  let val = vars[varName] !== undefined ? vars[varName] : '';
+  
+  // If a required variable in the line resolved to an empty string, we mark it missing
+  if (!val || val.trim() === '') {
+      hasMissingValue = true;
+  }
+  line = line.replace(match, val);
 }
 
 // Only keep the line if it didn't contain an empty variable (or if it had no variables)
@@ -571,7 +571,7 @@ for (let match of matches) {
 if (hasVariables && hasMissingValue) continue;
 
 if (line.trim() !== '') {
-   validLines.push(`<p class="text-xs md:text-sm text-gray-600 dark:text-darkmuted mt-0.5">${line}</p>`);
+  validLines.push(`<p class="text-xs md:text-sm text-gray-600 dark:text-darkmuted mt-0.5">${line}</p>`);
 }
 }
 return validLines.join('');
@@ -610,18 +610,18 @@ let compactActionBtns = '';
 if ((String(l.Phone) === String(user.phone) || user.role === 'admin') && l.Status !== 'Cancelled' && !isPublicHoliday) {
 actionBtns = `
 <button onclick="triggerEdit('${l.ID}')" class="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition shrink-0" title="Edit Record">
- <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
 </button>
 <button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition shrink-0" title="Cancel Record">
- <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
 </button>`;
 
 compactActionBtns = `
 <button onclick="triggerEdit('${l.ID}')" class="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-md transition shrink-0" title="Edit Record">
- <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
 </button>
 <button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-md transition shrink-0" title="Cancel Record">
- <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
 </button>`;
 }
 
@@ -630,32 +630,32 @@ if (l.Attendees) {
 try {
 const attArr = JSON.parse(l.Attendees);
 if (attArr && attArr.length > 0) {
-  attendeesDisplay = attArr.map(a => {
-      if (a.expandedNames) return a.expandedNames;
-      
-      if (a.type === 'group') {
-          if (a.name.startsWith('zz KAH:')) {
-              const dept = a.dept;
-              if (dept === 'Custom') {
-                  const gName = a.name.replace('zz KAH: ', '').trim();
-                  const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
-                  if (cGrp) {
-                      return cGrp.members.map(ph => {
-                          const c = companyContacts.find(x => String(x.phone) === String(ph));
-                          return c ? c.name : ph;
-                      }).join(', ');
-                  }
-              } else {
-                  const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
-                  if (kahMems.length > 0) return kahMems.join(', ');
-              }
-          } else if (a.name.startsWith('zz All in ')) {
-              return a.name.replace('zz ', '');
-          }
-          return a.name.replace('zz KAH: ', '').replace('zz ', '');
-      }
-      return a.name;
-  }).join(', ');
+ attendeesDisplay = attArr.map(a => {
+     if (a.expandedNames) return a.expandedNames;
+     
+     if (a.type === 'group') {
+         if (a.name.startsWith('zz KAH:')) {
+             const dept = a.dept;
+             if (dept === 'Custom') {
+                 const gName = a.name.replace('zz KAH: ', '').trim();
+                 const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
+                 if (cGrp) {
+                     return cGrp.members.map(ph => {
+                         const c = companyContacts.find(x => String(x.phone) === String(ph));
+                         return c ? c.name : ph;
+                     }).join(', ');
+                 }
+             } else {
+                 const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
+                 if (kahMems.length > 0) return kahMems.join(', ');
+             }
+         } else if (a.name.startsWith('zz All in ')) {
+             return a.name.replace('zz ', '');
+         }
+         return a.name.replace('zz KAH: ', '').replace('zz ', '');
+     }
+     return a.name;
+ }).join(', ');
 }
 } catch(e) {}
 }
@@ -690,6 +690,11 @@ State: l.State || ""
 };
 
 let titleRaw = isInfoAllContext ? window.appInfoAllTemplate : window.appAgendaTemplate;
+if (typeObj) {
+    if (isInfoAllContext && typeObj.infoAllTemplate) titleRaw = typeObj.infoAllTemplate;
+    else if (!isInfoAllContext && typeObj.agendaTemplate) titleRaw = typeObj.agendaTemplate;
+}
+
 if (isMyCalendar && !isInfoAllContext) titleRaw = '{EventType}'; 
 if (isPublicHoliday) titleRaw = '🇸🇬 {Name}';
 
@@ -712,6 +717,14 @@ if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
 const finalTitle = applyAcronymsFront(titleStr);
 
 let detailsRaw = isInfoAllContext ? window.appInfoAllDetailsTemplate : window.appAgendaDetailsTemplate;
+if (typeObj) {
+    if (isInfoAllContext && typeObj.infoAllDetailsTemplate !== undefined) {
+        detailsRaw = typeObj.infoAllDetailsTemplate;
+    } else if (!isInfoAllContext && typeObj.agendaDetailsTemplate !== undefined) {
+        detailsRaw = typeObj.agendaDetailsTemplate;
+    }
+}
+
 if (isPublicHoliday) detailsRaw = '';
 
 const finalDetailsHtml = detailsRaw ? parseAndCleanTemplate(detailsRaw, tplVars) : '';
@@ -721,15 +734,15 @@ const hasBody = finalDetailsHtml.trim() !== '' || (isInfoAllContext ? compactAct
 if (isInfoAllContext) {
 return `<div class="p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/60 bg-white/60 dark:bg-black/20 flex flex-col">
 <div class="flex justify-between items-start ${hasBody ? 'cursor-pointer select-none' : ''}" ${hasBody ? 'onclick="toggleAgendaCard(this)"' : ''}>
-  <h3 class="font-bold text-[11px] md:text-xs text-blue-900 dark:text-blue-300 flex-grow pr-2">${finalTitle}</h3>
-  ${hasBody ? `<svg class="w-4 h-4 text-blue-500 transition-transform duration-200 chevron-icon shrink-0 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>` : ''}
+ <h3 class="font-bold text-[11px] md:text-xs text-blue-900 dark:text-blue-300 flex-grow pr-2">${finalTitle}</h3>
+ ${hasBody ? `<svg class="w-4 h-4 text-blue-500 transition-transform duration-200 chevron-icon shrink-0 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>` : ''}
 </div>
 ${hasBody ? `
 <div class="agenda-card-body ${isCollapsed ? 'hidden-view' : ''}">
-  <div class="flex justify-between items-end gap-2 mt-1.5">
-    ${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
-    ${compactActionBtns ? `<div class="flex shrink-0 space-x-1">${compactActionBtns}</div>` : ''}
-  </div>
+ <div class="flex justify-between items-end gap-2 mt-1.5">
+   ${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
+   ${compactActionBtns ? `<div class="flex shrink-0 space-x-1">${compactActionBtns}</div>` : ''}
+ </div>
 </div>` : ''}
 </div>`;
 }
@@ -747,10 +760,10 @@ ${hasBody ? `<svg class="w-5 h-5 ml-1.5 text-gray-400 dark:text-darkmuted transi
 </div>
 ${hasBody ? `
 <div class="agenda-card-body ${isCollapsed ? 'hidden-view' : ''}">
- <div class="flex justify-between items-end gap-2 mt-2">
-   ${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow pt-1 border-t border-gray-100 dark:border-darkborder/50">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
-   ${actionBtns ? `<div class="flex shrink-0 space-x-1 pb-0.5">${actionBtns}</div>` : ''}
- </div>
+<div class="flex justify-between items-end gap-2 mt-2">
+  ${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow pt-1 border-t border-gray-100 dark:border-darkborder/50">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
+  ${actionBtns ? `<div class="flex shrink-0 space-x-1 pb-0.5">${actionBtns}</div>` : ''}
+</div>
 </div>` : ''}
 </div>`;
 }).join('');
@@ -769,19 +782,19 @@ const mEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
 const data = ctx === 'dash' ? window.dashFilteredLeaves : window.myFilteredLeaves;
 
 const infoAllEvents = data.filter(l => {
- if (String(l.InfoAll).toUpperCase() !== 'TRUE') return false;
- for (let d = new Date(mStart); d <= mEnd; d.setDate(d.getDate() + 1)) {
-     if (isEventOnDate(l, d)) return true;
- }
- return false;
+if (String(l.InfoAll).toUpperCase() !== 'TRUE') return false;
+for (let d = new Date(mStart); d <= mEnd; d.setDate(d.getDate() + 1)) {
+    if (isEventOnDate(l, d)) return true;
+}
+return false;
 });
 
 if (infoAllEvents.length > 0) {
- infoAllEvents.sort((a, b) => new Date(a.StartDate) - new Date(b.StartDate));
- infoAllList.innerHTML = buildAgendaHtml(infoAllEvents, ctx === 'my', true);
- infoAllContainer.classList.remove('hidden-view');
+infoAllEvents.sort((a, b) => new Date(a.StartDate) - new Date(b.StartDate));
+infoAllList.innerHTML = buildAgendaHtml(infoAllEvents, ctx === 'my', true);
+infoAllContainer.classList.remove('hidden-view');
 } else {
- infoAllContainer.classList.add('hidden-view');
+infoAllContainer.classList.add('hidden-view');
 }
 }
 
@@ -798,19 +811,19 @@ for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
 const dayEvents = data.filter(l => isEventOnDate(l, d));
 
 if (dayEvents.length > 0 || d.toDateString() === targetDate.toDateString()) {
-   const yyyy = d.getFullYear();
-   const mm = String(d.getMonth() + 1).padStart(2, '0');
-   const dd = String(d.getDate()).padStart(2, '0');
-   
-   html += `
-   <div class="agenda-day-group mb-6" data-date="${yyyy}-${mm}-${dd}">
-       <div class="sticky top-0 bg-gray-50 dark:bg-[#1a1a1a] z-10 py-1.5 border-y border-gray-200 dark:border-darkborder mb-3 shadow-sm px-2 rounded-lg">
-           <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400">${formatDisplayDate(d)}</h3>
-       </div>
-       <div class="space-y-3 px-1">
-           ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
-       </div>
-   </div>`;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  
+  html += `
+  <div class="agenda-day-group mb-6" data-date="${yyyy}-${mm}-${dd}">
+      <div class="sticky top-0 bg-gray-50 dark:bg-[#1a1a1a] z-10 py-1.5 border-y border-gray-200 dark:border-darkborder mb-3 shadow-sm px-2 rounded-lg">
+          <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400">${formatDisplayDate(d)}</h3>
+      </div>
+      <div class="space-y-3 px-1">
+          ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
+      </div>
+  </div>`;
 }
 }
 
@@ -836,21 +849,21 @@ group = document.createElement('div');
 group.className = 'agenda-day-group mb-6';
 group.dataset.date = dateStr;
 group.innerHTML = `
-   <div class="sticky top-0 bg-gray-50 dark:bg-[#1a1a1a] z-10 py-1.5 border-y border-gray-200 dark:border-darkborder mb-3 shadow-sm px-2 rounded-lg">
-       <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400">${formatDisplayDate(targetDateObj)}</h3>
-   </div>
-   <div class="space-y-3 px-1">
-       <p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>
-   </div>`;
+  <div class="sticky top-0 bg-gray-50 dark:bg-[#1a1a1a] z-10 py-1.5 border-y border-gray-200 dark:border-darkborder mb-3 shadow-sm px-2 rounded-lg">
+      <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400">${formatDisplayDate(targetDateObj)}</h3>
+  </div>
+  <div class="space-y-3 px-1">
+      <p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>
+  </div>`;
 
 const allGroups = Array.from(container.querySelectorAll('.agenda-day-group'));
 let inserted = false;
 for (let i = 0; i < allGroups.length; i++) {
-   if (allGroups[i].dataset.date > dateStr) {
-       container.insertBefore(group, allGroups[i]);
-       inserted = true;
-       break;
-   }
+  if (allGroups[i].dataset.date > dateStr) {
+      container.insertBefore(group, allGroups[i]);
+      inserted = true;
+      break;
+  }
 }
 if (!inserted) container.appendChild(group);
 }
@@ -873,18 +886,18 @@ if (l.Attendees) {
 try {
 const att = JSON.parse(l.Attendees);
 return att.some(a => {
-   if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
-   if (a.type === 'group') {
-       if (a.dept === 'Custom') {
-           const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-           return customG && customG.members.includes(String(user.phone));
-       } else if (a.name.startsWith('zz KAH:')) {
-           return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
-       } else {
-           return (user.departments ||[]).includes(a.dept); // Safety fallback
-       }
-   }
-   return false;
+  if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
+  if (a.type === 'group') {
+      if (a.dept === 'Custom') {
+          const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+          return customG && customG.members.includes(String(user.phone));
+      } else if (a.name.startsWith('zz KAH:')) {
+          return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+      } else {
+          return (user.departments ||[]).includes(a.dept); // Safety fallback
+      }
+  }
+  return false;
 });
 } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
 }
@@ -900,24 +913,24 @@ if (l.Attendees) {
 try {
 const att = JSON.parse(l.Attendees);
 return att.some(a => {
-  if (a.dept && String(a.dept).includes(d)) return true;
-  if (a.type === 'group' && a.dept === 'Custom') {
-     const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-     if (customG) {
-         return customG.members.some(phone => {
-             const contact = companyContacts.find(c => String(c.phone) === String(phone));
-             return contact && contact.dept && String(contact.dept).includes(d);
-         });
-     }
-  }
-  return false;
+ if (a.dept && String(a.dept).includes(d)) return true;
+ if (a.type === 'group' && a.dept === 'Custom') {
+    const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+    if (customG) {
+        return customG.members.some(phone => {
+            const contact = companyContacts.find(c => String(c.phone) === String(phone));
+            return contact && contact.dept && String(contact.dept).includes(d);
+        });
+    }
+ }
+ return false;
 });
 } catch(e) {
- const phones = String(l.Attendees).split(',');
- return phones.some(phone => {
-     const contact = companyContacts.find(c => String(c.phone) === String(phone.trim()));
-     return contact && contact.dept && String(contact.dept).includes(d);
- });
+const phones = String(l.Attendees).split(',');
+return phones.some(phone => {
+    const contact = companyContacts.find(c => String(c.phone) === String(phone.trim()));
+    return contact && contact.dept && String(contact.dept).includes(d);
+});
 }
 }
 return false;
@@ -971,18 +984,18 @@ if (l.Attendees) {
 try {
 const att = JSON.parse(l.Attendees);
 return att.some(a => {
-   if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
-   if (a.type === 'group') {
-       if (a.dept === 'Custom') {
-           const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-           return customG && customG.members.includes(String(user.phone));
-       } else if (a.name.startsWith('zz KAH:')) {
-           return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
-       } else {
-           return (user.departments ||[]).includes(a.dept); // Safety fallback
-       }
-   }
-   return false;
+  if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
+  if (a.type === 'group') {
+      if (a.dept === 'Custom') {
+          const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+          return customG && customG.members.includes(String(user.phone));
+      } else if (a.name.startsWith('zz KAH:')) {
+          return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+      } else {
+          return (user.departments ||[]).includes(a.dept); // Safety fallback
+      }
+  }
+  return false;
 });
 } catch(e) { return String(l.Attendees).includes(String(user.phone)); }
 }
