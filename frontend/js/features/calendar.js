@@ -21,8 +21,11 @@ if (!data || data.length === 0) return today;
 if (data.some(l => isEventOnDate(l, today))) return today;
 
 for (let offset = 1; offset <= 365; offset++) {
-    let futureD = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
-    let pastD = new Date(today.getFullYear(), today.getMonth(), today.getDate() - offset);
+    let futureD = new Date(today);
+    futureD.setDate(today.getDate() + offset);
+    
+    let pastD = new Date(today);
+    pastD.setDate(today.getDate() - offset);
     
     let futureHasEvent = data.some(l => isEventOnDate(l, futureD));
     let pastHasEvent = data.some(l => isEventOnDate(l, pastD));
@@ -911,7 +914,7 @@ filtered = fuse.search(q).map(res => res.item);
 
 window.dashFilteredLeaves = filtered;
 
-if (!window.isDefaultDashAgendaSet) {
+if (!window.isDefaultDashAgendaSet && filtered.length > 0) {
 dashDate = getClosestEventDate(filtered);
 dashMonth = new Date(dashDate.getFullYear(), dashDate.getMonth(), 1);
 window.isDefaultDashAgendaSet = true;
@@ -927,9 +930,11 @@ window.agendaDirty = false;
 
 const agendaEl = document.getElementById('dash-agenda');
 if (agendaEl) {
+setProgrammaticScroll();
 setTimeout(() => {
+    setProgrammaticScroll();
     const group = ensureAgendaDateExists('dash', dashDate);
-    if (group) group.scrollIntoView({ behavior: 'smooth' });
+    if (group) group.scrollIntoView({ behavior: 'auto', block: 'start' });
 }, 10);
 }
 
@@ -976,7 +981,7 @@ return false;
 
 window.myFilteredLeaves = my;
 
-if (!window.isDefaultMyAgendaSet) {
+if (!window.isDefaultMyAgendaSet && my.length > 0) {
 myDate = getClosestEventDate(my);
 myMonth = new Date(myDate.getFullYear(), myDate.getMonth(), 1);
 window.isDefaultMyAgendaSet = true;
@@ -991,9 +996,11 @@ window.myAgendaDirty = false;
 
 const agendaEl = document.getElementById('my-agenda');
 if (agendaEl) {
+setProgrammaticScroll();
 setTimeout(() => {
+    setProgrammaticScroll();
     const group = ensureAgendaDateExists('my', myDate);
-    if (group) group.scrollIntoView({ behavior: 'smooth' });
+    if (group) group.scrollIntoView({ behavior: 'auto', block: 'start' });
 }, 10);
 }
 
