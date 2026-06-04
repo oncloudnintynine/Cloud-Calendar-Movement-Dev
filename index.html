@@ -274,11 +274,6 @@ darkmuted: '#9ca3af'
 <button type="button" id="form-combined-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 font-bold text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-darkhover transition">Info All</button>
 </div>
 
-<div>
-<label id="label-combined-remarks" class="block font-semibold mb-1 text-sm">Remarks <span class="text-[10px] font-normal text-gray-500">(Optional)</span></label>
-<textarea id="form-combined-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
-</div>
-
 <div id="combined-attendees-wrapper" class="relative hidden-view">
 <label class="block font-semibold mb-1 text-sm text-blue-700 dark:text-blue-400">Attendees <span class="text-[10px] font-normal text-blue-500 dark:text-blue-500">(Optional)</span></label>
 <div id="combined-attendees-chip-container" class="flex flex-wrap gap-1.5 mb-1.5 empty:hidden"></div>
@@ -378,6 +373,11 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
+<div>
+<label id="label-combined-remarks" class="block font-semibold mb-1 text-sm">Remarks <span class="text-[10px] font-normal text-gray-500">(Optional)</span></label>
+<textarea id="form-combined-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
+</div>
+
 </div>
 
 <div class="shrink-0 p-3 border-t border-gray-200 dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10">
@@ -399,11 +399,6 @@ darkmuted: '#9ca3af'
 <div>
 <label class="block font-semibold mb-1 text-sm">Leave/MC/OIL Type</label>
 <select id="form-leave-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition cursor-pointer" onchange="toggleOverseasFields('leave')" required></select>
-</div>
-
-<div>
-<label class="block font-semibold mb-1 text-sm">Remarks</label>
-<textarea id="form-leave-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
 </div>
 
 <div id="leave-attendees-wrapper" class="relative hidden-view">
@@ -447,6 +442,11 @@ darkmuted: '#9ca3af'
 <div><label class="block font-semibold mb-1 text-sm text-gray-500">State</label><input type="text" id="form-leave-state" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded p-1.5 bg-white dark:bg-black outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-sm transition"></div>
 </div>
 
+<div>
+<label class="block font-semibold mb-1 text-sm">Remarks</label>
+<textarea id="form-leave-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
+</div>
+
 </div>
 <div class="shrink-0 p-3 border-t border-gray-200 dark:border-darkborder bg-gray-100 dark:bg-darkinput z-10">
 <button type="submit" id="submit-leave-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-md transition border border-transparent">Save Record</button>
@@ -471,11 +471,6 @@ darkmuted: '#9ca3af'
   <select id="form-event-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition cursor-pointer" required></select>
 </div>
 <button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 font-bold text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-darkhover transition">Info All</button>
-</div>
-
-<div>
-<label id="label-event-remarks" class="block font-semibold mb-1 text-sm">Remarks</label>
-<textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
 </div>
 
 <div class="relative">
@@ -536,6 +531,11 @@ darkmuted: '#9ca3af'
   <option value="ANNUALLY">Annually</option>
   <option value="WEEKDAY">Every weekday (Mon-Fri)</option>
 </select>
+</div>
+
+<div>
+<label id="label-event-remarks" class="block font-semibold mb-1 text-sm">Remarks</label>
+<textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"></textarea>
 </div>
 
 </div>
@@ -1002,17 +1002,17 @@ darkmuted: '#9ca3af'
 
 </main>
 
-<script src="frontend/js/core/config.js?v=75"></script>
-<script src="frontend/js/core/state.js?v=75"></script>
-<script src="frontend/js/core/api.js?v=75"></script>
-<script src="frontend/js/core/auth.js?v=75"></script>
-<script src="frontend/js/ui/ui.js?v=75"></script>
-<script src="frontend/js/features/calendar.js?v=75"></script>
-<script src="frontend/js/features/parade.js?v=75"></script>
-<script src="frontend/js/ui/forms.js?v=75"></script>
-<script src="frontend/js/ui/picker.js?v=75"></script>
-<script src="frontend/js/admin/admin.js?v=75"></script>
-<script src="frontend/js/admin/structure.js?v=75"></script> 
-<script src="frontend/js/core/app.js?v=75"></script>
+<script src="frontend/js/core/config.js?v=76"></script>
+<script src="frontend/js/core/state.js?v=76"></script>
+<script src="frontend/js/core/api.js?v=76"></script>
+<script src="frontend/js/core/auth.js?v=76"></script>
+<script src="frontend/js/ui/ui.js?v=76"></script>
+<script src="frontend/js/features/calendar.js?v=76"></script>
+<script src="frontend/js/features/parade.js?v=76"></script>
+<script src="frontend/js/ui/forms.js?v=76"></script>
+<script src="frontend/js/ui/picker.js?v=76"></script>
+<script src="frontend/js/admin/admin.js?v=76"></script>
+<script src="frontend/js/admin/structure.js?v=76"></script> 
+<script src="frontend/js/core/app.js?v=76"></script>
 </body>
 </html>
