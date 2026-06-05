@@ -5,9 +5,9 @@ Here is a comprehensive, step-by-step documentation guide designed specifically 
 
 ***
 
-# ☁️ Cloud Moves - Setup & Developer Guide
+# ☁️ Cloudy - Setup & Developer Guide
 
-Cloud Moves is a serverless, Progressive Web App (PWA) built to manage company personnel, leave/event records, and Key Appointment Holder (KAH) constraints. It utilizes a static front-end hosted on GitHub Pages, communicating with a backend powered entirely by Google Apps Script (GAS) and Google Workspace APIs (Drive, Sheets, Contacts, Calendar, Gmail).
+Cloudy is a serverless, Progressive Web App (PWA) built to manage company personnel, leave/event records, and Key Appointment Holder (KAH) constraints. It utilizes a static front-end hosted on GitHub Pages, communicating with a backend powered entirely by Google Apps Script (GAS) and Google Workspace APIs (Drive, Sheets, Contacts, Calendar, Gmail).
 
 ---
 
@@ -23,42 +23,42 @@ Cloud Moves is a serverless, Progressive Web App (PWA) built to manage company p
 ## 🚀 Step 1: Backend Setup (Google Apps Script)
 
 1. **Create the Script Project:**
- * Go to [script.google.com](https://script.google.com/) and create a **New Project**.
- * Name it `Cloud Moves Backend`.
+* Go to [script.google.com](https://script.google.com/) and create a **New Project**.
+* Name it `Cloud Moves Backend`.
 2. **Enable Google Workspace Services:**
- * On the left sidebar, click on **Services** (the `+` icon).
- * Find and add the **People API**. 
+* On the left sidebar, click on **Services** (the `+` icon).
+* Find and add the **People API**. 
 3. **Import Backend Code:**
- * Create files matching the exact names in the `backend/` folder of the repository (`Code.gs`, `Auth.gs`, `Calendar.gs`, `Leaves.gs`, `Settings.gs`, `Github.gs`).
- * *Note: GAS uses the `.gs` extension instead of `.js`.* Copy and paste the respective contents into each file.
- * Open the project settings (gear icon) and check **"Show 'appsscript.json' manifest file in editor"**. Overwrite the `appsscript.json` with the one from the repo.
+* Create files matching the exact names in the `backend/` folder of the repository (`Code.gs`, `Auth.gs`, `Calendar.gs`, `Leaves.gs`, `Settings.gs`, `Github.gs`).
+* *Note: GAS uses the `.gs` extension instead of `.js`.* Copy and paste the respective contents into each file.
+* Open the project settings (gear icon) and check **"Show 'appsscript.json' manifest file in editor"**. Overwrite the `appsscript.json` with the one from the repo.
 4. **Initialize the Database:**
- * Open `Code.gs`.
- * Select the `INITIAL_SETUP` function from the dropdown in the top toolbar and click **Run**.
- * Google will prompt you to authorize the script. Click **Review Permissions**, choose your Google Account, click **Advanced**, and proceed to the script.
- * *This function will automatically create a new Google Sheet named `Company_Leaves_DB` in your Google Drive and set up all default configuration properties.*
+* Open `Code.gs`.
+* Select the `INITIAL_SETUP` function from the dropdown in the top toolbar and click **Run**.
+* Google will prompt you to authorize the script. Click **Review Permissions**, choose your Google Account, click **Advanced**, and proceed to the script.
+* *This function will automatically create a new Google Sheet named `Company_Leaves_DB` in your Google Drive and set up all default configuration properties.*
 5. **Deploy the Web App:**
- * Click the **Deploy** button (top right) -> **New deployment**.
- * Click the gear icon next to "Select type" and choose **Web app**.
- * **Description**: `Initial Deployment`
- * **Execute as**: `Me` *(Crucial: This ensures the app uses your account's Drive/Contacts)*.
- * **Who has access**: `Anyone` *(Crucial: Allows the frontend to communicate with it anonymously; the app handles its own auth)*.
- * Click **Deploy**.
- * **Copy the Web App URL** and the **Deployment ID**. Save these for later.
+* Click the **Deploy** button (top right) -> **New deployment**.
+* Click the gear icon next to "Select type" and choose **Web app**.
+* **Description**: `Initial Deployment`
+* **Execute as**: `Me` *(Crucial: This ensures the app uses your account's Drive/Contacts)*.
+* **Who has access**: `Anyone` *(Crucial: Allows the frontend to communicate with it anonymously; the app handles its own auth)*.
+* Click **Deploy**.
+* **Copy the Web App URL** and the **Deployment ID**. Save these for later.
 
 ---
 
 ## 🖥️ Step 2: Frontend Setup
 
 1. **Configure the API Endpoint:**
- * Open `frontend/js/core/config.js` in your code editor.
- * Replace the `PROD_URL`, `DEV_URL`, and `EXP_URL` with the **Web App URLs** corresponding to their respective deployments.
- * Set `const ENV = 'Prod';` (or 'Dev' / 'Exp') appropriately for the environment you are configuring.
+* Open `frontend/js/core/config.js` in your code editor.
+* Replace the `PROD_URL`, `DEV_URL`, and `EXP_URL` with the **Web App URLs** corresponding to their respective deployments.
+* Set `const ENV = 'Prod';` (or 'Dev' / 'Exp') appropriately for the environment you are configuring.
 2. **Deploy the Frontend:**
- * Push your code to your GitHub repository.
- * Go to your repository settings -> **Pages**.
- * Set the source to deploy from the `main` branch (root directory).
- * Your app will now be accessible at `https://[your-username].github.io/[repo-name]/`.
+* Push your code to your GitHub repository.
+* Go to your repository settings -> **Pages**.
+* Set the source to deploy from the `main` branch (root directory).
+* Your app will now be accessible at `https://[your-username].github.io/[repo-name]/`.
 
 ---
 
@@ -67,40 +67,40 @@ Cloud Moves is a serverless, Progressive Web App (PWA) built to manage company p
 To allow GitHub to push updates directly to Google Apps Script automatically, you must generate `clasp` (Google's CLI tool) credentials. You can do this entirely in your browser using **GitHub Codespaces** without needing to install anything locally.
 
 1. **Generate Clasp Credentials via GitHub Codespaces:**
- * On your GitHub repository page, click the green **<> Code** button, switch to the **Codespaces** tab, and click **Create codespace on main**. A browser-based VS Code environment will open.
- * In the terminal at the bottom, run: `npm install -g @google/clasp`
- * Next, run: `clasp login --no-localhost`
- * The terminal will provide a long Google URL. Ctrl+Click (or Cmd+Click) to open it in a new tab.
- * Log in with the Google Account hosting your Apps Script backend and click **Allow**.
- * Copy the resulting URL, paste it back into your Codespace terminal, and hit **Enter**.
- * Run: `cat ~/.clasprc.json`
- * Copy the *entire* JSON output block shown in the terminal. You can now close and delete the Codespace.
+* On your GitHub repository page, click the green **<> Code** button, switch to the **Codespaces** tab, and click **Create codespace on main**. A browser-based VS Code environment will open.
+* In the terminal at the bottom, run: `npm install -g @google/clasp`
+* Next, run: `clasp login --no-localhost`
+* The terminal will provide a long Google URL. Ctrl+Click (or Cmd+Click) to open it in a new tab.
+* Log in with the Google Account hosting your Apps Script backend and click **Allow**.
+* Copy the resulting URL, paste it back into your Codespace terminal, and hit **Enter**.
+* Run: `cat ~/.clasprc.json`
+* Copy the *entire* JSON output block shown in the terminal. You can now close and delete the Codespace.
 2. **Retrieve Project IDs:**
- * **Script ID**: Found in your GAS Project Settings (gear icon) under "IDs".
- * **Deployment ID**: Found via GAS Deploy -> Manage deployments.
+* **Script ID**: Found in your GAS Project Settings (gear icon) under "IDs".
+* **Deployment ID**: Found via GAS Deploy -> Manage deployments.
 3. **Configure GitHub Secrets:**
- * Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions**.
- * Add the following Repository Secrets:
-   * `CLASP_CREDS`: Paste the JSON copied from Step 1.
-   * `SCRIPT_ID`: Paste your Script ID.
-   * `DEPLOYMENT_ID`: Paste your Deployment ID.
+* Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions**.
+* Add the following Repository Secrets:
+  * `CLASP_CREDS`: Paste the JSON copied from Step 1.
+  * `SCRIPT_ID`: Paste your Script ID.
+  * `DEPLOYMENT_ID`: Paste your Deployment ID.
 4. **How it works:**
- Every time you push a change to the `backend/` folder on the `main` branch, GitHub Actions will trigger `.github/workflows/deploy.yml`, pushing the code and updating the exact same Web App URL so your frontend never breaks.
+Every time you push a change to the `backend/` folder on the `main` branch, GitHub Actions will trigger `.github/workflows/deploy.yml`, pushing the code and updating the exact same Web App URL so your frontend never breaks.
 
 ---
 
 ## ⚙️ Step 4: Initial App Configuration
 
 1. **First Login:**
- * Open your frontend URL.
- * The default administrator password is `P@ssw0rd`.
- * Log in to access the App.
+* Open your frontend URL.
+* The default administrator password is `P@ssw0rd`.
+* Log in to access the App.
 2. **Configure Admin Settings:**
- * Go to **Menu -> Admin Settings**.
- * **Admin Password**: Change it immediately.
- * **User Login Keyword**: Set the keyword users append to their phone number to log in (e.g., `peace`).
- * **Organisational Structure**: Build your unit hierarchy. 
- * **Register Users**: Register your first batch of users. Google Contacts syncing takes ~1 minute to reflect.
+* Go to **Menu -> Admin Settings**.
+* **Admin Password**: Change it immediately.
+* **User Login Keyword**: Set the keyword users append to their phone number to log in (e.g., `peace`).
+* **Organisational Structure**: Build your unit hierarchy. 
+* **Register Users**: Register your first batch of users. Google Contacts syncing takes ~1 minute to reflect.
 
 ---
 

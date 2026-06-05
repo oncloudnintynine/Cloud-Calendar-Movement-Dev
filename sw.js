@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cloud-moves-v82';
+const CACHE_NAME = 'cloudy-v83';
 
 const urlsToCache =[
 './',
@@ -44,7 +44,7 @@ event.waitUntil(
 caches.keys().then(cacheNames => {
 return Promise.all(
 cacheNames.map(cacheName => {
- if (cacheWhitelist.indexOf(cacheName) === -1) return caches.delete(cacheName);
+if (cacheWhitelist.indexOf(cacheName) === -1) return caches.delete(cacheName);
 })
 );
 })
