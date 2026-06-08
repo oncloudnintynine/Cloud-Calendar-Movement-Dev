@@ -23,21 +23,38 @@ if (!props.getProperty('dashboardDeptOrder')) props.setProperty('dashboardDeptOr
 if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['landing-page', 'app-mode', 'dashboard-filter-order', 'admin-pass', 'user-keyword', 'menu-order']));
 if (!props.getProperty('adminContactsSectionsOrder')) props.setProperty('adminContactsSectionsOrder', JSON.stringify(['external-sync', 'contact-format', 'register-user', 'manage-users']));
 
-if (!props.getProperty('typicalEventTypes')) {
-var oldLeaveTypes = JSON.parse(props.getProperty('leaveTypes') || "[]");
+var typicalEventTypes = props.getProperty('typicalEventTypes');
+if (!typicalEventTypes) {
 var defaultTypes =[
-{name: 'Meeting', isEvent: true, defaultLoc: 'Conference Room'},
-{name: 'Others', isEvent: true},
-{name: 'Official Trip', isEvent: false},
-{name: 'Overseas Leave', isEvent: false},
-{name: 'Local Leave', isEvent: false}
+{name: 'Generic', isEvent: true, defaultLoc: 'In Camp', isKahRelevant: false, fields: { location:{show:true, req:true}, locationDetails:{show:true,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:true,label:'Meeting Description'} }},
+{name: 'Others', isEvent: true, defaultLoc: 'Out of Camp', isKahRelevant: false, fields: { location:{show:true, req:true}, locationDetails:{show:true,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:false,label:'Remarks'} }},
+{name: 'Official Trip', isEvent: false, isKahRelevant: true, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:false,label:'Remarks'} }},
+{name: 'Overseas Leave', isEvent: false, isKahRelevant: true, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:false,req:false}, remarks:{show:true,req:false,label:'Remarks'} }},
+{name: 'Local Leave', isEvent: false, isKahRelevant: false, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:false,req:false}, remarks:{show:true,req:false,label:'Remarks'} }}
 ];
-oldLeaveTypes.forEach(function(lt) {
-if (!defaultTypes.some(function(dt) { return dt.name === lt; })) {
-defaultTypes.push({name: lt, isEvent: false});
+props.setProperty('typicalEventTypes', JSON.stringify(defaultTypes));
+} else {
+var existing = JSON.parse(typicalEventTypes);
+var updated = false;
+existing.forEach(function(t) {
+if (t.name === 'Meeting') { t.name = 'Generic'; updated = true; }
+if (t.defaultLoc === 'Office') { t.defaultLoc = 'In Camp'; updated = true; }
+if (t.defaultLoc === 'Others') { t.defaultLoc = 'Out of Camp'; updated = true; }
+if (!t.fields) {
+    t.fields = {
+        location: {show: t.isEvent, req: t.isEvent},
+        locationDetails: {show: t.isEvent, req: false},
+        attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
+        remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
+    };
+    updated = true;
+}
+if (typeof t.isKahRelevant === 'undefined') {
+    t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
+    updated = true;
 }
 });
-props.setProperty('typicalEventTypes', JSON.stringify(defaultTypes));
+if (updated) props.setProperty('typicalEventTypes', JSON.stringify(existing));
 }
 
 if (!props.getProperty('kahEmailSubject')) props.setProperty('kahEmailSubject', 'Leave Requires Approval: KAH Limit Crossed for {Unit}');
@@ -74,8 +91,8 @@ verifySchema(mainSheet);
 
 var syncQueueSheet = ss.getSheetByName("Company_Sync_Queue");
 if (!syncQueueSheet) {
- syncQueueSheet = ss.insertSheet("Company_Sync_Queue");
- syncQueueSheet.appendRow(['Timestamp', 'Action', 'Payload', 'Status', 'Retries']);
+syncQueueSheet = ss.insertSheet("Company_Sync_Queue");
+syncQueueSheet.appendRow(['Timestamp', 'Action', 'Payload', 'Status', 'Retries']);
 }
 }
 
