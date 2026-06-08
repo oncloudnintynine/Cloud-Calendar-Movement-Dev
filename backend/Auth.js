@@ -13,10 +13,10 @@ var groupMap = {};
 var groupsRes = People.ContactGroups.list({ groupFields: "name,groupType", pageSize: 1000 });
 if (groupsRes.contactGroups) {
 groupsRes.contactGroups.forEach(function(g) {
-  var groupName = g.name || g.formattedName;
-  if (g.groupType === 'USER_CONTACT_GROUP' && groupName !== "DSTA Contacts") {
-    groupMap[g.resourceName] = groupName;
-  }
+ var groupName = g.name || g.formattedName;
+ if (g.groupType === 'USER_CONTACT_GROUP' && groupName !== "DSTA Contacts") {
+   groupMap[g.resourceName] = groupName;
+ }
 });
 }
 
@@ -56,13 +56,13 @@ if (!fullName) return "";
 if (!format) format = getContactNameFormat();
 
 try {
- var escapedFormat = format.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
- var regexStr = "^" + escapedFormat.replace('\\{Name\\}', '(?<name>.*?)').replace('\\{Unit\\}', '(?:.*?)') + "$";
- var regex = new RegExp(regexStr, "i");
- var match = regex.exec(fullName);
- if (match && match.groups && match.groups.name) {
-     return match.groups.name.trim();
- }
+var escapedFormat = format.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+var regexStr = "^" + escapedFormat.replace('\\{Name\\}', '(?<name>.*?)').replace('\\{Unit\\}', '(?:.*?)') + "$";
+var regex = new RegExp(regexStr, "i");
+var match = regex.exec(fullName);
+if (match && match.groups && match.groups.name) {
+    return match.groups.name.trim();
+}
 } catch (e) {}
 
 // Fallback for transition / robust cleanup
@@ -86,21 +86,21 @@ var userDepts =[];
 var userName = "";
 
 cg.connections.forEach(function(person) {
-  if (person.phoneNumbers) {
-    person.phoneNumbers.forEach(function(phoneObj) {
-      if (phoneObj.value && phoneObj.value.replace(/\D/g, '').slice(-8) === phone) {
-        if (!userName && person.names && person.names.length > 0) userName = extractName(person.names[0].displayName, format);
-        if (person.memberships) {
-          person.memberships.forEach(function(m) {
-            if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-              var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
-              if (gName && userDepts.indexOf(gName) === -1) userDepts.push(gName);
-            }
-          });
-        }
-      }
-    });
-  }
+ if (person.phoneNumbers) {
+   person.phoneNumbers.forEach(function(phoneObj) {
+     if (phoneObj.value && phoneObj.value.replace(/\D/g, '').slice(-8) === phone) {
+       if (!userName && person.names && person.names.length > 0) userName = extractName(person.names[0].displayName, format);
+       if (person.memberships) {
+         person.memberships.forEach(function(m) {
+           if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+             var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+             if (gName && userDepts.indexOf(gName) === -1) userDepts.push(gName);
+           }
+         });
+       }
+     }
+   });
+ }
 });
 
 if (!userName) throw new Error("User phone number not found in Google Contacts. If you just registered, please wait a minute for Google to sync.");
@@ -117,7 +117,7 @@ var targetDigits = data.mobile.replace(/\D/g, '').slice(-8);
 var phoneExists = cg.connections.some(function(person) {
 if (!person.phoneNumbers) return false;
 return person.phoneNumbers.some(function(p) {
-  return p.value && p.value.replace(/\D/g, '').slice(-8) === targetDigits;
+ return p.value && p.value.replace(/\D/g, '').slice(-8) === targetDigits;
 });
 });
 
@@ -131,7 +131,7 @@ phoneNumbers: [{ value: data.mobile, type: "mobile" }]
 if (data.birthday) {
 var parts = data.birthday.split('-');
 contactPayload.birthdays =[{
-  date: { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) }
+ date: { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) }
 }];
 }
 
@@ -141,8 +141,8 @@ var groupId = null;
 
 for (var grpRes in cg.groupMap) {
 if (cg.groupMap[grpRes].toLowerCase() === data.unit.toLowerCase()) {
-  groupId = grpRes;
-  break;
+ groupId = grpRes;
+ break;
 }
 }
 
@@ -153,11 +153,6 @@ groupId = newGroup.resourceName;
 
 People.ContactGroups.Members.modify({ resourceNamesToAdd: [resourceName] }, groupId);
 invalidateContactsCache();
-
-// Queue External Sync
-if (typeof enqueueSyncTask === 'function') {
-enqueueSyncTask('REGISTER_USER', data);
-}
 
 return { success: true, message: "User registered successfully." };
 }
@@ -174,12 +169,12 @@ contact.names = [{ givenName: formatContactName(data.fullName, data.unit) }];
 contact.phoneNumbers =[{ value: data.mobile, type: "mobile" }];
 
 if (data.birthday) {
-  var parts = data.birthday.split('-');
-  contact.birthdays = [{
-    date: { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) }
-  }];
+ var parts = data.birthday.split('-');
+ contact.birthdays = [{
+   date: { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) }
+ }];
 } else {
-  contact.birthdays =[]; 
+ contact.birthdays =[]; 
 }
 
 People.People.updateContact(contact, data.resourceName, { updatePersonFields: 'names,phoneNumbers,birthdays' });
@@ -189,22 +184,22 @@ var targetGroupId = null;
 var targetGroupName = data.unit.toUpperCase();
 
 for (var grpRes in cg.groupMap) {
-  if (cg.groupMap[grpRes].toUpperCase() === targetGroupName) { targetGroupId = grpRes; break; }
+ if (cg.groupMap[grpRes].toUpperCase() === targetGroupName) { targetGroupId = grpRes; break; }
 }
 
 if (!targetGroupId) {
-  var newGroup = People.ContactGroups.create({ contactGroup: { name: targetGroupName } });
-  targetGroupId = newGroup.resourceName;
+ var newGroup = People.ContactGroups.create({ contactGroup: { name: targetGroupName } });
+ targetGroupId = newGroup.resourceName;
 }
 
 var currentGroupIds =[];
 if (contact.memberships) {
-  contact.memberships.forEach(function(m) {
-    if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-      var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
-      if (gName) currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
-    }
-  });
+ contact.memberships.forEach(function(m) {
+   if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+     var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+     if (gName) currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
+   }
+ });
 }
 
 var toRemove = currentGroupIds.filter(function(id) { return id !== targetGroupId; });
@@ -212,16 +207,10 @@ var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ? [data.resourceName] 
 
 if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
 if (toRemove.length > 0) {
-  toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove: [data.resourceName] }, gId); });
+ toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove: [data.resourceName] }, gId); });
 }
 
 invalidateContactsCache();
-
-// Queue External Sync
-if (typeof enqueueSyncTask === 'function') {
-  enqueueSyncTask('UPDATE_USER', data);
-}
-
 return { success: true };
 } catch(e) {
 throw new Error("Failed to update user: " + e.message);

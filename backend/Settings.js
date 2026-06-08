@@ -102,12 +102,6 @@ companyStructure: JSON.parse(props.getProperty('companyStructure') || "{}"),
 allContacts: allContacts
 };
 
-if (data._userRole === 'admin') {
-response.oauthClientId = props.getProperty('oauthClientId') || '';
-var linked = props.getProperty('oauthLinkedAccounts');
-response.linkedAccounts = linked ? JSON.parse(linked) : [];
-}
-
 return response;
 }
 
@@ -161,20 +155,10 @@ if (data.contactNameFormat !== oldFormat) {
          if (primaryUnit !== "UNASSIGNED") {
              person.names = [{ givenName: formatContactName(baseName, primaryUnit, data.contactNameFormat) }];
              try { People.People.updateContact(person, person.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
-             
-             // Only push to sync if names actually change
-             batchChanges.push({ fullName: baseName, unit: primaryUnit, mobile: phone });
          }
      }
  });
  invalidateContactsCache();
-
- // Queue updates for all modified contacts sequentially to avoid queue size overflow
- if (typeof enqueueSyncTask === 'function' && batchChanges.length > 0) {
-     batchChanges.forEach(function(cData) {
-         enqueueSyncTask('UPDATE_USER', cData);
-     });
- }
 }
 }
 
@@ -201,16 +185,8 @@ function deleteUser(data) {
 if (data._userRole !== 'admin') throw new Error("Unauthorized");
 if (!data.resourceName) throw new Error("Missing contact identifier.");
 try {
-// Need to lookup phone before deleting so we can push sync
-var targetContact = People.People.get(data.resourceName, { personFields: 'phoneNumbers' });
-var phone = (targetContact.phoneNumbers && targetContact.phoneNumbers.length > 0) ? targetContact.phoneNumbers[0].value : "";
-
 People.People.deleteContact(data.resourceName);
 invalidateContactsCache();
-
-if (phone && typeof enqueueSyncTask === 'function') {
- enqueueSyncTask('DELETE_USER', { mobile: phone });
-}
 } catch(e) { throw new Error("Failed to delete user: " + e.message); }
 return { success: true };
 }
@@ -218,8 +194,6 @@ return { success: true };
 function updateUserUnits(data) {
 if (data._userRole !== 'admin') throw new Error("Unauthorized");
 var cg = getContactsAndGroups();
-
-var syncQueuePayload = [];
 
 for (var resName in data.changes) {
 var newUnit = data.changes[resName];
@@ -261,21 +235,9 @@ var nameObj = contact.names[0];
 var cleanNm = extractName(nameObj.displayName || nameObj.givenName || "");
 contact.names = [{ givenName: newUnit !== "UNASSIGNED" ? formatContactName(cleanNm, newUnit) : cleanNm }];
 try { People.People.updateContact(contact, resName, { updatePersonFields: 'names' }); } catch(e) {}
-
-var phone = (contact.phoneNumbers && contact.phoneNumbers.length > 0) ? contact.phoneNumbers[0].value : "";
-if (phone) {
- syncQueuePayload.push({ fullName: cleanNm, unit: newUnit, mobile: phone });
-}
 }
 }
 invalidateContactsCache();
-
-if (typeof enqueueSyncTask === 'function') {
-syncQueuePayload.forEach(function(p) {
- enqueueSyncTask('UPDATE_USER', p);
-});
-}
-
 return { success: true };
 }
 
@@ -376,11 +338,6 @@ if (deptIdx !== -1) {
 }
 
 invalidateContactsCache();
-
-if (typeof enqueueSyncTask === 'function') {
-enqueueSyncTask('RENAME_UNIT', { oldName: oldName, newName: newName });
-}
-
 return { success: true };
 }
 
@@ -448,22 +405,5 @@ if (contact.names && contact.names.length > 0) {
 });
 
 invalidateContactsCache();
-
-if (typeof enqueueSyncTask === 'function') {
-// Since the frontend payload might only contain resourceNames, we need to inject the phone numbers for the external sync engine to locate them.
-var enhancedContacts = [];
-frontendContacts.forEach(function(fc) {
- try {
-     var contact = People.People.get(fc.resourceName, { personFields: 'phoneNumbers' });
-     var phone = (contact.phoneNumbers && contact.phoneNumbers.length > 0) ? contact.phoneNumbers[0].value : "";
-     if (phone) {
-         enhancedContacts.push({ name: fc.name, unit: fc.unit, phone: phone });
-     }
- } catch(e) {}
-});
-
-enqueueSyncTask('FORCE_SYNC', { structure: structure, contacts: enhancedContacts });
-}
-
 return { success: true };
 }
