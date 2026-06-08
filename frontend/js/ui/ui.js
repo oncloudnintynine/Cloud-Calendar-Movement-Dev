@@ -29,12 +29,12 @@ orderArr.forEach(id => {
 const btn = document.getElementById(`menu-${id}`);
 if (btn) {
 if (appMode === 'combined' && ['submit-leave', 'submit-event', 'my-leaves'].includes(id)) {
-  btn.classList.add('hidden');
+ btn.classList.add('hidden');
 } else if (appMode === 'separated' && id === 'submit-combined') {
-  btn.classList.add('hidden');
+ btn.classList.add('hidden');
 } else {
-  btn.classList.remove('hidden');
-  menuContainer.appendChild(btn);
+ btn.classList.remove('hidden');
+ menuContainer.appendChild(btn);
 }
 }
 });
@@ -77,9 +77,9 @@ const controlsWrapper = document.getElementById('dash-controls-wrapper');
 if (controlsWrapper) {
 if (tabId === 'dashboard' || tabId === 'my-leaves') {
 if (tabId === 'dashboard') {
-    if (deptNav) deptNav.classList.remove('hidden');
+   if (deptNav) deptNav.classList.remove('hidden');
 } else {
-    if (deptNav) deptNav.classList.add('hidden');
+   if (deptNav) deptNav.classList.add('hidden');
 }
 controlsWrapper.classList.remove('hidden');
 controlsWrapper.classList.add('flex');
@@ -179,6 +179,37 @@ checkAndUpdate('btn-register-birthday', appData.register.birthdaySelected ? form
 checkAndUpdate('btn-admin-register-birthday', appData.adminRegister.birthdaySelected ? formatDisplayDate(appData.adminRegister.birthdayD) : "Select...");
 checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ? formatDisplayDate(appData.manageUser.birthdayD) : "Select...");
 }
+
+window.downloadVCF = function() {
+if (!companyContacts || companyContacts.length === 0) {
+  alert("Directory is empty or still loading.");
+  return;
+}
+
+let vcfData = "";
+companyContacts.forEach(c => {
+  const name = c.name || "";
+  const phone = c.phone || "";
+  const org = c.dept ? c.dept.split(',')[0].trim() : "Cloudy";
+  
+  vcfData += "BEGIN:VCARD\r\n";
+  vcfData += "VERSION:3.0\r\n";
+  vcfData += `FN:${name}\r\n`;
+  if (org) vcfData += `ORG:${org}\r\n`;
+  if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
+  vcfData += "END:VCARD\r\n";
+});
+
+const blob = new Blob([vcfData], { type: 'text/vcard;charset=utf-8;' });
+const url = URL.createObjectURL(blob);
+const link = document.createElement('a');
+link.href = url;
+link.setAttribute('download', 'Cloudy_Directory.vcf');
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+URL.revokeObjectURL(url);
+};
 
 function animateAndUpdate(btn) { 
 const icon = btn.querySelector('svg'); 
