@@ -287,19 +287,19 @@ darkmuted: '#9ca3af'
 <div id="combined-event-fields" class="space-y-4 hidden-view">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 <div>
- <label class="block font-semibold mb-1 text-sm">Location</label>
- <select id="form-combined-location" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm cursor-pointer" onchange="toggleMeetingRoomCheckbox('combined')">
-   <option value="Office">Office</option>
-   <option value="Others">Others</option>
- </select>
- <div id="combined-meeting-room-wrapper" class="flex items-center space-x-2 mt-2">
-   <input type="checkbox" id="form-combined-meeting-room" class="w-4 h-4 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-   <label for="form-combined-meeting-room" class="font-bold text-xs text-blue-700 dark:text-blue-400 cursor-pointer select-none">🏢 Book Cloud Meeting Room</label>
- </div>
+<label class="block font-semibold mb-1 text-sm">Location</label>
+<select id="form-combined-location" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm cursor-pointer" onchange="toggleMeetingRoomCheckbox('combined')">
+  <option value="Office">Office</option>
+  <option value="Others">Others</option>
+</select>
+<div id="combined-meeting-room-wrapper" class="flex items-center space-x-2 mt-2">
+  <input type="checkbox" id="form-combined-meeting-room" class="w-4 h-4 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+  <label for="form-combined-meeting-room" class="font-bold text-xs text-blue-700 dark:text-blue-400 cursor-pointer select-none">🏢 Book Cloud Meeting Room</label>
+</div>
 </div>
 <div>
- <label class="block font-semibold mb-1 text-sm">Location Details <span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">(Optional)</span></label>
- <input type="text" id="form-combined-location-details" placeholder="e.g. Room 302" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm">
+<label class="block font-semibold mb-1 text-sm">Location Details <span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">(Optional)</span></label>
+<input type="text" id="form-combined-location-details" placeholder="e.g. Room 302" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm">
 </div>
 </div>
 
@@ -310,31 +310,31 @@ darkmuted: '#9ca3af'
 
 <div class="relative pl-6 py-1 border-l-2 border-gray-200 dark:border-darkborder ml-2 space-y-3">
 <div class="relative">
- <div class="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full bg-blue-500 ring-4 ring-white dark:ring-darksurface"></div>
- <label class="block font-bold text-[10px] text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1">Start</label>
- <button type="button" id="btn-combined-event-start" onclick="openPicker(appData.combined.isAllDay ? 'date' : 'datetime', 'combined', 'start')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date & Time</button>
+<div class="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full bg-blue-500 ring-4 ring-white dark:ring-darksurface"></div>
+<label class="block font-bold text-[10px] text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1">Start</label>
+<button type="button" id="btn-combined-event-start" onclick="openPicker(appData.combined.isAllDay ? 'date' : 'datetime', 'combined', 'start')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date & Time</button>
 </div>
 <div class="relative">
- <div class="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full bg-red-500 ring-4 ring-white dark:ring-darksurface"></div>
- <label class="block font-bold text-[10px] text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1">End</label>
- <button type="button" id="btn-combined-event-end" onclick="openPicker(appData.combined.isAllDay ? 'date' : 'datetime', 'combined', 'end')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date & Time</button>
+<div class="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full bg-red-500 ring-4 ring-white dark:ring-darksurface"></div>
+<label class="block font-bold text-[10px] text-gray-500 dark:text-darkmuted uppercase tracking-wider mb-1">End</label>
+<button type="button" id="btn-combined-event-end" onclick="openPicker(appData.combined.isAllDay ? 'date' : 'datetime', 'combined', 'end')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date & Time</button>
 </div>
 <div id="combined-until-container" class="relative hidden-view pt-1">
- <div class="absolute -left-[30px] top-3 w-3.5 h-3.5 rounded-full bg-purple-500 ring-4 ring-white dark:ring-darksurface"></div>
- <label class="block font-bold text-[10px] text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Repeat Until</label>
- <button type="button" id="btn-combined-until" onclick="openPicker('date', 'combined', 'until')" class="w-full border-2 border-purple-300 dark:border-purple-800 rounded-lg py-2 px-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 text-left outline-none font-medium transition text-sm text-purple-900 dark:text-purple-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200">Select Date</button>
+<div class="absolute -left-[30px] top-3 w-3.5 h-3.5 rounded-full bg-purple-500 ring-4 ring-white dark:ring-darksurface"></div>
+<label class="block font-bold text-[10px] text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">Repeat Until</label>
+<button type="button" id="btn-combined-until" onclick="openPicker('date', 'combined', 'until')" class="w-full border-2 border-purple-300 dark:border-purple-800 rounded-lg py-2 px-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 text-left outline-none font-medium transition text-sm text-purple-900 dark:text-purple-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200">Select Date</button>
 </div>
 </div>
 
 <div>
 <label class="block font-semibold mb-1 text-sm">Repeat Event</label>
 <select id="form-combined-repeat" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition cursor-pointer text-sm" onchange="toggleCombinedRepeatUntil()">
- <option value="NONE">Does not repeat</option>
- <option value="DAILY">Daily</option>
- <option value="WEEKLY">Weekly</option>
- <option value="MONTHLY">Monthly</option>
- <option value="ANNUALLY">Annually</option>
- <option value="WEEKDAY">Every weekday (Mon-Fri)</option>
+<option value="NONE">Does not repeat</option>
+<option value="DAILY">Daily</option>
+<option value="WEEKLY">Weekly</option>
+<option value="MONTHLY">Monthly</option>
+<option value="ANNUALLY">Annually</option>
+<option value="WEEKDAY">Every weekday (Mon-Fri)</option>
 </select>
 </div>
 </div>
@@ -342,31 +342,31 @@ darkmuted: '#9ca3af'
 <div id="combined-leave-fields" class="space-y-4 hidden-view">
 <div class="flex space-x-2 w-full" id="combined-leave-time-start">
 <div class="flex-grow">
- <label class="block font-semibold mb-1 text-sm">Start Date</label>
- <button type="button" id="btn-combined-leave-start" onclick="openPicker('date', 'combined', 'start')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date</button>
+<label class="block font-semibold mb-1 text-sm">Start Date</label>
+<button type="button" id="btn-combined-leave-start" onclick="openPicker('date', 'combined', 'start')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date</button>
 </div>
 <div class="w-24 shrink-0" id="combined-leave-ampm-start">
- <label class="block font-semibold mb-1 text-center text-sm">Time</label>
- <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('start', 'combined')">
-   <div id="start-combined-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform"></div>
-   <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="start-combined-am">AM</div>
-   <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="start-combined-pm">PM</div>
- </div>
+<label class="block font-semibold mb-1 text-center text-sm">Time</label>
+<div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('start', 'combined')">
+  <div id="start-combined-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform"></div>
+  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="start-combined-am">AM</div>
+  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="start-combined-pm">PM</div>
+</div>
 </div>
 </div>
 
 <div class="flex space-x-2 w-full" id="combined-leave-time-end">
 <div class="flex-grow">
- <label class="block font-semibold mb-1 text-sm">End Date</label>
- <button type="button" id="btn-combined-leave-end" onclick="openPicker('date', 'combined', 'end')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date</button>
+<label class="block font-semibold mb-1 text-sm">End Date</label>
+<button type="button" id="btn-combined-leave-end" onclick="openPicker('date', 'combined', 'end')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">Select Date</button>
 </div>
 <div class="w-24 shrink-0" id="combined-leave-ampm-end">
- <label class="block font-semibold mb-1 text-center text-sm">Time</label>
- <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('end', 'combined')">
-   <div id="end-combined-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform translate-x-full"></div>
-   <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="end-combined-am">AM</div>
-   <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="end-combined-pm">PM</div>
- </div>
+<label class="block font-semibold mb-1 text-center text-sm">Time</label>
+<div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('end', 'combined')">
+  <div id="end-combined-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform translate-x-full"></div>
+  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="end-combined-am">AM</div>
+  <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="end-combined-pm">PM</div>
+</div>
 </div>
 </div>
 
@@ -419,9 +419,9 @@ darkmuted: '#9ca3af'
 <div class="w-24 shrink-0" id="leave-ampm-start">
 <label class="block font-semibold mb-1 text-center text-sm">Time</label>
 <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('start', 'leave')">
- <div id="start-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform"></div>
- <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="start-leave-am">AM</div>
- <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="start-leave-pm">PM</div>
+<div id="start-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform"></div>
+<div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="start-leave-am">AM</div>
+<div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="start-leave-pm">PM</div>
 </div>
 </div>
 </div>
@@ -433,9 +433,9 @@ darkmuted: '#9ca3af'
 <div class="w-24 shrink-0" id="leave-ampm-end">
 <label class="block font-semibold mb-1 text-center text-sm">Time</label>
 <div class="relative flex bg-gray-200 dark:bg-[#222] rounded-lg p-1 h-[38px] cursor-pointer select-none border-2 border-transparent" onclick="toggleAMPM('end', 'leave')">
- <div id="end-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform translate-x-full"></div>
- <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="end-leave-am">AM</div>
- <div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="end-leave-pm">PM</div>
+<div id="end-leave-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-blue-600 rounded transition-transform translate-x-full"></div>
+<div class="relative z-10 flex-1 flex items-center justify-center font-bold text-gray-500 dark:text-darkmuted transition-colors text-xs" id="end-leave-am">AM</div>
+<div class="relative z-10 flex-1 flex items-center justify-center font-bold text-white transition-colors text-xs" id="end-leave-pm">PM</div>
 </div>
 </div>
 </div>
@@ -487,12 +487,12 @@ darkmuted: '#9ca3af'
 <div>
 <label class="block font-semibold mb-1 text-sm">Location</label>
 <select id="form-event-location" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm cursor-pointer" onchange="toggleMeetingRoomCheckbox('event')" required>
- <option value="Office">Office</option>
- <option value="Others">Others</option>
+<option value="Office">Office</option>
+<option value="Others">Others</option>
 </select>
 <div id="event-meeting-room-wrapper" class="flex items-center space-x-2 mt-2">
- <input type="checkbox" id="form-event-meeting-room" class="w-4 h-4 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-blue-500">
- <label for="form-event-meeting-room" class="font-bold text-xs text-blue-700 dark:text-blue-400 cursor-pointer select-none">🏢 Book Cloud Meeting Room</label>
+<input type="checkbox" id="form-event-meeting-room" class="w-4 h-4 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+<label for="form-event-meeting-room" class="font-bold text-xs text-blue-700 dark:text-blue-400 cursor-pointer select-none">🏢 Book Cloud Meeting Room</label>
 </div>
 </div>
 <div>
@@ -553,6 +553,37 @@ darkmuted: '#9ca3af'
 
 <div id="view-admin" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
 <div id="admin-sections-container" class="flex-grow overflow-y-auto space-y-4 pb-4 px-1 pt-1">
+
+<div data-section="external-sync" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
+<div class="flex justify-between items-center mb-3">
+<h3 class="font-bold text-base text-indigo-600 dark:text-indigo-400">External Contacts Sync (OAuth)</h3>
+<svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+</div>
+<p class="text-[10px] text-gray-500 mb-3 leading-tight">Push contact updates to multiple external Google accounts automatically in the background. Requires a Google Cloud Platform (GCP) OAuth Client.</p>
+<div class="space-y-3">
+  <div>
+    <label class="block font-semibold mb-1 text-xs">GCP Client ID</label>
+    <input type="text" id="set-oauth-client-id" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 transition" placeholder="e.g. 12345-abc.apps.googleusercontent.com">
+  </div>
+  <div>
+    <label class="block font-semibold mb-1 text-xs">GCP Client Secret</label>
+    <div class="relative">
+      <input type="password" id="set-oauth-client-secret" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 pr-10 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 transition">
+      <button type="button" onclick="togglePassword('set-oauth-client-secret', this)" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+    </div>
+  </div>
+  <button onclick="saveOAuthCredentials()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition text-xs border border-transparent">Save OAuth Config</button>
+  
+  <div class="border-t border-gray-200 dark:border-darkborder pt-3 mt-3">
+    <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-2">Linked Target Accounts</h4>
+    <div class="flex space-x-2 mb-2">
+        <input type="text" id="oauth-auth-link" readonly class="flex-grow border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2 bg-gray-100 dark:bg-darkinput text-[10px] text-gray-600 font-mono outline-none cursor-text select-all" placeholder="Save credentials and click Generate Link...">
+        <button onclick="generateAuthLink()" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition text-[10px] border border-transparent">Generate Link</button>
+    </div>
+    <div id="oauth-linked-accounts-list" class="space-y-2 mt-3 empty:hidden"></div>
+  </div>
+</div>
+</div>
 
 <div data-section="landing-page" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
 <div class="flex justify-between items-center mb-3">
@@ -618,25 +649,25 @@ darkmuted: '#9ca3af'
 <div class="space-y-3">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 <div>
- <label class="block font-semibold mb-1 text-xs">Full Name</label>
- <input type="text" id="admin-reg-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="e.g. Tan Ah Kow">
+<label class="block font-semibold mb-1 text-xs">Full Name</label>
+<input type="text" id="admin-reg-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="e.g. Tan Ah Kow">
 </div>
 <div>
- <label class="block font-semibold mb-1 text-xs">Mobile No</label>
- <input type="tel" id="admin-reg-mobile" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="e.g. 96745345">
+<label class="block font-semibold mb-1 text-xs">Mobile No</label>
+<input type="tel" id="admin-reg-mobile" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="e.g. 96745345">
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 <div>
- <label class="block font-semibold mb-1 text-xs">Unit</label>
- <select id="admin-reg-unit" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"></select>
+<label class="block font-semibold mb-1 text-xs">Unit</label>
+<select id="admin-reg-unit" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"></select>
 </div>
 <div>
- <label class="block font-semibold mb-1 text-xs">Birthday</label>
- <button type="button" id="btn-admin-register-birthday" onclick="openPicker('date', 'adminRegister', 'birthday')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-left outline-none font-medium text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">Select...</button>
+<label class="block font-semibold mb-1 text-xs">Birthday</label>
+<button type="button" id="btn-admin-register-birthday" onclick="openPicker('date', 'adminRegister', 'birthday')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-left outline-none font-medium text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">Select...</button>
 </div>
 </div>
-<button onclick="submitAdminRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm">Register User</button>
+<button onclick="submitAdminRegister()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-sm transition text-sm border border-transparent">Register User</button>
 </div>
 </div>
 
@@ -657,29 +688,29 @@ darkmuted: '#9ca3af'
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
- <div>
-   <label class="block font-semibold mb-1 text-xs">Full Name</label>
-   <input type="text" id="edit-user-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-black text-sm py-1.5 px-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
- </div>
- <div>
-   <label class="block font-semibold mb-1 text-xs">Mobile No</label>
-   <input type="tel" id="edit-user-mobile" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-black text-sm py-1.5 px-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
- </div>
+<div>
+  <label class="block font-semibold mb-1 text-xs">Full Name</label>
+  <input type="text" id="edit-user-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-black text-sm py-1.5 px-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+</div>
+<div>
+  <label class="block font-semibold mb-1 text-xs">Mobile No</label>
+  <input type="tel" id="edit-user-mobile" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-black text-sm py-1.5 px-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+</div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
- <div>
-   <label class="block font-semibold mb-1 text-xs">Unit</label>
-   <select id="edit-user-unit" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-black text-sm py-1.5 px-2 outline-none cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"></select>
- </div>
- <div>
-   <label class="block font-semibold mb-1 text-xs">Birthday</label>
-   <button type="button" id="btn-manage-user-birthday" onclick="openPicker('date', 'manageUser', 'birthday')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-black text-left text-sm py-1.5 px-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">Select...</button>
- </div>
+<div>
+  <label class="block font-semibold mb-1 text-xs">Unit</label>
+  <select id="edit-user-unit" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-black text-sm py-1.5 px-2 outline-none cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"></select>
+</div>
+<div>
+  <label class="block font-semibold mb-1 text-xs">Birthday</label>
+  <button type="button" id="btn-manage-user-birthday" onclick="openPicker('date', 'manageUser', 'birthday')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-black text-left text-sm py-1.5 px-2 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">Select...</button>
+</div>
 </div>
 
 <div class="flex space-x-2 pt-2 border-t border-gray-300 dark:border-darkborder">
-<button onclick="confirmUpdateUser()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg shadow transition text-xs">Update User</button>
-<button onclick="confirmDeleteUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg shadow transition text-xs">Remove User</button>
+<button onclick="confirmUpdateUser()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg shadow transition text-xs border border-transparent">Update User</button>
+<button onclick="confirmDeleteUser()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg shadow transition text-xs border border-transparent">Remove User</button>
 </div>
 </div>
 </div>
@@ -719,7 +750,7 @@ darkmuted: '#9ca3af'
 </div>
 
 <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
-<button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow transition text-base">Save Settings</button>
+<button onclick="saveAdminSettings()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow transition text-base border border-transparent">Save Settings</button>
 </div>
 </div>
 
@@ -734,11 +765,11 @@ darkmuted: '#9ca3af'
 <div class="flex flex-wrap sm:flex-nowrap gap-2">
 <input type="text" id="new-typical-event-type" class="flex-grow w-full sm:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-sm outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="Add new type...">
 <div class="flex w-full sm:w-auto space-x-2">
- <select id="new-typical-event-isEvent" class="flex-grow sm:flex-grow-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-sm outline-none cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
-     <option value="true">Time-Bound</option>
-     <option value="false">All-Day / Half-Day</option>
- </select>
- <button type="button" onclick="addTypicalEventType()" class="shrink-0 bg-gray-300 dark:bg-gray-700 font-bold px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm">Add</button>
+<select id="new-typical-event-isEvent" class="flex-grow sm:flex-grow-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-sm outline-none cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+    <option value="true">Time-Bound</option>
+    <option value="false">All-Day / Half-Day</option>
+</select>
+<button type="button" onclick="addTypicalEventType()" class="shrink-0 bg-gray-300 dark:bg-gray-700 font-bold px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm border border-transparent">Add</button>
 </div>
 </div>
 </div>
@@ -749,106 +780,106 @@ darkmuted: '#9ca3af'
 
 <!-- GCal Event Title Template -->
 <div>
- <label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global GCal Event Title Template</label>
- <input type="text" id="set-gcal-template" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="{EventType} - {Name}, {Attendees}">
- <div class="flex flex-wrap gap-1.5 mt-1.5">
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
-   <button type="button" onclick="insertAtCursor('set-gcal-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
- </div>
+<label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global GCal Event Title Template</label>
+<input type="text" id="set-gcal-template" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="{EventType} - {Name}, {Attendees}">
+<div class="flex flex-wrap gap-1.5 mt-1.5">
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
+  <button type="button" onclick="insertAtCursor('set-gcal-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
+</div>
 </div>
 
 <div class="border-t border-gray-200 dark:border-darkborder pt-3"></div>
 
 <!-- App Agenda Card Title Template -->
 <div>
- <label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global App Agenda Card Title Template</label>
- <input type="text" id="set-agenda-template" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="{EventType} - {Name} ({Department})">
- <div class="flex flex-wrap gap-1.5 mt-1.5">
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
- </div>
+<label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global App Agenda Card Title Template</label>
+<input type="text" id="set-agenda-template" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="{EventType} - {Name} ({Department})">
+<div class="flex flex-wrap gap-1.5 mt-1.5">
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
+</div>
 </div>
 
 <!-- App Agenda Card Details Template -->
 <div>
- <label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global App Agenda Card Details Template</label>
- <textarea id="set-agenda-details-template" rows="4" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="Leave blank to hide details"></textarea>
- <div class="flex flex-wrap gap-1.5 mt-1.5">
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
-   <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
- </div>
+<label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global App Agenda Card Details Template</label>
+<textarea id="set-agenda-details-template" rows="4" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="Leave blank to hide details"></textarea>
+<div class="flex flex-wrap gap-1.5 mt-1.5">
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
+  <button type="button" onclick="insertAtCursor('set-agenda-details-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
+</div>
 </div>
 
 <div class="border-t border-gray-200 dark:border-darkborder pt-3"></div>
 
 <!-- Info All Card Title Template -->
 <div>
- <label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global Info All Card Title Template</label>
- <input type="text" id="set-infoall-template" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="{EventType} - {Name} ({Department})">
- <div class="flex flex-wrap gap-1.5 mt-1.5">
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
- </div>
+<label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global Info All Card Title Template</label>
+<input type="text" id="set-infoall-template" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="{EventType} - {Name} ({Department})">
+<div class="flex flex-wrap gap-1.5 mt-1.5">
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
+</div>
 </div>
 
 <!-- Info All Card Details Template -->
 <div>
- <label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global Info All Card Details Template</label>
- <textarea id="set-infoall-details-template" rows="4" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="Leave blank to hide details"></textarea>
- <div class="flex flex-wrap gap-1.5 mt-1.5">
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
-   <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
- </div>
+<label class="block font-bold mb-1 text-sm text-gray-700 dark:text-gray-300">Global Info All Card Details Template</label>
+<textarea id="set-infoall-details-template" rows="4" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 dark:focus:ring-yellow-800/50 transition" placeholder="Leave blank to hide details"></textarea>
+<div class="flex flex-wrap gap-1.5 mt-1.5">
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventType}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Name}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Attendees}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Attendees}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Department}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Department}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Location}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{LocationDetails}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{LocationDetails}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Country}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Country}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{State}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{State}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{StartTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{StartTime}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{EndTime}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EndTime}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{Remarks}</button>
+  <button type="button" onclick="insertAtCursor('set-infoall-details-template', '{EventDescription}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">{EventDescription}</button>
+</div>
 </div>
 
 </div>
@@ -856,7 +887,7 @@ darkmuted: '#9ca3af'
 
 </div>
 <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
-<button onclick="saveEventTemplates()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition">Save Event Types & Templates</button>
+<button onclick="saveEventTemplates()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition border border-transparent">Save Event Types & Templates</button>
 </div>
 </div>
 </div>
@@ -871,10 +902,10 @@ darkmuted: '#9ca3af'
 
 <div class="flex flex-wrap sm:flex-nowrap gap-2 mb-3">
 <div class="flex w-full sm:w-auto space-x-2">
- <input type="text" id="new-acronym-key" class="w-1/3 sm:w-24 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-sm outline-none shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition" placeholder="Short (MTG)">
- <input type="text" id="new-acronym-val" class="flex-grow w-2/3 sm:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-sm outline-none shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition" placeholder="Full Word (Meeting)">
+<input type="text" id="new-acronym-key" class="w-1/3 sm:w-24 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-sm outline-none shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition" placeholder="Short (MTG)">
+<input type="text" id="new-acronym-val" class="flex-grow w-2/3 sm:w-auto border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-sm outline-none shadow-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition" placeholder="Full Word (Meeting)">
 </div>
-<button type="button" onclick="addAcronym()" class="w-full sm:w-auto shrink-0 bg-gray-300 dark:bg-gray-700 font-bold px-4 py-1.5 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm">Add</button>
+<button type="button" onclick="addAcronym()" class="w-full sm:w-auto shrink-0 bg-gray-300 dark:bg-gray-700 font-bold px-4 py-1.5 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition text-sm border border-transparent">Add</button>
 </div>
 
 <div id="acronyms-list" class="space-y-1.5 bg-gray-100 dark:bg-[#1a1a1a] p-2 rounded-lg border border-gray-300 dark:border-darkborder mb-2 min-h-[40px]"></div>
@@ -882,7 +913,7 @@ darkmuted: '#9ca3af'
 
 </div>
 <div class="shrink-0 p-3 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_6px_rgba(0,0,0,0.1)] z-20">
-<button onclick="saveAcronyms()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition">Save Acronyms</button>
+<button onclick="saveAcronyms()" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2.5 rounded-lg shadow-md text-base transition border border-transparent">Save Acronyms</button>
 </div>
 </div>
 </div>
@@ -902,26 +933,26 @@ darkmuted: '#9ca3af'
 
 <div class="border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-[#1a1a1a] space-y-4">
 <div>
- <label class="block font-semibold mb-1 text-sm">KAH Email Subject Format</label>
- <input type="text" id="set-kah-subject" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="e.g. Leave Requires Approval: KAH Limit Crossed for {Unit}">
- <div class="flex flex-wrap gap-1.5 mt-1.5">
-   <button type="button" onclick="insertAtCursor('set-kah-subject', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Name}</button>
-   <button type="button" onclick="insertAtCursor('set-kah-subject', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{EventType}</button>
-   <button type="button" onclick="insertAtCursor('set-kah-subject', '{Unit}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Unit}</button>
-   <button type="button" onclick="insertAtCursor('set-kah-subject', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Location}</button>
-   <button type="button" onclick="insertAtCursor('set-kah-subject', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Remarks}</button>
- </div>
+<label class="block font-semibold mb-1 text-sm">KAH Email Subject Format</label>
+<input type="text" id="set-kah-subject" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="e.g. Leave Requires Approval: KAH Limit Crossed for {Unit}">
+<div class="flex flex-wrap gap-1.5 mt-1.5">
+  <button type="button" onclick="insertAtCursor('set-kah-subject', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Name}</button>
+  <button type="button" onclick="insertAtCursor('set-kah-subject', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{EventType}</button>
+  <button type="button" onclick="insertAtCursor('set-kah-subject', '{Unit}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Unit}</button>
+  <button type="button" onclick="insertAtCursor('set-kah-subject', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Location}</button>
+  <button type="button" onclick="insertAtCursor('set-kah-subject', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Remarks}</button>
+</div>
 </div>
 <div>
- <label class="block font-semibold mb-1 text-sm">KAH Email Body Format</label>
- <textarea id="set-kah-body" rows="2" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition resize-none overflow-hidden" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" placeholder="e.g. User {Name} applied for {EventType}..."></textarea>
- <div class="flex flex-wrap gap-1.5 mt-1.5">
-   <button type="button" onclick="insertAtCursor('set-kah-body', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Name}</button>
-   <button type="button" onclick="insertAtCursor('set-kah-body', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{EventType}</button>
-   <button type="button" onclick="insertAtCursor('set-kah-body', '{Unit}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Unit}</button>
-   <button type="button" onclick="insertAtCursor('set-kah-body', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Location}</button>
-   <button type="button" onclick="insertAtCursor('set-kah-body', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Remarks}</button>
- </div>
+<label class="block font-semibold mb-1 text-sm">KAH Email Body Format</label>
+<textarea id="set-kah-body" rows="2" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-white dark:bg-black text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition resize-none overflow-hidden" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" placeholder="e.g. User {Name} applied for {EventType}..."></textarea>
+<div class="flex flex-wrap gap-1.5 mt-1.5">
+  <button type="button" onclick="insertAtCursor('set-kah-body', '{Name}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Name}</button>
+  <button type="button" onclick="insertAtCursor('set-kah-body', '{EventType}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{EventType}</button>
+  <button type="button" onclick="insertAtCursor('set-kah-body', '{Unit}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Unit}</button>
+  <button type="button" onclick="insertAtCursor('set-kah-body', '{Location}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Location}</button>
+  <button type="button" onclick="insertAtCursor('set-kah-body', '{Remarks}')" class="text-[11px] font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 px-2.5 py-1 rounded-lg hover:bg-gray-300 transition shadow-sm">{Remarks}</button>
+</div>
 </div>
 </div>
 </div>
@@ -960,15 +991,15 @@ darkmuted: '#9ca3af'
 <div class="flex-grow flex flex-col min-h-[40vh] border-b border-gray-200 dark:border-darkborder">
 <div class="sticky top-0 bg-gray-100 dark:bg-[#1a1a1a] p-2 border-b border-gray-200 dark:border-darkborder z-10 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-2">
 <div class="flex items-center justify-between w-full md:w-auto">
-    <h3 class="font-bold text-sm md:text-base text-gray-800 dark:text-gray-200 pr-2">Manage Units & Personnel</h3>
-    <div class="flex items-center bg-gray-200 dark:bg-darkborder rounded p-0.5 shrink-0 ml-auto md:ml-2">
-        <button id="btn-struct-personnel" onclick="toggleStructureView('personnel')" class="px-2 py-1 rounded font-bold text-xs bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Personnel</button>
-        <button id="btn-struct-tree" onclick="toggleStructureView('tree')" class="px-2 py-1 rounded font-bold text-xs text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 transition">Tree</button>
-    </div>
+   <h3 class="font-bold text-sm md:text-base text-gray-800 dark:text-gray-200 pr-2">Manage Units & Personnel</h3>
+   <div class="flex items-center bg-gray-200 dark:bg-darkborder rounded p-0.5 shrink-0 ml-auto md:ml-2">
+       <button id="btn-struct-personnel" onclick="toggleStructureView('personnel')" class="px-2 py-1 rounded font-bold text-xs bg-white dark:bg-darksurface shadow text-blue-600 dark:text-blue-400">Personnel</button>
+       <button id="btn-struct-tree" onclick="toggleStructureView('tree')" class="px-2 py-1 rounded font-bold text-xs text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 transition">Tree</button>
+   </div>
 </div>
 <div class="flex space-x-2 mt-2 md:mt-0">
-  <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="w-full md:w-48 border-2 border-gray-300 dark:border-gray-500 rounded-lg p-1.5 text-xs bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase">
-  <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 rounded-lg transition text-xs border border-transparent">Add</button>
+ <input type="text" id="new-parent-unit" placeholder="New Parent Unit..." class="w-full md:w-48 border-2 border-gray-300 dark:border-gray-500 rounded-lg p-1.5 text-xs bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition uppercase">
+ <button onclick="addParentUnit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 rounded-lg transition text-xs border border-transparent">Add</button>
 </div>
 </div>
 <div id="structure-builder-list" class="flex-grow overflow-y-auto p-2 space-y-2 bg-gray-50 dark:bg-darkinput pb-6"></div>
@@ -1020,17 +1051,17 @@ darkmuted: '#9ca3af'
 
 </main>
 
-<script src="frontend/js/core/config.js?v=85"></script>
-<script src="frontend/js/core/state.js?v=85"></script>
-<script src="frontend/js/core/api.js?v=85"></script>
-<script src="frontend/js/core/auth.js?v=85"></script>
-<script src="frontend/js/ui/ui.js?v=85"></script>
-<script src="frontend/js/features/calendar.js?v=85"></script>
-<script src="frontend/js/features/parade.js?v=85"></script>
-<script src="frontend/js/ui/forms.js?v=85"></script>
-<script src="frontend/js/ui/picker.js?v=85"></script>
-<script src="frontend/js/admin/admin.js?v=85"></script>
-<script src="frontend/js/admin/structure.js?v=85"></script> 
-<script src="frontend/js/core/app.js?v=85"></script>
+<script src="frontend/js/core/config.js?v=86"></script>
+<script src="frontend/js/core/state.js?v=86"></script>
+<script src="frontend/js/core/api.js?v=86"></script>
+<script src="frontend/js/core/auth.js?v=86"></script>
+<script src="frontend/js/ui/ui.js?v=86"></script>
+<script src="frontend/js/features/calendar.js?v=86"></script>
+<script src="frontend/js/features/parade.js?v=86"></script>
+<script src="frontend/js/ui/forms.js?v=86"></script>
+<script src="frontend/js/ui/picker.js?v=86"></script>
+<script src="frontend/js/admin/admin.js?v=86"></script>
+<script src="frontend/js/admin/structure.js?v=86"></script> 
+<script src="frontend/js/core/app.js?v=86"></script>
 </body>
 </html>
