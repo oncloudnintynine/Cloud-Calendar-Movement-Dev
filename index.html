@@ -89,6 +89,8 @@ darkmuted: '#9ca3af'
 <button onclick="switchTab('submit-leave')" id="menu-submit-leave" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">Add Leave/MC (Classic)</button>
 <button onclick="switchTab('submit-event')" id="menu-submit-event" class="text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover hidden text-base transition">Add Event (Classic)</button>
 
+<button onclick="window.downloadVCF(); closeMenu();" id="menu-save-directory" class="text-left px-6 py-4 font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-base transition flex items-center justify-between">Save Directory to Phone <span>⬇️</span></button>
+
 <div id="menu-admin-group" class="hidden border-t border-gray-200 dark:border-darkborder mt-2 pt-2">
 <button onclick="switchTab('admin')" id="menu-admin" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">General Settings</button>
 <button onclick="switchTab('admin-contacts')" id="menu-admin-contacts" class="w-full text-left px-6 py-4 font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-darkhover text-base transition">Contacts & Users Management</button>
@@ -641,40 +643,6 @@ darkmuted: '#9ca3af'
 <div id="view-admin-contacts" class="tab-content hidden-view flex-col max-w-2xl mx-auto w-full h-full pb-2 md:pb-6 relative">
 <div id="admin-contacts-sections-container" class="flex-grow overflow-y-auto space-y-4 pb-4 px-1 pt-1">
 
-<div data-section="external-sync" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
-<div class="flex justify-between items-center mb-3">
-<h3 class="font-bold text-base text-indigo-600 dark:text-indigo-400">External Contacts Sync (OAuth)</h3>
-<svg class="w-5 h-5 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-</div>
-<p class="text-[10px] text-gray-500 mb-3 leading-tight">Push contact updates to multiple external Google accounts automatically in the background. Requires a Google Cloud Platform (GCP) OAuth Client.</p>
-<div class="space-y-3">
- <div>
-   <label class="block font-semibold mb-1 text-xs">GCP Client ID</label>
-   <input type="text" id="set-oauth-client-id" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 transition" placeholder="e.g. 12345-abc.apps.googleusercontent.com">
- </div>
- <div>
-   <label class="block font-semibold mb-1 text-xs">GCP Client Secret</label>
-   <div class="relative">
-     <input type="password" id="set-oauth-client-secret" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-3 pr-10 bg-gray-50 dark:bg-[#1a1a1a] text-sm outline-none focus:border-indigo-500 transition">
-     <button type="button" onclick="togglePassword('set-oauth-client-secret', this)" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
-   </div>
- </div>
- <button onclick="saveOAuthCredentials()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition text-xs border border-transparent">Save OAuth Config</button>
- 
- <div class="border-t border-gray-200 dark:border-darkborder pt-3 mt-3">
-   <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 mb-2">Linked Target Accounts</h4>
-   <div class="mb-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-[10px] text-yellow-800 dark:text-yellow-400">
-     <span class="font-bold">⚠️ Warning:</span> If you encounter a <span class="font-mono">403 Access Denied</span> error after clicking the link, ensure the target email address has been added to the <b>Test users</b> list in your Google Cloud Platform's OAuth Consent Screen.
-   </div>
-   <div class="flex space-x-2 mb-2">
-       <input type="text" id="oauth-auth-link" readonly class="flex-grow border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1 px-2 bg-gray-100 dark:bg-darkinput text-[10px] text-gray-600 font-mono outline-none cursor-text select-all" placeholder="Save credentials and click Generate Link...">
-       <button onclick="generateAuthLink()" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition text-[10px] border border-transparent">Generate Link</button>
-   </div>
-   <div id="oauth-linked-accounts-list" class="space-y-2 mt-3 empty:hidden"></div>
- </div>
-</div>
-</div>
-
 <div data-section="contact-format" class="bg-white dark:bg-darksurface rounded-xl shadow border border-gray-200 dark:border-darkborder p-4">
 <div class="flex justify-between items-center mb-3">
 <h3 class="font-bold text-base text-emerald-600 dark:text-emerald-400">Google Contacts Name Format</h3>
@@ -1064,17 +1032,17 @@ darkmuted: '#9ca3af'
 
 </main>
 
-<script src="frontend/js/core/config.js?v=91"></script>
-<script src="frontend/js/core/state.js?v=91"></script>
-<script src="frontend/js/core/api.js?v=91"></script>
-<script src="frontend/js/core/auth.js?v=91"></script>
-<script src="frontend/js/ui/ui.js?v=91"></script>
-<script src="frontend/js/features/calendar.js?v=91"></script>
-<script src="frontend/js/features/parade.js?v=91"></script>
-<script src="frontend/js/ui/forms.js?v=91"></script>
-<script src="frontend/js/ui/picker.js?v=91"></script>
-<script src="frontend/js/admin/admin.js?v=91"></script>
-<script src="frontend/js/admin/structure.js?v=91"></script> 
-<script src="frontend/js/core/app.js?v=91"></script>
+<script src="frontend/js/core/config.js?v=92"></script>
+<script src="frontend/js/core/state.js?v=92"></script>
+<script src="frontend/js/core/api.js?v=92"></script>
+<script src="frontend/js/core/auth.js?v=92"></script>
+<script src="frontend/js/ui/ui.js?v=92"></script>
+<script src="frontend/js/features/calendar.js?v=92"></script>
+<script src="frontend/js/features/parade.js?v=92"></script>
+<script src="frontend/js/ui/forms.js?v=92"></script>
+<script src="frontend/js/ui/picker.js?v=92"></script>
+<script src="frontend/js/admin/admin.js?v=92"></script>
+<script src="frontend/js/admin/structure.js?v=92"></script> 
+<script src="frontend/js/core/app.js?v=92"></script>
 </body>
 </html>
