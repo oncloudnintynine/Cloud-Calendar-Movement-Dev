@@ -57,6 +57,8 @@ if (data._userRole !== 'admin' && String(rows[i][headers.indexOf('Phone')]) !== 
 throw new Error("Unauthorized to modify this record.");
 }
 
+var oldType = rows[i][headers.indexOf('LeaveType')];
+
 var oldEventIds = (rows[i][headers.indexOf('EventIDs')] || '').split(',');
 oldEventIds.forEach(function(calAndEvt) {
 if (!calAndEvt) return;
@@ -104,6 +106,20 @@ newRow[headers.indexOf('UntilDate')] = data.untilDate || '';
 newRow[headers.indexOf('LocationDetails')] = data.locationDetails || '';
 
 sheet.getRange(i + 1, 1, 1, headers.length).setValues([newRow]);
+SpreadsheetApp.flush();
+
+// Check if old or new type is KAH relevant, then recalculate statuses
+var typicalEventTypes = JSON.parse(props.getProperty('typicalEventTypes') || "[]");
+var isKahRelevant = false;
+for (var k = 0; k < typicalEventTypes.length; k++) {
+  if ((typicalEventTypes[k].name === oldType || typicalEventTypes[k].name === data.leaveType) && typicalEventTypes[k].isKahRelevant) { 
+      isKahRelevant = true; break; 
+  }
+}
+if (isKahRelevant && typeof recalculateAllKahStatuses === 'function') {
+  recalculateAllKahStatuses(props);
+}
+
 return { status: status };
 }
 }
@@ -299,6 +315,7 @@ if (data._userRole !== 'admin' && String(rows[i][headers.indexOf('Phone')]) !== 
 throw new Error("Unauthorized to cancel this record.");
 }
 
+var oldType = rows[i][headers.indexOf('LeaveType')];
 sheet.getRange(i + 1, headers.indexOf('Status') + 1).setValue('Cancelled');
 var eventIds = (rows[i][headers.indexOf('EventIDs')] || '').split(',');
 eventIds.forEach(function(calAndEvt) {
@@ -318,6 +335,21 @@ try {
   }
 } catch(e) {}
 });
+
+SpreadsheetApp.flush();
+
+// Check if cancelled type is KAH relevant, then recalculate statuses globally
+var typicalEventTypes = JSON.parse(props.getProperty('typicalEventTypes') || "[]");
+var isKahRelevant = false;
+for (var k = 0; k < typicalEventTypes.length; k++) {
+  if (typicalEventTypes[k].name === oldType && typicalEventTypes[k].isKahRelevant) { 
+      isKahRelevant = true; break; 
+  }
+}
+if (isKahRelevant && typeof recalculateAllKahStatuses === 'function') {
+  recalculateAllKahStatuses(props);
+}
+
 return { success: true };
 }
 }
