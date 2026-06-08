@@ -19,7 +19,7 @@ try {
 var att = JSON.parse(data.attendees);
 if (att && att.length > 0) {
 attendeesStr = att.map(function(a) { 
-  return a.expandedNames ? a.expandedNames : (a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name); 
+ return a.expandedNames ? a.expandedNames : (a.type === 'group' ? a.name.replace('zz KAH: ', '').replace('zz ', '') : a.name); 
 }).join(', ');
 }
 } catch(e) {}
@@ -32,14 +32,14 @@ var endTimeStr = "";
 
 if (isEvent) {
 if (data.isAllDay) {
-     startTimeStr = Utilities.formatDate(new Date(data.startDate), tz, "dd MMM yyyy") + " (All Day)";
-     endTimeStr = Utilities.formatDate(new Date(data.endDate), tz, "dd MMM yyyy") + " (All Day)";
+    startTimeStr = Utilities.formatDate(new Date(data.startDate), tz, "dd MMM yyyy") + " (All Day)";
+    endTimeStr = Utilities.formatDate(new Date(data.endDate), tz, "dd MMM yyyy") + " (All Day)";
 } else {
-     startTimeStr = Utilities.formatDate(new Date(data.startDate), tz, "dd MMM yyyy HH:mm");
-     endTimeStr = Utilities.formatDate(new Date(data.endDate), tz, "dd MMM yyyy HH:mm");
+    startTimeStr = Utilities.formatDate(new Date(data.startDate), tz, "dd MMM yyyy HH:mm");
+    endTimeStr = Utilities.formatDate(new Date(data.endDate), tz, "dd MMM yyyy HH:mm");
 }
 if (data.halfDay && data.halfDay !== 'NONE') {
-     endTimeStr += " ↻ " + data.halfDay + (data.untilDate ? " until " + Utilities.formatDate(new Date(data.untilDate), tz, "dd MMM yyyy") : "");
+    endTimeStr += " ↻ " + data.halfDay + (data.untilDate ? " until " + Utilities.formatDate(new Date(data.untilDate), tz, "dd MMM yyyy") : "");
 }
 } else {
 timeStr = data.halfDay !== 'None' && data.halfDay !== 'NONE' ? "(" + data.halfDay + ")" : "";
@@ -49,7 +49,7 @@ endTimeStr = Utilities.formatDate(new Date(data.endDate), tz, "dd MMM yyyy");
 
 var safeType = (data.leaveType || "").trim();
 var displayType = safeType;
-if (safeType === 'Meeting' && data.remarks) {
+if (safeType === 'Generic' && data.remarks) {
 displayType = safeType + ": " + data.remarks.trim();
 }
 
@@ -58,13 +58,13 @@ var eventDesc = data.remarks ? data.remarks.trim() : displayType;
 var flatDepts = [];
 if (data.departments && data.departments.length > 0) {
 data.departments.forEach(function(d) {
- if (!d) return;
- d.toString().split(',').forEach(function(part) {
-   var trimmed = part.trim();
-   if (trimmed && flatDepts.indexOf(trimmed) === -1) {
-     flatDepts.push(trimmed);
-   }
- });
+if (!d) return;
+d.toString().split(',').forEach(function(part) {
+  var trimmed = part.trim();
+  if (trimmed && flatDepts.indexOf(trimmed) === -1) {
+    flatDepts.push(trimmed);
+  }
+});
 });
 }
 
@@ -124,24 +124,24 @@ else if (data.halfDay === 'ANNUALLY') rec = CalendarApp.newRecurrence().addYearl
 else if (data.halfDay === 'WEEKDAY') rec = CalendarApp.newRecurrence().addWeeklyRule().onlyOnWeekdays();
 
 if (data.untilDate) {
-   var untilDt = new Date(data.untilDate);
-   untilDt.setHours(23, 59, 59, 999);
-   rec = rec.until(untilDt);
+  var untilDt = new Date(data.untilDate);
+  untilDt.setHours(23, 59, 59, 999);
+  rec = rec.until(untilDt);
 }
 }
 
 if (data.isAllDay) {
 if (rec) {
-  evt = cal.createAllDayEventSeries(title, startDt, rec, opts);
+ evt = cal.createAllDayEventSeries(title, startDt, rec, opts);
 } else {
-  var endDtAdjusted = new Date(endDt.getTime() + 86400000);
-  evt = cal.createAllDayEvent(title, startDt, endDtAdjusted, opts);
+ var endDtAdjusted = new Date(endDt.getTime() + 86400000);
+ evt = cal.createAllDayEvent(title, startDt, endDtAdjusted, opts);
 }
 } else {
 if (rec) {
-  evt = cal.createEventSeries(title, startDt, endDt, rec, opts);
+ evt = cal.createEventSeries(title, startDt, endDt, rec, opts);
 } else {
-  evt = cal.createEvent(title, startDt, endDt, opts);
+ evt = cal.createEvent(title, startDt, endDt, opts);
 }
 }
 } else {
