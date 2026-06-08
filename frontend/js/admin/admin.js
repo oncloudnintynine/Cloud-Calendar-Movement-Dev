@@ -298,13 +298,13 @@ html += `
 <div data-idx="${i}" class="flex flex-col gap-3 bg-white dark:bg-darksurface p-3 md:p-4 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
   
   <!-- ROW 1 -->
-  <div class="flex items-center gap-2 w-full">
+  <div class="flex items-center gap-2 w-full flex-nowrap">
     <svg class="w-6 h-6 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
     ${isFixed ? `<div class="w-6 shrink-0"></div>` : ''}
     
     <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow min-w-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm md:text-base font-bold truncate" ${isFixed ? 'disabled' : ''}>
     
-    <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="w-32 md:w-40 shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-sm md:text-base font-bold cursor-pointer">
+    <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="w-[120px] md:w-40 shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-xs md:text-sm font-bold cursor-pointer">
      <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
      <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
     </select>
@@ -313,21 +313,21 @@ html += `
   </div>
 
   <!-- ROW 2 -->
-  <div class="flex items-center justify-between gap-2 w-full pl-0 sm:pl-10 flex-wrap sm:flex-nowrap">
+  <div class="flex items-center justify-between gap-2 w-full pl-0 sm:pl-10 flex-nowrap mt-1">
     
     <div class="flex items-center gap-2 shrink-0">
-        <label class="flex items-center space-x-2 shrink-0 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1.5 rounded-lg border border-yellow-300 dark:border-yellow-700 cursor-pointer transition hover:bg-yellow-100 dark:hover:bg-yellow-900/40" title="If checked, this event type counts towards the Unit KAH out-of-office limit.">
-          <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-4 h-4 md:w-5 md:h-5 text-yellow-600 cursor-pointer rounded border-gray-300" ${t.isKahRelevant ? 'checked' : ''}>
-          <span class="text-xs md:text-sm font-bold text-yellow-800 dark:text-yellow-400 whitespace-nowrap">KAH Tracker</span>
+        <label class="flex items-center space-x-1.5 shrink-0 bg-yellow-50 dark:bg-yellow-900/20 px-2.5 py-1.5 rounded-lg border border-yellow-300 dark:border-yellow-700 cursor-pointer transition hover:bg-yellow-100 dark:hover:bg-yellow-900/40" title="If checked, this event type counts towards the Unit KAH out-of-office limit.">
+          <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-600 cursor-pointer rounded border-gray-300" ${t.isKahRelevant ? 'checked' : ''}>
+          <span class="text-[11px] md:text-xs font-bold text-yellow-800 dark:text-yellow-400 whitespace-nowrap">KAH Tracker</span>
         </label>
         ${locHtml}
     </div>
 
-    <div class="flex items-center gap-2 shrink-0 ml-auto mt-2 sm:mt-0 w-full sm:w-auto justify-end">
-      <button type="button" onclick="document.getElementById('event-type-fields-${i}').classList.toggle('hidden-view')" class="text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 px-3 py-1.5 rounded-lg transition text-xs md:text-sm font-bold whitespace-nowrap bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700 shadow-sm" title="Configure Form Fields">
+    <div class="flex items-center gap-1.5 shrink-0 ml-auto justify-end">
+      <button type="button" onclick="document.getElementById('event-type-fields-${i}').classList.toggle('hidden-view')" class="text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 px-2.5 py-1.5 rounded-lg transition text-[11px] md:text-xs font-bold whitespace-nowrap bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700 shadow-sm" title="Configure Form Fields">
          Fields ⚙️
       </button>
-      <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3 py-1.5 rounded-lg transition text-xs md:text-sm font-bold whitespace-nowrap bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 shadow-sm" title="Specific Templates">
+      <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition text-[11px] md:text-xs font-bold whitespace-nowrap bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 shadow-sm" title="Specific Templates">
          Templates 📝
       </button>
     </div>
