@@ -40,9 +40,6 @@ safeSet('set-infoall-details-template', settings.infoAllDetailsTemplate || 'Star
 safeSet('set-landing-page', settings.landingPage || 'dashboard');
 safeSet('set-contact-format', settings.contactNameFormat || '{Name} (Cloud Group : {Unit})');
 
-safeSet('set-oauth-client-id', settings.oauthClientId || '');
-renderLinkedAccounts(settings.linkedAccounts || []);
-
 const radios = document.getElementsByName('app-mode');
 if (radios) {
 radios.forEach(r => { if(r.value === appMode) r.checked = true; });
@@ -114,7 +111,7 @@ window.adminSectionsSortable = new Sortable(container, {
 // Initialize Contacts & Users Management Container
 tempAdminContactsSectionsOrder = (settings.adminContactsSectionsOrder && settings.adminContactsSectionsOrder.length 
 ? settings.adminContactsSectionsOrder 
-:['external-sync', 'contact-format', 'register-user', 'manage-users']).filter(s => s !== 'code-backup');
+:['contact-format', 'register-user', 'manage-users']).filter(s => s !== 'code-backup' && s !== 'external-sync');
 
 const contactsContainer = document.getElementById('admin-contacts-sections-container');
 if (contactsContainer) {
@@ -698,54 +695,6 @@ function submitAdminRegister() { handleRegister('admin'); }
 // ==========================================
 // Save Functions for Admin Sections
 // ==========================================
-
-async function saveOAuthCredentials() {
-showLoader(true);
-const clientId = document.getElementById('set-oauth-client-id').value.trim();
-const clientSecret = document.getElementById('set-oauth-client-secret').value.trim();
-if (!clientId) { alert("Client ID is required"); showLoader(false); return; }
-
-try {
-await apiCall('saveOAuthCredentials', { adminPass: user.pass, clientId: clientId, clientSecret: clientSecret });
-alert("OAuth credentials saved successfully! You can now generate an authorization link.");
-} catch (err) { alert("Error: " + err.message); }
-showLoader(false);
-}
-
-async function generateAuthLink() {
-showLoader(true);
-try {
-const url = await apiCall('generateOAuthLink', { adminPass: user.pass });
-document.getElementById('oauth-auth-link').value = url;
-} catch (err) { alert("Error generating link: " + err.message); }
-showLoader(false);
-}
-
-function renderLinkedAccounts(accounts) {
-const container = document.getElementById('oauth-linked-accounts-list');
-if (!container) return;
-if (!accounts || accounts.length === 0) {
-container.innerHTML = '<p class="text-xs text-gray-500 italic py-1">No external accounts linked yet.</p>';
-return;
-}
-container.innerHTML = accounts.map(email => `
-<div class="flex justify-between items-center bg-gray-50 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-600 rounded-lg p-2 shadow-sm text-sm">
-<span class="font-bold text-gray-800 dark:text-gray-200 truncate pr-2">${email}</span>
-<button onclick="removeLinkedAccount('${email}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded transition text-xs font-bold leading-none shrink-0" title="Revoke Sync Access">Revoke</button>
-</div>
-`).join('');
-}
-
-async function removeLinkedAccount(email) {
-if (!confirm(`Are you sure you want to stop syncing contacts to ${email}?`)) return;
-showLoader(true);
-try {
-const updatedAccounts = await apiCall('removeLinkedAccount', { adminPass: user.pass, email: email });
-renderLinkedAccounts(updatedAccounts);
-alert(`Successfully revoked access for ${email}.`);
-} catch(err) { alert("Error revoking account: " + err.message); }
-showLoader(false);
-}
 
 async function saveAdminSettings() {
 showLoader(true);
