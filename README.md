@@ -81,9 +81,9 @@ To allow GitHub to push updates directly to Google Apps Script automatically, yo
 3. **Configure GitHub Secrets:**
 * Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions**.
 * Add the following Repository Secrets:
-  * `CLASP_CREDS`: Paste the JSON copied from Step 1.
-  * `SCRIPT_ID`: Paste your Script ID.
-  * `DEPLOYMENT_ID`: Paste your Deployment ID.
+ * `CLASP_CREDS`: Paste the JSON copied from Step 1.
+ * `SCRIPT_ID`: Paste your Script ID.
+ * `DEPLOYMENT_ID`: Paste your Deployment ID.
 4. **How it works:**
 Every time you push a change to the `backend/` folder on the `main` branch, GitHub Actions will trigger `.github/workflows/deploy.yml`, pushing the code and updating the exact same Web App URL so your frontend never breaks.
 
@@ -122,3 +122,14 @@ Every time you push a change to the `backend/` folder on the `main` branch, GitH
 Google Contacts is used as the directory. If a user is not appearing correctly:
 1. Ensure the user's phone number exists exactly as registered.
 2. If units are renamed or corrupted in Google Contacts, use the **"Force Sync G-Contacts"** button located in the **Organisational Structure** admin tab to wipe the relevant Contact data and overwrite it completely with the App's state.
+
+### 5. Setting up Google Cloud Platform (GCP) for External Contacts Sync (OAuth)
+To allow pushing contacts to external accounts, you must set up an OAuth Client in GCP:
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
+2. Enable the **Google People API** under APIs & Services.
+3. Configure the **OAuth consent screen** (External).
+4. **CRITICAL STEP:** While your consent screen is in "Testing" mode, you MUST manually add the Google accounts you intend to link into the **Test users** list. If you skip this, you will encounter an *"Access blocked: App has not completed the Google verification process"* error when attempting to authenticate.
+5. Go to Credentials -> Create Credentials -> **OAuth client ID** (Web application).
+   - Add `https://script.google.com` to Authorized JavaScript origins.
+   - Add your Apps Script Web App URL to Authorized redirect URIs.
+6. Copy the resulting **Client ID** and **Client Secret** into the Cloudy Admin Settings panel.
