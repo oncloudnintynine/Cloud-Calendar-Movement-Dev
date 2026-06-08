@@ -21,7 +21,7 @@ if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringi
 if (!props.getProperty('landingPage')) props.setProperty('landingPage', 'dashboard');
 if (!props.getProperty('dashboardDeptOrder')) props.setProperty('dashboardDeptOrder', JSON.stringify([]));
 if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['landing-page', 'app-mode', 'dashboard-filter-order', 'admin-pass', 'user-keyword', 'menu-order']));
-if (!props.getProperty('adminContactsSectionsOrder')) props.setProperty('adminContactsSectionsOrder', JSON.stringify(['external-sync', 'contact-format', 'register-user', 'manage-users']));
+if (!props.getProperty('adminContactsSectionsOrder')) props.setProperty('adminContactsSectionsOrder', JSON.stringify(['contact-format', 'register-user', 'manage-users']));
 
 var typicalEventTypes = props.getProperty('typicalEventTypes');
 if (!typicalEventTypes) {
@@ -81,22 +81,11 @@ var sheet = ss.getActiveSheet();
 sheet.setName("Leaves");
 sheet.appendRow(['ID', 'Timestamp', 'Phone', 'Name', 'Department', 'LeaveType', 'StartDate', 'EndDate', 'HalfDay', 'CoveringPerson', 'Country', 'State', 'Remarks', 'Status', 'EventIDs', 'Location', 'Attendees', 'InfoAll', 'IsAllDay', 'UntilDate', 'LocationDetails']);
 props.setProperty('dbSheetId', ss.getId());
-
-var syncQueueSheet = ss.insertSheet("Company_Sync_Queue");
-syncQueueSheet.appendRow(['Timestamp', 'Action', 'Payload', 'Status', 'Retries']);
 } else {
 var ss = SpreadsheetApp.openById(dbId);
 var mainSheet = ss.getSheetByName("Leaves") || ss.getSheets()[0];
 verifySchema(mainSheet);
-
-var syncQueueSheet = ss.getSheetByName("Company_Sync_Queue");
-if (!syncQueueSheet) {
-syncQueueSheet = ss.insertSheet("Company_Sync_Queue");
-syncQueueSheet.appendRow(['Timestamp', 'Action', 'Payload', 'Status', 'Retries']);
 }
-}
-
-setupBackgroundSyncTrigger();
 }
 
 function verifySchema(sheet) {
@@ -149,7 +138,7 @@ var lock = LockService.getScriptLock();
 var payload = JSON.parse(e.postData.contents);
 var action = payload.action;
 
-var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts', 'saveOAuthCredentials', 'removeLinkedAccount'].indexOf(action) !== -1;
+var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts'].indexOf(action) !== -1;
 if (needsLock) lock.waitLock(15000); 
 
 try {
@@ -157,7 +146,7 @@ var data = payload.data || {};
 var credentials = payload.credentials || {};
 var responseData = {};
 
-var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts', 'saveOAuthCredentials', 'generateOAuthLink', 'removeLinkedAccount'];
+var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts'];
 if (secureActions.indexOf(action) !== -1) {
 if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
 
@@ -185,9 +174,6 @@ else if (action === 'deleteUser') responseData = deleteUser(data);
 else if (action === 'updateUserUnits') responseData = updateUserUnits(data);
 else if (action === 'renameUnit') responseData = renameUnit(data);
 else if (action === 'forceSyncContacts') responseData = forceSyncContacts(data);
-else if (action === 'saveOAuthCredentials') responseData = saveOAuthCredentials(data);
-else if (action === 'generateOAuthLink') responseData = generateOAuthLink(data);
-else if (action === 'removeLinkedAccount') responseData = removeLinkedAccount(data);
 
 return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
 } catch (err) {
@@ -199,9 +185,4 @@ if (needsLock) lock.releaseLock();
 
 function doOptions(e) { 
 return ContentService.createTextOutput("").setMimeType(ContentService.MimeType.JSON); 
-}
-
-// OAuth2 Webhook Callback Handler
-function doGet(e) {
-return authCallbackHandler(e);
 }

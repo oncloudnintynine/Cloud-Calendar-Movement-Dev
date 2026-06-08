@@ -114,22 +114,17 @@ Every time you push a change to the `backend/` folder on the `main` branch, GitH
 * **Testing Locally**: The system utilizes 3 separate environments: `Exp`, `Dev`, and `Prod`. Toggle `ENV` inside `frontend/js/core/config.js` to point to the respective GAS backend URL. 
 * **Database Schema Changes**: If you add new data fields to `Leaves.js`, ensure you update the `verifySchema` array in `Code.js` to automatically generate the new columns in the Google Sheet.
 
-### 3. Fail-Safe Code Updater & Backups
+### 3. Syncing Contacts to Phones (The .vcf Method)
+Cloudy avoids complex Google Cloud Platform OAuth workflows for pushing contacts. Instead, it relies on a secure, native **1-Click Download**.
+* In the App Menu, users click **"Save Directory to Phone"**.
+* A `.vcf` file is instantly generated and downloaded.
+* iOS / Android will natively interpret this file and prompt the user to seamlessly add/update the entire company directory into their phone's address book. 
+
+### 4. Fail-Safe Code Updater & Backups
 * In **Admin Settings -> Code Backup**, you can trigger a 1-click backup of the latest GitHub repository code to a Google Doc in your Drive.
 * If the automated CI/CD pipeline ever fails (e.g., expired Clasp credentials), you can utilize the backup Doc text with the [Fail-Safe Code Updater](https://oncloudnintynine.github.io/Fail-Safe-Code-Updater/) tool linked in the admin menu to manually patch the backend.
 
-### 4. Handling Google Contact Sync Issues
-Google Contacts is used as the directory. If a user is not appearing correctly:
+### 5. Handling Google Contact Sync Issues
+Google Contacts is used as the master directory. If a user is not appearing correctly:
 1. Ensure the user's phone number exists exactly as registered.
 2. If units are renamed or corrupted in Google Contacts, use the **"Force Sync G-Contacts"** button located in the **Organisational Structure** admin tab to wipe the relevant Contact data and overwrite it completely with the App's state.
-
-### 5. Setting up Google Cloud Platform (GCP) for External Contacts Sync (OAuth)
-To allow pushing contacts to external accounts, you must set up an OAuth Client in GCP:
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
-2. Enable the **Google People API** under APIs & Services.
-3. Configure the **OAuth consent screen** (External).
-4. **CRITICAL STEP:** While your consent screen is in "Testing" mode, you MUST manually add the Google accounts you intend to link into the **Test users** list. If you skip this, you will encounter an *"Access blocked: App has not completed the Google verification process"* error when attempting to authenticate.
-5. Go to Credentials -> Create Credentials -> **OAuth client ID** (Web application).
-   - Add `https://script.google.com` to Authorized JavaScript origins.
-   - Add your Apps Script Web App URL to Authorized redirect URIs.
-6. Copy the resulting **Client ID** and **Client Secret** into the Cloudy Admin Settings panel.
