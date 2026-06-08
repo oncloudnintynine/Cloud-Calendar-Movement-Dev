@@ -40,24 +40,27 @@ safeSet('set-infoall-details-template', settings.infoAllDetailsTemplate || 'Star
 safeSet('set-landing-page', settings.landingPage || 'dashboard');
 safeSet('set-contact-format', settings.contactNameFormat || '{Name} (Cloud Group : {Unit})');
 
+safeSet('set-oauth-client-id', settings.oauthClientId || '');
+renderLinkedAccounts(settings.linkedAccounts || []);
+
 const radios = document.getElementsByName('app-mode');
 if (radios) {
- radios.forEach(r => { if(r.value === appMode) r.checked = true; });
+radios.forEach(r => { if(r.value === appMode) r.checked = true; });
 }
 
 let allDepts = new Set(companyStructure);
 if(companyContacts) {
- companyContacts.forEach(c => {
-    if(c.dept && c.dept !== 'Unassigned') {
-        c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
-    }
- });
+companyContacts.forEach(c => {
+   if(c.dept && c.dept !== 'Unassigned') {
+       c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
+   }
+});
 }
 allDepts.add('Cloud Meeting Room');
 
 tempDashboardDeptOrder = settings.dashboardDeptOrder || [];
 allDepts.forEach(d => {
- if (!tempDashboardDeptOrder.includes(d)) tempDashboardDeptOrder.push(d);
+if (!tempDashboardDeptOrder.includes(d)) tempDashboardDeptOrder.push(d);
 });
 tempDashboardDeptOrder = tempDashboardDeptOrder.filter(d => allDepts.has(d));
 renderDashboardFilterOrder();
@@ -71,9 +74,9 @@ renderTypicalEventTypes();
 tempAcronyms = {};
 if (settings.acronyms) {
 for (let key in settings.acronyms) {
-    let val = settings.acronyms[key];
-    if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
-    else tempAcronyms[key] = val;
+   let val = settings.acronyms[key];
+   if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
+   else tempAcronyms[key] = val;
 }
 }
 renderAcronyms();
@@ -85,7 +88,9 @@ renderCustomKahGroups();
 
 tempAdminSectionsOrder = (settings.adminSectionsOrder && settings.adminSectionsOrder.length 
 ? settings.adminSectionsOrder 
-:['landing-page', 'app-mode', 'dashboard-filter-order', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'contact-format', 'menu-order']).filter(s => s !== 'code-backup');
+:['landing-page', 'app-mode', 'dashboard-filter-order', 'external-sync', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'contact-format', 'menu-order']).filter(s => s !== 'code-backup');
+
+if (!tempAdminSectionsOrder.includes('external-sync')) tempAdminSectionsOrder.splice(3, 0, 'external-sync');
 
 const container = document.getElementById('admin-sections-container');
 if (container) {
@@ -96,14 +101,14 @@ if (el) container.appendChild(el);
 
 if (window.adminSectionsSortable) window.adminSectionsSortable.destroy();
 if (typeof Sortable !== 'undefined') {
-  window.adminSectionsSortable = new Sortable(container, {
-    animation: 150,
-    handle: '.section-handle',
-    ghostClass: 'opacity-50',
-    onEnd: function () {
-      tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
-    }
-  });
+ window.adminSectionsSortable = new Sortable(container, {
+   animation: 150,
+   handle: '.section-handle',
+   ghostClass: 'opacity-50',
+   onEnd: function () {
+     tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
+   }
+ });
 }
 }
 } catch(e) {
@@ -121,7 +126,7 @@ populateAdminSettingsForm(settings);
 if(settings.allContacts) {
 companyContacts = settings.allContacts;
 companyContacts.forEach(c => {
-   c.formattedName = window.formatContactName(c.name, c.dept);
+  c.formattedName = window.formatContactName(c.name, c.dept);
 });
 fuseAllContacts = new Fuse(companyContacts, { keys:['formattedName', 'name', 'dept', 'phone'], threshold: 0.3 });
 }
@@ -167,10 +172,10 @@ const list = document.getElementById('typical-event-types-list');
 if(!list) return;
 
 const buildChips = (inputId) => {
-    const vars = ['{EventType}','{Name}','{Attendees}','{Department}','{Location}','{LocationDetails}','{Country}','{State}','{StartTime}','{EndTime}','{Remarks}','{EventDescription}'];
-    return `<div class="flex flex-wrap gap-1 mt-1.5 mb-2">` + 
-        vars.map(v => `<button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>`).join('') + 
-        `</div>`;
+   const vars = ['{EventType}','{Name}','{Attendees}','{Department}','{Location}','{LocationDetails}','{Country}','{State}','{StartTime}','{EndTime}','{Remarks}','{EventDescription}'];
+   return `<div class="flex flex-wrap gap-1 mt-1.5 mb-2">` + 
+       vars.map(v => `<button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>`).join('') + 
+       `</div>`;
 };
 
 let html = '';
@@ -190,61 +195,61 @@ removeBtnHtml = `<button type="button" onclick="removeTypicalEventType(${i})" cl
 
 let templatesHtml = `
 <div class="w-full mt-2 pt-3 border-t border-gray-200 dark:border-darkborder hidden-view" id="event-type-tpl-${i}">
-   <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-1">
-       <div>
-           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">GCal Title Override</label>
-           <input type="text" id="evt-tpl-gcal-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.gcalTemplate || ''}" onchange="updateTypicalEventType(${i}, 'gcalTemplate', this.value)">
-           ${buildChips(`evt-tpl-gcal-${i}`)}
-       </div>
-       <div>
-           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Title Override</label>
-           <input type="text" id="evt-tpl-agenda-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.agendaTemplate || ''}" onchange="updateTypicalEventType(${i}, 'agendaTemplate', this.value)">
-           ${buildChips(`evt-tpl-agenda-${i}`)}
-       </div>
-       <div>
-           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Title Override</label>
-           <input type="text" id="evt-tpl-infoall-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.infoAllTemplate || ''}" onchange="updateTypicalEventType(${i}, 'infoAllTemplate', this.value)">
-           ${buildChips(`evt-tpl-infoall-${i}`)}
-       </div>
-   </div>
-   <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-       <div>
-           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Details Override</label>
-           <textarea id="evt-tpl-agedet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'agendaDetailsTemplate', this.value)">${t.agendaDetailsTemplate || ''}</textarea>
-           ${buildChips(`evt-tpl-agedet-${i}`)}
-       </div>
-       <div>
-           <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Details Override</label>
-           <textarea id="evt-tpl-infdet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'infoAllDetailsTemplate', this.value)">${t.infoAllDetailsTemplate || ''}</textarea>
-           ${buildChips(`evt-tpl-infdet-${i}`)}
-       </div>
-   </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-1">
+      <div>
+          <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">GCal Title Override</label>
+          <input type="text" id="evt-tpl-gcal-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.gcalTemplate || ''}" onchange="updateTypicalEventType(${i}, 'gcalTemplate', this.value)">
+          ${buildChips(`evt-tpl-gcal-${i}`)}
+      </div>
+      <div>
+          <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Title Override</label>
+          <input type="text" id="evt-tpl-agenda-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.agendaTemplate || ''}" onchange="updateTypicalEventType(${i}, 'agendaTemplate', this.value)">
+          ${buildChips(`evt-tpl-agenda-${i}`)}
+      </div>
+      <div>
+          <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Title Override</label>
+          <input type="text" id="evt-tpl-infoall-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.infoAllTemplate || ''}" onchange="updateTypicalEventType(${i}, 'infoAllTemplate', this.value)">
+          ${buildChips(`evt-tpl-infoall-${i}`)}
+      </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+      <div>
+          <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Details Override</label>
+          <textarea id="evt-tpl-agedet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'agendaDetailsTemplate', this.value)">${t.agendaDetailsTemplate || ''}</textarea>
+          ${buildChips(`evt-tpl-agedet-${i}`)}
+      </div>
+      <div>
+          <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Details Override</label>
+          <textarea id="evt-tpl-infdet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'infoAllDetailsTemplate', this.value)">${t.infoAllDetailsTemplate || ''}</textarea>
+          ${buildChips(`evt-tpl-infdet-${i}`)}
+      </div>
+  </div>
 </div>
 `;
 
 html += `
 <div data-idx="${i}" class="flex flex-col gap-2 bg-white dark:bg-darksurface p-3 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
-    <div class="flex items-center w-full sm:w-auto gap-2">
-    <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-    ${isFixed ? `<div class="w-2 sm:w-0 shrink-0"></div>` : ''}
-    <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow sm:w-32 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm font-semibold" ${isFixed ? 'disabled' : ''}>
-    </div>
+   <div class="flex items-center w-full sm:w-auto gap-2">
+   <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+   ${isFixed ? `<div class="w-2 sm:w-0 shrink-0"></div>` : ''}
+   <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow sm:w-32 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm font-semibold" ${isFixed ? 'disabled' : ''}>
+   </div>
 
-    <div class="flex items-center w-full sm:w-auto gap-2 flex-grow">
-    <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="flex-grow sm:flex-grow-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-sm cursor-pointer shrink-0">
-     <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
-     <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
-    </select>
+   <div class="flex items-center w-full sm:w-auto gap-2 flex-grow">
+   <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="flex-grow sm:flex-grow-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-sm cursor-pointer shrink-0">
+    <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
+    <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
+   </select>
 
-    ${locHtml}
+   ${locHtml}
 
-    ${removeBtnHtml}
-    
-    <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-500 hover:text-blue-700 p-1.5 rounded-lg transition shrink-0 ml-1 bg-blue-50 dark:bg-blue-900/30" title="Specific Templates">
-       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-    </button>
-    </div>
+   ${removeBtnHtml}
+   
+   <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-500 hover:text-blue-700 p-1.5 rounded-lg transition shrink-0 ml-1 bg-blue-50 dark:bg-blue-900/30" title="Specific Templates">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+   </button>
+   </div>
 </div>
 ${templatesHtml}
 </div>
@@ -261,7 +266,7 @@ ghostClass: 'opacity-50',
 onEnd: function () { 
 const newArr =[];
 Array.from(list.children).forEach(el => {
-  newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
+ newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
 });
 tempTypicalEventTypes = newArr;
 renderTypicalEventTypes();
@@ -295,13 +300,13 @@ function updateTypicalEventType(idx, field, val) {
 if (field === 'name' && FIXED_TYPICAL_EVENTS.includes(tempTypicalEventTypes[idx].name)) return;
 
 if (['gcalTemplate', 'agendaTemplate', 'agendaDetailsTemplate', 'infoAllTemplate', 'infoAllDetailsTemplate'].includes(field)) {
-    if (val === '') {
-        delete tempTypicalEventTypes[idx][field];
-    } else {
-        tempTypicalEventTypes[idx][field] = val;
-    }
+   if (val === '') {
+       delete tempTypicalEventTypes[idx][field];
+   } else {
+       tempTypicalEventTypes[idx][field] = val;
+   }
 } else {
-    tempTypicalEventTypes[idx][field] = val;
+   tempTypicalEventTypes[idx][field] = val;
 }
 
 if (field === 'isEvent') renderTypicalEventTypes(); 
@@ -417,7 +422,7 @@ html += `<div class="mb-4"><h4 class="font-bold text-lg text-gray-800 dark:text-
 if (grouped[parent]['_direct']) {
 html += `<div class="space-y-1">`;
 grouped[parent]['_direct'].forEach(k => {
-  html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
+ html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
 });
 html += `</div>`;
 }
@@ -426,7 +431,7 @@ for (const child in grouped[parent]) {
 if (child !== '_direct') {
 html += `<h5 class="font-semibold text-sm text-gray-600 dark:text-gray-400 mt-2 mb-1 pl-2 border-l-2 border-blue-400">${child}</h5><div class="space-y-1">`;
 grouped[parent][child].forEach(k => {
-  html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
+ html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
 });
 html += `</div>`;
 }
@@ -447,10 +452,10 @@ container.innerHTML = customKahGroups.map((g, i) => `
 </div>
 <div class="space-y-1.5 mb-3">
 ${g.members.map(phone => {
-  const contact = companyContacts.find(c => String(c.phone) === String(phone));
-  const name = contact ? contact.name : phone;
-  const dept = contact ? contact.dept : '';
-  return `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm text-sm"><span class="font-medium truncate">${name} <span class="text-xs text-gray-500 font-normal ml-1">(${dept})</span></span> <button onclick="removeKahGroupMember(${i}, '${phone}')" class="text-red-500 font-bold px-2">&times;</button></div>`;
+ const contact = companyContacts.find(c => String(c.phone) === String(phone));
+ const name = contact ? contact.name : phone;
+ const dept = contact ? contact.dept : '';
+ return `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm text-sm"><span class="font-medium truncate">${name} <span class="text-xs text-gray-500 font-normal ml-1">(${dept})</span></span> <button onclick="removeKahGroupMember(${i}, '${phone}')" class="text-red-500 font-bold px-2">&times;</button></div>`;
 }).join('')}
 ${g.members.length === 0 ? '<p class="text-xs text-gray-500 dark:text-darkmuted italic text-center py-1">No members added yet.</p>' : ''}
 </div>
@@ -586,6 +591,54 @@ function submitAdminRegister() { handleRegister('admin'); }
 // ==========================================
 // Save Functions for Admin Sections
 // ==========================================
+
+async function saveOAuthCredentials() {
+showLoader(true);
+const clientId = document.getElementById('set-oauth-client-id').value.trim();
+const clientSecret = document.getElementById('set-oauth-client-secret').value.trim();
+if (!clientId) { alert("Client ID is required"); showLoader(false); return; }
+
+try {
+await apiCall('saveOAuthCredentials', { adminPass: user.pass, clientId: clientId, clientSecret: clientSecret });
+alert("OAuth credentials saved successfully! You can now generate an authorization link.");
+} catch (err) { alert("Error: " + err.message); }
+showLoader(false);
+}
+
+async function generateAuthLink() {
+showLoader(true);
+try {
+const url = await apiCall('generateOAuthLink', { adminPass: user.pass });
+document.getElementById('oauth-auth-link').value = url;
+} catch (err) { alert("Error generating link: " + err.message); }
+showLoader(false);
+}
+
+function renderLinkedAccounts(accounts) {
+const container = document.getElementById('oauth-linked-accounts-list');
+if (!container) return;
+if (!accounts || accounts.length === 0) {
+container.innerHTML = '<p class="text-xs text-gray-500 italic py-1">No external accounts linked yet.</p>';
+return;
+}
+container.innerHTML = accounts.map(email => `
+<div class="flex justify-between items-center bg-gray-50 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-600 rounded-lg p-2 shadow-sm text-sm">
+<span class="font-bold text-gray-800 dark:text-gray-200 truncate pr-2">${email}</span>
+<button onclick="removeLinkedAccount('${email}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded transition text-xs font-bold leading-none shrink-0" title="Revoke Sync Access">Revoke</button>
+</div>
+`).join('');
+}
+
+async function removeLinkedAccount(email) {
+if (!confirm(`Are you sure you want to stop syncing contacts to ${email}?`)) return;
+showLoader(true);
+try {
+const updatedAccounts = await apiCall('removeLinkedAccount', { adminPass: user.pass, email: email });
+renderLinkedAccounts(updatedAccounts);
+alert(`Successfully revoked access for ${email}.`);
+} catch(err) { alert("Error revoking account: " + err.message); }
+showLoader(false);
+}
 
 async function saveAdminSettings() {
 showLoader(true);
