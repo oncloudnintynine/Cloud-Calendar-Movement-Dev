@@ -7,13 +7,13 @@ isInfoAll = forceState !== undefined ? forceState : !isInfoAll;['form-event-info
 const btn = document.getElementById(id);
 if(!btn) return;
 if(isInfoAll) {
-  btn.innerHTML = '📢 Info All (ON)';
-  btn.classList.add('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
-  btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
+ btn.innerHTML = '📢 Info All (ON)';
+ btn.classList.add('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
+ btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 } else {
-  btn.innerHTML = 'Info All';
-  btn.classList.remove('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
-  btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
+ btn.innerHTML = 'Info All';
+ btn.classList.remove('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
+ btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 }
 });
 }
@@ -49,12 +49,45 @@ const wrapper = document.getElementById(`${ctx}-meeting-room-wrapper`);
 const checkbox = document.getElementById(`form-${ctx}-meeting-room`);
 
 if (locEl && wrapper) {
-  if (locEl.value === 'Others') {
-      wrapper.classList.add('hidden-view');
-      if (checkbox) checkbox.checked = false;
-  } else {
-      wrapper.classList.remove('hidden-view');
-  }
+ if (locEl.value === 'Out of Camp') {
+     wrapper.classList.add('hidden-view');
+     if (checkbox) checkbox.checked = false;
+ } else {
+     wrapper.classList.remove('hidden-view');
+ }
+}
+}
+
+function applyDynamicFields(ctx, typeObj) {
+if (!typeObj || !typeObj.fields) return;
+const fields = typeObj.fields;
+
+const setField = (wrapperId, inputId, config) => {
+ const wrapper = document.getElementById(wrapperId);
+ const input = document.getElementById(inputId);
+ if (wrapper) {
+     if (config.show) wrapper.classList.remove('hidden-view');
+     else wrapper.classList.add('hidden-view');
+ }
+ if (input) {
+     input.required = config.req;
+     const label = document.getElementById(`label-${inputId}`);
+     if (label && wrapperId) {
+         label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
+     }
+ }
+};
+
+setField(`wrapper-${ctx}-location`, `form-${ctx}-location`, fields.location);
+setField(`wrapper-${ctx}-location-details`, `form-${ctx}-location-details`, fields.locationDetails);
+setField(`${ctx}-attendees-wrapper`, `form-${ctx}-attendee-search`, fields.attendees);
+
+const remarksInput = document.getElementById(`form-${ctx}-remarks`);
+const remarksLabel = document.getElementById(`label-${ctx}-remarks`);
+if (remarksInput && remarksLabel) {
+ remarksInput.required = fields.remarks.req;
+ remarksInput.placeholder = fields.remarks.req ? `Enter ${fields.remarks.label.toLowerCase()} (Required)` : "";
+ remarksLabel.innerHTML = `${fields.remarks.label} ${fields.remarks.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500">(Optional)</span>'}`;
 }
 }
 
@@ -69,15 +102,8 @@ const eventFields = document.getElementById('combined-event-fields');
 const leaveFields = document.getElementById('combined-leave-fields');
 const locationInput = document.getElementById('form-combined-location');
 const btnInfoAll = document.getElementById('form-combined-infoall-btn');
-const remarksInput = document.getElementById('form-combined-remarks');
-const remarksLabel = document.getElementById('label-combined-remarks');
-const attWrap = document.getElementById('combined-attendees-wrapper');
 
-if (isEvent || val === 'Official Trip') {
-attWrap.classList.remove('hidden-view');
-} else {
-attWrap.classList.add('hidden-view');
-}
+applyDynamicFields('combined', typeObj);
 
 if (isEvent) {
 eventFields.classList.remove('hidden-view');
@@ -85,28 +111,16 @@ leaveFields.classList.add('hidden-view');
 btnInfoAll.classList.remove('hidden-view');
 
 if (!locationInput.value || locationInput.value.trim() === '') {
-let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'Office';
-if (defLoc !== 'Office' && defLoc !== 'Others') defLoc = 'Others';
+let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
+if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
 locationInput.value = defLoc;
 toggleMeetingRoomCheckbox('combined');
 }
 
-if (val === 'Meeting') {
-remarksInput.required = true;
-remarksInput.placeholder = "Enter meeting agenda/description (Required)";
-remarksLabel.innerHTML = 'Meeting Description <span class="text-red-500">*</span>';
-} else {
-remarksInput.required = false;
-remarksInput.placeholder = "";
-remarksLabel.innerHTML = 'Remarks <span class="text-[10px] font-normal text-gray-500">(Optional)</span>';
-}
 } else {
 eventFields.classList.add('hidden-view');
 leaveFields.classList.remove('hidden-view');
 btnInfoAll.classList.add('hidden-view');
-remarksInput.required = false;
-remarksInput.placeholder = "";
-remarksLabel.innerHTML = 'Remarks <span class="text-[10px] font-normal text-gray-500">(Optional)</span>';
 
 const overseas = document.getElementById('combined-overseas-fields');
 const cInput = document.getElementById('form-combined-country');
@@ -245,7 +259,12 @@ selectBehalf(ctx, l.Name, l.Phone, l.Department);
 }
 
 const typeEl = document.getElementById(`form-${ctx}-type`) || document.getElementById(`form-${ctx}-name`);
-if (typeEl) typeEl.value = l.LeaveType;
+if (typeEl) {
+ typeEl.value = l.LeaveType;
+ if (ctx === 'event' || ctx === 'leave') {
+     applyDynamicFields(ctx, typeObj);
+ }
+}
 
 if (appMode === 'combined') {
 toggleCombinedFields();
@@ -261,8 +280,8 @@ eventAttendees = JSON.parse(l.Attendees);
 } catch(e) {
 const savedPhones = String(l.Attendees).split(',');
 savedPhones.forEach(ph => {
-  const contact = companyContacts.find(c => String(c.phone) === String(ph));
-  if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, formattedName: contact.formattedName, dept: contact.dept, type: 'contact' });
+ const contact = companyContacts.find(c => String(c.phone) === String(ph));
+ if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, formattedName: contact.formattedName, dept: contact.dept, type: 'contact' });
 });
 }
 }
@@ -276,10 +295,10 @@ document.getElementById(`form-${ctx}-allday`).checked = appData[ctx].isAllDay;
 
 const locEl = document.getElementById(`form-${ctx}-location`);
 if (locEl) {
-  let val = l.Location || 'Office';
-  if (val !== 'Office' && val !== 'Others') val = 'Others';
-  locEl.value = val;
-  toggleMeetingRoomCheckbox(ctx);
+ let val = l.Location || 'In Camp';
+ if (val !== 'In Camp' && val !== 'Out of Camp') val = 'Out of Camp';
+ locEl.value = val;
+ toggleMeetingRoomCheckbox(ctx);
 }
 
 const locDetEl = document.getElementById(`form-${ctx}-location-details`);
@@ -330,7 +349,7 @@ const el = document.getElementById(id);
 if(el) el.style.height='auto'; 
 });['event', 'combined'].forEach(ctx => {
 const locEl = document.getElementById(`form-${ctx}-location`);
-if (locEl) { locEl.value = 'Office'; toggleMeetingRoomCheckbox(ctx); }
+if (locEl) { locEl.value = 'In Camp'; toggleMeetingRoomCheckbox(ctx); }
 const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
 if (meetRoomCb) meetRoomCb.checked = false;
 });
@@ -393,10 +412,14 @@ tPM.classList.remove(act); tPM.classList.add(...inact);
 }
 
 function toggleOverseasFields(ctx) {
-const type = document.getElementById(`form-${ctx}-type`).value;
+const typeInput = document.getElementById(`form-${ctx}-type`);
+if (!typeInput) return;
+const type = typeInput.value;
+const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === type) : null;
+applyDynamicFields(ctx, typeObj);
+
 const el = document.getElementById(`${ctx}-overseas-fields`);
 const cInput = document.getElementById(`form-${ctx}-country`);
-const attWrap = document.getElementById(`${ctx}-attendees-wrapper`);
 const timeStart = document.getElementById(`${ctx}-time-start`);
 const timeEnd = document.getElementById(`${ctx}-time-end`);
 
@@ -407,11 +430,9 @@ el.classList.add('hidden-view'); cInput.required = false; cInput.value = ''; doc
 }
 
 if (type === 'Official Trip') {
-if(attWrap) attWrap.classList.remove('hidden-view');
 if(timeStart) timeStart.classList.add('hidden-view');
 if(timeEnd) timeEnd.classList.add('hidden-view');
 } else {
-if(attWrap) attWrap.classList.add('hidden-view');
 if(timeStart) timeStart.classList.remove('hidden-view');
 if(timeEnd) timeEnd.classList.remove('hidden-view');
 }
@@ -431,7 +452,7 @@ targetName = adminBehalfUser.name;
 targetPhone = adminBehalfUser.phone;
 targetDepts = new Set();
 if (adminBehalfUser.dept) {
-  adminBehalfUser.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+ adminBehalfUser.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 }
 } else if (user.role === 'admin' && !adminBehalfUser) {
 alert("Admin: Please select a user to submit on behalf of.");
@@ -448,8 +469,8 @@ const endCopy = new Date(appData[ctx].endD);
 
 // STRICT ZERO-OUT FOR NON-EVENTS
 if (!isEvent) {
- startCopy.setHours(0, 0, 0, 0);
- endCopy.setHours(0, 0, 0, 0);
+startCopy.setHours(0, 0, 0, 0);
+endCopy.setHours(0, 0, 0, 0);
 }
 
 const toLocalISO = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 19);
@@ -467,8 +488,8 @@ let country = '';
 let state = '';
 
 const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
-if (meetRoomCb && meetRoomCb.checked && document.getElementById(`form-${ctx}-location`).value !== 'Others') {
- targetDepts.add('Cloud Meeting Room');
+if (meetRoomCb && meetRoomCb.checked && document.getElementById(`form-${ctx}-location`).value !== 'Out of Camp') {
+targetDepts.add('Cloud Meeting Room');
 }
 
 if (!isEvent) {
@@ -488,17 +509,17 @@ else if (appData[ctx].endAMPM === 'AM') calculatedHalfDay = 'End AM';
 country = document.getElementById(`form-${ctx}-country`) ? document.getElementById(`form-${ctx}-country`).value : '';
 state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`form-${ctx}-state`).value : '';
 
-if (typeValue === 'Official Trip') {
+if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
 eventAttendees.forEach(a => { 
-   if (a.dept !== 'Custom' && a.dept) {
-       a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
-   } 
+  if (a.dept !== 'Custom' && a.dept) {
+      a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+  } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
 }
 } else {
 calculatedHalfDay = document.getElementById(`form-${ctx}-repeat`).value; 
-loc = document.getElementById(`form-${ctx}-location`).value;
+loc = document.getElementById(`form-${ctx}-location`) ? document.getElementById(`form-${ctx}-location`).value : '';
 
 const locDetEl = document.getElementById(`form-${ctx}-location-details`);
 if (locDetEl) locDetails = locDetEl.value.trim();
@@ -510,12 +531,14 @@ if (calculatedHalfDay !== 'NONE') {
 eventUntilDate = toLocalISO(appData[ctx].untilD);
 }
 
+if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
 eventAttendees.forEach(a => { 
 if (a.dept !== 'Custom' && a.dept) {
-    a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+   a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
+}
 }
 
 const isEdit = !!currentEditId;
@@ -565,7 +588,7 @@ UntilDate: eventUntilDate
 if (isEdit) {
 const existingIdx = allLeaves.findIndex(l => l.ID === targetId);
 if (existingIdx !== -1) {
-    allLeaves[existingIdx] = localMock;
+   allLeaves[existingIdx] = localMock;
 }
 } else {
 allLeaves.push(localMock);
