@@ -7,11 +7,11 @@ isInfoAll = forceState !== undefined ? forceState : !isInfoAll;['form-event-info
 const btn = document.getElementById(id);
 if(!btn) return;
 if(isInfoAll) {
-btn.innerHTML = '📢 Announce (ON)';
+btn.innerHTML = '📢 Info All (ON)';
 btn.classList.add('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
 btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 } else {
-btn.innerHTML = 'Announce';
+btn.innerHTML = 'Info All';
 btn.classList.remove('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
 btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 }
@@ -73,7 +73,7 @@ if (input) {
     input.required = config.req;
     const label = document.getElementById(`label-${inputId}`);
     if (label && wrapperId) {
-        label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
+        label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
     }
 }
 };
@@ -87,7 +87,7 @@ const remarksLabel = document.getElementById(`label-${ctx}-remarks`);
 if (remarksInput && remarksLabel) {
 remarksInput.required = fields.remarks.req;
 remarksInput.placeholder = fields.remarks.req ? `Enter ${fields.remarks.label.toLowerCase()} (Required)` : "";
-remarksLabel.innerHTML = `${fields.remarks.label} ${fields.remarks.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500">(Optional)</span>'}`;
+remarksLabel.innerHTML = `${fields.remarks.label} ${fields.remarks.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500">(Optional)</span>'}`;
 }
 }
 
@@ -222,13 +222,13 @@ inputEl.classList.add('ring-2', 'ring-emerald-500');
 const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(c => `
-<div class="p-4 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/30" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
-<span class="font-semibold text-emerald-800 dark:text-emerald-300 text-base">${c.formattedName}</span>
+<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/30" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
+<span class="font-semibold text-emerald-800 dark:text-emerald-300">${c.formattedName}</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
 } else {
-resC.innerHTML = `<div class="p-4 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
+resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
 }
 }
 
@@ -236,7 +236,7 @@ function selectBehalf(ctx, name, phone, dept) {
 adminBehalfUser = { name, phone, dept };
 document.getElementById(`selected-behalf-${ctx}`).innerHTML = `
 <span>Submitting for: ${window.formatContactName(name, dept)}</span>
-<button type="button" onclick="clearBehalf('${ctx}')" class="text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition">&times; clear</button>
+<button type="button" onclick="clearBehalf('${ctx}')" class="text-red-500 hover:bg-red-50 p-1 rounded transition">&times; clear</button>
 `;
 const inputEl = document.getElementById(`form-${ctx}-behalf-search`);
 inputEl.value = '';
@@ -267,13 +267,13 @@ inputEl.classList.add('ring-2', 'ring-blue-500');
 const results = fuseAttendees.search(q).slice(0, 6).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(item => `
-<div class="p-4 border-b border-gray-200 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}', '${item.formattedName.replace(/'/g, "\\'")}')">
-<span class="font-semibold text-blue-800 dark:text-blue-300 text-base">${item.formattedName}</span>
+<div class="p-3 border-b border-gray-200 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}', '${item.formattedName.replace(/'/g, "\\'")}')">
+<span class="font-semibold text-blue-800 dark:text-blue-300">${item.formattedName}</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
 } else {
-resC.innerHTML = `<div class="p-4 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
+resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
 }
 }
 
@@ -297,9 +297,9 @@ function renderAttendees(ctx) {
 const c = document.getElementById(`${ctx}-attendees-chip-container`);
 if(c) {
 c.innerHTML = eventAttendees.map(a => `
-<div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-xl px-3 py-1.5 text-sm font-semibold shadow-sm">
+<div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-lg px-2 py-1 text-sm font-semibold shadow-sm">
 ${a.formattedName || window.formatContactName(a.name, a.dept)}
-<button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none leading-none text-lg">&times;</button>
+<button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
 </div>
 `).join('');
 }
@@ -635,14 +635,6 @@ if (existingIdx !== -1) {
 } else {
 allLeaves.push(localMock);
 }
-
-dashDate = new Date(startCopy);
-dashDate.setHours(0,0,0,0);
-dashMonth = new Date(dashDate.getFullYear(), dashDate.getMonth(), 1);
-
-myDate = new Date(startCopy);
-myDate.setHours(0,0,0,0);
-myMonth = new Date(myDate.getFullYear(), myDate.getMonth(), 1);
 
 window.agendaDirty = true;
 window.myAgendaDirty = true;
