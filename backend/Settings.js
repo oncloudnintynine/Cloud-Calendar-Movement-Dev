@@ -71,6 +71,7 @@ landingPage: props.getProperty('landingPage') || 'dashboard',
 dashboardDeptOrder: JSON.parse(props.getProperty('dashboardDeptOrder') || "[]"),
 menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
 adminSectionsOrder: JSON.parse(props.getProperty('adminSectionsOrder') || "null"),
+adminContactsSectionsOrder: JSON.parse(props.getProperty('adminContactsSectionsOrder') || "null"),
 userKeyword: props.getProperty('userKeyword') || 'peace',
 appMode: props.getProperty('appMode') || 'combined',
 companyStructure: JSON.parse(props.getProperty('companyStructure') || "{}"),
@@ -163,6 +164,7 @@ if (data.appMode !== undefined) props.setProperty('appMode', data.appMode);
 if (data.companyStructure !== undefined) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
 if (data.menuOrder !== undefined) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
 if (data.adminSectionsOrder !== undefined) props.setProperty('adminSectionsOrder', JSON.stringify(data.adminSectionsOrder));
+if (data.adminContactsSectionsOrder !== undefined) props.setProperty('adminContactsSectionsOrder', JSON.stringify(data.adminContactsSectionsOrder));
 
 if (triggerKahRecalc && typeof recalculateAllKahStatuses === 'function') {
 recalculateAllKahStatuses(props);

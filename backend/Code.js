@@ -20,7 +20,8 @@ if (!props.getProperty('kahList')) props.setProperty('kahList', JSON.stringify([
 if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringify(['dashboard', 'parade-state', 'my-leaves', 'submit-combined']));
 if (!props.getProperty('landingPage')) props.setProperty('landingPage', 'dashboard');
 if (!props.getProperty('dashboardDeptOrder')) props.setProperty('dashboardDeptOrder', JSON.stringify([]));
-if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['landing-page', 'app-mode', 'dashboard-filter-order', 'external-sync', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'contact-format', 'menu-order']));
+if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['landing-page', 'app-mode', 'dashboard-filter-order', 'admin-pass', 'user-keyword', 'menu-order']));
+if (!props.getProperty('adminContactsSectionsOrder')) props.setProperty('adminContactsSectionsOrder', JSON.stringify(['external-sync', 'contact-format', 'register-user', 'manage-users']));
 
 if (!props.getProperty('typicalEventTypes')) {
 var oldLeaveTypes = JSON.parse(props.getProperty('leaveTypes') || "[]");
