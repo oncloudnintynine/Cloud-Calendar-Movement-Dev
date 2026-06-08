@@ -86,11 +86,10 @@ customKahGroups = settings.customKahGroups ||[];
 renderKAHSelected();
 renderCustomKahGroups();
 
+// Initialize General Settings Container
 tempAdminSectionsOrder = (settings.adminSectionsOrder && settings.adminSectionsOrder.length 
 ? settings.adminSectionsOrder 
-:['landing-page', 'app-mode', 'dashboard-filter-order', 'external-sync', 'register-user', 'manage-users', 'admin-pass', 'user-keyword', 'contact-format', 'menu-order']).filter(s => s !== 'code-backup');
-
-if (!tempAdminSectionsOrder.includes('external-sync')) tempAdminSectionsOrder.splice(3, 0, 'external-sync');
+:['landing-page', 'app-mode', 'dashboard-filter-order', 'admin-pass', 'user-keyword', 'menu-order']).filter(s => s !== 'code-backup');
 
 const container = document.getElementById('admin-sections-container');
 if (container) {
@@ -111,6 +110,32 @@ if (typeof Sortable !== 'undefined') {
  });
 }
 }
+
+// Initialize Contacts & Users Management Container
+tempAdminContactsSectionsOrder = (settings.adminContactsSectionsOrder && settings.adminContactsSectionsOrder.length 
+? settings.adminContactsSectionsOrder 
+:['external-sync', 'contact-format', 'register-user', 'manage-users']).filter(s => s !== 'code-backup');
+
+const contactsContainer = document.getElementById('admin-contacts-sections-container');
+if (contactsContainer) {
+tempAdminContactsSectionsOrder.forEach(id => {
+const el = contactsContainer.querySelector(`[data-section="${id}"]`);
+if (el) contactsContainer.appendChild(el);
+});
+
+if (window.adminContactsSectionsSortable) window.adminContactsSectionsSortable.destroy();
+if (typeof Sortable !== 'undefined') {
+ window.adminContactsSectionsSortable = new Sortable(contactsContainer, {
+   animation: 150,
+   handle: '.section-handle',
+   ghostClass: 'opacity-50',
+   onEnd: function () {
+     tempAdminContactsSectionsOrder = Array.from(contactsContainer.children).map(el => el.dataset.section);
+   }
+ });
+}
+}
+
 } catch(e) {
 console.error("Error populating admin form:", e);
 }
@@ -642,18 +667,19 @@ showLoader(false);
 
 async function saveAdminSettings() {
 showLoader(true);
-const newPass = document.getElementById('set-admin-pass').value || null;
+const newPass = document.getElementById('set-admin-pass') ? document.getElementById('set-admin-pass').value : null;
 let selectedMode = 'combined';
 document.getElementsByName('app-mode').forEach(r => { if(r.checked) selectedMode = r.value; });
 
 const payload = {
 adminPass: user.pass, newAdminPass: newPass, appMode: selectedMode,
-landingPage: document.getElementById('set-landing-page').value,
+landingPage: document.getElementById('set-landing-page') ? document.getElementById('set-landing-page').value : 'dashboard',
 dashboardDeptOrder: tempDashboardDeptOrder,
-contactNameFormat: document.getElementById('set-contact-format').value.trim() || '{Name} (Cloud Group : {Unit})',
-userKeyword: document.getElementById('set-user-keyword').value.trim() || 'peace',
+contactNameFormat: document.getElementById('set-contact-format') ? document.getElementById('set-contact-format').value.trim() : '{Name} (Cloud Group : {Unit})',
+userKeyword: document.getElementById('set-user-keyword') ? document.getElementById('set-user-keyword').value.trim() : 'peace',
 menuOrder: tempMenuOrder,
-adminSectionsOrder: tempAdminSectionsOrder
+adminSectionsOrder: tempAdminSectionsOrder,
+adminContactsSectionsOrder: tempAdminContactsSectionsOrder
 };
 
 try {
