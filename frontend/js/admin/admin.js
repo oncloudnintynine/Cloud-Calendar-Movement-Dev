@@ -208,18 +208,20 @@ tempTypicalEventTypes.forEach((t, i) => {
 const safeName = t?.name || '';
 const isFixed = FIXED_TYPICAL_EVENTS.includes(safeName);
 
-let locHtml = '<div class="flex-grow w-24"></div>';
+let locHtml = '';
 if (safeName === 'Generic' || safeName === 'Others') {
 locHtml = `
-<select onchange="updateTypicalEventType(${i}, 'defaultLoc', this.value)" class="w-24 md:w-32 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-xs md:text-sm cursor-pointer shrink-0">
+<select onchange="updateTypicalEventType(${i}, 'defaultLoc', this.value)" class="w-28 md:w-32 border border-gray-300 dark:border-gray-500 rounded-lg py-1.5 px-2 bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-xs md:text-sm font-bold cursor-pointer shrink-0 shadow-sm">
   <option value="In Camp" ${t.defaultLoc === 'In Camp' ? 'selected' : ''}>In Camp</option>
   <option value="Out of Camp" ${t.defaultLoc === 'Out of Camp' ? 'selected' : ''}>Out of Camp</option>
 </select>`;
 }
 
-let removeBtnHtml = '<div class="w-6 shrink-0 ml-auto hidden sm:block"></div>';
+let removeBtnHtml = '';
 if (!isFixed) {
-removeBtnHtml = `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg transition shrink-0 ml-auto" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
+removeBtnHtml = `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-white hover:bg-red-500 p-1.5 rounded-lg transition shrink-0 ml-1 border border-transparent hover:border-red-600" title="Remove"><svg class="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
+} else {
+removeBtnHtml = `<div class="w-8 md:w-10 shrink-0 ml-1"></div>`;
 }
 
 if (!t.fields) t.fields = { location: {show:true,req:false}, locationDetails: {show:true,req:false}, attendees: {show:true,req:false}, remarks: {show:true,req:false,label:'Remarks'} };
@@ -251,7 +253,7 @@ let fieldConfigHtml = `
     <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Remarks</div>
     <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'remarks', 'show', this.checked)" ${t.fields.remarks.show?'checked':''}> <span>Visible</span></label>
     <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'remarks', 'req', this.checked)" ${t.fields.remarks.req?'checked':''} ${!t.fields.remarks.show?'disabled':''}> <span>Required</span></label>
-    <input type="text" value="${t.fields.remarks.label || 'Remarks'}" onchange="updateEventTypeField(${i}, 'remarks', 'label', this.value)" class="w-full mt-1 border border-gray-300 dark:border-gray-500 rounded p-1 text-[10px] bg-white dark:bg-black outline-none" placeholder="Label">
+    <input type="text" value="${t.fields.remarks.label || 'Remarks'}" onchange="updateEventTypeField(${i}, 'remarks', 'label', this.value)" class="w-full mt-1 border border-gray-300 dark:border-gray-500 rounded p-1 text-[10px] bg-white dark:bg-black outline-none font-bold" placeholder="Label">
   </div>
   
 </div>
@@ -293,42 +295,46 @@ let templatesHtml = `
 `;
 
 html += `
-<div data-idx="${i}" class="flex flex-col gap-2 bg-white dark:bg-darksurface p-3 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
-<div class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full">
+<div data-idx="${i}" class="flex flex-col gap-3 bg-white dark:bg-darksurface p-3 md:p-4 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
   
-  <div class="flex items-center w-full md:w-auto gap-2 min-w-0">
-    <svg class="w-5 h-5 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-    ${isFixed ? `<div class="w-1 md:w-0 shrink-0"></div>` : ''}
-    <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow md:w-28 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm font-semibold truncate" ${isFixed ? 'disabled' : ''}>
-  </div>
-
-  <div class="flex items-center w-full md:w-auto gap-2 flex-grow overflow-hidden">
-    <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="w-24 md:w-auto flex-grow md:flex-grow-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-xs md:text-sm cursor-pointer shrink-0">
+  <!-- ROW 1 -->
+  <div class="flex items-center gap-2 w-full">
+    <svg class="w-6 h-6 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+    ${isFixed ? `<div class="w-6 shrink-0"></div>` : ''}
+    
+    <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow min-w-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm md:text-base font-bold truncate" ${isFixed ? 'disabled' : ''}>
+    
+    <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="w-32 md:w-40 shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-sm md:text-base font-bold cursor-pointer">
      <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
      <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
     </select>
-    
-    <label class="flex items-center space-x-1 shrink-0 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1.5 rounded-lg border border-yellow-200 dark:border-yellow-800 cursor-pointer" title="If checked, this event type counts towards the Unit KAH out-of-office limit.">
-      <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-3.5 h-3.5 text-yellow-600" ${t.isKahRelevant ? 'checked' : ''}>
-      <span class="text-[10px] md:text-xs font-bold text-yellow-700 dark:text-yellow-500 whitespace-nowrap">KAH Tracker</span>
-    </label>
 
-    ${locHtml}
     ${removeBtnHtml}
   </div>
 
-  <div class="flex items-center space-x-1 w-full md:w-auto justify-end mt-2 md:mt-0 shrink-0">
-    <button type="button" onclick="document.getElementById('event-type-fields-${i}').classList.toggle('hidden-view')" class="text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 px-2 py-1.5 rounded-lg transition text-xs font-bold whitespace-nowrap bg-gray-50 dark:bg-darkinput border border-gray-200 dark:border-gray-600" title="Configure Form Fields">
-       Fields ⚙️
-    </button>
-    <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 px-2 py-1.5 rounded-lg transition text-xs font-bold whitespace-nowrap bg-gray-50 dark:bg-darkinput border border-gray-200 dark:border-gray-600" title="Specific Templates">
-       Templates 📝
-    </button>
-  </div>
+  <!-- ROW 2 -->
+  <div class="flex items-center justify-between gap-2 w-full pl-0 sm:pl-10 flex-wrap sm:flex-nowrap">
+    
+    <div class="flex items-center gap-2 shrink-0">
+        <label class="flex items-center space-x-2 shrink-0 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1.5 rounded-lg border border-yellow-300 dark:border-yellow-700 cursor-pointer transition hover:bg-yellow-100 dark:hover:bg-yellow-900/40" title="If checked, this event type counts towards the Unit KAH out-of-office limit.">
+          <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-4 h-4 md:w-5 md:h-5 text-yellow-600 cursor-pointer rounded border-gray-300" ${t.isKahRelevant ? 'checked' : ''}>
+          <span class="text-xs md:text-sm font-bold text-yellow-800 dark:text-yellow-400 whitespace-nowrap">KAH Tracker</span>
+        </label>
+        ${locHtml}
+    </div>
 
-</div>
-${fieldConfigHtml}
-${templatesHtml}
+    <div class="flex items-center gap-2 shrink-0 ml-auto mt-2 sm:mt-0 w-full sm:w-auto justify-end">
+      <button type="button" onclick="document.getElementById('event-type-fields-${i}').classList.toggle('hidden-view')" class="text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 px-3 py-1.5 rounded-lg transition text-xs md:text-sm font-bold whitespace-nowrap bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700 shadow-sm" title="Configure Form Fields">
+         Fields ⚙️
+      </button>
+      <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3 py-1.5 rounded-lg transition text-xs md:text-sm font-bold whitespace-nowrap bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 shadow-sm" title="Specific Templates">
+         Templates 📝
+      </button>
+    </div>
+  </div>
+  
+  ${fieldConfigHtml}
+  ${templatesHtml}
 </div>
 `;
 });
