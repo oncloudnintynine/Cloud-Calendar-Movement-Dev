@@ -99,7 +99,7 @@ document.documentElement.classList.toggle('dark');
 const isDark = document.documentElement.classList.contains('dark');
 localStorage.setItem('theme', isDark ? 'dark' : 'light');
 const metaTheme = document.getElementById('theme-color-meta');
-if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0a0a0a' : '#f9fafb');
+if (metaTheme) metaTheme.setAttribute('content', isDark ? '#121212' : '#ffffff');
 }
 
 function togglePassword(id, btnElement) {

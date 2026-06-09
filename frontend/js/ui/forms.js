@@ -8,12 +8,12 @@ const btn = document.getElementById(id);
 if(!btn) return;
 if(isInfoAll) {
 btn.innerHTML = '📢 Announce (ON)';
-btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
-btn.classList.remove('bg-gray-100', 'dark:bg-[#1a1a1a]', 'text-gray-600', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700');
+btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
+btn.classList.remove('bg-gray-50', 'dark:bg-[#1a1a1a]', 'text-gray-600', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700');
 } else {
 btn.innerHTML = 'Announce';
-btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-sm');
-btn.classList.add('bg-gray-100', 'dark:bg-[#1a1a1a]', 'text-gray-600', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700');
+btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
+btn.classList.add('bg-gray-50', 'dark:bg-[#1a1a1a]', 'text-gray-600', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700');
 }
 });
 }
@@ -219,21 +219,21 @@ inputEl.classList.add('ring-2', 'ring-emerald-500');
 const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(c => `
-<div class="px-3 py-2 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-sm" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
-<span class="font-bold text-emerald-800 dark:text-emerald-300">${c.formattedName}</span>
+<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-base" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
+<span class="font-semibold text-emerald-800 dark:text-emerald-300">${c.formattedName}</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
 } else {
-resC.innerHTML = `<div class="p-2 text-gray-500 text-sm">No match found</div>`; resC.classList.remove('hidden-view');
+resC.innerHTML = `<div class="p-3 text-gray-500 text-base">No match found</div>`; resC.classList.remove('hidden-view');
 }
 }
 
 function selectBehalf(ctx, name, phone, dept) {
 adminBehalfUser = { name, phone, dept };
 document.getElementById(`selected-behalf-${ctx}`).innerHTML = `
-<span class="truncate pr-2">Submitting for: ${window.formatContactName(name, dept)}</span>
-<button type="button" onclick="clearBehalf('${ctx}')" class="shrink-0 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition text-xs">&times; clear</button>
+<span>Submitting for: ${window.formatContactName(name, dept)}</span>
+<button type="button" onclick="clearBehalf('${ctx}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-lg transition">&times; clear</button>
 `;
 const inputEl = document.getElementById(`form-${ctx}-behalf-search`);
 inputEl.value = '';
@@ -264,13 +264,13 @@ inputEl.classList.add('ring-2', 'ring-blue-500');
 const results = fuseAttendees.search(q).slice(0, 6).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(item => `
-<div class="px-3 py-2 border-b border-gray-100 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}', '${item.formattedName.replace(/'/g, "\\'")}')">
-<span class="font-bold text-blue-800 dark:text-blue-300">${item.formattedName}</span>
+<div class="p-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 text-base" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}', '${item.formattedName.replace(/'/g, "\\'")}')">
+<span class="font-semibold text-blue-800 dark:text-blue-300">${item.formattedName}</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
 } else {
-resC.innerHTML = `<div class="p-2 text-gray-500 text-sm">No match found</div>`; resC.classList.remove('hidden-view');
+resC.innerHTML = `<div class="p-3 text-gray-500 text-base">No match found</div>`; resC.classList.remove('hidden-view');
 }
 }
 
@@ -294,9 +294,9 @@ function renderAttendees(ctx) {
 const c = document.getElementById(`${ctx}-attendees-chip-container`);
 if(c) {
 c.innerHTML = eventAttendees.map(a => `
-<div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-md px-2 py-1 text-xs font-bold shadow-sm">
+<div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-lg px-3 py-1.5 text-sm font-semibold shadow-sm">
 ${a.formattedName || window.formatContactName(a.name, a.dept)}
-<button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-1.5 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none leading-none text-base">&times;</button>
+<button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
 </div>
 `).join('');
 }
