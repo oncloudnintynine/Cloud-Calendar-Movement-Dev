@@ -12,7 +12,6 @@ setTimeout(() => { panel.classList.remove('-translate-x-full'); }, 10);
 }
 
 function closeMenu() {
-if (window.innerWidth >= 1024) return; // Prevent closing the permanent sidebar on desktop
 const menu = document.getElementById('slide-menu');
 const panel = document.getElementById('slide-menu-panel');
 panel.classList.add('-translate-x-full');
@@ -30,12 +29,12 @@ orderArr.forEach(id => {
 const btn = document.getElementById(`menu-${id}`);
 if (btn) {
 if (appMode === 'combined' && ['submit-leave', 'submit-event', 'my-leaves'].includes(id)) {
-btn.classList.add('hidden');
+ btn.classList.add('hidden');
 } else if (appMode === 'separated' && id === 'submit-combined') {
-btn.classList.add('hidden');
+ btn.classList.add('hidden');
 } else {
-btn.classList.remove('hidden');
-menuContainer.appendChild(btn);
+ btn.classList.remove('hidden');
+ menuContainer.appendChild(btn);
 }
 }
 });
@@ -60,11 +59,11 @@ const view = document.getElementById(`view-${tabId}`);
 if (view) { view.classList.remove('hidden-view'); view.classList.add('flex'); }
 
 document.querySelectorAll('#slide-menu-panel button[id^="menu-"]').forEach(btn => {
-btn.classList.remove('bg-blue-50', 'text-blue-700', 'dark:bg-blue-900/20', 'dark:text-blue-400', 'font-bold');
+btn.classList.remove('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
 });
 
 const activeMenu = document.getElementById(`menu-${tabId}`);
-if (activeMenu && activeMenu.tagName === 'BUTTON') activeMenu.classList.add('bg-blue-50', 'text-blue-700', 'dark:bg-blue-900/20', 'dark:text-blue-400', 'font-bold');
+if (activeMenu && activeMenu.tagName === 'BUTTON') activeMenu.classList.add('bg-blue-50', 'text-blue-600', 'dark:bg-darkhover', 'dark:text-blue-400');
 
 const titleEl = document.getElementById('active-tab-title');
 if (titleEl) {
@@ -78,9 +77,9 @@ const controlsWrapper = document.getElementById('dash-controls-wrapper');
 if (controlsWrapper) {
 if (tabId === 'dashboard' || tabId === 'my-leaves') {
 if (tabId === 'dashboard') {
-  if (deptNav) deptNav.classList.remove('hidden');
+   if (deptNav) deptNav.classList.remove('hidden');
 } else {
-  if (deptNav) deptNav.classList.add('hidden');
+   if (deptNav) deptNav.classList.add('hidden');
 }
 controlsWrapper.classList.remove('hidden');
 controlsWrapper.classList.add('flex');
@@ -108,8 +107,8 @@ const isPassword = el.type === 'password';
 el.type = isPassword ? 'text' : 'password';
 if (btnElement) {
 btnElement.innerHTML = isPassword 
-? `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg>`
-: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>`;
+? `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg>`
+: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>`;
 }
 }
 
@@ -183,22 +182,22 @@ checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ?
 
 window.downloadVCF = function() {
 if (!companyContacts || companyContacts.length === 0) {
- alert("Directory is empty or still loading.");
- return;
+  alert("Directory is empty or still loading.");
+  return;
 }
 
 let vcfData = "";
 companyContacts.forEach(c => {
- const name = c.name || "";
- const phone = c.phone || "";
- const org = c.dept ? c.dept.split(',')[0].trim() : "Cloudy";
- 
- vcfData += "BEGIN:VCARD\r\n";
- vcfData += "VERSION:3.0\r\n";
- vcfData += `FN:${name}\r\n`;
- if (org) vcfData += `ORG:${org}\r\n`;
- if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
- vcfData += "END:VCARD\r\n";
+  const name = c.name || "";
+  const phone = c.phone || "";
+  const org = c.dept ? c.dept.split(',')[0].trim() : "Cloudy";
+  
+  vcfData += "BEGIN:VCARD\r\n";
+  vcfData += "VERSION:3.0\r\n";
+  vcfData += `FN:${name}\r\n`;
+  if (org) vcfData += `ORG:${org}\r\n`;
+  if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
+  vcfData += "END:VCARD\r\n";
 });
 
 const blob = new Blob([vcfData], { type: 'text/vcard;charset=utf-8;' });

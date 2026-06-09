@@ -7,13 +7,13 @@ isInfoAll = forceState !== undefined ? forceState : !isInfoAll;['form-event-info
 const btn = document.getElementById(id);
 if(!btn) return;
 if(isInfoAll) {
-btn.innerHTML = '📢 Announce (ON)';
-btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
-btn.classList.remove('bg-gray-50', 'dark:bg-[#1a1a1a]', 'text-gray-600', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700');
+btn.innerHTML = '📢 Info All (ON)';
+btn.classList.add('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
+btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 } else {
-btn.innerHTML = 'Announce';
-btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
-btn.classList.add('bg-gray-50', 'dark:bg-[#1a1a1a]', 'text-gray-600', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700');
+btn.innerHTML = 'Info All';
+btn.classList.remove('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
+btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 }
 });
 }
@@ -50,10 +50,10 @@ const checkbox = document.getElementById(`form-${ctx}-meeting-room`);
 
 if (locEl && wrapper) {
 if (locEl.value === 'Out of Camp') {
- wrapper.classList.add('hidden-view');
- if (checkbox) checkbox.checked = false;
+  wrapper.classList.add('hidden-view');
+  if (checkbox) checkbox.checked = false;
 } else {
- wrapper.classList.remove('hidden-view');
+  wrapper.classList.remove('hidden-view');
 }
 }
 }
@@ -63,18 +63,18 @@ const allBlocks = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overse
 let order = [...allBlocks];
 
 if (typeObj && typeObj.fieldOrder && typeObj.fieldOrder.length > 0) {
- const specified = typeObj.fieldOrder;
- const missing = allBlocks.filter(b => !specified.includes(b));
- order = [...specified, ...missing];
+  const specified = typeObj.fieldOrder;
+  const missing = allBlocks.filter(b => !specified.includes(b));
+  order = [...specified, ...missing];
 }
 
 order.forEach((block, idx) => {
- const el1 = document.getElementById(`block-${ctx}-${block}`);
- if (el1) el1.style.order = idx + 2;
- const el2 = document.getElementById(`block-${ctx}-${block}-event`);
- if (el2) el2.style.order = idx + 2;
- const el3 = document.getElementById(`block-${ctx}-${block}-leave`);
- if (el3) el3.style.order = idx + 2;
+  const el1 = document.getElementById(`block-${ctx}-${block}`);
+  if (el1) el1.style.order = idx + 2;
+  const el2 = document.getElementById(`block-${ctx}-${block}-event`);
+  if (el2) el2.style.order = idx + 2;
+  const el3 = document.getElementById(`block-${ctx}-${block}-leave`);
+  if (el3) el3.style.order = idx + 2;
 });
 }
 
@@ -86,15 +86,15 @@ const setField = (wrapperId, inputId, config) => {
 const wrapper = document.getElementById(wrapperId);
 const input = document.getElementById(inputId);
 if (wrapper) {
- if (config.show) wrapper.classList.remove('hidden-view');
- else wrapper.classList.add('hidden-view');
+  if (config.show) wrapper.classList.remove('hidden-view');
+  else wrapper.classList.add('hidden-view');
 }
 if (input) {
- input.required = config.req;
- const label = document.getElementById(`label-${inputId}`);
- if (label && wrapperId) {
-     label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
- }
+  input.required = config.req;
+  const label = document.getElementById(`label-${inputId}`);
+  if (label && wrapperId) {
+      label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
+  }
 }
 };
 
@@ -107,7 +107,7 @@ const remarksLabel = document.getElementById(`label-${ctx}-remarks`);
 if (remarksInput && remarksLabel) {
 remarksInput.required = fields.remarks.req;
 remarksInput.placeholder = fields.remarks.req ? `Enter ${fields.remarks.label.toLowerCase()} (Required)` : "";
-remarksLabel.innerHTML = `${fields.remarks.label} ${fields.remarks.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500">(Optional)</span>'}`;
+remarksLabel.innerHTML = `${fields.remarks.label} ${fields.remarks.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500">(Optional)</span>'}`;
 }
 }
 
@@ -135,10 +135,10 @@ hide('block-combined-overseas');
 if(btnInfoAll) btnInfoAll.classList.remove('hidden-view');
 
 if (!locationInput.value || locationInput.value.trim() === '') {
- let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
- if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
- locationInput.value = defLoc;
- toggleMeetingRoomCheckbox('combined');
+  let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
+  if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
+  locationInput.value = defLoc;
+  toggleMeetingRoomCheckbox('combined');
 }
 } else {
 hide('block-combined-location');
@@ -149,13 +149,13 @@ if(btnInfoAll) btnInfoAll.classList.add('hidden-view');
 
 const cInput = document.getElementById('form-combined-country');
 if (val === 'Overseas Leave' || val === 'Official Trip') { 
- show('block-combined-overseas'); 
- if(cInput) cInput.required = true; 
+  show('block-combined-overseas'); 
+  if(cInput) cInput.required = true; 
 } else { 
- hide('block-combined-overseas'); 
- if(cInput) { cInput.required = false; cInput.value = ''; }
- const stateEl = document.getElementById('form-combined-state');
- if(stateEl) stateEl.value = '';
+  hide('block-combined-overseas'); 
+  if(cInput) { cInput.required = false; cInput.value = ''; }
+  const stateEl = document.getElementById('form-combined-state');
+  if(stateEl) stateEl.value = '';
 }
 }
 
@@ -219,13 +219,13 @@ inputEl.classList.add('ring-2', 'ring-emerald-500');
 const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(c => `
-<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-base" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
+<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/30" onclick="selectBehalf('${ctx}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}')">
 <span class="font-semibold text-emerald-800 dark:text-emerald-300">${c.formattedName}</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
 } else {
-resC.innerHTML = `<div class="p-3 text-gray-500 text-base">No match found</div>`; resC.classList.remove('hidden-view');
+resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
 }
 }
 
@@ -233,7 +233,7 @@ function selectBehalf(ctx, name, phone, dept) {
 adminBehalfUser = { name, phone, dept };
 document.getElementById(`selected-behalf-${ctx}`).innerHTML = `
 <span>Submitting for: ${window.formatContactName(name, dept)}</span>
-<button type="button" onclick="clearBehalf('${ctx}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-lg transition">&times; clear</button>
+<button type="button" onclick="clearBehalf('${ctx}')" class="text-red-500 hover:bg-red-50 p-1 rounded transition">&times; clear</button>
 `;
 const inputEl = document.getElementById(`form-${ctx}-behalf-search`);
 inputEl.value = '';
@@ -264,13 +264,13 @@ inputEl.classList.add('ring-2', 'ring-blue-500');
 const results = fuseAttendees.search(q).slice(0, 6).map(r => r.item);
 if (results.length > 0) {
 resC.innerHTML = results.map(item => `
-<div class="p-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 text-base" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}', '${item.formattedName.replace(/'/g, "\\'")}')">
+<div class="p-3 border-b border-gray-200 dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30" onclick="selectAttendee('${ctx}', '${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.dept}', '${item.type}', '${(item.expandedNames || '').replace(/'/g, "\\'")}', '${item.formattedName.replace(/'/g, "\\'")}')">
 <span class="font-semibold text-blue-800 dark:text-blue-300">${item.formattedName}</span>
 </div>
 `).join('');
 resC.classList.remove('hidden-view');
 } else {
-resC.innerHTML = `<div class="p-3 text-gray-500 text-base">No match found</div>`; resC.classList.remove('hidden-view');
+resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
 }
 }
 
@@ -294,7 +294,7 @@ function renderAttendees(ctx) {
 const c = document.getElementById(`${ctx}-attendees-chip-container`);
 if(c) {
 c.innerHTML = eventAttendees.map(a => `
-<div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-lg px-3 py-1.5 text-sm font-semibold shadow-sm">
+<div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-lg px-2 py-1 text-sm font-semibold shadow-sm">
 ${a.formattedName || window.formatContactName(a.name, a.dept)}
 <button type="button" onclick="removeAttendee('${ctx}', '${a.id}')" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-red-500 focus:outline-none">&times;</button>
 </div>
@@ -548,7 +548,7 @@ state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`
 if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
 eventAttendees.forEach(a => { 
 if (a.dept !== 'Custom' && a.dept) {
-  a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+   a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
