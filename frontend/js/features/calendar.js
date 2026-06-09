@@ -79,10 +79,10 @@ const btn = document.getElementById(`${ctx}-toggle-widgets-btn`);
 
 if (window.isTopWidgetsHidden[ctx]) {
 if(container) container.classList.add('hidden-view');
-if(btn) btn.innerHTML = `<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg> Show Cal`;
+if(btn) btn.innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg> Show Cal`;
 } else {
 if(container) container.classList.remove('hidden-view');
-if(btn) btn.innerHTML = `<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal`;
+if(btn) btn.innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal`;
 }
 };
 
@@ -492,7 +492,7 @@ slotIdx++;
 }
 });
 
-let rowHeight = Math.max(90, (slots.length * 24) + 36);
+let rowHeight = Math.max(80, (slots.length * 24) + 32);
 html += `<div class="flex-1 relative bg-white dark:bg-darksurface flex min-h-[${rowHeight}px]">`;
 
 for (let i = 0; i < 7; i++) {
@@ -501,11 +501,11 @@ let isToday = curD.toDateString() === new Date().toDateString();
 let isCurMonth = curD.getMonth() === m;
 let bg = isCurMonth ? '' : 'bg-gray-50/50 dark:bg-[#151515]';
 html += `<div class="flex-1 border-r border-gray-200 last:border-r-0 dark:border-darkborder ${bg} p-1" onclick="selectDate('${ctx}', ${curD.getFullYear()}, ${curD.getMonth()}, ${curD.getDate()})">
-<div class="text-xs font-bold ${isToday ? 'bg-blue-600 text-white rounded-full w-5 h-5 mx-auto flex items-center justify-center shadow-md' : 'text-gray-500 dark:text-darkmuted text-center'}">${curD.getDate()}</div>
+<div class="text-[11px] font-bold ${isToday ? 'bg-blue-600 text-white rounded-full w-5 h-5 mx-auto flex items-center justify-center shadow-md' : 'text-gray-500 dark:text-darkmuted text-center'}">${curD.getDate()}</div>
 </div>`;
 }
 
-html += `<div class="absolute top-8 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">`;
+html += `<div class="absolute top-7 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">`;
 segments.forEach(seg => {
 const isPublicHoliday = seg.l.LeaveType === 'Public Holiday';
 const color = isPublicHoliday ? 'bg-indigo-500 dark:bg-indigo-600 text-white' : (seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white'));
@@ -526,7 +526,7 @@ const appliedTitle = applyAcronymsFront(titleRawStr);
 
 const left = (seg.sDay / 7) * 100;
 const width = (seg.len / 7) * 100;
-const topOffset = (seg.slot * 24) + 26; 
+const topOffset = (seg.slot * 22) + 24; 
 
 let rounded = 'rounded-md';
 if (seg.len > 1) {
@@ -535,7 +535,7 @@ else if (seg.sDay === 0) rounded = 'rounded-r-md';
 else if (seg.eDay === 6) rounded = 'rounded-l-md';
 }
 
-html += `<div class="absolute h-[22px] px-1.5 text-[10px] md:text-xs font-bold leading-snug truncate shadow-sm pointer-events-auto cursor-pointer border border-black/5 ${color} ${rounded}" style="left: calc(${left}% + 2px); width: calc(${width}% - 4px); top: ${topOffset}px;" onclick="selectDate('${ctx}', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${appliedTitle}">${appliedTitle}</div>`;
+html += `<div class="absolute h-[20px] px-1.5 text-[10px] md:text-xs font-bold leading-snug truncate shadow-sm pointer-events-auto cursor-pointer border border-black/5 ${color} ${rounded}" style="left: calc(${left}% + 2px); width: calc(${width}% - 4px); top: ${topOffset}px;" onclick="selectDate('${ctx}', ${w.getFullYear()}, ${w.getMonth()}, ${w.getDate() + seg.sDay})" title="${appliedTitle}">${appliedTitle}</div>`;
 });
 html += `</div></div>`; 
 }
@@ -610,7 +610,7 @@ return validLines.join('');
 }
 
 function buildAgendaHtml(items, isMyCalendar, isInfoAllContext) {
-if (!items || items.length === 0) return isInfoAllContext ? '' : `<p class="text-gray-500 dark:text-darkmuted text-center italic text-sm mt-2">No records for this date.</p>`;
+if (!items || items.length === 0) return isInfoAllContext ? '' : `<p class="text-gray-500 dark:text-darkmuted text-center italic text-xs md:text-sm mt-2">No records for this date.</p>`;
 
 const ctx = isMyCalendar ? 'my' : 'dash';
 const isCollapsed = window.isAgendaCollapsed[ctx];
@@ -781,9 +781,9 @@ const finalDetailsHtml = detailsRaw ? parseAndCleanTemplate(detailsRaw, tplVars)
 const hasBody = finalDetailsHtml.trim() !== '' || (isInfoAllContext ? compactActionBtns !== '' : actionBtns !== '');
 
 if (isInfoAllContext) {
-return `<div class="p-2.5 md:p-3 rounded-xl border border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-900/10 shadow-sm flex flex-col transition hover:shadow-md">
+return `<div class="p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-900/10 shadow-sm flex flex-col transition hover:shadow-md">
 <div class="flex justify-between items-start ${hasBody ? 'cursor-pointer select-none' : ''}" ${hasBody ? 'onclick="toggleAgendaCard(this)"' : ''}>
-<h3 class="font-bold text-[13px] md:text-sm text-blue-900 dark:text-blue-300 flex-grow pr-2 leading-tight">${finalTitle}</h3>
+<h3 class="font-bold text-[11px] md:text-sm text-blue-900 dark:text-blue-300 flex-grow pr-2 leading-tight">${finalTitle}</h3>
 ${hasBody ? `<svg class="w-4 h-4 text-blue-500 transition-transform duration-300 chevron-icon shrink-0 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>` : ''}
 </div>
 ${hasBody ? `
@@ -799,12 +799,12 @@ ${compactActionBtns ? `<div class="flex shrink-0 space-x-1">${compactActionBtns}
 return `<div class="p-3 rounded-xl bg-white dark:bg-darkinput shadow-sm flex flex-col transition hover:shadow-md border border-transparent dark:border-darkborder/50">
 <div class="flex justify-between items-start ${hasBody ? 'cursor-pointer select-none' : ''}" ${hasBody ? 'onclick="toggleAgendaCard(this)"' : ''}>
 <div class="flex-grow pr-2">
-<h3 class="font-bold text-sm md:text-base text-gray-900 dark:text-gray-100 leading-tight">${finalTitle}</h3>
-${!isMyCalendar && !isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-xs text-gray-700 dark:text-darktext mt-0.5">(${l.HalfDay})</p>` : ''}
+<h3 class="font-bold text-xs md:text-sm text-gray-900 dark:text-gray-100 leading-tight">${finalTitle}</h3>
+${!isMyCalendar && !isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-[11px] text-gray-700 dark:text-darktext mt-0.5">(${l.HalfDay})</p>` : ''}
 </div>
 <div class="flex items-center shrink-0">
-<span class="text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-md text-center inline-block leading-tight shadow-sm ${getBadgeClass(l.Status, l.LeaveType)}">${formatStatusBadge(l.Status, l.LeaveType)}</span>
-${hasBody ? `<svg class="w-5 h-5 ml-1.5 text-gray-400 dark:text-darkmuted transition-transform duration-300 chevron-icon shrink-0 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>` : ''}
+<span class="text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-md text-center inline-block leading-tight shadow-sm ${getBadgeClass(l.Status, l.LeaveType)}">${formatStatusBadge(l.Status, l.LeaveType)}</span>
+${hasBody ? `<svg class="w-4 h-4 ml-1.5 text-gray-400 dark:text-darkmuted transition-transform duration-300 chevron-icon shrink-0 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>` : ''}
 </div>
 </div>
 ${hasBody ? `
@@ -865,18 +865,18 @@ const mm = String(d.getMonth() + 1).padStart(2, '0');
 const dd = String(d.getDate()).padStart(2, '0');
 
 html += `
-<div class="agenda-day-group mb-5" data-date="${yyyy}-${mm}-${dd}">
- <div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1.5 border-b border-gray-200 dark:border-darkborder mb-3">
-     <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
+<div class="agenda-day-group mb-3 md:mb-4" data-date="${yyyy}-${mm}-${dd}">
+ <div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
+     <h3 class="font-bold text-xs md:text-sm text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
  </div>
- <div class="space-y-3 px-1">
+ <div class="space-y-2 px-1">
      ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
  </div>
 </div>`;
 }
 }
 
-container.innerHTML = html || `<p class="text-gray-500 dark:text-darkmuted text-center text-sm mt-6">No records found.</p>`;
+container.innerHTML = html || `<p class="text-gray-500 dark:text-darkmuted text-center text-xs mt-4">No records found.</p>`;
 
 container.removeEventListener('scroll', ctx === 'dash' ? () => handleAgendaScroll('dash') : () => handleAgendaScroll('my'));
 container.addEventListener('scroll', ctx === 'dash' ? () => handleAgendaScroll('dash') : () => handleAgendaScroll('my'));
@@ -895,14 +895,14 @@ let group = container.querySelector(`.agenda-day-group[data-date="${dateStr}"]`)
 
 if (!group) {
 group = document.createElement('div');
-group.className = 'agenda-day-group mb-5';
+group.className = 'agenda-day-group mb-3 md:mb-4';
 group.dataset.date = dateStr;
 group.innerHTML = `
-<div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1.5 border-b border-gray-200 dark:border-darkborder mb-3">
- <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
+<div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
+ <h3 class="font-bold text-xs md:text-sm text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
 </div>
-<div class="space-y-3 px-1">
- <p class="text-gray-500 dark:text-darkmuted text-center italic text-sm mt-3">No records for this date.</p>
+<div class="space-y-2 px-1">
+ <p class="text-gray-500 dark:text-darkmuted text-center italic text-xs mt-2">No records for this date.</p>
 </div>`;
 
 const allGroups = Array.from(container.querySelectorAll('.agenda-day-group'));
