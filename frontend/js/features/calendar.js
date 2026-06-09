@@ -662,10 +662,10 @@ actionBtns = `
 </button>`;
 
 compactActionBtns = `
-<button onclick="triggerEdit('${l.ID}')" class="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition shrink-0" title="Edit Record">
+<button onclick="triggerEdit('${l.ID}')" class="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition shrink-0" title="Edit Record">
 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.89 1.147l-2.952.81a.375.375 0 01-.465-.465l.81-2.952a4.5 4.5 0 011.147-1.89L16.862 4.487z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125L16.862 4.487" /></svg>
 </button>
-<button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition shrink-0" title="Cancel Record">
+<button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition shrink-0" title="Cancel Record">
 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
 </button>`;
 }
@@ -788,9 +788,9 @@ ${hasBody ? `<svg class="w-4 h-4 text-blue-500 transition-transform duration-300
 </div>
 ${hasBody ? `
 <div class="agenda-card-body ${isCollapsed ? 'hidden-view' : ''}">
-<div class="flex justify-between items-end gap-2 mt-1.5">
-${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
-${compactActionBtns ? `<div class="flex shrink-0 space-x-1">${compactActionBtns}</div>` : ''}
+<div class="flex flex-col mt-1.5">
+${finalDetailsHtml ? `<div class="whitespace-pre-wrap w-full">${finalDetailsHtml}</div>` : ''}
+${compactActionBtns ? `<div class="flex justify-end space-x-1 mt-1.5 pt-1.5 border-t border-blue-100 dark:border-blue-800/50">${compactActionBtns}</div>` : ''}
 </div>
 </div>` : ''}
 </div>`;
@@ -867,7 +867,7 @@ const dd = String(d.getDate()).padStart(2, '0');
 html += `
 <div class="agenda-day-group mb-3 md:mb-4" data-date="${yyyy}-${mm}-${dd}">
  <div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
-     <h3 class="font-bold text-xs md:text-sm text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
+     <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
  </div>
  <div class="space-y-2 px-1">
      ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
@@ -899,7 +899,7 @@ group.className = 'agenda-day-group mb-3 md:mb-4';
 group.dataset.date = dateStr;
 group.innerHTML = `
 <div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
- <h3 class="font-bold text-xs md:text-sm text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
+ <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
 </div>
 <div class="space-y-2 px-1">
  <p class="text-gray-500 dark:text-darkmuted text-center italic text-xs mt-2">No records for this date.</p>
