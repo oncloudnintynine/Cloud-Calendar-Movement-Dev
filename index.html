@@ -83,39 +83,39 @@ darkmuted: '#9ca3af'
 <!-- Main Workspace Layout -->
 <div class="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-gray-50 dark:bg-darkbase">
 <nav class="bg-white/90 dark:bg-darksurface/90 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-darkborder px-2 md:px-4 py-1.5 flex justify-between items-center z-40 shrink-0 min-h-[52px] w-full gap-2">
-    <!-- LEFT -->
-    <div class="flex flex-col justify-center flex-1 min-w-0">
-        <div class="font-extrabold text-[20px] md:text-[22px] text-blue-600 dark:text-blue-400 leading-none lg:hidden mb-1 truncate">Cloudy</div>
-        <div class="flex items-center min-w-0 w-full">
-            <button id="menu-btn" onclick="toggleMenu()" class="p-1 -ml-1 mr-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-darkhover text-gray-700 dark:text-darktext hidden lg:hidden transition shrink-0">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-            </button>
-            <div id="active-tab-title" class="text-sm md:text-xl font-bold text-gray-700 dark:text-gray-200 hidden leading-tight whitespace-normal break-words pr-1"></div>
-        </div>
-    </div>
+   <!-- LEFT -->
+   <div class="flex flex-col justify-center flex-1 min-w-0">
+       <div class="font-extrabold text-[20px] md:text-[22px] text-blue-600 dark:text-blue-400 leading-none lg:hidden mb-1 truncate">Cloudy</div>
+       <div class="flex items-center min-w-0 w-full">
+           <button id="menu-btn" onclick="toggleMenu()" class="p-1 -ml-1 mr-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-darkhover text-gray-700 dark:text-darktext hidden lg:hidden transition shrink-0">
+               <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+           </button>
+           <div id="active-tab-title" class="text-sm md:text-xl font-bold text-gray-700 dark:text-gray-200 hidden leading-tight whitespace-normal break-words pr-1"></div>
+       </div>
+   </div>
 
-    <!-- MIDDLE -->
-    <div id="dash-controls-wrapper" class="hidden flex-col md:flex-row items-center justify-center gap-1.5 md:gap-3 shrink-0 flex-1 min-w-0">
-        <select id="dash-dept-nav" class="hidden w-auto text-sm border-2 border-blue-400 dark:border-blue-600 rounded-lg py-1 pl-3 pr-8 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer max-w-[130px] md:max-w-[160px] truncate" onchange="window.agendaDirty=true; renderDashboard();">
-            <option value="">All Depts</option>
-        </select>
-        <div id="dash-view-toggle" class="flex items-center bg-gray-200 dark:bg-darkinput border border-gray-300 dark:border-darkborder rounded-lg p-0.5 shrink-0 w-auto">
-            <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-3 py-1 rounded-md font-bold text-xs md:text-sm transition bg-white dark:bg-darksurface shadow-sm text-blue-600 dark:text-blue-400 text-center">Agenda</button>
-            <button id="btn-dash-month" onclick="toggleDashView('month')" class="px-3 py-1 rounded-md font-semibold text-xs md:text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 text-center">Month</button>
-        </div>
-    </div>
+   <!-- MIDDLE -->
+   <div id="dash-controls-wrapper" class="hidden flex-col md:flex-row items-center justify-center gap-1.5 md:gap-3 shrink-0 flex-1 min-w-0">
+       <select id="dash-dept-nav" class="hidden w-auto text-sm border-2 border-blue-400 dark:border-blue-600 rounded-lg py-1 pl-3 pr-8 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer max-w-[130px] md:max-w-[160px] truncate" onchange="window.agendaDirty=true; renderDashboard();">
+           <option value="">All Depts</option>
+       </select>
+       <div id="dash-view-toggle" class="flex items-center bg-gray-200 dark:bg-darkinput border border-gray-300 dark:border-darkborder rounded-lg p-0.5 shrink-0 w-auto">
+           <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-3 py-1 rounded-md font-bold text-xs md:text-sm transition bg-white dark:bg-darksurface shadow-sm text-blue-600 dark:text-blue-400 text-center">Agenda</button>
+           <button id="btn-dash-month" onclick="toggleDashView('month')" class="px-3 py-1 rounded-md font-semibold text-xs md:text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 text-center">Month</button>
+       </div>
+   </div>
 
-    <!-- RIGHT -->
-    <div class="flex items-center justify-end space-x-1.5 md:space-x-3 flex-1 min-w-0">
-        <span id="nav-user-name" class="font-bold hidden md:block mr-2 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[100px] lg:max-w-[200px]"></span>
-        <button onclick="toggleTheme()" class="text-2xl p-1 transition shrink-0" title="Toggle Theme">🌗</button>
-        <button onclick="animateAndUpdate(this)" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition shrink-0" title="Sync / Refresh">
-            <svg class="w-[22px] h-[22px] transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-        </button>
-        <button id="logout-btn" onclick="logout()" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-red-600 dark:hover:text-red-400 rounded-full transition hidden shrink-0" title="Logout">
-            <svg class="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" /></svg>
-        </button>
-    </div>
+   <!-- RIGHT -->
+   <div class="flex items-center justify-end space-x-1.5 md:space-x-3 flex-1 min-w-0">
+       <span id="nav-user-name" class="font-bold hidden md:block mr-2 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[100px] lg:max-w-[200px]"></span>
+       <button onclick="toggleTheme()" class="text-2xl p-1 transition shrink-0" title="Toggle Theme">🌗</button>
+       <button onclick="animateAndUpdate(this)" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition shrink-0" title="Sync / Refresh">
+           <svg class="w-[22px] h-[22px] transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+       </button>
+       <button id="logout-btn" onclick="logout()" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-red-600 dark:hover:text-red-400 rounded-full transition hidden shrink-0" title="Logout">
+           <svg class="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" /></svg>
+       </button>
+   </div>
 </nav>
 
 <main class="flex-grow flex flex-col w-full h-full relative overflow-hidden bg-gray-50 dark:bg-darkbase">
@@ -285,7 +285,7 @@ darkmuted: '#9ca3af'
 
 <div id="admin-behalf-combined" style="order: 0" class="hidden-view relative pb-5 border-b border-gray-200 dark:border-darkborder">
 <label class="block font-extrabold mb-2 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
-<input type="text" id="form-combined-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-3 px-4 bg-emerald-50 dark:bg-emerald-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-emerald-600/50 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 dark:focus:ring-emerald-800/40 transition text-base font-semibold" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('combined')">
+<input type="text" id="form-combined-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-3 px-4 bg-emerald-50 dark:bg-emerald-900/10 focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-emerald-600/50 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 dark:focus:ring-emerald-800/40 transition text-base font-semibold" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('combined')">
 <div id="behalf-results-combined" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-400 dark:border-emerald-700 rounded-xl shadow-2xl hidden-view max-h-56 overflow-y-auto mt-2"></div>
 <div id="selected-behalf-combined" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-base flex items-center justify-between empty:hidden"></div>
 </div>
@@ -417,25 +417,25 @@ darkmuted: '#9ca3af'
 
 <div id="admin-behalf-leave" style="order: 0" class="hidden-view relative pb-5 border-b border-gray-200 dark:border-darkborder">
 <label class="block font-extrabold mb-2 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
-<input type="text" id="form-leave-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-3 px-4 bg-emerald-50 dark:bg-emerald-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-emerald-600/50 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 dark:focus:ring-emerald-800/40 transition text-base font-semibold" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('leave')">
+<input type="text" id="form-leave-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-3 px-4 bg-emerald-50 dark:bg-emerald-900/10 focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-emerald-600/50 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 dark:focus:ring-emerald-800/40 transition text-base font-semibold" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('leave')">
 <div id="behalf-results-leave" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-400 dark:border-emerald-700 rounded-xl shadow-2xl hidden-view max-h-56 overflow-y-auto mt-2"></div>
 <div id="selected-behalf-leave" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-base flex items-center justify-between empty:hidden"></div>
 </div>
 
 <div style="order: 1" class="w-full min-w-0">
 <label class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Leave/MC/OIL Type</label>
-<select id="form-leave-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer text-base font-extrabold" onchange="toggleOverseasFields('leave')" required></select>
+<select id="form-leave-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer text-base font-extrabold" onchange="toggleOverseasFields('leave')" required></select>
 </div>
 
 <div id="block-leave-remarks" class="w-full">
 <label id="label-leave-remarks" class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Remarks <span class="text-sm font-normal text-gray-500">(Optional)</span></label>
-<textarea id="form-leave-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium leading-relaxed"></textarea>
+<textarea id="form-leave-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium leading-relaxed"></textarea>
 </div>
 
 <div id="block-leave-attendees" class="relative hidden-view w-full">
 <label id="label-form-leave-attendee-search" class="block font-bold mb-2 text-base text-blue-700 dark:text-blue-400">Attendees <span class="text-sm font-normal text-blue-500 dark:text-blue-500">(Optional)</span></label>
 <div id="leave-attendees-chip-container" class="flex flex-wrap gap-2 mb-2 empty:hidden"></div>
-<input type="text" id="form-leave-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-xl py-3 px-4 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('leave')">
+<input type="text" id="form-leave-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-xl py-3 px-4 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('leave')">
 <div id="leave-attendees-results" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-blue-400 dark:border-blue-600 rounded-xl shadow-2xl hidden-view max-h-56 overflow-y-auto mt-2"></div>
 </div>
 
@@ -492,7 +492,7 @@ darkmuted: '#9ca3af'
 
 <div id="admin-behalf-event" style="order: 0" class="hidden-view relative pb-5 border-b border-gray-200 dark:border-darkborder">
 <label class="block font-extrabold mb-2 text-base text-emerald-600 dark:text-emerald-400">Submit on behalf of (Admin Only)</label>
-<input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-3 px-4 bg-emerald-50 dark:bg-emerald-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-emerald-600/50 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 dark:focus:ring-emerald-800/40 transition text-base font-semibold" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
+<input type="text" id="form-event-behalf-search" class="w-full border-2 border-emerald-400 dark:border-emerald-600 rounded-xl py-3 px-4 bg-emerald-50 dark:bg-emerald-900/10 focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-emerald-600/50 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-200 dark:focus:ring-emerald-800/40 transition text-base font-semibold" placeholder="Search for user to apply for..." autocomplete="off" onkeyup="searchBehalf('event')">
 <div id="behalf-results-event" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-emerald-400 dark:border-emerald-700 rounded-xl shadow-2xl hidden-view max-h-56 overflow-y-auto mt-2"></div>
 <div id="selected-behalf-event" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-base flex items-center justify-between empty:hidden"></div>
 </div>
@@ -500,27 +500,27 @@ darkmuted: '#9ca3af'
 <div style="order: 1" class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-stretch sm:items-end w-full">
 <div class="flex-grow min-w-0">
 <label class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Event Type</label>
-<select id="form-event-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer font-extrabold text-blue-700 dark:text-blue-400 text-base" onchange="toggleEventFields()" required></select>
+<select id="form-event-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer font-extrabold text-blue-700 dark:text-blue-400 text-base" onchange="toggleEventFields()" required></select>
 </div>
 <button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-5 py-3 font-bold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-darkhover transition h-[52px]">Announce</button>
 </div>
 
 <div id="block-event-remarks" class="w-full">
 <label id="label-event-remarks" class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Remarks <span class="text-sm font-normal text-gray-500">(Optional)</span></label>
-<textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium leading-relaxed"></textarea>
+<textarea id="form-event-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium leading-relaxed"></textarea>
 </div>
 
 <div id="block-event-attendees" class="relative hidden-view w-full">
 <label id="label-form-event-attendee-search" class="block font-bold mb-2 text-base text-blue-700 dark:text-blue-400">Attendees <span class="text-sm font-normal text-blue-500 dark:text-blue-500">(Optional)</span></label>
 <div id="event-attendees-chip-container" class="flex flex-wrap gap-2 mb-2 empty:hidden"></div>
-<input type="text" id="form-event-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-xl py-3 px-4 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('event')">
+<input type="text" id="form-event-attendee-search" class="w-full border-2 border-blue-300 dark:border-blue-700 rounded-xl py-3 px-4 bg-blue-50/50 dark:bg-blue-900/10 focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm placeholder-blue-400 dark:placeholder-blue-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-semibold" placeholder="Search person or department..." autocomplete="off" onkeyup="searchAttendees('event')">
 <div id="event-attendees-results" class="absolute z-30 w-full bg-white dark:bg-darksurface border-2 border-blue-400 dark:border-blue-600 rounded-xl shadow-2xl hidden-view max-h-56 overflow-y-auto mt-2"></div>
 </div>
 
 <div id="block-event-location" class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full hidden-view">
 <div id="wrapper-event-location" class="min-w-0">
 <label id="label-form-event-location" class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Location</label>
-<select id="form-event-location" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium cursor-pointer" onchange="toggleMeetingRoomCheckbox('event')">
+<select id="form-event-location" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium cursor-pointer" onchange="toggleMeetingRoomCheckbox('event')">
 <option value="In Camp">In Camp</option>
 <option value="Out of Camp">Out of Camp</option>
 </select>
@@ -531,7 +531,7 @@ darkmuted: '#9ca3af'
 </div>
 <div id="wrapper-event-location-details" class="min-w-0">
 <label id="label-form-event-location-details" class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Location Details <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(Optional)</span></label>
-<input type="text" id="form-event-location-details" placeholder="e.g. Room 302" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium">
+<input type="text" id="form-event-location-details" placeholder="e.g. Room 302" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium">
 </div>
 </div>
 
@@ -562,7 +562,7 @@ darkmuted: '#9ca3af'
 
 <div id="block-event-repeat" class="w-full">
 <label class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Repeat Event</label>
-<select id="form-event-repeat" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer text-base font-medium" onchange="toggleRepeatUntil('event')">
+<select id="form-event-repeat" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer text-base font-medium" onchange="toggleRepeatUntil('event')">
 <option value="NONE">Does not repeat</option>
 <option value="DAILY">Daily</option>
 <option value="WEEKLY">Weekly</option>
@@ -1007,8 +1007,8 @@ darkmuted: '#9ca3af'
 <div class="flex items-center justify-between w-full md:w-auto">
 <h3 class="font-extrabold text-lg md:text-xl text-gray-900 dark:text-white pr-4 tracking-tight">Manage Units & Personnel</h3>
 <div class="flex items-center bg-gray-200 dark:bg-darkborder rounded-lg p-1 shrink-0 ml-auto md:ml-4">
- <button id="btn-struct-personnel" onclick="toggleStructureView('personnel')" class="px-4 py-1.5 rounded-md font-bold text-sm bg-white dark:bg-darksurface shadow-sm text-blue-600 dark:text-blue-400">Personnel</button>
- <button id="btn-struct-tree" onclick="toggleStructureView('tree')" class="px-4 py-1.5 rounded-md font-bold text-sm text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 transition">Tree</button>
+<button id="btn-struct-personnel" onclick="toggleStructureView('personnel')" class="px-4 py-1.5 rounded-md font-bold text-sm bg-white dark:bg-darksurface shadow-sm text-blue-600 dark:text-blue-400">Personnel</button>
+<button id="btn-struct-tree" onclick="toggleStructureView('tree')" class="px-4 py-1.5 rounded-md font-bold text-sm text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 transition">Tree</button>
 </div>
 </div>
 <div class="flex space-x-3 w-full md:w-auto mt-2 md:mt-0">
@@ -1065,17 +1065,17 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
-<script src="frontend/js/core/config.js?v=105"></script>
-<script src="frontend/js/core/state.js?v=105"></script>
-<script src="frontend/js/core/api.js?v=105"></script>
-<script src="frontend/js/core/auth.js?v=105"></script>
-<script src="frontend/js/ui/ui.js?v=105"></script>
-<script src="frontend/js/features/calendar.js?v=105"></script>
-<script src="frontend/js/features/parade.js?v=105"></script>
-<script src="frontend/js/ui/forms.js?v=105"></script>
-<script src="frontend/js/ui/picker.js?v=105"></script>
-<script src="frontend/js/admin/admin.js?v=105"></script>
-<script src="frontend/js/admin/structure.js?v=105"></script> 
-<script src="frontend/js/core/app.js?v=105"></script>
+<script src="frontend/js/core/config.js?v=106"></script>
+<script src="frontend/js/core/state.js?v=106"></script>
+<script src="frontend/js/core/api.js?v=106"></script>
+<script src="frontend/js/core/auth.js?v=106"></script>
+<script src="frontend/js/ui/ui.js?v=106"></script>
+<script src="frontend/js/features/calendar.js?v=106"></script>
+<script src="frontend/js/features/parade.js?v=106"></script>
+<script src="frontend/js/ui/forms.js?v=106"></script>
+<script src="frontend/js/ui/picker.js?v=106"></script>
+<script src="frontend/js/admin/admin.js?v=106"></script>
+<script src="frontend/js/admin/structure.js?v=106"></script> 
+<script src="frontend/js/core/app.js?v=106"></script>
 </body>
 </html>
