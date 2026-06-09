@@ -276,12 +276,12 @@ cells.forEach(cell => {
 const cellDay = parseInt(cell.dataset.day);
 const isToday = cell.dataset.istoday === 'true';
 
-let baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 mx-auto rounded-full cursor-pointer transition-colors text-[10px] md:text-xs font-medium ";
+let baseClass = "cal-day-cell flex flex-col items-center justify-center w-5 h-5 md:w-7 md:h-7 mx-auto rounded-full cursor-pointer transition-colors text-[10px] md:text-xs font-medium leading-none ";
 if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
 else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
 if (cellDay === d) {
-baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 mx-auto rounded-full cursor-pointer transition-colors text-[10px] md:text-xs font-bold bg-blue-600 text-white shadow-md ";
+baseClass = "cal-day-cell flex flex-col items-center justify-center w-5 h-5 md:w-7 md:h-7 mx-auto rounded-full cursor-pointer transition-colors text-[10px] md:text-xs font-bold bg-blue-600 text-white shadow-md leading-none ";
 }
 
 cell.className = baseClass;
@@ -289,9 +289,9 @@ cell.className = baseClass;
 const hasEvent = cell.dataset.hasevent === 'true';
 if (hasEvent) {
 const dotColor = cellDay === d ? 'bg-white' : 'bg-blue-500';
-cell.innerHTML = `${cellDay}<div class="absolute bottom-0 md:bottom-0.5 w-1 h-1 md:w-1.5 md:h-1.5 ${dotColor} rounded-full"></div>`;
+cell.innerHTML = `<span>${cellDay}</span><div class="w-1 h-1 md:w-1.5 md:h-1.5 mt-px md:mt-0.5 ${dotColor} rounded-full"></div>`;
 } else {
-cell.innerHTML = `${cellDay}`;
+cell.innerHTML = `<span>${cellDay}</span><div class="w-1 h-1 md:w-1.5 md:h-1.5 mt-px md:mt-0.5 bg-transparent rounded-full"></div>`;
 }
 });
 }
@@ -322,17 +322,17 @@ if (isAtBottom) {
 for (let i = groups.length - 1; i >= 0; i--) {
 const rect = groups[i].getBoundingClientRect();
 if (rect.top < containerBottom) {
-    topDateStr = groups[i].dataset.date; 
-    break;
+   topDateStr = groups[i].dataset.date; 
+   break;
 }
 }
 } else {
 for (const group of groups) {
 const rect = group.getBoundingClientRect();
 if (rect.top >= containerTop && rect.top <= containerTop + 100) {
-    topDateStr = group.dataset.date; break;
+   topDateStr = group.dataset.date; break;
 } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
-    topDateStr = group.dataset.date; break;
+   topDateStr = group.dataset.date; break;
 }
 }
 }
@@ -347,15 +347,15 @@ if (isDash) dashDate = new Date(y, m - 1, d);
 else myDate = new Date(y, m - 1, d);
 
 if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
-    if (isDash) {
-        dashMonth = new Date(y, m - 1, 1);
-    } else {
-        myMonth = new Date(y, m - 1, 1);
-    }
-    renderMiniCalendar(ctx);
-    updateInfoAllDisplay(ctx);
+   if (isDash) {
+       dashMonth = new Date(y, m - 1, 1);
+   } else {
+       myMonth = new Date(y, m - 1, 1);
+   }
+   renderMiniCalendar(ctx);
+   updateInfoAllDisplay(ctx);
 } else {
-    updateMiniCalendarSelection(ctx, d);
+   updateMiniCalendarSelection(ctx, d);
 }
 }
 }
@@ -415,15 +415,15 @@ const isSelected = current.toDateString() === selDate.toDateString();
 const isToday = current.toDateString() === new Date().toDateString();
 const hasEvent = data.some(l => isEventOnDate(l, current));
 
-let baseClass = "cal-day-cell relative flex items-center justify-center w-5 h-5 md:w-6 md:h-6 mx-auto rounded-full cursor-pointer transition-colors text-[10px] md:text-xs font-medium ";
+let baseClass = "cal-day-cell flex flex-col items-center justify-center w-5 h-5 md:w-7 md:h-7 mx-auto rounded-full cursor-pointer transition-colors text-[10px] md:text-xs font-medium leading-none ";
 if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
 else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
 else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
 const dotColor = isSelected ? 'bg-white' : 'bg-blue-500';
-const dot = hasEvent ? `<div class="absolute bottom-0 md:bottom-0.5 w-1 h-1 md:w-1.5 md:h-1.5 ${dotColor} rounded-full"></div>` : '';
+const dot = hasEvent ? `<div class="w-1 h-1 md:w-1.5 md:h-1.5 mt-px md:mt-0.5 ${dotColor} rounded-full"></div>` : `<div class="w-1 h-1 md:w-1.5 md:h-1.5 mt-px md:mt-0.5 bg-transparent rounded-full"></div>`;
 
-html += `<div class="${baseClass}" data-day="${d}" data-istoday="${isToday}" data-hasevent="${hasEvent}" onclick="selectDate('${ctx}', ${y}, ${m}, ${d})">${d}${dot}</div>`;
+html += `<div class="${baseClass}" data-day="${d}" data-istoday="${isToday}" data-hasevent="${hasEvent}" onclick="selectDate('${ctx}', ${y}, ${m}, ${d})"><span>${d}</span>${dot}</div>`;
 }
 const gridEl = document.getElementById(`${ctx}-cal-grid`);
 if (gridEl) gridEl.innerHTML = html;
@@ -457,7 +457,7 @@ let evEnd = new Date(l.EndDate); evEnd.setHours(0,0,0,0);
 if (isRepeating) {
 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
 if (isEventOnDate(l, d)) {
-  instances.push({ l: l, start: new Date(d), end: new Date(d), isLeave: isLeave });
+ instances.push({ l: l, start: new Date(d), end: new Date(d), isLeave: isLeave });
 }
 }
 } else {
@@ -490,12 +490,12 @@ while (true) {
 if (!slots[slotIdx]) slots[slotIdx] =[];
 let conflict = false;
 for (let i = seg.sDay; i <= seg.eDay; i++) {
-  if (slots[slotIdx][i]) { conflict = true; break; }
+ if (slots[slotIdx][i]) { conflict = true; break; }
 }
 if (!conflict) {
-  for (let i = seg.sDay; i <= seg.eDay; i++) slots[slotIdx][i] = true;
-  seg.slot = slotIdx;
-  break;
+ for (let i = seg.sDay; i <= seg.eDay; i++) slots[slotIdx][i] = true;
+ seg.slot = slotIdx;
+ break;
 }
 slotIdx++;
 }
@@ -591,7 +591,7 @@ let varName = match.replace(/[{}]/g, '');
 let val = vars[varName] !== undefined ? vars[varName] : '';
 
 if (val && String(val).trim() !== '') {
- hasPresentValue = true;
+hasPresentValue = true;
 }
 line = line.replace(match, val);
 }
@@ -602,16 +602,16 @@ if (hasVariables && !hasPresentValue) continue;
 if (line.trim() !== '') {
 // Cleanup artifacts like trailing commas, stray hyphens, empty parens left by missing variables
 line = line.replace(/,\s*(?=[,\)]|$)/g, "")  // Remove trailing commas
-        .replace(/\(\s*\)/g, "")          // Remove empty parentheses
-        .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
-        .replace(/\s+/g, " ")             // Normalize spaces
-        .trim();
+       .replace(/\(\s*\)/g, "")          // Remove empty parentheses
+       .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
+       .replace(/\s+/g, " ")             // Normalize spaces
+       .trim();
 
 if (line.endsWith('-')) line = line.slice(0, -1).trim();
 if (line.endsWith(':')) line = line.slice(0, -1).trim();
 
 if (line !== '') {
- validLines.push(`<p class="text-[11px] md:text-xs text-gray-600 dark:text-darkmuted mt-0.5 leading-snug">${line}</p>`);
+validLines.push(`<p class="text-[11px] md:text-xs text-gray-600 dark:text-darkmuted mt-0.5 leading-snug">${line}</p>`);
 }
 }
 }
@@ -688,25 +688,25 @@ attendeesDisplay = attArr.map(a => {
 if (a.expandedNames) return a.expandedNames;
 
 if (a.type === 'group') {
-    if (a.name.startsWith('zz KAH:')) {
-        const dept = a.dept;
-        if (dept === 'Custom') {
-            const gName = a.name.replace('zz KAH: ', '').trim();
-            const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
-            if (cGrp) {
-                return cGrp.members.map(ph => {
-                    const c = companyContacts.find(x => String(x.phone) === String(ph));
-                    return c ? c.name : ph;
-                }).join(', ');
-            }
-        } else {
-            const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
-            if (kahMems.length > 0) return kahMems.join(', ');
-        }
-    } else if (a.name.startsWith('zz All in ')) {
-        return a.name.replace('zz ', '');
-    }
-    return a.name.replace('zz KAH: ', '').replace('zz ', '');
+   if (a.name.startsWith('zz KAH:')) {
+       const dept = a.dept;
+       if (dept === 'Custom') {
+           const gName = a.name.replace('zz KAH: ', '').trim();
+           const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
+           if (cGrp) {
+               return cGrp.members.map(ph => {
+                   const c = companyContacts.find(x => String(x.phone) === String(ph));
+                   return c ? c.name : ph;
+               }).join(', ');
+           }
+       } else {
+           const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
+           if (kahMems.length > 0) return kahMems.join(', ');
+       }
+   } else if (a.name.startsWith('zz All in ')) {
+       return a.name.replace('zz ', '');
+   }
+   return a.name.replace('zz KAH: ', '').replace('zz ', '');
 }
 return a.name;
 }).join(', ');
@@ -777,9 +777,9 @@ const finalTitle = applyAcronymsFront(titleStr);
 let detailsRaw = isInfoAllContext ? window.appInfoAllDetailsTemplate : window.appAgendaDetailsTemplate;
 if (typeObj) {
 if (isInfoAllContext && typeObj.infoAllDetailsTemplate !== undefined) {
-   detailsRaw = typeObj.infoAllDetailsTemplate;
+  detailsRaw = typeObj.infoAllDetailsTemplate;
 } else if (!isInfoAllContext && typeObj.agendaDetailsTemplate !== undefined) {
-   detailsRaw = typeObj.agendaDetailsTemplate;
+  detailsRaw = typeObj.agendaDetailsTemplate;
 }
 }
 
@@ -875,12 +875,12 @@ const dd = String(d.getDate()).padStart(2, '0');
 
 html += `
 <div class="agenda-day-group mb-3 md:mb-4" data-date="${yyyy}-${mm}-${dd}">
- <div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
-     <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
- </div>
- <div class="space-y-2 px-1">
-     ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
- </div>
+<div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
+    <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
+</div>
+<div class="space-y-2 px-1">
+    ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
+</div>
 </div>`;
 }
 }
@@ -908,19 +908,19 @@ group.className = 'agenda-day-group mb-3 md:mb-4';
 group.dataset.date = dateStr;
 group.innerHTML = `
 <div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
- <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
+<h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
 </div>
 <div class="space-y-2 px-1">
- <p class="text-gray-500 dark:text-darkmuted text-center italic text-xs mt-2">No records for this date.</p>
+<p class="text-gray-500 dark:text-darkmuted text-center italic text-xs mt-2">No records for this date.</p>
 </div>`;
 
 const allGroups = Array.from(container.querySelectorAll('.agenda-day-group'));
 let inserted = false;
 for (let i = 0; i < allGroups.length; i++) {
 if (allGroups[i].dataset.date > dateStr) {
- container.insertBefore(group, allGroups[i]);
- inserted = true;
- break;
+container.insertBefore(group, allGroups[i]);
+inserted = true;
+break;
 }
 }
 if (!inserted) container.appendChild(group);
@@ -946,14 +946,14 @@ const att = JSON.parse(l.Attendees);
 return att.some(a => {
 if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
 if (a.type === 'group') {
- if (a.dept === 'Custom') {
-     const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-     return customG && customG.members.includes(String(user.phone));
- } else if (a.name.startsWith('zz KAH:')) {
-     return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
- } else {
-     return (user.departments ||[]).includes(a.dept); // Safety fallback
- }
+if (a.dept === 'Custom') {
+    const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+    return customG && customG.members.includes(String(user.phone));
+} else if (a.name.startsWith('zz KAH:')) {
+    return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+} else {
+    return (user.departments ||[]).includes(a.dept); // Safety fallback
+}
 }
 return false;
 });
@@ -975,10 +975,10 @@ if (a.dept && String(a.dept).includes(d)) return true;
 if (a.type === 'group' && a.dept === 'Custom') {
 const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
 if (customG) {
-   return customG.members.some(phone => {
-       const contact = companyContacts.find(c => String(c.phone) === String(phone));
-       return contact && contact.dept && String(contact.dept).includes(d);
-   });
+  return customG.members.some(phone => {
+      const contact = companyContacts.find(c => String(c.phone) === String(phone));
+      return contact && contact.dept && String(contact.dept).includes(d);
+  });
 }
 }
 return false;
@@ -1044,14 +1044,14 @@ const att = JSON.parse(l.Attendees);
 return att.some(a => {
 if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
 if (a.type === 'group') {
- if (a.dept === 'Custom') {
-     const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-     return customG && customG.members.includes(String(user.phone));
- } else if (a.name.startsWith('zz KAH:')) {
-     return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
- } else {
-     return (user.departments ||[]).includes(a.dept); // Safety fallback
- }
+if (a.dept === 'Custom') {
+    const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+    return customG && customG.members.includes(String(user.phone));
+} else if (a.name.startsWith('zz KAH:')) {
+    return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+} else {
+    return (user.departments ||[]).includes(a.dept); // Safety fallback
+}
 }
 return false;
 });
