@@ -64,16 +64,16 @@ if (!t.fields) {
  };
  updatedTypical = true;
 }
-if (typeof t.isKahRelevant === 'undefined') {
- t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
- updatedTypical = true;
-}
 if (!t.fieldOrder) {
  if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
-     t.fieldOrder = ['country', 'dateRange', 'remarks', 'location', 'attendees'];
+     t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
  } else {
-     t.fieldOrder = ['location', 'attendees', 'dateRange', 'remarks', 'country'];
+     t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
  }
+ updatedTypical = true;
+}
+if (typeof t.isKahRelevant === 'undefined') {
+ t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
  updatedTypical = true;
 }
 });

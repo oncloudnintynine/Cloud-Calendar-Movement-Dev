@@ -58,6 +58,22 @@ if (locEl.value === 'Out of Camp') {
 }
 }
 
+function applyFieldOrder(ctx, typeObj) {
+let order = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
+if (typeObj && typeObj.fieldOrder && typeObj.fieldOrder.length > 0) {
+    order = typeObj.fieldOrder;
+}
+
+order.forEach((block, idx) => {
+    const el1 = document.getElementById(`block-${ctx}-${block}`);
+    if (el1) el1.style.order = idx + 2;
+    const el2 = document.getElementById(`block-${ctx}-${block}-event`);
+    if (el2) el2.style.order = idx + 2;
+    const el3 = document.getElementById(`block-${ctx}-${block}-leave`);
+    if (el3) el3.style.order = idx + 2;
+});
+}
+
 function applyDynamicFields(ctx, typeObj) {
 if (!typeObj || !typeObj.fields) return;
 const fields = typeObj.fields;
@@ -80,7 +96,7 @@ if (input) {
 
 setField(`wrapper-${ctx}-location`, `form-${ctx}-location`, fields.location);
 setField(`wrapper-${ctx}-location-details`, `form-${ctx}-location-details`, fields.locationDetails);
-setField(`wrapper-${ctx}-attendees`, `form-${ctx}-attendee-search`, fields.attendees);
+setField(`block-${ctx}-attendees`, `form-${ctx}-attendee-search`, fields.attendees);
 
 const remarksInput = document.getElementById(`form-${ctx}-remarks`);
 const remarksLabel = document.getElementById(`label-${ctx}-remarks`);
@@ -89,32 +105,6 @@ remarksInput.required = fields.remarks.req;
 remarksInput.placeholder = fields.remarks.req ? `Enter ${fields.remarks.label.toLowerCase()} (Required)` : "";
 remarksLabel.innerHTML = `${fields.remarks.label} ${fields.remarks.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500">(Optional)</span>'}`;
 }
-}
-
-function reorderFields(ctx, typeObj) {
-const wrappers = {
-    'location': document.getElementById(`wrapper-${ctx}-location-main`),
-    'attendees': document.getElementById(`wrapper-${ctx}-attendees`),
-    'dateRange': document.getElementById(`wrapper-${ctx}-daterange`),
-    'country': document.getElementById(`wrapper-${ctx}-country`),
-    'remarks': document.getElementById(`wrapper-${ctx}-remarks`)
-};
-
-Object.values(wrappers).forEach(el => { if(el) el.style.order = 99; });
-
-if (typeObj && typeObj.fieldOrder) {
-    typeObj.fieldOrder.forEach((key, idx) => {
-        if (wrappers[key]) wrappers[key].style.order = idx + 2; 
-    });
-}
-}
-
-function applyDynamicFieldsAndReorder(ctx) {
-const typeInput = document.getElementById(`form-${ctx}-type`) || document.getElementById(`form-${ctx}-name`);
-if (!typeInput) return;
-const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === typeInput.value) : null;
-applyDynamicFields(ctx, typeObj);
-reorderFields(ctx, typeObj);
 }
 
 function toggleCombinedFields() {
@@ -126,51 +116,64 @@ const isEvent = typeObj ? typeObj.isEvent : true;
 
 applyDynamicFields('combined', typeObj);
 
-const eventDates = document.getElementById('combined-event-dates');
-const leaveDates = document.getElementById('combined-leave-dates');
 const btnInfoAll = document.getElementById('form-combined-infoall-btn');
-const countryWrapper = document.getElementById('wrapper-combined-country');
 const locationInput = document.getElementById('form-combined-location');
 
+const show = (id) => { const el = document.getElementById(id); if(el) el.classList.remove('hidden-view'); };
+const hide = (id) => { const el = document.getElementById(id); if(el) el.classList.add('hidden-view'); };
+
 if (isEvent) {
-if(eventDates) eventDates.classList.remove('hidden-view');
-if(leaveDates) leaveDates.classList.add('hidden-view');
+show('block-combined-location');
+show('block-combined-time-event');
+show('block-combined-repeat');
+hide('block-combined-time-leave');
+hide('block-combined-overseas');
 if(btnInfoAll) btnInfoAll.classList.remove('hidden-view');
 
 if (!locationInput.value || locationInput.value.trim() === '') {
-let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
-if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
-locationInput.value = defLoc;
-toggleMeetingRoomCheckbox('combined');
+    let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
+    if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
+    locationInput.value = defLoc;
+    toggleMeetingRoomCheckbox('combined');
 }
-if(countryWrapper) countryWrapper.classList.add('hidden-view');
-
 } else {
-if(eventDates) eventDates.classList.add('hidden-view');
-if(leaveDates) leaveDates.classList.remove('hidden-view');
+hide('block-combined-location');
+hide('block-combined-time-event');
+hide('block-combined-repeat');
+show('block-combined-time-leave');
 if(btnInfoAll) btnInfoAll.classList.add('hidden-view');
 
 const cInput = document.getElementById('form-combined-country');
 if (val === 'Overseas Leave' || val === 'Official Trip') { 
-if(countryWrapper) countryWrapper.classList.remove('hidden-view'); 
-if(cInput) cInput.required = true; 
+    show('block-combined-overseas'); 
+    if(cInput) cInput.required = true; 
 } else { 
-if(countryWrapper) countryWrapper.classList.add('hidden-view'); 
-if(cInput) cInput.required = false; 
-}
-
-const leaveTimeStart = document.getElementById('combined-leave-time-start');
-const leaveTimeEnd = document.getElementById('combined-leave-time-end');
-if (val === 'Official Trip') {
-if(leaveTimeStart) leaveTimeStart.classList.add('hidden-view');
-if(leaveTimeEnd) leaveTimeEnd.classList.add('hidden-view');
-} else {
-if(leaveTimeStart) leaveTimeStart.classList.remove('hidden-view');
-if(leaveTimeEnd) leaveTimeEnd.classList.remove('hidden-view');
+    hide('block-combined-overseas'); 
+    if(cInput) { cInput.required = false; cInput.value = ''; }
+    const stateEl = document.getElementById('form-combined-state');
+    if(stateEl) stateEl.value = '';
 }
 }
 
-reorderFields('combined', typeObj);
+applyFieldOrder('combined', typeObj);
+}
+
+function toggleEventFields() {
+const typeInput = document.getElementById('form-event-type');
+if(!typeInput) return;
+const val = typeInput.value;
+const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === val) : null;
+
+applyDynamicFields('event', typeObj);
+applyFieldOrder('event', typeObj);
+
+const locationInput = document.getElementById('form-event-location');
+if (locationInput && (!locationInput.value || locationInput.value.trim() === '')) {
+let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
+if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
+locationInput.value = defLoc;
+toggleMeetingRoomCheckbox('event');
+}
 }
 
 function toggleOverseasFields(ctx) {
@@ -180,30 +183,20 @@ const type = typeInput.value;
 const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === type) : null;
 applyDynamicFields(ctx, typeObj);
 
-const el = document.getElementById(`wrapper-${ctx}-country`);
+const el = document.getElementById(`block-${ctx}-overseas`);
 const cInput = document.getElementById(`form-${ctx}-country`);
-const timeStart = document.getElementById(`${ctx}-time-start`);
-const timeEnd = document.getElementById(`${ctx}-time-end`);
 
 if (type === 'Overseas Leave' || type === 'Official Trip') { 
 if(el) el.classList.remove('hidden-view'); 
 if(cInput) cInput.required = true; 
 } else { 
 if(el) el.classList.add('hidden-view'); 
-if(cInput) cInput.required = false; cInput.value = ''; 
-const sInput = document.getElementById(`form-${ctx}-state`);
-if(sInput) sInput.value = '';
+if(cInput) { cInput.required = false; cInput.value = ''; }
+const stateEl = document.getElementById(`form-${ctx}-state`);
+if(stateEl) stateEl.value = ''; 
 }
 
-if (type === 'Official Trip') {
-if(timeStart) timeStart.classList.add('hidden-view');
-if(timeEnd) timeEnd.classList.add('hidden-view');
-} else {
-if(timeStart) timeStart.classList.remove('hidden-view');
-if(timeEnd) timeEnd.classList.remove('hidden-view');
-}
-
-reorderFields(ctx, typeObj);
+applyFieldOrder(ctx, typeObj);
 }
 
 // --- Admin Submit on Behalf Logic ---
@@ -325,17 +318,14 @@ selectBehalf(ctx, l.Name, l.Phone, l.Department);
 const typeEl = document.getElementById(`form-${ctx}-type`) || document.getElementById(`form-${ctx}-name`);
 if (typeEl) {
 typeEl.value = l.LeaveType;
-if (ctx === 'event' || ctx === 'leave') {
-    applyDynamicFields(ctx, typeObj);
-}
 }
 
 if (appMode === 'combined') {
 toggleCombinedFields();
-} else if (!isEvent) {
+} else if (ctx === 'leave') {
 toggleOverseasFields('leave');
-} else {
-applyDynamicFieldsAndReorder('event');
+} else if (ctx === 'event') {
+toggleEventFields();
 }
 
 if (isEvent || l.LeaveType === 'Official Trip') {
@@ -434,7 +424,7 @@ updateTimeSliderVisual('start', 'AM', 'combined'); updateTimeSliderVisual('end',
 if (appMode === 'combined') toggleCombinedFields();
 else {
 toggleOverseasFields('leave');
-applyDynamicFieldsAndReorder('event');
+toggleEventFields();
 }
 
 toggleInfoAll(false);
