@@ -17,17 +17,39 @@ window.jumpToToday = function(ctx) {
 const today = new Date();
 today.setHours(0,0,0,0);
 if (ctx === 'dash') {
- dashDate = today;
- dashMonth = new Date(today.getFullYear(), today.getMonth(), 1);
- window.agendaDirty = true;
- if (dashViewMode === 'month') toggleDashView('agenda');
- else renderDashboard();
+dashDate = today;
+dashMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+window.agendaDirty = true;
+if (dashViewMode === 'month') toggleDashView('agenda');
+else renderDashboard();
+setTimeout(() => window.scrollToAgendaDate(ctx, dashDate), 100);
 } else {
- myDate = today;
- myMonth = new Date(today.getFullYear(), today.getMonth(), 1);
- window.myAgendaDirty = true;
- if (dashViewMode === 'month') toggleDashView('agenda');
- else renderMyLeaves();
+myDate = today;
+myMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+window.myAgendaDirty = true;
+if (dashViewMode === 'month') toggleDashView('agenda');
+else renderMyLeaves();
+setTimeout(() => window.scrollToAgendaDate(ctx, myDate), 100);
+}
+};
+
+window.jumpToDate = function(ctx, targetDateObj) {
+const targetDate = new Date(targetDateObj);
+targetDate.setHours(0,0,0,0);
+if (ctx === 'dash') {
+dashDate = targetDate;
+dashMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+window.agendaDirty = true;
+if (dashViewMode === 'month') toggleDashView('agenda');
+else renderDashboard();
+setTimeout(() => window.scrollToAgendaDate(ctx, dashDate), 100);
+} else {
+myDate = targetDate;
+myMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+window.myAgendaDirty = true;
+if (dashViewMode === 'month') toggleDashView('agenda');
+else renderMyLeaves();
+setTimeout(() => window.scrollToAgendaDate(ctx, myDate), 100);
 }
 };
 
@@ -37,16 +59,16 @@ if (!container) return;
 
 // If the container is currently hidden (e.g. tab hasn't switched yet), wait and try again
 if (container.offsetParent === null) {
- setTimeout(() => window.scrollToAgendaDate(ctx, targetDateObj), 50);
- return;
+setTimeout(() => window.scrollToAgendaDate(ctx, targetDateObj), 50);
+return;
 }
 
 setProgrammaticScroll();
 const group = ensureAgendaDateExists(ctx, targetDateObj);
 if (group) {
- const cRect = container.getBoundingClientRect();
- const gRect = group.getBoundingClientRect();
- container.scrollTop += (gRect.top - cRect.top);
+const cRect = container.getBoundingClientRect();
+const gRect = group.getBoundingClientRect();
+container.scrollTop += (gRect.top - cRect.top);
 }
 };
 
@@ -94,11 +116,11 @@ if(!parent) return;
 const cards = parent.querySelectorAll('.agenda-card-body');
 const chevrons = parent.querySelectorAll('.chevron-icon');
 if (window.isAgendaCollapsed[ctx]) {
-   cards.forEach(b => b.classList.add('hidden-view'));
-   chevrons.forEach(c => c.classList.remove('rotate-180'));
+  cards.forEach(b => b.classList.add('hidden-view'));
+  chevrons.forEach(c => c.classList.remove('rotate-180'));
 } else {
-   cards.forEach(b => b.classList.remove('hidden-view'));
-   chevrons.forEach(c => c.classList.add('rotate-180'));
+  cards.forEach(b => b.classList.remove('hidden-view'));
+  chevrons.forEach(c => c.classList.add('rotate-180'));
 }
 };
 
@@ -289,20 +311,20 @@ let topDateStr = null;
 
 if (isAtBottom) {
 for (let i = groups.length - 1; i >= 0; i--) {
-   const rect = groups[i].getBoundingClientRect();
-   if (rect.top < containerBottom) {
-       topDateStr = groups[i].dataset.date; 
-       break;
-   }
+  const rect = groups[i].getBoundingClientRect();
+  if (rect.top < containerBottom) {
+      topDateStr = groups[i].dataset.date; 
+      break;
+  }
 }
 } else {
 for (const group of groups) {
-   const rect = group.getBoundingClientRect();
-   if (rect.top >= containerTop && rect.top <= containerTop + 100) {
-       topDateStr = group.dataset.date; break;
-   } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
-       topDateStr = group.dataset.date; break;
-   }
+  const rect = group.getBoundingClientRect();
+  if (rect.top >= containerTop && rect.top <= containerTop + 100) {
+      topDateStr = group.dataset.date; break;
+  } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
+      topDateStr = group.dataset.date; break;
+  }
 }
 }
 
@@ -312,20 +334,20 @@ const targetDate = isDash ? dashDate : myDate;
 const targetMonth = isDash ? dashMonth : myMonth;
 
 if (targetDate.getDate() !== d || targetDate.getMonth() !== (m-1) || targetDate.getFullYear() !== y) {
-   if (isDash) dashDate = new Date(y, m - 1, d);
-   else myDate = new Date(y, m - 1, d);
-   
-   if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
-       if (isDash) {
-           dashMonth = new Date(y, m - 1, 1);
-       } else {
-           myMonth = new Date(y, m - 1, 1);
-       }
-       renderMiniCalendar(ctx);
-       updateInfoAllDisplay(ctx);
-   } else {
-       updateMiniCalendarSelection(ctx, d);
-   }
+  if (isDash) dashDate = new Date(y, m - 1, d);
+  else myDate = new Date(y, m - 1, d);
+  
+  if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
+      if (isDash) {
+          dashMonth = new Date(y, m - 1, 1);
+      } else {
+          myMonth = new Date(y, m - 1, 1);
+      }
+      renderMiniCalendar(ctx);
+      updateInfoAllDisplay(ctx);
+  } else {
+      updateMiniCalendarSelection(ctx, d);
+  }
 }
 }
 }, 50);
@@ -425,15 +447,15 @@ let evEnd = new Date(l.EndDate); evEnd.setHours(0,0,0,0);
 
 if (isRepeating) {
 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
- if (isEventOnDate(l, d)) {
-     instances.push({ l: l, start: new Date(d), end: new Date(d), isLeave: isLeave });
- }
+if (isEventOnDate(l, d)) {
+    instances.push({ l: l, start: new Date(d), end: new Date(d), isLeave: isLeave });
+}
 }
 } else {
 if (evStart <= endDate && evEnd >= startDate) {
- let clampedStart = new Date(Math.max(evStart, startDate));
- let clampedEnd = new Date(Math.min(evEnd, endDate));
- instances.push({ l: l, start: clampedStart, end: clampedEnd, isLeave: isLeave });
+let clampedStart = new Date(Math.max(evStart, startDate));
+let clampedEnd = new Date(Math.min(evEnd, endDate));
+instances.push({ l: l, start: clampedStart, end: clampedEnd, isLeave: isLeave });
 }
 }
 });
@@ -456,17 +478,17 @@ let slots =[];
 segments.forEach(seg => {
 let slotIdx = 0;
 while (true) {
- if (!slots[slotIdx]) slots[slotIdx] =[];
- let conflict = false;
- for (let i = seg.sDay; i <= seg.eDay; i++) {
-     if (slots[slotIdx][i]) { conflict = true; break; }
- }
- if (!conflict) {
-     for (let i = seg.sDay; i <= seg.eDay; i++) slots[slotIdx][i] = true;
-     seg.slot = slotIdx;
-     break;
- }
- slotIdx++;
+if (!slots[slotIdx]) slots[slotIdx] =[];
+let conflict = false;
+for (let i = seg.sDay; i <= seg.eDay; i++) {
+    if (slots[slotIdx][i]) { conflict = true; break; }
+}
+if (!conflict) {
+    for (let i = seg.sDay; i <= seg.eDay; i++) slots[slotIdx][i] = true;
+    seg.slot = slotIdx;
+    break;
+}
+slotIdx++;
 }
 });
 
@@ -496,7 +518,7 @@ const displayType = safeType === 'Generic' && seg.l.Remarks ? `${safeType}: ${se
 
 let dispName = applyAcronymsFront(seg.l.Name || "");
 if (dispName === (seg.l.Name || "")) {
- dispName = dispName.split(' ')[0];
+dispName = dispName.split(' ')[0];
 }
 
 const titleRawStr = isPublicHoliday ? seg.l.Name : (seg.isLeave ? `${dispName} : ${displayType}` : displayType);
@@ -560,7 +582,7 @@ let varName = match.replace(/[{}]/g, '');
 let val = vars[varName] !== undefined ? vars[varName] : '';
 
 if (val && String(val).trim() !== '') {
-    hasPresentValue = true;
+   hasPresentValue = true;
 }
 line = line.replace(match, val);
 }
@@ -571,16 +593,16 @@ if (hasVariables && !hasPresentValue) continue;
 if (line.trim() !== '') {
 // Cleanup artifacts like trailing commas, stray hyphens, empty parens left by missing variables
 line = line.replace(/,\s*(?=[,\)]|$)/g, "")  // Remove trailing commas
-           .replace(/\(\s*\)/g, "")          // Remove empty parentheses
-           .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
-           .replace(/\s+/g, " ")             // Normalize spaces
-           .trim();
+          .replace(/\(\s*\)/g, "")          // Remove empty parentheses
+          .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
+          .replace(/\s+/g, " ")             // Normalize spaces
+          .trim();
 
 if (line.endsWith('-')) line = line.slice(0, -1).trim();
 if (line.endsWith(':')) line = line.slice(0, -1).trim();
 
 if (line !== '') {
-    validLines.push(`<p class="text-xs md:text-sm text-gray-600 dark:text-darkmuted mt-0.5">${line}</p>`);
+   validLines.push(`<p class="text-xs md:text-sm text-gray-600 dark:text-darkmuted mt-0.5">${line}</p>`);
 }
 }
 }
@@ -618,8 +640,8 @@ if (l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None') {
 timeStr += ` <span class="font-bold text-purple-600 dark:text-purple-400">↻ ${l.HalfDay}</span>`;
 endTimeStr += ` <span class="font-bold text-purple-600 dark:text-purple-400">↻ ${l.HalfDay}</span>`;
 if (l.UntilDate) {
-  timeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
-  endTimeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
+ timeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
+ endTimeStr += ` until ${formatDisplayDate(new Date(l.UntilDate))}`;
 }
 }
 } else {
@@ -654,30 +676,30 @@ try {
 const attArr = JSON.parse(l.Attendees);
 if (attArr && attArr.length > 0) {
 attendeesDisplay = attArr.map(a => {
-   if (a.expandedNames) return a.expandedNames;
-   
-   if (a.type === 'group') {
-       if (a.name.startsWith('zz KAH:')) {
-           const dept = a.dept;
-           if (dept === 'Custom') {
-               const gName = a.name.replace('zz KAH: ', '').trim();
-               const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
-               if (cGrp) {
-                   return cGrp.members.map(ph => {
-                       const c = companyContacts.find(x => String(x.phone) === String(ph));
-                       return c ? c.name : ph;
-                   }).join(', ');
-               }
-           } else {
-               const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
-               if (kahMems.length > 0) return kahMems.join(', ');
-           }
-       } else if (a.name.startsWith('zz All in ')) {
-           return a.name.replace('zz ', '');
-       }
-       return a.name.replace('zz KAH: ', '').replace('zz ', '');
-   }
-   return a.name;
+  if (a.expandedNames) return a.expandedNames;
+  
+  if (a.type === 'group') {
+      if (a.name.startsWith('zz KAH:')) {
+          const dept = a.dept;
+          if (dept === 'Custom') {
+              const gName = a.name.replace('zz KAH: ', '').trim();
+              const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
+              if (cGrp) {
+                  return cGrp.members.map(ph => {
+                      const c = companyContacts.find(x => String(x.phone) === String(ph));
+                      return c ? c.name : ph;
+                  }).join(', ');
+              }
+          } else {
+              const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
+              if (kahMems.length > 0) return kahMems.join(', ');
+          }
+      } else if (a.name.startsWith('zz All in ')) {
+          return a.name.replace('zz ', '');
+      }
+      return a.name.replace('zz KAH: ', '').replace('zz ', '');
+  }
+  return a.name;
 }).join(', ');
 }
 } catch(e) {}
@@ -716,8 +738,8 @@ State: l.State || ""
 
 let titleRaw = isInfoAllContext ? window.appInfoAllTemplate : window.appAgendaTemplate;
 if (typeObj) {
-  if (isInfoAllContext && typeObj.infoAllTemplate) titleRaw = typeObj.infoAllTemplate;
-  else if (!isInfoAllContext && typeObj.agendaTemplate) titleRaw = typeObj.agendaTemplate;
+ if (isInfoAllContext && typeObj.infoAllTemplate) titleRaw = typeObj.infoAllTemplate;
+ else if (!isInfoAllContext && typeObj.agendaTemplate) titleRaw = typeObj.agendaTemplate;
 }
 
 if (isMyCalendar && !isInfoAllContext) titleRaw = '{EventType}'; 
@@ -745,11 +767,11 @@ const finalTitle = applyAcronymsFront(titleStr);
 
 let detailsRaw = isInfoAllContext ? window.appInfoAllDetailsTemplate : window.appAgendaDetailsTemplate;
 if (typeObj) {
-  if (isInfoAllContext && typeObj.infoAllDetailsTemplate !== undefined) {
-      detailsRaw = typeObj.infoAllDetailsTemplate;
-  } else if (!isInfoAllContext && typeObj.agendaDetailsTemplate !== undefined) {
-      detailsRaw = typeObj.agendaDetailsTemplate;
-  }
+ if (isInfoAllContext && typeObj.infoAllDetailsTemplate !== undefined) {
+     detailsRaw = typeObj.infoAllDetailsTemplate;
+ } else if (!isInfoAllContext && typeObj.agendaDetailsTemplate !== undefined) {
+     detailsRaw = typeObj.agendaDetailsTemplate;
+ }
 }
 
 if (isPublicHoliday) detailsRaw = '';
@@ -767,8 +789,8 @@ ${hasBody ? `<svg class="w-4 h-4 text-blue-500 transition-transform duration-200
 ${hasBody ? `
 <div class="agenda-card-body ${isCollapsed ? 'hidden-view' : ''}">
 <div class="flex justify-between items-end gap-2 mt-1.5">
- ${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
- ${compactActionBtns ? `<div class="flex shrink-0 space-x-1">${compactActionBtns}</div>` : ''}
+${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
+${compactActionBtns ? `<div class="flex shrink-0 space-x-1">${compactActionBtns}</div>` : ''}
 </div>
 </div>` : ''}
 </div>`;
@@ -811,7 +833,7 @@ const data = ctx === 'dash' ? window.dashFilteredLeaves : window.myFilteredLeave
 const infoAllEvents = data.filter(l => {
 if (String(l.InfoAll).toUpperCase() !== 'TRUE') return false;
 for (let d = new Date(mStart); d <= mEnd; d.setDate(d.getDate() + 1)) {
-  if (isEventOnDate(l, d)) return true;
+ if (isEventOnDate(l, d)) return true;
 }
 return false;
 });
@@ -844,12 +866,12 @@ const dd = String(d.getDate()).padStart(2, '0');
 
 html += `
 <div class="agenda-day-group mb-6" data-date="${yyyy}-${mm}-${dd}">
-    <div class="sticky top-0 bg-gray-50 dark:bg-[#1a1a1a] z-10 py-1.5 border-y border-gray-200 dark:border-darkborder mb-3 shadow-sm px-2 rounded-lg">
-        <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400">${formatDisplayDate(d)}</h3>
-    </div>
-    <div class="space-y-3 px-1">
-        ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
-    </div>
+   <div class="sticky top-0 bg-gray-50 dark:bg-[#1a1a1a] z-10 py-1.5 border-y border-gray-200 dark:border-darkborder mb-3 shadow-sm px-2 rounded-lg">
+       <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400">${formatDisplayDate(d)}</h3>
+   </div>
+   <div class="space-y-3 px-1">
+       ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
+   </div>
 </div>`;
 }
 }
@@ -877,19 +899,19 @@ group.className = 'agenda-day-group mb-6';
 group.dataset.date = dateStr;
 group.innerHTML = `
 <div class="sticky top-0 bg-gray-50 dark:bg-[#1a1a1a] z-10 py-1.5 border-y border-gray-200 dark:border-darkborder mb-3 shadow-sm px-2 rounded-lg">
-    <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400">${formatDisplayDate(targetDateObj)}</h3>
+   <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400">${formatDisplayDate(targetDateObj)}</h3>
 </div>
 <div class="space-y-3 px-1">
-    <p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>
+   <p class="text-gray-500 dark:text-darkmuted text-center italic mt-2">No records for this date.</p>
 </div>`;
 
 const allGroups = Array.from(container.querySelectorAll('.agenda-day-group'));
 let inserted = false;
 for (let i = 0; i < allGroups.length; i++) {
 if (allGroups[i].dataset.date > dateStr) {
-    container.insertBefore(group, allGroups[i]);
-    inserted = true;
-    break;
+   container.insertBefore(group, allGroups[i]);
+   inserted = true;
+   break;
 }
 }
 if (!inserted) container.appendChild(group);
@@ -915,14 +937,14 @@ const att = JSON.parse(l.Attendees);
 return att.some(a => {
 if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
 if (a.type === 'group') {
-    if (a.dept === 'Custom') {
-        const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-        return customG && customG.members.includes(String(user.phone));
-    } else if (a.name.startsWith('zz KAH:')) {
-        return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
-    } else {
-        return (user.departments ||[]).includes(a.dept); // Safety fallback
-    }
+   if (a.dept === 'Custom') {
+       const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+       return customG && customG.members.includes(String(user.phone));
+   } else if (a.name.startsWith('zz KAH:')) {
+       return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+   } else {
+       return (user.departments ||[]).includes(a.dept); // Safety fallback
+   }
 }
 return false;
 });
@@ -942,21 +964,21 @@ const att = JSON.parse(l.Attendees);
 return att.some(a => {
 if (a.dept && String(a.dept).includes(d)) return true;
 if (a.type === 'group' && a.dept === 'Custom') {
-  const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-  if (customG) {
-      return customG.members.some(phone => {
-          const contact = companyContacts.find(c => String(c.phone) === String(phone));
-          return contact && contact.dept && String(contact.dept).includes(d);
-      });
-  }
+ const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+ if (customG) {
+     return customG.members.some(phone => {
+         const contact = companyContacts.find(c => String(c.phone) === String(phone));
+         return contact && contact.dept && String(contact.dept).includes(d);
+     });
+ }
 }
 return false;
 });
 } catch(e) {
 const phones = String(l.Attendees).split(',');
 return phones.some(phone => {
-  const contact = companyContacts.find(c => String(c.phone) === String(phone.trim()));
-  return contact && contact.dept && String(contact.dept).includes(d);
+ const contact = companyContacts.find(c => String(c.phone) === String(phone.trim()));
+ return contact && contact.dept && String(contact.dept).includes(d);
 });
 }
 }
@@ -1013,14 +1035,14 @@ const att = JSON.parse(l.Attendees);
 return att.some(a => {
 if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
 if (a.type === 'group') {
-    if (a.dept === 'Custom') {
-        const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-        return customG && customG.members.includes(String(user.phone));
-    } else if (a.name.startsWith('zz KAH:')) {
-        return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
-    } else {
-        return (user.departments ||[]).includes(a.dept); // Safety fallback
-    }
+   if (a.dept === 'Custom') {
+       const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+       return customG && customG.members.includes(String(user.phone));
+   } else if (a.name.startsWith('zz KAH:')) {
+       return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+   } else {
+       return (user.departments ||[]).includes(a.dept); // Safety fallback
+   }
 }
 return false;
 });
