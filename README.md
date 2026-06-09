@@ -81,9 +81,9 @@ To allow GitHub to push updates directly to Google Apps Script automatically, yo
 3. **Configure GitHub Secrets:**
 * Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions**.
 * Add the following Repository Secrets:
- * `CLASP_CREDS`: Paste the JSON copied from Step 1.
- * `SCRIPT_ID`: Paste your Script ID.
- * `DEPLOYMENT_ID`: Paste your Deployment ID.
+* `CLASP_CREDS`: Paste the JSON copied from Step 1.
+* `SCRIPT_ID`: Paste your Script ID.
+* `DEPLOYMENT_ID`: Paste your Deployment ID.
 4. **How it works:**
 Every time you push a change to the `backend/` folder on the `main` branch, GitHub Actions will trigger `.github/workflows/deploy.yml`, pushing the code and updating the exact same Web App URL so your frontend never breaks.
 
@@ -116,7 +116,7 @@ Every time you push a change to the `backend/` folder on the `main` branch, GitH
 
 ### 3. Syncing Contacts to Phones (The .vcf Method)
 Cloudy avoids complex Google Cloud Platform OAuth workflows for pushing contacts. Instead, it relies on a secure, native **1-Click Download**.
-* In the App Menu, users click **"Save Directory to Phone"**.
+* In the App Menu, users click **"Save Contacts"**.
 * A `.vcf` file is instantly generated and downloaded.
 * iOS / Android will natively interpret this file and prompt the user to seamlessly add/update the entire company directory into their phone's address book. 
 
