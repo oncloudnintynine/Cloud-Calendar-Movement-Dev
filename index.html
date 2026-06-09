@@ -33,7 +33,6 @@ darkmuted: '#9ca3af'
 }
 </script>
 </head>
-<!-- Adopted a dynamic flex-row layout on large screens to accommodate the permanent sidebar -->
 <body class="bg-gray-50 text-gray-900 dark:bg-darkbase dark:text-darktext transition-colors duration-200 h-[100dvh] flex flex-col lg:flex-row text-base overflow-hidden">
 
 <div id="loader" class="fixed inset-0 bg-white/90 dark:bg-darkbase/90 backdrop-blur-sm z-[100] flex-col items-center justify-center hidden">
@@ -81,37 +80,34 @@ darkmuted: '#9ca3af'
 
 <!-- Main Workspace Layout -->
 <div class="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-gray-50 dark:bg-darkbase pt-[24px] lg:pt-0">
-<nav class="bg-white/80 dark:bg-darksurface/80 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-darkborder px-4 py-3 flex justify-between items-center z-40 shrink-0">
+<nav class="bg-white/90 dark:bg-darksurface/90 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-darkborder px-3 md:px-5 py-2 flex justify-between items-center z-40 shrink-0 min-h-[64px]">
 <div class="flex items-center flex-1 min-w-0">
 <button id="menu-btn" onclick="toggleMenu()" class="p-2 -ml-2 mr-2 rounded-xl hover:bg-gray-100 dark:hover:bg-darkhover text-gray-700 dark:text-darktext hidden lg:hidden transition shrink-0">
-<svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
 </button>
-<!-- Desktop Logo (Visible only when sidebar is hidden/not active logically, but sidebar IS permanent. We'll show title on mobile, hide on desktop) -->
-<div class="font-extrabold text-xl text-blue-600 dark:text-blue-400 leading-tight whitespace-nowrap truncate lg:hidden mr-3">Cloudy</div>
-<div id="active-tab-title" class="text-lg font-bold text-gray-800 dark:text-gray-200 hidden leading-tight truncate"></div>
+<div class="flex flex-col min-w-0">
+<div class="font-extrabold text-xl text-blue-600 dark:text-blue-400 leading-tight whitespace-nowrap truncate lg:hidden">Cloudy</div>
+<div id="active-tab-title" class="text-sm font-bold text-gray-500 dark:text-gray-400 hidden leading-tight truncate"></div>
+</div>
 </div>
 
-<div id="dash-controls-wrapper" class="hidden flex-row items-center gap-3 shrink-0 mx-4">
-<select id="dash-dept-nav" class="hidden text-sm border-2 border-blue-400 dark:border-blue-600 rounded-xl py-1.5 pl-3 pr-8 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer max-w-[160px] truncate" onchange="window.agendaDirty=true; renderDashboard();">
+<div id="dash-controls-wrapper" class="hidden flex-col md:flex-row items-stretch md:items-center gap-1.5 md:gap-3 shrink-0 mx-2 md:mx-4 w-[120px] md:w-auto">
+<select id="dash-dept-nav" class="hidden w-full md:w-auto text-[11px] md:text-sm border-2 border-blue-400 dark:border-blue-600 rounded-lg py-1 md:py-1.5 pl-2 pr-6 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer max-w-[160px] truncate" onchange="window.agendaDirty=true; renderDashboard();">
 <option value="">All Depts</option>
 </select>
-<div id="dash-view-toggle" class="flex items-center bg-gray-200 dark:bg-darkinput border border-gray-300 dark:border-darkborder rounded-xl p-1 shrink-0">
-<button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="px-3 py-1 rounded-lg font-bold text-sm transition bg-white dark:bg-darksurface shadow-sm text-blue-600 dark:text-blue-400 text-center">Agenda</button>
-<button id="btn-dash-month" onclick="toggleDashView('month')" class="px-3 py-1 rounded-lg font-semibold text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 text-center">Month</button>
+<div id="dash-view-toggle" class="flex items-center bg-gray-200 dark:bg-darkinput border border-gray-300 dark:border-darkborder rounded-lg p-0.5 md:p-1 shrink-0 w-full md:w-auto">
+<button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="flex-1 md:flex-none px-2 py-0.5 md:py-1 rounded-md font-bold text-[10px] md:text-sm transition bg-white dark:bg-darksurface shadow-sm text-blue-600 dark:text-blue-400 text-center">Agenda</button>
+<button id="btn-dash-month" onclick="toggleDashView('month')" class="flex-1 md:flex-none px-2 py-0.5 md:py-1 rounded-md font-semibold text-[10px] md:text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 text-center">Month</button>
 </div>
 </div>
 
-<div class="flex items-center justify-end space-x-2 min-w-0">
-<span id="nav-user-name" class="font-bold hidden md:block mr-2 text-base text-gray-700 dark:text-gray-300 truncate max-w-[150px] lg:max-w-[250px]"></span>
-<button onclick="toggleTheme()" class="p-2 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition shrink-0 bg-gray-100 dark:bg-darkinput" title="Toggle Theme">
-<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-2.25l1.591-1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-</svg>
-</button>
-<button onclick="animateAndUpdate(this)" class="p-2 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition shrink-0 bg-gray-100 dark:bg-darkinput" title="Sync / Refresh">
+<div class="flex items-center justify-end space-x-1 md:space-x-2 min-w-0 flex-1">
+<span id="nav-user-name" class="font-bold hidden md:block mr-2 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px] lg:max-w-[250px]"></span>
+<button onclick="toggleTheme()" class="text-xl transition shrink-0" title="Toggle Theme">🌗</button>
+<button onclick="animateAndUpdate(this)" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition shrink-0" title="Sync / Refresh">
 <svg class="w-6 h-6 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
 </button>
-<button id="logout-btn" onclick="logout()" class="p-2 text-gray-500 dark:text-darkmuted hover:text-red-600 dark:hover:text-red-400 rounded-full transition hidden shrink-0 bg-gray-100 dark:bg-darkinput" title="Logout">
+<button id="logout-btn" onclick="logout()" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-red-600 dark:hover:text-red-400 rounded-full transition hidden shrink-0" title="Logout">
 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
 </button>
 </div>
@@ -251,7 +247,7 @@ darkmuted: '#9ca3af'
 <div class="flex justify-between items-center mb-3 shrink-0 py-2 border-b border-gray-200 dark:border-darkborder">
 <h3 class="font-extrabold text-xl text-gray-800 dark:text-gray-100">My Agenda</h3>
 <div class="flex space-x-2">
-<button id="my-toggle-widgets-btn" onclick="window.toggleTopWidgets('my')" class="flex items-center text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-4 py-2 rounded-xl transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal</button>
+<button id="my-toggle-widgets-btn" onclick="window.toggleTopWidgets('my')" class="flex items-center text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-4 py-2 rounded-xl transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-5 h-5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg> Hide Cal</button>
 <button type="button" onclick="jumpToToday('my')" class="text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-4 py-2 rounded-xl transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
 <button id="my-expand-toggle-btn" onclick="toggleAllAgendaCards('my')" class="text-sm font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-4 py-2 rounded-xl transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
 </div>
@@ -398,7 +394,7 @@ darkmuted: '#9ca3af'
 
 </div>
 
-<div class="shrink-0 p-5 md:p-6 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20">
+<div class="shrink-0 p-5 md:p-6 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20 md:rounded-b-3xl">
 <button type="submit" id="submit-combined-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-2xl shadow-lg transition text-lg border border-transparent">Save Record</button>
 <button type="button" id="cancel-edit-combined-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded-xl shadow hidden-view mt-3 transition text-base border border-transparent">Cancel Edit</button>
 </div>
@@ -473,7 +469,7 @@ darkmuted: '#9ca3af'
 <div id="block-leave-repeat" class="hidden-view"></div>
 
 </div>
-<div class="shrink-0 p-5 md:p-6 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20">
+<div class="shrink-0 p-5 md:p-6 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20 md:rounded-b-3xl">
 <button type="submit" id="submit-leave-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-2xl shadow-lg transition text-lg border border-transparent">Save Record</button>
 <button type="button" id="cancel-edit-leave-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded-xl shadow hidden-view mt-3 transition text-base border border-transparent">Cancel Edit</button>
 </div>
@@ -573,7 +569,7 @@ darkmuted: '#9ca3af'
 
 </div>
 
-<div class="shrink-0 p-5 md:p-6 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20">
+<div class="shrink-0 p-5 md:p-6 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20 md:rounded-b-3xl">
 <button type="submit" id="submit-event-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-2xl shadow-lg transition text-lg border border-transparent">Save Event</button>
 <button type="button" id="cancel-edit-event-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded-xl shadow hidden-view mt-3 transition text-base border border-transparent">Cancel Edit</button>
 </div>
@@ -1059,17 +1055,17 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
-<script src="frontend/js/core/config.js?v=98"></script>
-<script src="frontend/js/core/state.js?v=98"></script>
-<script src="frontend/js/core/api.js?v=98"></script>
-<script src="frontend/js/core/auth.js?v=98"></script>
-<script src="frontend/js/ui/ui.js?v=98"></script>
-<script src="frontend/js/features/calendar.js?v=98"></script>
-<script src="frontend/js/features/parade.js?v=98"></script>
-<script src="frontend/js/ui/forms.js?v=98"></script>
-<script src="frontend/js/ui/picker.js?v=98"></script>
-<script src="frontend/js/admin/admin.js?v=98"></script>
-<script src="frontend/js/admin/structure.js?v=98"></script> 
-<script src="frontend/js/core/app.js?v=98"></script>
+<script src="frontend/js/core/config.js?v=99"></script>
+<script src="frontend/js/core/state.js?v=99"></script>
+<script src="frontend/js/core/api.js?v=99"></script>
+<script src="frontend/js/core/auth.js?v=99"></script>
+<script src="frontend/js/ui/ui.js?v=99"></script>
+<script src="frontend/js/features/calendar.js?v=99"></script>
+<script src="frontend/js/features/parade.js?v=99"></script>
+<script src="frontend/js/ui/forms.js?v=99"></script>
+<script src="frontend/js/ui/picker.js?v=99"></script>
+<script src="frontend/js/admin/admin.js?v=99"></script>
+<script src="frontend/js/admin/structure.js?v=99"></script> 
+<script src="frontend/js/core/app.js?v=99"></script>
 </body>
 </html>
