@@ -48,9 +48,9 @@ radios.forEach(r => { if(r.value === appMode) r.checked = true; });
 let allDepts = new Set(companyStructure);
 if(companyContacts) {
 companyContacts.forEach(c => {
- if(c.dept && c.dept !== 'Unassigned') {
-     c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
- }
+  if(c.dept && c.dept !== 'Unassigned') {
+      c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
+  }
 });
 }
 allDepts.add('Cloud Meeting Room');
@@ -71,9 +71,9 @@ renderTypicalEventTypes();
 tempAcronyms = {};
 if (settings.acronyms) {
 for (let key in settings.acronyms) {
- let val = settings.acronyms[key];
- if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
- else tempAcronyms[key] = val;
+  let val = settings.acronyms[key];
+  if (typeof val === 'string') tempAcronyms[key] = { full: val, active: true };
+  else tempAcronyms[key] = val;
 }
 }
 renderAcronyms();
@@ -98,12 +98,12 @@ if (el) container.appendChild(el);
 if (window.adminSectionsSortable) window.adminSectionsSortable.destroy();
 if (typeof Sortable !== 'undefined') {
 window.adminSectionsSortable = new Sortable(container, {
- animation: 150,
- handle: '.section-handle',
- ghostClass: 'opacity-50',
- onEnd: function () {
-   tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
- }
+  animation: 150,
+  handle: '.section-handle',
+  ghostClass: 'opacity-50',
+  onEnd: function () {
+    tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.section);
+  }
 });
 }
 }
@@ -123,12 +123,12 @@ if (el) contactsContainer.appendChild(el);
 if (window.adminContactsSectionsSortable) window.adminContactsSectionsSortable.destroy();
 if (typeof Sortable !== 'undefined') {
 window.adminContactsSectionsSortable = new Sortable(contactsContainer, {
- animation: 150,
- handle: '.section-handle',
- ghostClass: 'opacity-50',
- onEnd: function () {
-   tempAdminContactsSectionsOrder = Array.from(contactsContainer.children).map(el => el.dataset.section);
- }
+  animation: 150,
+  handle: '.section-handle',
+  ghostClass: 'opacity-50',
+  onEnd: function () {
+    tempAdminContactsSectionsOrder = Array.from(contactsContainer.children).map(el => el.dataset.section);
+  }
 });
 }
 }
@@ -148,7 +148,7 @@ populateAdminSettingsForm(settings);
 if(settings.allContacts) {
 companyContacts = settings.allContacts;
 companyContacts.forEach(c => {
-c.formattedName = window.formatContactName(c.name, c.dept);
+ c.formattedName = window.formatContactName(c.name, c.dept);
 });
 fuseAllContacts = new Fuse(companyContacts, { keys:['formattedName', 'name', 'dept', 'phone'], threshold: 0.3 });
 }
@@ -194,10 +194,10 @@ const list = document.getElementById('typical-event-types-list');
 if(!list) return;
 
 const buildChips = (inputId) => {
- const vars = ['{EventType}','{Name}','{Attendees}','{Department}','{Location}','{LocationDetails}','{Country}','{State}','{StartTime}','{EndTime}','{Remarks}','{EventDescription}'];
- return `<div class="flex flex-wrap gap-1 mt-1.5 mb-2">` + 
-     vars.map(v => `<button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>`).join('') + 
-     `</div>`;
+  const vars = ['{EventType}','{Name}','{Attendees}','{Department}','{Location}','{LocationDetails}','{Country}','{State}','{StartTime}','{EndTime}','{Remarks}','{EventDescription}'];
+  return `<div class="flex flex-wrap gap-1 mt-1.5 mb-2">` + 
+      vars.map(v => `<button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>`).join('') + 
+      `</div>`;
 };
 
 let html = '';
@@ -209,8 +209,8 @@ let locHtml = '';
 if (safeName === 'Generic' || safeName === 'Others') {
 locHtml = `
 <select onchange="updateTypicalEventType(${i}, 'defaultLoc', this.value)" class="w-28 md:w-32 border border-gray-300 dark:border-gray-500 rounded-lg py-1.5 px-2 bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-xs md:text-sm font-bold cursor-pointer shrink-0 shadow-sm">
- <option value="In Camp" ${t.defaultLoc === 'In Camp' ? 'selected' : ''}>In Camp</option>
- <option value="Out of Camp" ${t.defaultLoc === 'Out of Camp' ? 'selected' : ''}>Out of Camp</option>
+  <option value="In Camp" ${t.defaultLoc === 'In Camp' ? 'selected' : ''}>In Camp</option>
+  <option value="Out of Camp" ${t.defaultLoc === 'Out of Camp' ? 'selected' : ''}>Out of Camp</option>
 </select>`;
 }
 
@@ -227,146 +227,111 @@ let fieldConfigHtml = `
 <div class="mt-3 pt-3 border-t border-gray-200 dark:border-darkborder text-sm hidden-view" id="event-type-fields-${i}">
 <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-2">Form Fields Configuration</h4>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
- 
- <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
-   <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Location</div>
-   <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'location', 'show', this.checked)" ${t.fields.location.show?'checked':''}> <span>Visible</span></label>
-   <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'location', 'req', this.checked)" ${t.fields.location.req?'checked':''} ${!t.fields.location.show?'disabled':''}> <span>Required</span></label>
- </div>
- 
- <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
-   <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Location Details</div>
-   <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'locationDetails', 'show', this.checked)" ${t.fields.locationDetails.show?'checked':''}> <span>Visible</span></label>
-   <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'locationDetails', 'req', this.checked)" ${t.fields.locationDetails.req?'checked':''} ${!t.fields.locationDetails.show?'disabled':''}> <span>Required</span></label>
- </div>
- 
- <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
-   <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Attendees</div>
-   <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'attendees', 'show', this.checked)" ${t.fields.attendees.show?'checked':''}> <span>Visible</span></label>
-   <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'attendees', 'req', this.checked)" ${t.fields.attendees.req?'checked':''} ${!t.fields.attendees.show?'disabled':''}> <span>Required</span></label>
- </div>
+  
+  <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
+    <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Location</div>
+    <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'location', 'show', this.checked)" ${t.fields.location.show?'checked':''}> <span>Visible</span></label>
+    <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'location', 'req', this.checked)" ${t.fields.location.req?'checked':''} ${!t.fields.location.show?'disabled':''}> <span>Required</span></label>
+  </div>
+  
+  <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
+    <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Location Details</div>
+    <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'locationDetails', 'show', this.checked)" ${t.fields.locationDetails.show?'checked':''}> <span>Visible</span></label>
+    <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'locationDetails', 'req', this.checked)" ${t.fields.locationDetails.req?'checked':''} ${!t.fields.locationDetails.show?'disabled':''}> <span>Required</span></label>
+  </div>
+  
+  <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
+    <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Attendees</div>
+    <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'attendees', 'show', this.checked)" ${t.fields.attendees.show?'checked':''}> <span>Visible</span></label>
+    <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'attendees', 'req', this.checked)" ${t.fields.attendees.req?'checked':''} ${!t.fields.attendees.show?'disabled':''}> <span>Required</span></label>
+  </div>
 
- <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
-   <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Remarks</div>
-   <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'remarks', 'show', this.checked)" ${t.fields.remarks.show?'checked':''}> <span>Visible</span></label>
-   <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'remarks', 'req', this.checked)" ${t.fields.remarks.req?'checked':''} ${!t.fields.remarks.show?'disabled':''}> <span>Required</span></label>
-   <input type="text" value="${t.fields.remarks.label || 'Remarks'}" onchange="updateEventTypeField(${i}, 'remarks', 'label', this.value)" class="w-full mt-1 border border-gray-300 dark:border-gray-500 rounded p-1 text-[10px] bg-white dark:bg-black outline-none font-bold" placeholder="Label">
- </div>
- 
+  <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
+    <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Remarks</div>
+    <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'remarks', 'show', this.checked)" ${t.fields.remarks.show?'checked':''}> <span>Visible</span></label>
+    <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'remarks', 'req', this.checked)" ${t.fields.remarks.req?'checked':''} ${!t.fields.remarks.show?'disabled':''}> <span>Required</span></label>
+    <input type="text" value="${t.fields.remarks.label || 'Remarks'}" onchange="updateEventTypeField(${i}, 'remarks', 'label', this.value)" class="w-full mt-1 border border-gray-300 dark:border-gray-500 rounded p-1 text-[10px] bg-white dark:bg-black outline-none font-bold" placeholder="Label">
+  </div>
+  
 </div>
 </div>`;
 
 let templatesHtml = `
 <div class="w-full mt-2 pt-3 border-t border-gray-200 dark:border-darkborder hidden-view" id="event-type-tpl-${i}">
-<h4 class="font-bold text-gray-700 dark:text-gray-300 mb-2">Display Templates Override</h4>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-1">
-    <div>
-        <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">GCal Title Override</label>
-        <input type="text" id="evt-tpl-gcal-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.gcalTemplate || ''}" onchange="updateTypicalEventType(${i}, 'gcalTemplate', this.value)">
-        ${buildChips(`evt-tpl-gcal-${i}`)}
-    </div>
-    <div>
-        <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Title Override</label>
-        <input type="text" id="evt-tpl-agenda-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.agendaTemplate || ''}" onchange="updateTypicalEventType(${i}, 'agendaTemplate', this.value)">
-        ${buildChips(`evt-tpl-agenda-${i}`)}
-    </div>
-    <div>
-        <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Title Override</label>
-        <input type="text" id="evt-tpl-infoall-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.infoAllTemplate || ''}" onchange="updateTypicalEventType(${i}, 'infoAllTemplate', this.value)">
-        ${buildChips(`evt-tpl-infoall-${i}`)}
-    </div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-    <div>
-        <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Details Override</label>
-        <textarea id="evt-tpl-agedet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'agendaDetailsTemplate', this.value)">${t.agendaDetailsTemplate || ''}</textarea>
-        ${buildChips(`evt-tpl-agedet-${i}`)}
-    </div>
-    <div>
-        <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Details Override</label>
-        <textarea id="evt-tpl-infdet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'infoAllDetailsTemplate', this.value)">${t.infoAllDetailsTemplate || ''}</textarea>
-        ${buildChips(`evt-tpl-infdet-${i}`)}
-    </div>
-</div>
+ <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-2">Display Templates Override</h4>
+ <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-1">
+     <div>
+         <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">GCal Title Override</label>
+         <input type="text" id="evt-tpl-gcal-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.gcalTemplate || ''}" onchange="updateTypicalEventType(${i}, 'gcalTemplate', this.value)">
+         ${buildChips(`evt-tpl-gcal-${i}`)}
+     </div>
+     <div>
+         <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Title Override</label>
+         <input type="text" id="evt-tpl-agenda-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.agendaTemplate || ''}" onchange="updateTypicalEventType(${i}, 'agendaTemplate', this.value)">
+         ${buildChips(`evt-tpl-agenda-${i}`)}
+     </div>
+     <div>
+         <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Title Override</label>
+         <input type="text" id="evt-tpl-infoall-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.infoAllTemplate || ''}" onchange="updateTypicalEventType(${i}, 'infoAllTemplate', this.value)">
+         ${buildChips(`evt-tpl-infoall-${i}`)}
+     </div>
+ </div>
+ <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+     <div>
+         <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Details Override</label>
+         <textarea id="evt-tpl-agedet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'agendaDetailsTemplate', this.value)">${t.agendaDetailsTemplate || ''}</textarea>
+         ${buildChips(`evt-tpl-agedet-${i}`)}
+     </div>
+     <div>
+         <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Details Override</label>
+         <textarea id="evt-tpl-infdet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'infoAllDetailsTemplate', this.value)">${t.infoAllDetailsTemplate || ''}</textarea>
+         ${buildChips(`evt-tpl-infdet-${i}`)}
+     </div>
+ </div>
 </div>
 `;
-
-let orderHtml = `
-<div class="mt-3 pt-3 border-t border-gray-200 dark:border-darkborder text-sm hidden-view" id="event-type-order-${i}">
-  <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-2">Form Field Order</h4>
-  <p class="text-[10px] text-gray-500 mb-2">Drag to reorder how fields appear when this event type is selected.</p>
-  <div id="sortable-field-order-${i}" class="space-y-1.5 flex flex-col">
-`;
-
-const defaultOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
-const currentOrder = t.fieldOrder || defaultOrder;
-
-const blockNames = {
-    'time': 'Start / End Time',
-    'location': 'Location',
-    'attendees': 'Attendees',
-    'remarks': 'Remarks',
-    'repeat': 'Repeat Options',
-    'overseas': 'Country / State'
-};
-
-currentOrder.forEach(block => {
-    if(blockNames[block]) {
-        orderHtml += `
-        <div data-id="${block}" class="flex items-center space-x-2 bg-gray-50 dark:bg-[#2a2a2a] p-2 rounded border border-gray-200 dark:border-gray-600 cursor-grab shadow-sm">
-           <svg class="w-4 h-4 text-gray-400 dark:text-darkmuted field-handle shrink-0 cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-           <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">${blockNames[block]}</span>
-        </div>
-        `;
-    }
-});
-orderHtml += `</div></div>`;
 
 html += `
 <div data-idx="${i}" class="flex flex-col gap-3 bg-white dark:bg-darksurface p-3 md:p-4 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
- 
- <!-- ROW 1 -->
- <div class="flex items-center gap-2 w-full flex-nowrap">
-   <svg class="w-6 h-6 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-   ${isFixed ? `<div class="w-6 shrink-0"></div>` : ''}
-   
-   <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow min-w-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm md:text-base font-bold truncate" ${isFixed ? 'disabled' : ''}>
-   
-   <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="w-[120px] md:w-40 shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-xs md:text-sm font-bold cursor-pointer">
-    <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
-    <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
-   </select>
+  
+  <!-- ROW 1 -->
+  <div class="flex items-center gap-2 w-full flex-nowrap">
+    <svg class="w-6 h-6 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+    ${isFixed ? `<div class="w-6 shrink-0"></div>` : ''}
+    
+    <input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow min-w-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm md:text-base font-bold truncate" ${isFixed ? 'disabled' : ''}>
+    
+    <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="w-[120px] md:w-40 shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-xs md:text-sm font-bold cursor-pointer">
+     <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
+     <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
+    </select>
 
-   ${removeBtnHtml}
- </div>
+    ${removeBtnHtml}
+  </div>
 
- <!-- ROW 2 -->
- <div class="flex items-center justify-between gap-2 w-full pl-0 sm:pl-10 flex-nowrap mt-1">
-   
-   <div class="flex items-center gap-2 shrink-0">
-       <label class="flex items-center space-x-1.5 shrink-0 bg-yellow-50 dark:bg-yellow-900/20 px-2.5 py-1.5 rounded-lg border border-yellow-300 dark:border-yellow-700 cursor-pointer transition hover:bg-yellow-100 dark:hover:bg-yellow-900/40" title="If checked, this event type counts towards the Unit KAH out-of-office limit.">
-         <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-600 cursor-pointer rounded border-gray-300" ${t.isKahRelevant ? 'checked' : ''}>
-         <span class="text-[11px] md:text-xs font-bold text-yellow-800 dark:text-yellow-400 whitespace-nowrap">KAH Tracker</span>
-       </label>
-       ${locHtml}
-   </div>
+  <!-- ROW 2 -->
+  <div class="flex items-center justify-between gap-2 w-full pl-0 sm:pl-10 flex-nowrap mt-1">
+    
+    <div class="flex items-center gap-2 shrink-0">
+        <label class="flex items-center space-x-1.5 shrink-0 bg-yellow-50 dark:bg-yellow-900/20 px-2.5 py-1.5 rounded-lg border border-yellow-300 dark:border-yellow-700 cursor-pointer transition hover:bg-yellow-100 dark:hover:bg-yellow-900/40" title="If checked, this event type counts towards the Unit KAH out-of-office limit.">
+          <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-600 cursor-pointer rounded border-gray-300" ${t.isKahRelevant ? 'checked' : ''}>
+          <span class="text-[11px] md:text-xs font-bold text-yellow-800 dark:text-yellow-400 whitespace-nowrap">KAH Tracker</span>
+        </label>
+        ${locHtml}
+    </div>
 
-   <div class="flex items-center gap-1.5 shrink-0 ml-auto justify-end">
-     <button type="button" onclick="document.getElementById('event-type-order-${i}').classList.toggle('hidden-view')" class="text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 px-2.5 py-1.5 rounded-lg transition text-[11px] md:text-xs font-bold whitespace-nowrap bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-300 dark:border-emerald-700 shadow-sm" title="Field Order">
-        Order ↕️
-     </button>
-     <button type="button" onclick="document.getElementById('event-type-fields-${i}').classList.toggle('hidden-view')" class="text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 px-2.5 py-1.5 rounded-lg transition text-[11px] md:text-xs font-bold whitespace-nowrap bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700 shadow-sm" title="Configure Form Fields">
-        Fields ⚙️
-     </button>
-     <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition text-[11px] md:text-xs font-bold whitespace-nowrap bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 shadow-sm" title="Specific Templates">
-        Templates 📝
-     </button>
-   </div>
- </div>
- 
- ${fieldConfigHtml}
- ${templatesHtml}
- ${orderHtml}
+    <div class="flex items-center gap-1.5 shrink-0 ml-auto justify-end">
+      <button type="button" onclick="document.getElementById('event-type-fields-${i}').classList.toggle('hidden-view')" class="text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 px-2.5 py-1.5 rounded-lg transition text-[11px] md:text-xs font-bold whitespace-nowrap bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700 shadow-sm" title="Configure Form Fields">
+         Fields ⚙️
+      </button>
+      <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-2.5 py-1.5 rounded-lg transition text-[11px] md:text-xs font-bold whitespace-nowrap bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 shadow-sm" title="Specific Templates">
+         Templates 📝
+      </button>
+    </div>
+  </div>
+  
+  ${fieldConfigHtml}
+  ${templatesHtml}
 </div>
 `;
 });
@@ -387,21 +352,6 @@ tempTypicalEventTypes = newArr;
 renderTypicalEventTypes();
 } 
 });
-
-tempTypicalEventTypes.forEach((t, i) => {
-if(window['fieldOrderSortable' + i]) window['fieldOrderSortable' + i].destroy();
-const orderList = document.getElementById(`sortable-field-order-${i}`);
-if (orderList) {
-    window['fieldOrderSortable' + i] = new Sortable(orderList, {
-        animation: 150,
-        handle: '.field-handle',
-        ghostClass: 'opacity-50',
-        onEnd: function() {
-            tempTypicalEventTypes[i].fieldOrder = Array.from(orderList.children).map(el => el.dataset.id);
-        }
-    });
-}
-});
 }
 }
 
@@ -416,12 +366,11 @@ isEvent: isEvent,
 isKahRelevant: false,
 defaultLoc: '',
 fields: {
- location: {show: isEvent, req: false},
- locationDetails: {show: isEvent, req: false},
- attendees: {show: isEvent, req: false},
- remarks: {show: true, req: false, label: 'Remarks'}
-},
-fieldOrder: ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas']
+  location: {show: isEvent, req: false},
+  locationDetails: {show: isEvent, req: false},
+  attendees: {show: isEvent, req: false},
+  remarks: {show: true, req: false, label: 'Remarks'}
+}
 }); 
 nameInput.value = ''; 
 renderTypicalEventTypes(); 
@@ -439,13 +388,13 @@ function updateTypicalEventType(idx, field, val) {
 if (field === 'name' && FIXED_TYPICAL_EVENTS.includes(tempTypicalEventTypes[idx].name)) return;
 
 if (['gcalTemplate', 'agendaTemplate', 'agendaDetailsTemplate', 'infoAllTemplate', 'infoAllDetailsTemplate'].includes(field)) {
- if (val === '') {
-     delete tempTypicalEventTypes[idx][field];
- } else {
-     tempTypicalEventTypes[idx][field] = val;
- }
+  if (val === '') {
+      delete tempTypicalEventTypes[idx][field];
+  } else {
+      tempTypicalEventTypes[idx][field] = val;
+  }
 } else {
- tempTypicalEventTypes[idx][field] = val;
+  tempTypicalEventTypes[idx][field] = val;
 }
 
 if (field === 'isEvent') renderTypicalEventTypes(); 
@@ -453,16 +402,16 @@ if (field === 'isEvent') renderTypicalEventTypes();
 
 function updateEventTypeField(idx, fieldKey, prop, val) {
 if (!tempTypicalEventTypes[idx].fields) {
- tempTypicalEventTypes[idx].fields = {
-     location: {show: true, req: false},
-     locationDetails: {show: true, req: false},
-     attendees: {show: true, req: false},
-     remarks: {show: true, req: false, label: 'Remarks'}
- };
+  tempTypicalEventTypes[idx].fields = {
+      location: {show: true, req: false},
+      locationDetails: {show: true, req: false},
+      attendees: {show: true, req: false},
+      remarks: {show: true, req: false, label: 'Remarks'}
+  };
 }
 tempTypicalEventTypes[idx].fields[fieldKey][prop] = val;
 if (prop === 'show' && !val) {
- tempTypicalEventTypes[idx].fields[fieldKey].req = false;
+  tempTypicalEventTypes[idx].fields[fieldKey].req = false;
 }
 renderTypicalEventTypes();
 }
