@@ -267,12 +267,12 @@ cells.forEach(cell => {
 const cellDay = parseInt(cell.dataset.day);
 const isToday = cell.dataset.istoday === 'true';
 
-let baseClass = "cal-day-cell relative flex items-center justify-center w-8 h-8 mx-auto rounded-full cursor-pointer transition-colors text-sm font-medium ";
+let baseClass = "cal-day-cell relative flex items-center justify-center w-6 h-6 md:w-8 md:h-8 mx-auto rounded-full cursor-pointer transition-colors text-xs md:text-sm font-medium ";
 if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
 else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
 if (cellDay === d) {
-baseClass = "cal-day-cell relative flex items-center justify-center w-8 h-8 mx-auto rounded-full cursor-pointer transition-colors text-sm font-bold bg-blue-600 text-white shadow-md ";
+baseClass = "cal-day-cell relative flex items-center justify-center w-6 h-6 md:w-8 md:h-8 mx-auto rounded-full cursor-pointer transition-colors text-xs md:text-sm font-bold bg-blue-600 text-white shadow-md ";
 }
 
 cell.className = baseClass;
@@ -280,7 +280,7 @@ cell.className = baseClass;
 const hasEvent = cell.dataset.hasevent === 'true';
 if (hasEvent) {
 const dotColor = cellDay === d ? 'bg-white' : 'bg-blue-500';
-cell.innerHTML = `${cellDay}<div class="absolute bottom-1 w-1.5 h-1.5 ${dotColor} rounded-full"></div>`;
+cell.innerHTML = `${cellDay}<div class="absolute bottom-0.5 md:bottom-1 w-1 h-1 md:w-1.5 md:h-1.5 ${dotColor} rounded-full"></div>`;
 } else {
 cell.innerHTML = `${cellDay}`;
 }
@@ -406,13 +406,13 @@ const isSelected = current.toDateString() === selDate.toDateString();
 const isToday = current.toDateString() === new Date().toDateString();
 const hasEvent = data.some(l => isEventOnDate(l, current));
 
-let baseClass = "cal-day-cell relative flex items-center justify-center w-8 h-8 mx-auto rounded-full cursor-pointer transition-colors text-sm font-medium ";
+let baseClass = "cal-day-cell relative flex items-center justify-center w-6 h-6 md:w-8 md:h-8 mx-auto rounded-full cursor-pointer transition-colors text-xs md:text-sm font-medium ";
 if (isSelected) baseClass += "bg-blue-600 text-white font-bold shadow-md ";
 else if (isToday) baseClass += "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 dark:ring-1 dark:ring-blue-500 font-bold ";
 else baseClass += "hover:bg-gray-200 dark:hover:bg-darkhover ";
 
 const dotColor = isSelected ? 'bg-white' : 'bg-blue-500';
-const dot = hasEvent ? `<div class="absolute bottom-1 w-1.5 h-1.5 ${dotColor} rounded-full"></div>` : '';
+const dot = hasEvent ? `<div class="absolute bottom-0.5 md:bottom-1 w-1 h-1 md:w-1.5 md:h-1.5 ${dotColor} rounded-full"></div>` : '';
 
 html += `<div class="${baseClass}" data-day="${d}" data-istoday="${isToday}" data-hasevent="${hasEvent}" onclick="selectDate('${ctx}', ${y}, ${m}, ${d})">${d}${dot}</div>`;
 }
