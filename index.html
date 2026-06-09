@@ -80,20 +80,20 @@ darkmuted: '#9ca3af'
 
 <!-- Main Workspace Layout -->
 <div class="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-gray-50 dark:bg-darkbase pt-[24px] lg:pt-0">
-<nav class="bg-white/90 dark:bg-darksurface/90 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-darkborder px-3 md:px-5 py-2 flex justify-between items-center z-40 shrink-0 min-h-[64px] w-full gap-2">
+<nav class="bg-white/90 dark:bg-darksurface/90 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-darkborder px-2 md:px-4 py-1.5 flex justify-between items-center z-40 shrink-0 min-h-[52px] w-full gap-2">
     <!-- LEFT -->
     <div class="flex flex-col justify-center flex-1 min-w-0">
-        <div class="font-extrabold text-[22px] text-blue-600 dark:text-blue-400 leading-none whitespace-nowrap truncate lg:hidden mb-1.5">Cloudy</div>
-        <div class="flex items-center">
+        <div class="font-extrabold text-[20px] md:text-[22px] text-blue-600 dark:text-blue-400 leading-none lg:hidden mb-1 truncate">Cloudy</div>
+        <div class="flex items-center min-w-0 w-full">
             <button id="menu-btn" onclick="toggleMenu()" class="p-1 -ml-1 mr-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-darkhover text-gray-700 dark:text-darktext hidden lg:hidden transition shrink-0">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
             </button>
-            <div id="active-tab-title" class="text-lg font-bold text-gray-500 dark:text-gray-400 hidden leading-none truncate"></div>
+            <div id="active-tab-title" class="text-[12px] md:text-sm font-bold text-gray-600 dark:text-gray-300 hidden leading-tight whitespace-normal break-words pr-1"></div>
         </div>
     </div>
 
     <!-- MIDDLE -->
-    <div id="dash-controls-wrapper" class="hidden flex-col items-center justify-center gap-2 shrink-0 flex-1 min-w-0">
+    <div id="dash-controls-wrapper" class="hidden flex-col items-center justify-center gap-1.5 shrink-0 flex-1 min-w-0">
         <select id="dash-dept-nav" class="hidden w-auto text-sm border-2 border-blue-400 dark:border-blue-600 rounded-lg py-1 pl-3 pr-8 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer max-w-[130px] md:max-w-[160px] truncate" onchange="window.agendaDirty=true; renderDashboard();">
             <option value="">All Depts</option>
         </select>
@@ -174,7 +174,7 @@ darkmuted: '#9ca3af'
 
 <!-- TOP WIDGETS CONTAINER -->
 <div id="dash-top-widgets-container" class="flex flex-row w-full gap-3 shrink-0 max-h-[190px] md:max-h-[220px]">
-<div id="dash-cal-wrapper" class="flex-1 min-w-0 bg-white dark:bg-darksurface rounded-xl shadow-sm border border-gray-200 dark:border-darkborder p-2.5 flex flex-col transition-all duration-300">
+<div id="dash-cal-wrapper" class="w-[45%] md:flex-1 min-w-0 bg-white dark:bg-darksurface rounded-xl shadow-sm border border-gray-200 dark:border-darkborder p-2.5 flex flex-col transition-all duration-300">
 <div class="flex justify-between items-center mb-1.5 shrink-0">
 <button onclick="changeMonth('dash', -1)" class="px-2 py-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-black transition leading-none text-gray-700 dark:text-gray-300 text-sm">◀</button>
 <div id="dash-cal-month" class="font-extrabold text-[13px] md:text-sm leading-none whitespace-nowrap overflow-hidden text-ellipsis text-gray-900 dark:text-white flex-1 text-center mx-1"></div>
@@ -184,9 +184,9 @@ darkmuted: '#9ca3af'
 <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-1 font-medium flex-grow items-start"></div>
 </div>
 
-<div id="dash-infoall-container" class="flex-1 min-w-0 hidden-view flex flex-col bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-3 md:p-4 shadow-sm border-2 border-blue-100 dark:border-blue-800/50 transition-all duration-300">
-<h4 id="dash-infoall-title" class="font-extrabold text-xs md:text-sm text-blue-700 dark:text-blue-400 mb-2 tracking-wide flex items-center shrink-0 min-w-0 uppercase">
-<span class="mr-1.5 shrink-0">📌</span> <span class="truncate">INFO ALL</span>
+<div id="dash-infoall-container" class="w-[55%] md:flex-1 min-w-0 hidden-view flex flex-col bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-2 md:p-3 shadow-sm border-2 border-blue-100 dark:border-blue-800/50 transition-all duration-300">
+<h4 id="dash-infoall-title" class="font-extrabold text-xs md:text-sm text-blue-700 dark:text-blue-400 mb-1.5 tracking-wide flex items-center shrink-0 min-w-0 uppercase">
+<span class="mr-1.5 shrink-0">📌</span> <span class="truncate">ANNOUNCEMENTS</span>
 </h4>
 <div id="dash-infoall-list" class="flex-grow overflow-y-auto space-y-2 pr-1 scrollbar-hide text-[11px] md:text-xs"></div>
 </div>
@@ -232,7 +232,7 @@ darkmuted: '#9ca3af'
 
 <div class="px-3 pt-3 flex flex-col space-y-3 shrink-0 max-w-7xl mx-auto w-full">
 <div id="my-top-widgets-container" class="flex flex-row w-full gap-3 shrink-0 max-h-[190px] md:max-h-[220px]">
-<div id="my-cal-wrapper" class="flex-1 min-w-0 bg-white dark:bg-darksurface rounded-xl shadow-sm border border-gray-200 dark:border-darkborder p-2.5 flex flex-col transition-all duration-300">
+<div id="my-cal-wrapper" class="w-[45%] md:flex-1 min-w-0 bg-white dark:bg-darksurface rounded-xl shadow-sm border border-gray-200 dark:border-darkborder p-2.5 flex flex-col transition-all duration-300">
 <div class="flex justify-between items-center mb-1.5 shrink-0">
 <button onclick="changeMonth('my', -1)" class="px-2 py-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-black transition leading-none text-gray-700 dark:text-gray-300 text-sm">◀</button>
 <div id="my-cal-month" class="font-extrabold text-[13px] md:text-sm leading-none whitespace-nowrap overflow-hidden text-ellipsis text-gray-800 dark:text-white flex-1 text-center mx-1"></div>
@@ -242,9 +242,9 @@ darkmuted: '#9ca3af'
 <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-1 font-medium flex-grow items-start"></div>
 </div>
 
-<div id="my-infoall-container" class="flex-1 min-w-0 hidden-view flex flex-col bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-3 md:p-4 shadow-sm border-2 border-blue-100 dark:border-blue-800/50 transition-all duration-300">
-<h4 id="my-infoall-title" class="font-extrabold text-xs md:text-sm text-blue-700 dark:text-blue-400 mb-2 tracking-wide flex items-center shrink-0 min-w-0 uppercase">
-<span class="mr-1.5 shrink-0">📌</span> <span class="truncate">INFO ALL</span>
+<div id="my-infoall-container" class="w-[55%] md:flex-1 min-w-0 hidden-view flex flex-col bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-2 md:p-3 shadow-sm border-2 border-blue-100 dark:border-blue-800/50 transition-all duration-300">
+<h4 id="my-infoall-title" class="font-extrabold text-xs md:text-sm text-blue-700 dark:text-blue-400 mb-1.5 tracking-wide flex items-center shrink-0 min-w-0 uppercase">
+<span class="mr-1.5 shrink-0">📌</span> <span class="truncate">ANNOUNCEMENTS</span>
 </h4>
 <div id="my-infoall-list" class="flex-grow overflow-y-auto space-y-2 pr-1 scrollbar-hide text-[11px] md:text-xs"></div>
 </div>
@@ -1063,17 +1063,17 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
-<script src="frontend/js/core/config.js?v=101"></script>
-<script src="frontend/js/core/state.js?v=101"></script>
-<script src="frontend/js/core/api.js?v=101"></script>
-<script src="frontend/js/core/auth.js?v=101"></script>
-<script src="frontend/js/ui/ui.js?v=101"></script>
-<script src="frontend/js/features/calendar.js?v=101"></script>
-<script src="frontend/js/features/parade.js?v=101"></script>
-<script src="frontend/js/ui/forms.js?v=101"></script>
-<script src="frontend/js/ui/picker.js?v=101"></script>
-<script src="frontend/js/admin/admin.js?v=101"></script>
-<script src="frontend/js/admin/structure.js?v=101"></script> 
-<script src="frontend/js/core/app.js?v=101"></script>
+<script src="frontend/js/core/config.js?v=102"></script>
+<script src="frontend/js/core/state.js?v=102"></script>
+<script src="frontend/js/core/api.js?v=102"></script>
+<script src="frontend/js/core/auth.js?v=102"></script>
+<script src="frontend/js/ui/ui.js?v=102"></script>
+<script src="frontend/js/features/calendar.js?v=102"></script>
+<script src="frontend/js/features/parade.js?v=102"></script>
+<script src="frontend/js/ui/forms.js?v=102"></script>
+<script src="frontend/js/ui/picker.js?v=102"></script>
+<script src="frontend/js/admin/admin.js?v=102"></script>
+<script src="frontend/js/admin/structure.js?v=102"></script> 
+<script src="frontend/js/core/app.js?v=102"></script>
 </body>
 </html>
