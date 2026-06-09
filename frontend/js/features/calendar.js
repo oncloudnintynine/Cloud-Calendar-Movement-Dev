@@ -78,10 +78,10 @@ const container = document.getElementById(`${ctx}-top-widgets-container`);
 const btn = document.getElementById(`${ctx}-toggle-widgets-btn`);
 
 if (window.isTopWidgetsHidden[ctx]) {
-if(container) container.classList.add('hidden-view');
+if(container) { container.classList.add('hidden-view'); container.classList.remove('flex'); }
 if(btn) btn.innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg> Show Cal`;
 } else {
-if(container) container.classList.remove('hidden-view');
+if(container) { container.classList.remove('hidden-view'); container.classList.add('flex'); }
 if(btn) btn.innerHTML = `<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal`;
 }
 };
@@ -175,6 +175,9 @@ const dashWrapMonth = document.getElementById('dash-month-wrapper');
 const myWrapAgenda = document.getElementById('my-agenda-wrapper');
 const myWrapMonth = document.getElementById('my-month-wrapper');
 
+const dashTopWidgets = document.getElementById('dash-top-widgets-container');
+const myTopWidgets = document.getElementById('my-top-widgets-container');
+
 const activeClass =['bg-white', 'dark:bg-darksurface', 'shadow', 'text-blue-600', 'dark:text-blue-400', 'font-bold'];
 const inactiveClass =['text-gray-500', 'dark:text-darkmuted', 'hover:text-gray-800', 'dark:hover:text-gray-200', 'bg-transparent', 'font-semibold'];
 
@@ -186,6 +189,9 @@ if (dashWrapAgenda) dashWrapAgenda.classList.remove('hidden-view');
 if (dashWrapMonth) dashWrapMonth.classList.add('hidden-view');
 if (myWrapAgenda) myWrapAgenda.classList.remove('hidden-view');
 if (myWrapMonth) myWrapMonth.classList.add('hidden-view');
+
+if (dashTopWidgets && !window.isTopWidgetsHidden['dash']) { dashTopWidgets.classList.remove('hidden-view'); dashTopWidgets.classList.add('flex'); }
+if (myTopWidgets && !window.isTopWidgetsHidden['my']) { myTopWidgets.classList.remove('hidden-view'); myTopWidgets.classList.add('flex'); }
 } else {
 btnMonth.classList.add(...activeClass); btnMonth.classList.remove(...inactiveClass);
 btnAgenda.classList.remove(...activeClass); btnAgenda.classList.add(...inactiveClass);
@@ -201,6 +207,9 @@ myWrapMonth.classList.remove('hidden-view');
 myWrapMonth.classList.add('flex');
 }
 if (myWrapAgenda) myWrapAgenda.classList.add('hidden-view');
+
+if (dashTopWidgets) { dashTopWidgets.classList.add('hidden-view'); dashTopWidgets.classList.remove('flex'); }
+if (myTopWidgets) { myTopWidgets.classList.add('hidden-view'); myTopWidgets.classList.remove('flex'); }
 }
 
 window.agendaDirty = true;
@@ -662,10 +671,10 @@ actionBtns = `
 </button>`;
 
 compactActionBtns = `
-<button onclick="triggerEdit('${l.ID}')" class="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition shrink-0" title="Edit Record">
+<button onclick="triggerEdit('${l.ID}')" class="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition shrink-0" title="Edit Record">
 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.89 1.147l-2.952.81a.375.375 0 01-.465-.465l.81-2.952a4.5 4.5 0 011.147-1.89L16.862 4.487z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125L16.862 4.487" /></svg>
 </button>
-<button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition shrink-0" title="Cancel Record">
+<button onclick="cancelLeave('${l.ID}', '${l.Phone}')" class="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition shrink-0" title="Cancel Record">
 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
 </button>`;
 }
@@ -796,21 +805,21 @@ ${compactActionBtns ? `<div class="flex justify-end space-x-1 mt-1.5 pt-1.5 bord
 </div>`;
 }
 
-return `<div class="p-3 rounded-xl bg-white dark:bg-darkinput shadow-sm flex flex-col transition hover:shadow-md border border-transparent dark:border-darkborder/50">
+return `<div class="p-3 md:p-4 rounded-xl bg-white dark:bg-darkinput shadow-sm flex flex-col transition hover:shadow-md border border-gray-200 dark:border-darkborder">
 <div class="flex justify-between items-start ${hasBody ? 'cursor-pointer select-none' : ''}" ${hasBody ? 'onclick="toggleAgendaCard(this)"' : ''}>
 <div class="flex-grow pr-2">
-<h3 class="font-bold text-xs md:text-sm text-gray-900 dark:text-gray-100 leading-tight">${finalTitle}</h3>
-${!isMyCalendar && !isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-[11px] text-gray-700 dark:text-darktext mt-0.5">(${l.HalfDay})</p>` : ''}
+<h3 class="font-bold text-sm md:text-base text-gray-900 dark:text-gray-100 leading-tight">${finalTitle}</h3>
+${!isMyCalendar && !isEvent && l.HalfDay !== 'None' && l.HalfDay !== 'NONE' ? `<p class="font-medium text-xs text-gray-700 dark:text-darktext mt-0.5">(${l.HalfDay})</p>` : ''}
 </div>
 <div class="flex items-center shrink-0">
-<span class="text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-md text-center inline-block leading-tight shadow-sm ${getBadgeClass(l.Status, l.LeaveType)}">${formatStatusBadge(l.Status, l.LeaveType)}</span>
-${hasBody ? `<svg class="w-4 h-4 ml-1.5 text-gray-400 dark:text-darkmuted transition-transform duration-300 chevron-icon shrink-0 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>` : ''}
+<span class="text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-md text-center inline-block leading-tight shadow-sm ${getBadgeClass(l.Status, l.LeaveType)}">${formatStatusBadge(l.Status, l.LeaveType)}</span>
+${hasBody ? `<svg class="w-5 h-5 ml-1.5 text-gray-400 dark:text-darkmuted transition-transform duration-300 chevron-icon shrink-0 ${isCollapsed ? '' : 'rotate-180'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>` : ''}
 </div>
 </div>
 ${hasBody ? `
 <div class="agenda-card-body ${isCollapsed ? 'hidden-view' : ''}">
 <div class="flex justify-between items-end gap-2 mt-2">
-${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow pt-1.5 border-t border-gray-100 dark:border-darkborder/50">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
+${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow pt-1.5">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
 ${actionBtns ? `<div class="flex shrink-0 space-x-1.5 pb-0.5">${actionBtns}</div>` : ''}
 </div>
 </div>` : ''}
