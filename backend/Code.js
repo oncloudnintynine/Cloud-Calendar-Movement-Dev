@@ -26,11 +26,11 @@ if (!props.getProperty('adminContactsSectionsOrder')) props.setProperty('adminCo
 var typicalEventTypes = props.getProperty('typicalEventTypes');
 if (!typicalEventTypes) {
 var defaultTypes =[
-{name: 'Generic', isEvent: true, defaultLoc: 'In Camp', isKahRelevant: false, fields: { location:{show:true, req:true}, locationDetails:{show:true,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:true,label:'Meeting Description'} }, fieldOrder: ['location', 'attendees', 'dateRange', 'remarks', 'country']},
-{name: 'Others', isEvent: true, defaultLoc: 'Out of Camp', isKahRelevant: false, fields: { location:{show:true, req:true}, locationDetails:{show:true,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:false,label:'Remarks'} }, fieldOrder: ['location', 'attendees', 'dateRange', 'remarks', 'country']},
-{name: 'Official Trip', isEvent: false, isKahRelevant: true, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:false,label:'Remarks'} }, fieldOrder: ['country', 'dateRange', 'remarks', 'location', 'attendees']},
-{name: 'Overseas Leave', isEvent: false, isKahRelevant: true, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:false,req:false}, remarks:{show:true,req:false,label:'Remarks'} }, fieldOrder: ['country', 'dateRange', 'remarks', 'location', 'attendees']},
-{name: 'Local Leave', isEvent: false, isKahRelevant: false, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:false,req:false}, remarks:{show:true,req:false,label:'Remarks'} }, fieldOrder: ['location', 'attendees', 'dateRange', 'remarks', 'country']}
+{name: 'Generic', isEvent: true, defaultLoc: 'In Camp', isKahRelevant: false, fields: { location:{show:true, req:true}, locationDetails:{show:true,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:true,label:'Meeting Description'} }},
+{name: 'Others', isEvent: true, defaultLoc: 'Out of Camp', isKahRelevant: false, fields: { location:{show:true, req:true}, locationDetails:{show:true,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:false,label:'Remarks'} }},
+{name: 'Official Trip', isEvent: false, isKahRelevant: true, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:true,req:false}, remarks:{show:true,req:false,label:'Remarks'} }},
+{name: 'Overseas Leave', isEvent: false, isKahRelevant: true, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:false,req:false}, remarks:{show:true,req:false,label:'Remarks'} }},
+{name: 'Local Leave', isEvent: false, isKahRelevant: false, fields: { location:{show:false, req:false}, locationDetails:{show:false,req:false}, attendees:{show:false,req:false}, remarks:{show:true,req:false,label:'Remarks'} }}
 ];
 props.setProperty('typicalEventTypes', JSON.stringify(defaultTypes));
 } else {
@@ -41,25 +41,17 @@ if (t.name === 'Meeting') { t.name = 'Generic'; updated = true; }
 if (t.defaultLoc === 'Office') { t.defaultLoc = 'In Camp'; updated = true; }
 if (t.defaultLoc === 'Others') { t.defaultLoc = 'Out of Camp'; updated = true; }
 if (!t.fields) {
-   t.fields = {
-       location: {show: t.isEvent, req: t.isEvent},
-       locationDetails: {show: t.isEvent, req: false},
-       attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
-       remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
-   };
-   updated = true;
+    t.fields = {
+        location: {show: t.isEvent, req: t.isEvent},
+        locationDetails: {show: t.isEvent, req: false},
+        attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
+        remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
+    };
+    updated = true;
 }
 if (typeof t.isKahRelevant === 'undefined') {
-   t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
-   updated = true;
-}
-if (!t.fieldOrder) {
-   if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
-       t.fieldOrder = ['country', 'dateRange', 'remarks', 'location', 'attendees'];
-   } else {
-       t.fieldOrder = ['location', 'attendees', 'dateRange', 'remarks', 'country'];
-   }
-   updated = true;
+    t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
+    updated = true;
 }
 });
 if (updated) props.setProperty('typicalEventTypes', JSON.stringify(existing));
