@@ -7,13 +7,13 @@ isInfoAll = forceState !== undefined ? forceState : !isInfoAll;['form-event-info
 const btn = document.getElementById(id);
 if(!btn) return;
 if(isInfoAll) {
- btn.innerHTML = '📢 Info All (ON)';
- btn.classList.add('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
- btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
+btn.innerHTML = '📢 Info All (ON)';
+btn.classList.add('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
+btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 } else {
- btn.innerHTML = 'Info All';
- btn.classList.remove('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
- btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
+btn.innerHTML = 'Info All';
+btn.classList.remove('bg-yellow-400', 'dark:bg-yellow-500', 'text-yellow-900', 'dark:text-yellow-900', 'border-yellow-500', 'dark:border-yellow-400', 'shadow-md');
+btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-100', 'dark:hover:bg-darkhover');
 }
 });
 }
@@ -49,12 +49,12 @@ const wrapper = document.getElementById(`${ctx}-meeting-room-wrapper`);
 const checkbox = document.getElementById(`form-${ctx}-meeting-room`);
 
 if (locEl && wrapper) {
- if (locEl.value === 'Out of Camp') {
-     wrapper.classList.add('hidden-view');
-     if (checkbox) checkbox.checked = false;
- } else {
-     wrapper.classList.remove('hidden-view');
- }
+if (locEl.value === 'Out of Camp') {
+    wrapper.classList.add('hidden-view');
+    if (checkbox) checkbox.checked = false;
+} else {
+    wrapper.classList.remove('hidden-view');
+}
 }
 }
 
@@ -63,32 +63,58 @@ if (!typeObj || !typeObj.fields) return;
 const fields = typeObj.fields;
 
 const setField = (wrapperId, inputId, config) => {
- const wrapper = document.getElementById(wrapperId);
- const input = document.getElementById(inputId);
- if (wrapper) {
-     if (config.show) wrapper.classList.remove('hidden-view');
-     else wrapper.classList.add('hidden-view');
- }
- if (input) {
-     input.required = config.req;
-     const label = document.getElementById(`label-${inputId}`);
-     if (label && wrapperId) {
-         label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
-     }
- }
+const wrapper = document.getElementById(wrapperId);
+const input = document.getElementById(inputId);
+if (wrapper) {
+    if (config.show) wrapper.classList.remove('hidden-view');
+    else wrapper.classList.add('hidden-view');
+}
+if (input) {
+    input.required = config.req;
+    const label = document.getElementById(`label-${inputId}`);
+    if (label && wrapperId) {
+        label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
+    }
+}
 };
 
 setField(`wrapper-${ctx}-location`, `form-${ctx}-location`, fields.location);
 setField(`wrapper-${ctx}-location-details`, `form-${ctx}-location-details`, fields.locationDetails);
-setField(`${ctx}-attendees-wrapper`, `form-${ctx}-attendee-search`, fields.attendees);
+setField(`wrapper-${ctx}-attendees`, `form-${ctx}-attendee-search`, fields.attendees);
 
 const remarksInput = document.getElementById(`form-${ctx}-remarks`);
 const remarksLabel = document.getElementById(`label-${ctx}-remarks`);
 if (remarksInput && remarksLabel) {
- remarksInput.required = fields.remarks.req;
- remarksInput.placeholder = fields.remarks.req ? `Enter ${fields.remarks.label.toLowerCase()} (Required)` : "";
- remarksLabel.innerHTML = `${fields.remarks.label} ${fields.remarks.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500">(Optional)</span>'}`;
+remarksInput.required = fields.remarks.req;
+remarksInput.placeholder = fields.remarks.req ? `Enter ${fields.remarks.label.toLowerCase()} (Required)` : "";
+remarksLabel.innerHTML = `${fields.remarks.label} ${fields.remarks.req ? '<span class="text-red-500">*</span>' : '<span class="text-[10px] font-normal text-gray-500">(Optional)</span>'}`;
 }
+}
+
+function reorderFields(ctx, typeObj) {
+const wrappers = {
+    'location': document.getElementById(`wrapper-${ctx}-location-main`),
+    'attendees': document.getElementById(`wrapper-${ctx}-attendees`),
+    'dateRange': document.getElementById(`wrapper-${ctx}-daterange`),
+    'country': document.getElementById(`wrapper-${ctx}-country`),
+    'remarks': document.getElementById(`wrapper-${ctx}-remarks`)
+};
+
+Object.values(wrappers).forEach(el => { if(el) el.style.order = 99; });
+
+if (typeObj && typeObj.fieldOrder) {
+    typeObj.fieldOrder.forEach((key, idx) => {
+        if (wrappers[key]) wrappers[key].style.order = idx + 2; 
+    });
+}
+}
+
+function applyDynamicFieldsAndReorder(ctx) {
+const typeInput = document.getElementById(`form-${ctx}-type`) || document.getElementById(`form-${ctx}-name`);
+if (!typeInput) return;
+const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === typeInput.value) : null;
+applyDynamicFields(ctx, typeObj);
+reorderFields(ctx, typeObj);
 }
 
 function toggleCombinedFields() {
@@ -98,17 +124,18 @@ const val = typeInput.value;
 const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === val) : null;
 const isEvent = typeObj ? typeObj.isEvent : true;
 
-const eventFields = document.getElementById('combined-event-fields');
-const leaveFields = document.getElementById('combined-leave-fields');
-const locationInput = document.getElementById('form-combined-location');
-const btnInfoAll = document.getElementById('form-combined-infoall-btn');
-
 applyDynamicFields('combined', typeObj);
 
+const eventDates = document.getElementById('combined-event-dates');
+const leaveDates = document.getElementById('combined-leave-dates');
+const btnInfoAll = document.getElementById('form-combined-infoall-btn');
+const countryWrapper = document.getElementById('wrapper-combined-country');
+const locationInput = document.getElementById('form-combined-location');
+
 if (isEvent) {
-eventFields.classList.remove('hidden-view');
-leaveFields.classList.add('hidden-view');
-btnInfoAll.classList.remove('hidden-view');
+if(eventDates) eventDates.classList.remove('hidden-view');
+if(leaveDates) leaveDates.classList.add('hidden-view');
+if(btnInfoAll) btnInfoAll.classList.remove('hidden-view');
 
 if (!locationInput.value || locationInput.value.trim() === '') {
 let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
@@ -116,18 +143,20 @@ if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
 locationInput.value = defLoc;
 toggleMeetingRoomCheckbox('combined');
 }
+if(countryWrapper) countryWrapper.classList.add('hidden-view');
 
 } else {
-eventFields.classList.add('hidden-view');
-leaveFields.classList.remove('hidden-view');
-btnInfoAll.classList.add('hidden-view');
+if(eventDates) eventDates.classList.add('hidden-view');
+if(leaveDates) leaveDates.classList.remove('hidden-view');
+if(btnInfoAll) btnInfoAll.classList.add('hidden-view');
 
-const overseas = document.getElementById('combined-overseas-fields');
 const cInput = document.getElementById('form-combined-country');
 if (val === 'Overseas Leave' || val === 'Official Trip') { 
-overseas.classList.remove('hidden-view'); cInput.required = true; 
+if(countryWrapper) countryWrapper.classList.remove('hidden-view'); 
+if(cInput) cInput.required = true; 
 } else { 
-overseas.classList.add('hidden-view'); cInput.required = false; 
+if(countryWrapper) countryWrapper.classList.add('hidden-view'); 
+if(cInput) cInput.required = false; 
 }
 
 const leaveTimeStart = document.getElementById('combined-leave-time-start');
@@ -140,6 +169,41 @@ if(leaveTimeStart) leaveTimeStart.classList.remove('hidden-view');
 if(leaveTimeEnd) leaveTimeEnd.classList.remove('hidden-view');
 }
 }
+
+reorderFields('combined', typeObj);
+}
+
+function toggleOverseasFields(ctx) {
+const typeInput = document.getElementById(`form-${ctx}-type`);
+if (!typeInput) return;
+const type = typeInput.value;
+const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === type) : null;
+applyDynamicFields(ctx, typeObj);
+
+const el = document.getElementById(`wrapper-${ctx}-country`);
+const cInput = document.getElementById(`form-${ctx}-country`);
+const timeStart = document.getElementById(`${ctx}-time-start`);
+const timeEnd = document.getElementById(`${ctx}-time-end`);
+
+if (type === 'Overseas Leave' || type === 'Official Trip') { 
+if(el) el.classList.remove('hidden-view'); 
+if(cInput) cInput.required = true; 
+} else { 
+if(el) el.classList.add('hidden-view'); 
+if(cInput) cInput.required = false; cInput.value = ''; 
+const sInput = document.getElementById(`form-${ctx}-state`);
+if(sInput) sInput.value = '';
+}
+
+if (type === 'Official Trip') {
+if(timeStart) timeStart.classList.add('hidden-view');
+if(timeEnd) timeEnd.classList.add('hidden-view');
+} else {
+if(timeStart) timeStart.classList.remove('hidden-view');
+if(timeEnd) timeEnd.classList.remove('hidden-view');
+}
+
+reorderFields(ctx, typeObj);
 }
 
 // --- Admin Submit on Behalf Logic ---
@@ -260,16 +324,18 @@ selectBehalf(ctx, l.Name, l.Phone, l.Department);
 
 const typeEl = document.getElementById(`form-${ctx}-type`) || document.getElementById(`form-${ctx}-name`);
 if (typeEl) {
- typeEl.value = l.LeaveType;
- if (ctx === 'event' || ctx === 'leave') {
-     applyDynamicFields(ctx, typeObj);
- }
+typeEl.value = l.LeaveType;
+if (ctx === 'event' || ctx === 'leave') {
+    applyDynamicFields(ctx, typeObj);
+}
 }
 
 if (appMode === 'combined') {
 toggleCombinedFields();
 } else if (!isEvent) {
 toggleOverseasFields('leave');
+} else {
+applyDynamicFieldsAndReorder('event');
 }
 
 if (isEvent || l.LeaveType === 'Official Trip') {
@@ -280,8 +346,8 @@ eventAttendees = JSON.parse(l.Attendees);
 } catch(e) {
 const savedPhones = String(l.Attendees).split(',');
 savedPhones.forEach(ph => {
- const contact = companyContacts.find(c => String(c.phone) === String(ph));
- if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, formattedName: contact.formattedName, dept: contact.dept, type: 'contact' });
+const contact = companyContacts.find(c => String(c.phone) === String(ph));
+if(contact) eventAttendees.push({ id: contact.phone, name: contact.name, formattedName: contact.formattedName, dept: contact.dept, type: 'contact' });
 });
 }
 }
@@ -295,10 +361,10 @@ document.getElementById(`form-${ctx}-allday`).checked = appData[ctx].isAllDay;
 
 const locEl = document.getElementById(`form-${ctx}-location`);
 if (locEl) {
- let val = l.Location || 'In Camp';
- if (val !== 'In Camp' && val !== 'Out of Camp') val = 'Out of Camp';
- locEl.value = val;
- toggleMeetingRoomCheckbox(ctx);
+let val = l.Location || 'In Camp';
+if (val !== 'In Camp' && val !== 'Out of Camp') val = 'Out of Camp';
+locEl.value = val;
+toggleMeetingRoomCheckbox(ctx);
 }
 
 const locDetEl = document.getElementById(`form-${ctx}-location-details`);
@@ -366,7 +432,10 @@ updateTimeSliderVisual('start', 'AM', 'leave'); updateTimeSliderVisual('end', 'P
 updateTimeSliderVisual('start', 'AM', 'combined'); updateTimeSliderVisual('end', 'PM', 'combined');
 
 if (appMode === 'combined') toggleCombinedFields();
-else toggleOverseasFields('leave');
+else {
+toggleOverseasFields('leave');
+applyDynamicFieldsAndReorder('event');
+}
 
 toggleInfoAll(false);
 toggleRepeatUntil('event');
@@ -411,33 +480,6 @@ tPM.classList.remove(act); tPM.classList.add(...inact);
 }
 }
 
-function toggleOverseasFields(ctx) {
-const typeInput = document.getElementById(`form-${ctx}-type`);
-if (!typeInput) return;
-const type = typeInput.value;
-const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === type) : null;
-applyDynamicFields(ctx, typeObj);
-
-const el = document.getElementById(`${ctx}-overseas-fields`);
-const cInput = document.getElementById(`form-${ctx}-country`);
-const timeStart = document.getElementById(`${ctx}-time-start`);
-const timeEnd = document.getElementById(`${ctx}-time-end`);
-
-if (type === 'Overseas Leave' || type === 'Official Trip') { 
-el.classList.remove('hidden-view'); cInput.required = true; 
-} else { 
-el.classList.add('hidden-view'); cInput.required = false; cInput.value = ''; document.getElementById(`form-${ctx}-state`).value = ''; 
-}
-
-if (type === 'Official Trip') {
-if(timeStart) timeStart.classList.add('hidden-view');
-if(timeEnd) timeEnd.classList.add('hidden-view');
-} else {
-if(timeStart) timeStart.classList.remove('hidden-view');
-if(timeEnd) timeEnd.classList.remove('hidden-view');
-}
-}
-
 function submitForm(ctx) {
 let targetName = user.name;
 let targetPhone = user.phone;
@@ -452,7 +494,7 @@ targetName = adminBehalfUser.name;
 targetPhone = adminBehalfUser.phone;
 targetDepts = new Set();
 if (adminBehalfUser.dept) {
- adminBehalfUser.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+adminBehalfUser.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 }
 } else if (user.role === 'admin' && !adminBehalfUser) {
 alert("Admin: Please select a user to submit on behalf of.");
@@ -511,9 +553,9 @@ state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`
 
 if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
 eventAttendees.forEach(a => { 
-  if (a.dept !== 'Custom' && a.dept) {
-      a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
-  } 
+ if (a.dept !== 'Custom' && a.dept) {
+     a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+ } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
 }
@@ -534,7 +576,7 @@ eventUntilDate = toLocalISO(appData[ctx].untilD);
 if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
 eventAttendees.forEach(a => { 
 if (a.dept !== 'Custom' && a.dept) {
-   a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+  a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
@@ -588,7 +630,7 @@ UntilDate: eventUntilDate
 if (isEdit) {
 const existingIdx = allLeaves.findIndex(l => l.ID === targetId);
 if (existingIdx !== -1) {
-   allLeaves[existingIdx] = localMock;
+  allLeaves[existingIdx] = localMock;
 }
 } else {
 allLeaves.push(localMock);
