@@ -33,13 +33,15 @@ darkmuted: '#9ca3af'
 }
 </script>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-darkbase dark:text-darktext transition-colors duration-200 h-[100dvh] flex flex-col lg:flex-row text-base overflow-hidden">
+<body class="bg-gray-50 text-gray-900 dark:bg-darkbase dark:text-darktext transition-colors duration-200 h-[100dvh] flex flex-col text-base overflow-hidden">
 
 <div id="loader" class="fixed inset-0 bg-white/90 dark:bg-darkbase/90 backdrop-blur-sm z-[100] flex-col items-center justify-center hidden">
 <div class="spinner mb-4"></div><p class="font-bold text-xl text-blue-600 dark:text-blue-400 tracking-wide">Processing...</p>
 </div>
 
-<div id="dev-banner" class="bg-red-600 text-white text-center py-1 text-xs font-bold tracking-widest hidden z-[60] fixed top-0 w-full">DEV MODE</div>
+<div id="dev-banner" class="bg-red-600 text-white text-center py-1 text-xs font-bold tracking-widest hidden z-[60] w-full shrink-0">DEV MODE</div>
+
+<div class="flex-1 flex flex-col lg:flex-row overflow-hidden w-full relative">
 
 <!-- Sidebar: Fixed slide-over on mobile, permanent elegant column on desktop -->
 <div id="slide-menu" class="fixed inset-0 bg-black/60 z-50 hidden-view lg:!relative lg:!flex lg:!w-72 lg:!bg-transparent lg:!z-auto lg:border-r border-gray-200 dark:border-darkborder" onclick="if(event.target.id === 'slide-menu') closeMenu()">
@@ -79,7 +81,7 @@ darkmuted: '#9ca3af'
 </div>
 
 <!-- Main Workspace Layout -->
-<div class="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-gray-50 dark:bg-darkbase pt-[24px] lg:pt-0">
+<div class="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden bg-gray-50 dark:bg-darkbase">
 <nav class="bg-white/90 dark:bg-darksurface/90 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-darkborder px-2 md:px-4 py-1.5 flex justify-between items-center z-40 shrink-0 min-h-[52px] w-full gap-2">
     <!-- LEFT -->
     <div class="flex flex-col justify-center flex-1 min-w-0">
@@ -196,10 +198,10 @@ darkmuted: '#9ca3af'
 <div id="dash-agenda-wrapper" class="flex flex-col flex-grow overflow-hidden max-w-7xl mx-auto w-full px-3 md:px-4 mt-2">
 <div class="flex justify-between items-center mb-1.5 shrink-0 py-1.5 border-b border-gray-200 dark:border-darkborder">
 <h3 class="font-extrabold text-lg text-gray-800 dark:text-gray-100">Agenda</h3>
-<div class="flex space-x-1 md:space-x-2">
-<button id="dash-toggle-widgets-btn" onclick="window.toggleTopWidgets('dash')" class="flex items-center text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal</button>
-<button type="button" onclick="jumpToToday('dash')" class="text-[10px] md:text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
-<button id="dash-expand-toggle-btn" onclick="toggleAllAgendaCards('dash')" class="text-[10px] md:text-sm font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
+<div class="flex space-x-1 md:space-x-1.5">
+<button id="dash-toggle-widgets-btn" onclick="window.toggleTopWidgets('dash')" class="flex items-center text-[10px] md:text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal</button>
+<button type="button" onclick="jumpToToday('dash')" class="text-[10px] md:text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
+<button id="dash-expand-toggle-btn" onclick="toggleAllAgendaCards('dash')" class="text-[10px] md:text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
 </div>
 </div>
 <div id="dash-agenda" class="flex-1 overflow-y-auto pr-1 pb-10 scrollbar-hide w-full"></div>
@@ -254,10 +256,10 @@ darkmuted: '#9ca3af'
 <div id="my-agenda-wrapper" class="flex flex-col flex-grow overflow-hidden max-w-7xl mx-auto w-full px-3 md:px-4 mt-2">
 <div class="flex justify-between items-center mb-1.5 shrink-0 py-1.5 border-b border-gray-200 dark:border-darkborder">
 <h3 class="font-extrabold text-lg text-gray-800 dark:text-gray-100">My Agenda</h3>
-<div class="flex space-x-1 md:space-x-2">
-<button id="my-toggle-widgets-btn" onclick="window.toggleTopWidgets('my')" class="flex items-center text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg> Hide Cal</button>
-<button type="button" onclick="jumpToToday('my')" class="text-[10px] md:text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
-<button id="my-expand-toggle-btn" onclick="toggleAllAgendaCards('my')" class="text-[10px] md:text-sm font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
+<div class="flex space-x-1 md:space-x-1.5">
+<button id="my-toggle-widgets-btn" onclick="window.toggleTopWidgets('my')" class="flex items-center text-[10px] md:text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg> Hide Cal</button>
+<button type="button" onclick="jumpToToday('my')" class="text-[10px] md:text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
+<button id="my-expand-toggle-btn" onclick="toggleAllAgendaCards('my')" class="text-[10px] md:text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
 </div>
 </div>
 <div id="my-agenda" class="flex-1 overflow-y-auto pr-1 pb-10 scrollbar-hide w-full"></div>
@@ -1063,17 +1065,17 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
-<script src="frontend/js/core/config.js?v=104"></script>
-<script src="frontend/js/core/state.js?v=104"></script>
-<script src="frontend/js/core/api.js?v=104"></script>
-<script src="frontend/js/core/auth.js?v=104"></script>
-<script src="frontend/js/ui/ui.js?v=104"></script>
-<script src="frontend/js/features/calendar.js?v=104"></script>
-<script src="frontend/js/features/parade.js?v=104"></script>
-<script src="frontend/js/ui/forms.js?v=104"></script>
-<script src="frontend/js/ui/picker.js?v=104"></script>
-<script src="frontend/js/admin/admin.js?v=104"></script>
-<script src="frontend/js/admin/structure.js?v=104"></script> 
-<script src="frontend/js/core/app.js?v=104"></script>
+<script src="frontend/js/core/config.js?v=105"></script>
+<script src="frontend/js/core/state.js?v=105"></script>
+<script src="frontend/js/core/api.js?v=105"></script>
+<script src="frontend/js/core/auth.js?v=105"></script>
+<script src="frontend/js/ui/ui.js?v=105"></script>
+<script src="frontend/js/features/calendar.js?v=105"></script>
+<script src="frontend/js/features/parade.js?v=105"></script>
+<script src="frontend/js/ui/forms.js?v=105"></script>
+<script src="frontend/js/ui/picker.js?v=105"></script>
+<script src="frontend/js/admin/admin.js?v=105"></script>
+<script src="frontend/js/admin/structure.js?v=105"></script> 
+<script src="frontend/js/core/app.js?v=105"></script>
 </body>
 </html>
