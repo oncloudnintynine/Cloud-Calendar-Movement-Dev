@@ -88,12 +88,12 @@ darkmuted: '#9ca3af'
             <button id="menu-btn" onclick="toggleMenu()" class="p-1 -ml-1 mr-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-darkhover text-gray-700 dark:text-darktext hidden lg:hidden transition shrink-0">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
             </button>
-            <div id="active-tab-title" class="text-[12px] md:text-sm font-bold text-gray-600 dark:text-gray-300 hidden leading-tight whitespace-normal break-words pr-1"></div>
+            <div id="active-tab-title" class="text-sm md:text-xl font-bold text-gray-700 dark:text-gray-200 hidden leading-tight whitespace-normal break-words pr-1"></div>
         </div>
     </div>
 
     <!-- MIDDLE -->
-    <div id="dash-controls-wrapper" class="hidden flex-col items-center justify-center gap-1.5 shrink-0 flex-1 min-w-0">
+    <div id="dash-controls-wrapper" class="hidden flex-col md:flex-row items-center justify-center gap-1.5 md:gap-3 shrink-0 flex-1 min-w-0">
         <select id="dash-dept-nav" class="hidden w-auto text-sm border-2 border-blue-400 dark:border-blue-600 rounded-lg py-1 pl-3 pr-8 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer max-w-[130px] md:max-w-[160px] truncate" onchange="window.agendaDirty=true; renderDashboard();">
             <option value="">All Depts</option>
         </select>
@@ -184,8 +184,8 @@ darkmuted: '#9ca3af'
 <div id="dash-cal-grid" class="grid grid-cols-7 text-center gap-y-1 font-medium flex-grow items-start"></div>
 </div>
 
-<div id="dash-infoall-container" class="w-[55%] md:flex-1 min-w-0 hidden-view flex flex-col bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-2 md:p-3 shadow-sm border-2 border-blue-100 dark:border-blue-800/50 transition-all duration-300">
-<h4 id="dash-infoall-title" class="font-extrabold text-xs md:text-sm text-blue-700 dark:text-blue-400 mb-1.5 tracking-wide flex items-center shrink-0 min-w-0 uppercase">
+<div id="dash-infoall-container" class="w-[55%] md:flex-1 min-w-0 hidden-view flex flex-col bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-3 md:p-4 shadow-sm border-2 border-blue-100 dark:border-blue-800/50 transition-all duration-300">
+<h4 id="dash-infoall-title" class="font-extrabold text-xs md:text-sm text-blue-700 dark:text-blue-400 mb-2 tracking-wide flex items-center shrink-0 min-w-0 uppercase">
 <span class="mr-1.5 shrink-0">📌</span> <span class="truncate">ANNOUNCEMENTS</span>
 </h4>
 <div id="dash-infoall-list" class="flex-grow overflow-y-auto space-y-2 pr-1 scrollbar-hide text-[11px] md:text-xs"></div>
@@ -196,22 +196,22 @@ darkmuted: '#9ca3af'
 <div id="dash-agenda-wrapper" class="flex flex-col flex-grow overflow-hidden max-w-7xl mx-auto w-full px-3 md:px-4 mt-2">
 <div class="flex justify-between items-center mb-1.5 shrink-0 py-1.5 border-b border-gray-200 dark:border-darkborder">
 <h3 class="font-extrabold text-lg text-gray-800 dark:text-gray-100">Agenda</h3>
-<div class="flex space-x-1 md:space-x-1.5">
-<button id="dash-toggle-widgets-btn" onclick="window.toggleTopWidgets('dash')" class="flex items-center text-[10px] md:text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal</button>
-<button type="button" onclick="jumpToToday('dash')" class="text-[10px] md:text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
-<button id="dash-expand-toggle-btn" onclick="toggleAllAgendaCards('dash')" class="text-[10px] md:text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
+<div class="flex space-x-1 md:space-x-2">
+<button id="dash-toggle-widgets-btn" onclick="window.toggleTopWidgets('dash')" class="flex items-center text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" x2="22" y1="2" y2="22" /></svg> Hide Cal</button>
+<button type="button" onclick="jumpToToday('dash')" class="text-[10px] md:text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
+<button id="dash-expand-toggle-btn" onclick="toggleAllAgendaCards('dash')" class="text-[10px] md:text-sm font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
 </div>
 </div>
 <div id="dash-agenda" class="flex-1 overflow-y-auto pr-1 pb-10 scrollbar-hide w-full"></div>
 </div>
 
-<div id="dash-month-wrapper" class="hidden-view flex-grow flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border border-gray-200 dark:border-darkborder p-3 max-w-7xl mx-auto w-full mb-3 mt-2">
+<div id="dash-month-wrapper" class="hidden-view flex-grow flex-col overflow-hidden bg-transparent p-0 max-w-7xl mx-auto w-full mb-3 mt-2">
 <div class="flex justify-between items-center mb-2 shrink-0 px-1">
-<button onclick="changeMonth('dash', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm border border-transparent dark:border-darkborder text-gray-700 dark:text-gray-300">◀ Prev</button>
+<button onclick="changeMonth('dash', -1)" class="p-1 hover:bg-gray-200 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm text-gray-700 dark:text-gray-300">◀ Prev</button>
 <div id="dash-month-title" class="font-extrabold text-lg text-gray-900 dark:text-white"></div>
-<button onclick="changeMonth('dash', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm border border-transparent dark:border-darkborder text-gray-700 dark:text-gray-300">Next ▶</button>
+<button onclick="changeMonth('dash', 1)" class="p-1 hover:bg-gray-200 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm text-gray-700 dark:text-gray-300">Next ▶</button>
 </div>
-<div class="grid grid-cols-7 text-center text-[11px] font-bold text-gray-500 dark:text-darkmuted mb-1 shrink-0 border-b border-gray-200 dark:border-darkborder pb-1.5">
+<div class="grid grid-cols-7 text-center text-[11px] font-bold text-gray-500 dark:text-darkmuted mb-1 shrink-0 pb-1.5">
 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
 </div>
 <div id="dash-month-grid" class="flex-grow overflow-y-auto flex flex-col pt-1.5"></div>
@@ -242,8 +242,8 @@ darkmuted: '#9ca3af'
 <div id="my-cal-grid" class="grid grid-cols-7 text-center gap-y-1 font-medium flex-grow items-start"></div>
 </div>
 
-<div id="my-infoall-container" class="w-[55%] md:flex-1 min-w-0 hidden-view flex flex-col bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-2 md:p-3 shadow-sm border-2 border-blue-100 dark:border-blue-800/50 transition-all duration-300">
-<h4 id="my-infoall-title" class="font-extrabold text-xs md:text-sm text-blue-700 dark:text-blue-400 mb-1.5 tracking-wide flex items-center shrink-0 min-w-0 uppercase">
+<div id="my-infoall-container" class="w-[55%] md:flex-1 min-w-0 hidden-view flex flex-col bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-3 md:p-4 shadow-sm border-2 border-blue-100 dark:border-blue-800/50 transition-all duration-300">
+<h4 id="my-infoall-title" class="font-extrabold text-xs md:text-sm text-blue-700 dark:text-blue-400 mb-2 tracking-wide flex items-center shrink-0 min-w-0 uppercase">
 <span class="mr-1.5 shrink-0">📌</span> <span class="truncate">ANNOUNCEMENTS</span>
 </h4>
 <div id="my-infoall-list" class="flex-grow overflow-y-auto space-y-2 pr-1 scrollbar-hide text-[11px] md:text-xs"></div>
@@ -254,22 +254,22 @@ darkmuted: '#9ca3af'
 <div id="my-agenda-wrapper" class="flex flex-col flex-grow overflow-hidden max-w-7xl mx-auto w-full px-3 md:px-4 mt-2">
 <div class="flex justify-between items-center mb-1.5 shrink-0 py-1.5 border-b border-gray-200 dark:border-darkborder">
 <h3 class="font-extrabold text-lg text-gray-800 dark:text-gray-100">My Agenda</h3>
-<div class="flex space-x-1 md:space-x-1.5">
-<button id="my-toggle-widgets-btn" onclick="window.toggleTopWidgets('my')" class="flex items-center text-[10px] md:text-xs font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg> Hide Cal</button>
-<button type="button" onclick="jumpToToday('my')" class="text-[10px] md:text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
-<button id="my-expand-toggle-btn" onclick="toggleAllAgendaCards('my')" class="text-[10px] md:text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-2 md:px-2.5 py-1 rounded-lg transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
+<div class="flex space-x-1 md:space-x-2">
+<button id="my-toggle-widgets-btn" onclick="window.toggleTopWidgets('my')" class="flex items-center text-[10px] md:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-darkinput border border-gray-300 dark:border-darkborder px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-gray-50 dark:hover:bg-darkhover"><svg class="w-3.5 h-3.5 md:w-4 md:h-4 mr-1 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg> Hide Cal</button>
+<button type="button" onclick="jumpToToday('my')" class="text-[10px] md:text-sm font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40">Today</button>
+<button id="my-expand-toggle-btn" onclick="toggleAllAgendaCards('my')" class="text-[10px] md:text-sm font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-2.5 md:px-3 py-1.5 rounded-lg transition shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900/40">Collapse All</button>
 </div>
 </div>
 <div id="my-agenda" class="flex-1 overflow-y-auto pr-1 pb-10 scrollbar-hide w-full"></div>
 </div>
 
-<div id="my-month-wrapper" class="hidden-view flex-grow flex-col overflow-hidden bg-white dark:bg-darksurface rounded-xl shadow-sm border border-gray-200 dark:border-darkborder p-3 max-w-7xl mx-auto w-full mb-3 mt-2">
+<div id="my-month-wrapper" class="hidden-view flex-grow flex-col overflow-hidden bg-transparent p-0 max-w-7xl mx-auto w-full mb-3 mt-2">
 <div class="flex justify-between items-center mb-2 shrink-0 px-1">
-<button onclick="changeMonth('my', -1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm border border-transparent dark:border-darkborder text-gray-700 dark:text-gray-300">◀ Prev</button>
+<button onclick="changeMonth('my', -1)" class="p-1 hover:bg-gray-200 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm text-gray-700 dark:text-gray-300">◀ Prev</button>
 <div id="my-month-title" class="font-extrabold text-lg text-gray-900 dark:text-white"></div>
-<button onclick="changeMonth('my', 1)" class="p-1 hover:bg-gray-100 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm border border-transparent dark:border-darkborder text-gray-700 dark:text-gray-300">Next ▶</button>
+<button onclick="changeMonth('my', 1)" class="p-1 hover:bg-gray-200 dark:hover:bg-darkhover rounded-lg font-bold transition text-sm text-gray-700 dark:text-gray-300">Next ▶</button>
 </div>
-<div class="grid grid-cols-7 text-center text-[11px] font-bold text-gray-500 dark:text-darkmuted mb-1 shrink-0 border-b border-gray-200 dark:border-darkborder pb-1.5">
+<div class="grid grid-cols-7 text-center text-[11px] font-bold text-gray-500 dark:text-darkmuted mb-1 shrink-0 pb-1.5">
 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
 </div>
 <div id="my-month-grid" class="flex-grow overflow-y-auto flex flex-col pt-1.5"></div>
@@ -1063,17 +1063,17 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
-<script src="frontend/js/core/config.js?v=102"></script>
-<script src="frontend/js/core/state.js?v=102"></script>
-<script src="frontend/js/core/api.js?v=102"></script>
-<script src="frontend/js/core/auth.js?v=102"></script>
-<script src="frontend/js/ui/ui.js?v=102"></script>
-<script src="frontend/js/features/calendar.js?v=102"></script>
-<script src="frontend/js/features/parade.js?v=102"></script>
-<script src="frontend/js/ui/forms.js?v=102"></script>
-<script src="frontend/js/ui/picker.js?v=102"></script>
-<script src="frontend/js/admin/admin.js?v=102"></script>
-<script src="frontend/js/admin/structure.js?v=102"></script> 
-<script src="frontend/js/core/app.js?v=102"></script>
+<script src="frontend/js/core/config.js?v=104"></script>
+<script src="frontend/js/core/state.js?v=104"></script>
+<script src="frontend/js/core/api.js?v=104"></script>
+<script src="frontend/js/core/auth.js?v=104"></script>
+<script src="frontend/js/ui/ui.js?v=104"></script>
+<script src="frontend/js/features/calendar.js?v=104"></script>
+<script src="frontend/js/features/parade.js?v=104"></script>
+<script src="frontend/js/ui/forms.js?v=104"></script>
+<script src="frontend/js/ui/picker.js?v=104"></script>
+<script src="frontend/js/admin/admin.js?v=104"></script>
+<script src="frontend/js/admin/structure.js?v=104"></script> 
+<script src="frontend/js/core/app.js?v=104"></script>
 </body>
 </html>
