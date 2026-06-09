@@ -13,10 +13,11 @@ throw new Error("Unauthorized to submit data on behalf of others.");
 
 var id = data.id || Utilities.getUuid(); // Use frontend generated ID if provided
 var eventIds = createGCalEvents(data, props);
+var timestamp = new Date();
 
 var row = new Array(headers.length).fill('');
 row[headers.indexOf('ID')] = id;
-row[headers.indexOf('Timestamp')] = new Date();
+row[headers.indexOf('Timestamp')] = timestamp;
 row[headers.indexOf('Phone')] = data.phone;
 row[headers.indexOf('Name')] = data.name;
 row[headers.indexOf('Department')] = data.departments.join(',');
@@ -37,6 +38,8 @@ row[headers.indexOf('IsAllDay')] = data.isAllDay ? 'TRUE' : 'FALSE';
 row[headers.indexOf('UntilDate')] = data.untilDate || '';
 row[headers.indexOf('LocationDetails')] = data.locationDetails || '';
 
+data.timestamp = timestamp; // Pass down for KAH check
+
 sheet.appendRow(row);
 
 // Run a complete board-wide recalculation to heal/flag KAH limits accurately based on the new entry
@@ -46,14 +49,14 @@ var sheetRows = sheet.getDataRange().getValues();
 recalculateAllKahStatuses(props, sheet, headers, sheetRows);
 var freshRows = sheet.getDataRange().getValues();
 for (var i = freshRows.length - 1; i >= 1; i--) {
-   if (freshRows[i][headers.indexOf('ID')] === id) {
-       finalStatus = freshRows[i][headers.indexOf('Status')];
-       break;
-   }
+  if (freshRows[i][headers.indexOf('ID')] === id) {
+      finalStatus = freshRows[i][headers.indexOf('Status')];
+      break;
+  }
 }
 } catch(e) {
 // Fallback if recalc fails
-var kahExceededDept = checkKahLimit(data, props, sheet);
+var kahExceededDept = checkKahLimit(data, props, sheet, id);
 finalStatus = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
 var lastRowIdx = sheet.getLastRow();
 sheet.getRange(lastRowIdx, headers.indexOf('Status') + 1).setValue(finalStatus);
@@ -86,26 +89,27 @@ var oldEventIds = (rows[targetRowIdx][headers.indexOf('EventIDs')] || '').split(
 oldEventIds.forEach(function(calAndEvt) {
 if (!calAndEvt) return;
 try {
- var parts = calAndEvt.split('|');
- if (parts.length === 2) {
-   var cal = CalendarApp.getCalendarById(parts[0]);
-   if (cal) {
-     var evt = cal.getEventById(parts[1]);
-     if (evt) evt.deleteEvent();
-     else {
-       var series = cal.getEventSeriesById(parts[1]);
-       if (series) series.deleteEventSeries();
-     }
-   }
- }
+var parts = calAndEvt.split('|');
+if (parts.length === 2) {
+  var cal = CalendarApp.getCalendarById(parts[0]);
+  if (cal) {
+    var evt = cal.getEventById(parts[1]);
+    if (evt) evt.deleteEvent();
+    else {
+      var series = cal.getEventSeriesById(parts[1]);
+      if (series) series.deleteEventSeries();
+    }
+  }
+}
 } catch(e) {}
 });
 
 var newEventIds = createGCalEvents(data, props);
+var timestamp = new Date();
 
 var newRow = new Array(headers.length).fill('');
 newRow[headers.indexOf('ID')] = data.id;
-newRow[headers.indexOf('Timestamp')] = new Date();
+newRow[headers.indexOf('Timestamp')] = timestamp;
 newRow[headers.indexOf('Phone')] = data.phone;
 newRow[headers.indexOf('Name')] = data.name;
 newRow[headers.indexOf('Department')] = data.departments.join(',');
@@ -125,6 +129,8 @@ newRow[headers.indexOf('InfoAll')] = data.infoAll ? 'TRUE' : 'FALSE';
 newRow[headers.indexOf('IsAllDay')] = data.isAllDay ? 'TRUE' : 'FALSE';
 newRow[headers.indexOf('UntilDate')] = data.untilDate || '';
 newRow[headers.indexOf('LocationDetails')] = data.locationDetails || '';
+
+data.timestamp = timestamp; // Pass down for KAH check
 
 sheet.getRange(targetRowIdx + 1, 1, 1, headers.length).setValues([newRow]);
 
@@ -164,44 +170,44 @@ for (var i=0; i<lines.length; i++) {
 var line = lines[i];
 if (line.indexOf('BEGIN:VEVENT') === 0) currentEvent = {};
 else if (line.indexOf('END:VEVENT') === 0 && currentEvent) {
- if (currentEvent.start && currentEvent.summary) {
-    var y = parseInt(currentEvent.start.substring(0,4), 10);
-    var m = parseInt(currentEvent.start.substring(4,6), 10) - 1;
-    var d = parseInt(currentEvent.start.substring(6,8), 10);
-    if (y >= yearLimitStart) {
-        var sDate = new Date(y, m, d);
-        var eDate = new Date(y, m, d, 23, 59, 59);
-        events.push({
-           ID: 'HOLIDAY_' + (currentEvent.uid || Utilities.getUuid()),
-           Timestamp: sDate.toISOString(),
-           Phone: 'SYSTEM',
-           Name: currentEvent.summary.replace(/\\,/g, ','),
-           Department: 'ALL',
-           LeaveType: 'Public Holiday',
-           StartDate: sDate.toISOString(),
-           EndDate: eDate.toISOString(),
-           HalfDay: 'NONE',
-           CoveringPerson: '',
-           Country: 'Singapore',
-           State: '',
-           Remarks: 'Singapore Public Holiday',
-           Status: 'Holiday',
-           EventIDs: '',
-           Location: 'Singapore',
-           Attendees: '',
-           InfoAll: 'TRUE',
-           IsAllDay: 'TRUE',
-           UntilDate: '',
-           LocationDetails: ''
-        });
-    }
- }
- currentEvent = null;
+if (currentEvent.start && currentEvent.summary) {
+   var y = parseInt(currentEvent.start.substring(0,4), 10);
+   var m = parseInt(currentEvent.start.substring(4,6), 10) - 1;
+   var d = parseInt(currentEvent.start.substring(6,8), 10);
+   if (y >= yearLimitStart) {
+       var sDate = new Date(y, m, d);
+       var eDate = new Date(y, m, d, 23, 59, 59);
+       events.push({
+          ID: 'HOLIDAY_' + (currentEvent.uid || Utilities.getUuid()),
+          Timestamp: sDate.toISOString(),
+          Phone: 'SYSTEM',
+          Name: currentEvent.summary.replace(/\\,/g, ','),
+          Department: 'ALL',
+          LeaveType: 'Public Holiday',
+          StartDate: sDate.toISOString(),
+          EndDate: eDate.toISOString(),
+          HalfDay: 'NONE',
+          CoveringPerson: '',
+          Country: 'Singapore',
+          State: '',
+          Remarks: 'Singapore Public Holiday',
+          Status: 'Holiday',
+          EventIDs: '',
+          Location: 'Singapore',
+          Attendees: '',
+          InfoAll: 'TRUE',
+          IsAllDay: 'TRUE',
+          UntilDate: '',
+          LocationDetails: ''
+       });
+   }
+}
+currentEvent = null;
 }
 else if (currentEvent) {
- if (line.indexOf('DTSTART;VALUE=DATE:') === 0) currentEvent.start = line.split(':')[1];
- else if (line.indexOf('SUMMARY:') === 0) currentEvent.summary = line.substring(8);
- else if (line.indexOf('UID:') === 0) currentEvent.uid = line.substring(4);
+if (line.indexOf('DTSTART;VALUE=DATE:') === 0) currentEvent.start = line.split(':')[1];
+else if (line.indexOf('SUMMARY:') === 0) currentEvent.summary = line.substring(8);
+else if (line.indexOf('UID:') === 0) currentEvent.uid = line.substring(4);
 }
 }
 cache.put("sg_holidays_json", JSON.stringify(events), 21600); // 6 hour cache
@@ -226,8 +232,8 @@ if (phone && person.memberships) {
 var depts =[];
 person.memberships.forEach(function(m) {
 if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
- var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
- if (gName) depts.push(gName);
+var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+if (gName) depts.push(gName);
 }
 });
 if(depts.length > 0) phoneToDepts[phone] = depts.join(',');
@@ -246,28 +252,28 @@ if (obj.Status !== 'Cancelled' && obj.EventIDs && new Date(obj.EndDate) >= today
 var eventPairs = String(obj.EventIDs).split(',');
 var allDeleted = true;
 for (var e = 0; e < eventPairs.length; e++) {
-   if (!eventPairs[e]) continue;
-   var parts = eventPairs[e].split('|');
-   if (parts.length === 2) {
-       try {
-           var cal = CalendarApp.getCalendarById(parts[0]);
-           if (cal) {
-               var evt = cal.getEventById(parts[1]) || cal.getEventSeriesById(parts[1]);
-               if (evt) {
-                   allDeleted = false;
-                   break; // At least one event still exists, keep active
-               }
-           }
-       } catch(err) {
-           // Ignore API errors, assume exists to be safe
-           allDeleted = false; 
-       }
-   }
+  if (!eventPairs[e]) continue;
+  var parts = eventPairs[e].split('|');
+  if (parts.length === 2) {
+      try {
+          var cal = CalendarApp.getCalendarById(parts[0]);
+          if (cal) {
+              var evt = cal.getEventById(parts[1]) || cal.getEventSeriesById(parts[1]);
+              if (evt) {
+                  allDeleted = false;
+                  break; // At least one event still exists, keep active
+              }
+          }
+      } catch(err) {
+          // Ignore API errors, assume exists to be safe
+          allDeleted = false; 
+      }
+  }
 }
 if (allDeleted && eventPairs.length > 0) {
-   obj.Status = 'Cancelled';
-   rows[i][headers.indexOf('Status')] = 'Cancelled';
-   updates = true;
+  obj.Status = 'Cancelled';
+  rows[i][headers.indexOf('Status')] = 'Cancelled';
+  updates = true;
 }
 }
 // -----------------------------------------------------
@@ -279,12 +285,12 @@ if (obj.Attendees) {
 try {
 var att = JSON.parse(obj.Attendees);
 att.forEach(function(a) {
- if (a.dept && a.dept !== 'Custom') {
-   var dp = a.dept.split(',');
-   dp.forEach(function(d) {
-     if (d.trim() && attDepts.indexOf(d.trim()) === -1) attDepts.push(d.trim());
-   });
- }
+if (a.dept && a.dept !== 'Custom') {
+  var dp = a.dept.split(',');
+  dp.forEach(function(d) {
+    if (d.trim() && attDepts.indexOf(d.trim()) === -1) attDepts.push(d.trim());
+  });
+}
 });
 } catch(e) {}
 }
@@ -341,18 +347,18 @@ var eventIds = (rows[i][headers.indexOf('EventIDs')] || '').split(',');
 eventIds.forEach(function(calAndEvt) {
 if (!calAndEvt) return;
 try {
- var parts = calAndEvt.split('|');
- if(parts.length === 2) {
-   var cal = CalendarApp.getCalendarById(parts[0]);
-   if (cal) {
-     var evt = cal.getEventById(parts[1]);
-     if (evt) evt.deleteEvent();
-     else {
-       var series = cal.getEventSeriesById(parts[1]);
-       if (series) series.deleteEventSeries();
-     }
-   }
- }
+var parts = calAndEvt.split('|');
+if(parts.length === 2) {
+  var cal = CalendarApp.getCalendarById(parts[0]);
+  if (cal) {
+    var evt = cal.getEventById(parts[1]);
+    if (evt) evt.deleteEvent();
+    else {
+      var series = cal.getEventSeriesById(parts[1]);
+      if (series) series.deleteEventSeries();
+    }
+  }
+}
 } catch(e) {}
 });
 
@@ -385,7 +391,7 @@ var limit = parseInt(props.getProperty('kahLimit') || "50");
 
 var userKAHData = kahList.filter(function(k) { return String(k.phone) === String(data.phone); });
 var userCustomGroups = customKahGroups.filter(function(g) { 
-   return g.members.map(function(m) { return String(m); }).indexOf(String(data.phone)) !== -1; 
+  return g.members.map(function(m) { return String(m); }).indexOf(String(data.phone)) !== -1; 
 });
 
 if (userKAHData.length === 0 && userCustomGroups.length === 0) return false;
@@ -397,11 +403,18 @@ reqStart.setHours(0, 0, 0, 0);
 var reqEnd = new Date(data.endDate);
 reqEnd.setHours(23, 59, 59, 999);
 
+var targetTimestamp = data.timestamp ? new Date(data.timestamp) : new Date();
+
 var otherKAHLeaves = [];
 for (var i = 1; i < rows.length; i++) {
 var rId = rows[i][headers.indexOf('ID')];
 var rStatus = rows[i][headers.indexOf('Status')];
 if (rStatus === 'Cancelled' || rId === skipId) continue;
+
+var rTimestamp = new Date(rows[i][headers.indexOf('Timestamp')]);
+
+// ONLY count leaves submitted/edited BEFORE this one. This prevents earlier approved events from being retroactively flagged.
+if (rTimestamp > targetTimestamp) continue;
 
 var rType = rows[i][headers.indexOf('LeaveType')];
 var rKahRel = false;
@@ -410,18 +423,18 @@ if (typicalEventTypes[k].name === rType && typicalEventTypes[k].isKahRelevant) {
 }
 
 if (rKahRel) {
-  var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
-  rStart.setHours(0, 0, 0, 0);
-  var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
-  rEnd.setHours(23, 59, 59, 999);
-  
-  if (rStart > reqEnd || rEnd < reqStart) continue;
+ var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
+ rStart.setHours(0, 0, 0, 0);
+ var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
+ rEnd.setHours(23, 59, 59, 999);
+ 
+ if (rStart > reqEnd || rEnd < reqStart) continue;
 
-  otherKAHLeaves.push({
-      phone: String(rows[i][headers.indexOf('Phone')]),
-      start: rStart,
-      end: rEnd
-  });
+ otherKAHLeaves.push({
+     phone: String(rows[i][headers.indexOf('Phone')]),
+     start: rStart,
+     end: rEnd
+ });
 }
 }
 
@@ -436,23 +449,23 @@ if (totalKahInDept === 0) return;
 var maxConcurrentOut = 0;
 
 for (var current = new Date(reqStart); current <= reqEnd; current.setDate(current.getDate() + 1)) {
-  var outToday = [String(data.phone)]; 
-  
-  otherKAHLeaves.forEach(function(l) {
-      if (l.start <= current && l.end >= current) {
-          if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
-              outToday.push(l.phone);
-          }
-      }
-  });
-  
-  if (outToday.length > maxConcurrentOut) {
-      maxConcurrentOut = outToday.length;
-  }
+ var outToday = [String(data.phone)]; 
+ 
+ otherKAHLeaves.forEach(function(l) {
+     if (l.start <= current && l.end >= current) {
+         if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
+             outToday.push(l.phone);
+         }
+     }
+ });
+ 
+ if (outToday.length > maxConcurrentOut) {
+     maxConcurrentOut = outToday.length;
+ }
 }
 
 if ((maxConcurrentOut / totalKahInDept) * 100 > limit) {
-  exceededDepts.push(dept);
+ exceededDepts.push(dept);
 }
 });
 
@@ -467,23 +480,23 @@ if (totalKahInDept === 0) return;
 var maxConcurrentOut = 0;
 
 for (var current = new Date(reqStart); current <= reqEnd; current.setDate(current.getDate() + 1)) {
-  var outToday = [String(data.phone)]; 
-  
-  otherKAHLeaves.forEach(function(l) {
-      if (l.start <= current && l.end >= current) {
-          if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
-              outToday.push(l.phone);
-          }
-      }
-  });
-  
-  if (outToday.length > maxConcurrentOut) {
-      maxConcurrentOut = outToday.length;
-  }
+ var outToday = [String(data.phone)]; 
+ 
+ otherKAHLeaves.forEach(function(l) {
+     if (l.start <= current && l.end >= current) {
+         if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
+             outToday.push(l.phone);
+         }
+     }
+ });
+ 
+ if (outToday.length > maxConcurrentOut) {
+     maxConcurrentOut = outToday.length;
+ }
 }
 
 if ((maxConcurrentOut / totalKahInDept) * 100 > limit) {
-  exceededDepts.push(dept);
+ exceededDepts.push(dept);
 }
 });
 
@@ -504,18 +517,18 @@ var fullLoc = data.location || data.country || "";
 if (data.locationDetails) fullLoc += " - " + data.locationDetails;
 
 var finalSubject = subjectTemplate
- .replace(/{Name}/g, data.name || "")
- .replace(/{EventType}/g, data.leaveType || "")
- .replace(/{Unit}/g, deptStr || "")
- .replace(/{Location}/g, fullLoc)
- .replace(/{Remarks}/g, data.remarks || "");
- 
+.replace(/{Name}/g, data.name || "")
+.replace(/{EventType}/g, data.leaveType || "")
+.replace(/{Unit}/g, deptStr || "")
+.replace(/{Location}/g, fullLoc)
+.replace(/{Remarks}/g, data.remarks || "");
+
 var finalBody = bodyTemplate
- .replace(/{Name}/g, data.name || "")
- .replace(/{EventType}/g, data.leaveType || "")
- .replace(/{Unit}/g, deptStr || "")
- .replace(/{Location}/g, fullLoc)
- .replace(/{Remarks}/g, data.remarks || "");
+.replace(/{Name}/g, data.name || "")
+.replace(/{EventType}/g, data.leaveType || "")
+.replace(/{Unit}/g, deptStr || "")
+.replace(/{Location}/g, fullLoc)
+.replace(/{Remarks}/g, data.remarks || "");
 
 finalSubject = applyAcronyms(finalSubject, acronyms);
 finalBody = applyAcronyms(finalBody, acronyms);
@@ -558,21 +571,22 @@ if (typicalEventTypes[k].name === rType && typicalEventTypes[k].isKahRelevant) {
 
 if (rKahRel) {
 var dataMock = {
- id: rId,
- phone: rows[i][headers.indexOf('Phone')],
- name: rows[i][headers.indexOf('Name')],
- leaveType: rType,
- startDate: rows[i][headers.indexOf('StartDate')],
- endDate: rows[i][headers.indexOf('EndDate')],
- _isRecalculation: true
+id: rId,
+phone: rows[i][headers.indexOf('Phone')],
+name: rows[i][headers.indexOf('Name')],
+leaveType: rType,
+startDate: rows[i][headers.indexOf('StartDate')],
+endDate: rows[i][headers.indexOf('EndDate')],
+timestamp: rows[i][headers.indexOf('Timestamp')],
+_isRecalculation: true
 };
 
 var kahExceededDept = checkKahLimit(dataMock, props, sheet, rId, rows, headers);
 var newStatus = kahExceededDept ? "Cal Updated (KAH Limit Crossed for " + kahExceededDept + ")" : "Cal Updated";
 
 if (rStatus !== newStatus) {
- batchUpdates.push({ row: i + 1, col: statusColIdx + 1, val: newStatus });
- rows[i][statusColIdx] = newStatus; // Update in-memory array for subsequent evaluations in loop
+batchUpdates.push({ row: i + 1, col: statusColIdx + 1, val: newStatus });
+rows[i][statusColIdx] = newStatus; // Update in-memory array for subsequent evaluations in loop
 }
 }
 }
