@@ -95,13 +95,13 @@ darkmuted: '#9ca3af'
   </div>
 
   <!-- MIDDLE -->
-  <div id="dash-controls-wrapper" class="hidden flex-col items-center justify-center gap-1.5 shrink-0 mx-2 w-[160px] md:w-[200px]">
-      <select id="dash-dept-nav" class="hidden w-full text-xs md:text-sm border-2 border-blue-400 dark:border-blue-600 rounded-lg py-1 pl-2 pr-6 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer truncate" onchange="window.agendaDirty=true; renderDashboard();">
+  <div id="dash-controls-wrapper" class="hidden flex-col items-center justify-center gap-1 shrink-0 mx-1 md:mx-2 w-[140px] md:w-[180px]">
+      <select id="dash-dept-nav" class="hidden w-full text-xs md:text-sm border-2 border-blue-400 dark:border-blue-600 rounded-lg py-0.5 md:py-1 pl-2 pr-6 bg-blue-50 dark:bg-blue-900/10 text-blue-800 dark:text-blue-300 font-bold outline-none shadow-sm focus:border-blue-600 transition cursor-pointer truncate" onchange="window.agendaDirty=true; renderDashboard();">
           <option value="">All Depts</option>
       </select>
       <div id="dash-view-toggle" class="flex items-center bg-gray-200 dark:bg-darkinput border border-gray-300 dark:border-darkborder rounded-lg p-0.5 shrink-0 w-full">
-          <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="flex-1 px-2 py-1 rounded-md font-bold text-xs md:text-sm transition bg-white dark:bg-darksurface shadow-sm text-blue-600 dark:text-blue-400 text-center">Agenda</button>
-          <button id="btn-dash-month" onclick="toggleDashView('month')" class="flex-1 px-2 py-1 rounded-md font-semibold text-xs md:text-sm transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 text-center">Month</button>
+          <button id="btn-dash-agenda" onclick="toggleDashView('agenda')" class="flex-1 px-1 md:px-2 py-0.5 md:py-1 rounded-md font-bold text-[11px] md:text-xs transition bg-white dark:bg-darksurface shadow-sm text-blue-600 dark:text-blue-400 text-center">Agenda</button>
+          <button id="btn-dash-month" onclick="toggleDashView('month')" class="flex-1 px-1 md:px-2 py-0.5 md:py-1 rounded-md font-semibold text-[11px] md:text-xs transition text-gray-500 dark:text-darkmuted hover:text-gray-800 dark:hover:text-gray-200 text-center">Month</button>
       </div>
   </div>
 
@@ -290,12 +290,12 @@ darkmuted: '#9ca3af'
 <div id="selected-behalf-combined" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-base flex items-center justify-between empty:hidden"></div>
 </div>
 
-<div style="order: 1" class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-stretch sm:items-end w-full">
+<div style="order: 1" class="flex flex-row space-x-3 md:space-x-4 items-end w-full">
 <div class="flex-grow min-w-0">
 <label class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Event Type</label>
 <select id="form-combined-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer font-extrabold text-blue-700 dark:text-blue-400 text-base" onchange="toggleCombinedFields()" required></select>
 </div>
-<button type="button" id="form-combined-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-5 py-3 font-bold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-darkhover transition h-[52px]">Announce</button>
+<button type="button" id="form-combined-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-3 sm:px-5 py-3 font-bold text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-darkinput hover:bg-gray-200 dark:hover:bg-darkhover transition h-[52px] flex items-center justify-center whitespace-nowrap outline-none">Announce</button>
 </div>
 
 <div id="block-combined-remarks" class="w-full">
@@ -497,12 +497,12 @@ darkmuted: '#9ca3af'
 <div id="selected-behalf-event" class="mt-3 font-bold text-emerald-700 dark:text-emerald-400 text-base flex items-center justify-between empty:hidden"></div>
 </div>
 
-<div style="order: 1" class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 items-stretch sm:items-end w-full">
+<div style="order: 1" class="flex flex-row space-x-3 md:space-x-4 items-end w-full">
 <div class="flex-grow min-w-0">
 <label class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Event Type</label>
 <select id="form-event-type" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer font-extrabold text-blue-700 dark:text-blue-400 text-base" onchange="toggleEventFields()" required></select>
 </div>
-<button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-5 py-3 font-bold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-darkhover transition h-[52px]">Announce</button>
+<button type="button" id="form-event-infoall-btn" onclick="toggleInfoAll()" class="shrink-0 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-3 sm:px-5 py-3 font-bold text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-darkinput hover:bg-gray-200 dark:hover:bg-darkhover transition h-[52px] flex items-center justify-center whitespace-nowrap outline-none">Announce</button>
 </div>
 
 <div id="block-event-remarks" class="w-full">
@@ -1065,17 +1065,17 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
-<script src="frontend/js/core/config.js?v=110"></script>
-<script src="frontend/js/core/state.js?v=110"></script>
-<script src="frontend/js/core/api.js?v=110"></script>
-<script src="frontend/js/core/auth.js?v=110"></script>
-<script src="frontend/js/ui/ui.js?v=110"></script>
-<script src="frontend/js/features/calendar.js?v=110"></script>
-<script src="frontend/js/features/parade.js?v=110"></script>
-<script src="frontend/js/ui/forms.js?v=110"></script>
-<script src="frontend/js/ui/picker.js?v=110"></script>
-<script src="frontend/js/admin/admin.js?v=110"></script>
-<script src="frontend/js/admin/structure.js?v=110"></script> 
-<script src="frontend/js/core/app.js?v=110"></script>
+<script src="frontend/js/core/config.js?v=111"></script>
+<script src="frontend/js/core/state.js?v=111"></script>
+<script src="frontend/js/core/api.js?v=111"></script>
+<script src="frontend/js/core/auth.js?v=111"></script>
+<script src="frontend/js/ui/ui.js?v=111"></script>
+<script src="frontend/js/features/calendar.js?v=111"></script>
+<script src="frontend/js/features/parade.js?v=111"></script>
+<script src="frontend/js/ui/forms.js?v=111"></script>
+<script src="frontend/js/ui/picker.js?v=111"></script>
+<script src="frontend/js/admin/admin.js?v=111"></script>
+<script src="frontend/js/admin/structure.js?v=111"></script> 
+<script src="frontend/js/core/app.js?v=111"></script>
 </body>
 </html>
