@@ -501,8 +501,8 @@ slotIdx++;
 }
 });
 
-let rowHeight = Math.max(80, (slots.length * 24) + 32);
-html += `<div class="flex-1 relative bg-white dark:bg-darksurface flex min-h-[${rowHeight}px]">`;
+let rowHeight = Math.max(80, (slots.length * 22) + 32);
+html += `<div class="flex-1 relative bg-white dark:bg-darksurface flex" style="min-height: ${rowHeight}px;">`;
 
 for (let i = 0; i < 7; i++) {
 let curD = new Date(w); curD.setDate(curD.getDate() + i);
@@ -535,7 +535,7 @@ const appliedTitle = applyAcronymsFront(titleRawStr);
 
 const left = (seg.sDay / 7) * 100;
 const width = (seg.len / 7) * 100;
-const topOffset = (seg.slot * 22) + 24; 
+const topOffset = (seg.slot * 22) + 2; 
 
 let rounded = 'rounded-md';
 if (seg.len > 1) {
