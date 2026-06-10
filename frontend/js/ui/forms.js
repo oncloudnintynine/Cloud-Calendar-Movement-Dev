@@ -3,17 +3,18 @@
 // ==========================================
 
 function toggleInfoAll(forceState) {
-isInfoAll = forceState !== undefined ? forceState : !isInfoAll;['form-event-infoall-btn', 'form-combined-infoall-btn'].forEach(id => {
+isInfoAll = forceState !== undefined ? forceState : !isInfoAll;
+['form-event-infoall-btn', 'form-combined-infoall-btn'].forEach(id => {
 const btn = document.getElementById(id);
 if(!btn) return;
+const isHidden = btn.classList.contains('hidden-view');
+
 if(isInfoAll) {
-btn.innerHTML = '📢 Announce (ON)';
-btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
-btn.classList.remove('bg-gray-50', 'dark:bg-[#1a1a1a]', 'text-gray-600', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700');
+btn.innerHTML = '<span class="mr-1.5 text-base leading-none">📢</span> Announce';
+btn.className = `shrink-0 border-2 border-blue-600 bg-blue-600 text-white rounded-xl px-3 sm:px-5 py-3 font-bold text-sm shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:bg-blue-700 hover:border-blue-700 transition h-[52px] flex items-center justify-center whitespace-nowrap outline-none ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-darksurface ring-offset-white ${isHidden ? 'hidden-view' : ''}`;
 } else {
 btn.innerHTML = 'Announce';
-btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
-btn.classList.add('bg-gray-50', 'dark:bg-[#1a1a1a]', 'text-gray-600', 'dark:text-gray-300', 'border-gray-200', 'dark:border-gray-700');
+btn.className = `shrink-0 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-3 sm:px-5 py-3 font-bold text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-darkinput hover:bg-gray-200 dark:hover:bg-darkhover transition h-[52px] flex items-center justify-center whitespace-nowrap outline-none ${isHidden ? 'hidden-view' : ''}`;
 }
 });
 }
@@ -50,10 +51,10 @@ const checkbox = document.getElementById(`form-${ctx}-meeting-room`);
 
 if (locEl && wrapper) {
 if (locEl.value === 'Out of Camp') {
- wrapper.classList.add('hidden-view');
- if (checkbox) checkbox.checked = false;
+wrapper.classList.add('hidden-view');
+if (checkbox) checkbox.checked = false;
 } else {
- wrapper.classList.remove('hidden-view');
+wrapper.classList.remove('hidden-view');
 }
 }
 }
@@ -63,18 +64,18 @@ const allBlocks = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overse
 let order = [...allBlocks];
 
 if (typeObj && typeObj.fieldOrder && typeObj.fieldOrder.length > 0) {
- const specified = typeObj.fieldOrder;
- const missing = allBlocks.filter(b => !specified.includes(b));
- order = [...specified, ...missing];
+const specified = typeObj.fieldOrder;
+const missing = allBlocks.filter(b => !specified.includes(b));
+order = [...specified, ...missing];
 }
 
 order.forEach((block, idx) => {
- const el1 = document.getElementById(`block-${ctx}-${block}`);
- if (el1) el1.style.order = idx + 2;
- const el2 = document.getElementById(`block-${ctx}-${block}-event`);
- if (el2) el2.style.order = idx + 2;
- const el3 = document.getElementById(`block-${ctx}-${block}-leave`);
- if (el3) el3.style.order = idx + 2;
+const el1 = document.getElementById(`block-${ctx}-${block}`);
+if (el1) el1.style.order = idx + 2;
+const el2 = document.getElementById(`block-${ctx}-${block}-event`);
+if (el2) el2.style.order = idx + 2;
+const el3 = document.getElementById(`block-${ctx}-${block}-leave`);
+if (el3) el3.style.order = idx + 2;
 });
 }
 
@@ -86,15 +87,15 @@ const setField = (wrapperId, inputId, config) => {
 const wrapper = document.getElementById(wrapperId);
 const input = document.getElementById(inputId);
 if (wrapper) {
- if (config.show) wrapper.classList.remove('hidden-view');
- else wrapper.classList.add('hidden-view');
+if (config.show) wrapper.classList.remove('hidden-view');
+else wrapper.classList.add('hidden-view');
 }
 if (input) {
- input.required = config.req;
- const label = document.getElementById(`label-${inputId}`);
- if (label && wrapperId) {
-     label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
- }
+input.required = config.req;
+const label = document.getElementById(`label-${inputId}`);
+if (label && wrapperId) {
+    label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
+}
 }
 };
 
@@ -135,10 +136,10 @@ hide('block-combined-overseas');
 if(btnInfoAll) btnInfoAll.classList.remove('hidden-view');
 
 if (!locationInput.value || locationInput.value.trim() === '') {
- let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
- if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
- locationInput.value = defLoc;
- toggleMeetingRoomCheckbox('combined');
+let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
+if (defLoc !== 'In Camp' && defLoc !== 'Out of Camp') defLoc = 'Out of Camp';
+locationInput.value = defLoc;
+toggleMeetingRoomCheckbox('combined');
 }
 } else {
 hide('block-combined-location');
@@ -149,13 +150,13 @@ if(btnInfoAll) btnInfoAll.classList.add('hidden-view');
 
 const cInput = document.getElementById('form-combined-country');
 if (val === 'Overseas Leave' || val === 'Official Trip') { 
- show('block-combined-overseas'); 
- if(cInput) cInput.required = true; 
+show('block-combined-overseas'); 
+if(cInput) cInput.required = true; 
 } else { 
- hide('block-combined-overseas'); 
- if(cInput) { cInput.required = false; cInput.value = ''; }
- const stateEl = document.getElementById('form-combined-state');
- if(stateEl) stateEl.value = '';
+hide('block-combined-overseas'); 
+if(cInput) { cInput.required = false; cInput.value = ''; }
+const stateEl = document.getElementById('form-combined-state');
+if(stateEl) stateEl.value = '';
 }
 }
 
@@ -548,7 +549,7 @@ state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`
 if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
 eventAttendees.forEach(a => { 
 if (a.dept !== 'Custom' && a.dept) {
-  a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+ a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
