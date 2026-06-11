@@ -605,6 +605,26 @@ html += `</div>`;
 list.innerHTML = html;
 }
 
+function updateKahGroupCalendarName(idx, newName) {
+if (!newName.trim()) return;
+customKahGroups[idx].calendarName = newName.trim();
+}
+
+async function backfillKahGroupCalendar(idx) {
+const g = customKahGroups[idx];
+if (!g.calendarName) g.calendarName = g.name;
+if (!confirm(`This will scan all historical records and sync them into the dedicated Google Calendar "${g.calendarName}". Proceed?`)) return;
+showLoader(true);
+try {
+await apiCall('backfillCustomCalendar', { adminPass: user.pass, calendarName: g.calendarName, members: g.members });
+alert("Calendar successfully synced with past events!");
+} catch(e) {
+alert("Error syncing past events: " + e.message);
+} finally {
+showLoader(false);
+}
+}
+
 function renderCustomKahGroups() {
 const container = document.getElementById('custom-kah-groups-list');
 if (!container) return;
@@ -615,11 +635,15 @@ container.innerHTML = customKahGroups.map((g, i) => `
 <button onclick="removeCustomKahGroup(${i})" class="text-red-500 hover:text-red-700 text-xs font-bold transition">Delete Group</button>
 </div>
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 bg-blue-50 dark:bg-blue-900/20 p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/50 gap-2">
-<div class="flex items-center space-x-2">
+<div class="flex items-center space-x-2 w-full sm:w-auto">
   <input type="checkbox" id="kah-group-cal-${i}" class="w-4 h-4 text-blue-600 rounded cursor-pointer" ${g.hasCalendar ? 'checked' : ''} onchange="toggleKahGroupCalendar(${i}, this.checked)">
   <label for="kah-group-cal-${i}" class="text-xs font-bold text-blue-800 dark:text-blue-300 cursor-pointer">Enable Dedicated Group Calendar</label>
 </div>
-${g.hasCalendar ? `<span class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold italic bg-white dark:bg-darksurface px-2 py-0.5 rounded shadow-sm border border-blue-200 dark:border-blue-800/50">Cal Name: ${g.calendarName || g.name}</span>` : ''}
+${g.hasCalendar ? `
+<div class="flex items-center space-x-2 w-full sm:w-auto mt-2 sm:mt-0">
+  <input type="text" id="kah-group-cal-name-${i}" value="${g.calendarName || g.name}" onchange="updateKahGroupCalendarName(${i}, this.value)" class="text-[11px] font-bold text-blue-900 dark:text-blue-100 bg-white dark:bg-darksurface px-2 py-1.5 rounded shadow-sm border border-blue-300 dark:border-blue-700 outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-36" placeholder="Calendar Name">
+  <button type="button" onclick="backfillKahGroupCalendar(${i})" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded font-bold transition shadow-sm whitespace-nowrap shrink-0 border border-transparent">Sync Past Events</button>
+</div>` : ''}
 </div>
 <div class="space-y-1.5 mb-3">
 ${g.members.map(phone => {
