@@ -41,25 +41,25 @@ if (t.name === 'Meeting') { t.name = 'Generic'; updated = true; }
 if (t.defaultLoc === 'Office') { t.defaultLoc = 'In Camp'; updated = true; }
 if (t.defaultLoc === 'Others') { t.defaultLoc = 'Out of Camp'; updated = true; }
 if (!t.fields) {
-   t.fields = {
-       location: {show: t.isEvent, req: t.isEvent},
-       locationDetails: {show: t.isEvent, req: false},
-       attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
-       remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
-   };
-   updated = true;
+  t.fields = {
+      location: {show: t.isEvent, req: t.isEvent},
+      locationDetails: {show: t.isEvent, req: false},
+      attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
+      remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
+  };
+  updated = true;
 }
 if (!t.fieldOrder) {
-   if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
-       t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
-   } else {
-       t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
-   }
-   updated = true;
+  if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
+      t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
+  } else {
+      t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
+  }
+  updated = true;
 }
 if (typeof t.isKahRelevant === 'undefined') {
-   t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
-   updated = true;
+  t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
+  updated = true;
 }
 });
 if (updated) props.setProperty('typicalEventTypes', JSON.stringify(existing));
@@ -154,7 +154,7 @@ var data = payload.data || {};
 var credentials = payload.credentials || {};
 var responseData = {};
 
-var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts'];
+var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts', 'deleteCalendar'];
 if (secureActions.indexOf(action) !== -1) {
 if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
 
@@ -182,6 +182,7 @@ else if (action === 'deleteUser') responseData = deleteUser(data);
 else if (action === 'updateUserUnits') responseData = updateUserUnits(data);
 else if (action === 'renameUnit') responseData = renameUnit(data);
 else if (action === 'forceSyncContacts') responseData = forceSyncContacts(data);
+else if (action === 'deleteCalendar') responseData = deleteCalendar(data);
 
 return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
 } catch (err) {
