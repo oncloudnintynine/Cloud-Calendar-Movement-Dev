@@ -17,8 +17,8 @@ if (devBanner && ENV !== 'Prod') {
 devBanner.classList.remove('hidden');
 devBanner.innerText = `${ENV.toUpperCase()} MODE`;
 if (ENV === 'Exp') {
-    devBanner.classList.remove('bg-red-600');
-    devBanner.classList.add('bg-purple-600');
+   devBanner.classList.remove('bg-red-600');
+   devBanner.classList.add('bg-purple-600');
 }
 }
 
@@ -85,7 +85,10 @@ user.departments = user.departments ||[]; // Safety fallback for Admins
 document.getElementById('nav-user-name').innerText = user.role === 'admin' ? "Administrator" : (user.departments.length ? `${user.name}` : user.name);
 
 try {
-const settings = await apiCall('getSettings', { adminPass: user.role === 'admin' ? user.pass : null }); 
+// Optimize Load Time: Fetch settings and leaves simultaneously via the getInitialData gateway
+const initialData = await apiCall('getInitialData', { adminPass: user.role === 'admin' ? user.pass : null }); 
+const settings = initialData.settings;
+
 window.appTypicalEventTypes = settings.typicalEventTypes ||[]; 
 window.appAcronyms = settings.acronyms || {};
 
@@ -124,19 +127,19 @@ applyMenuOrder(mOrder);
 if (user.role !== 'admin' && companyContacts.length > 0) {
 const myContact = companyContacts.find(c => c.phone == user.phone);
 if (myContact && myContact.dept) {
-    user.departments = myContact.dept.split(',').map(s=>s.trim());
-    localStorage.setItem('user', JSON.stringify(user));
+   user.departments = myContact.dept.split(',').map(s=>s.trim());
+   localStorage.setItem('user', JSON.stringify(user));
 }
 }
 
 let allUnits = new Set();
 if(companyStructure) {
- (Array.isArray(companyStructure) ? companyStructure : Object.keys(companyStructure)).forEach(d => allUnits.add(d));
+(Array.isArray(companyStructure) ? companyStructure : Object.keys(companyStructure)).forEach(d => allUnits.add(d));
 }
 if (companyContacts.length > 0) {
 companyContacts.forEach(c => {
 if (c.dept && c.dept !== 'Unassigned') {
-  c.dept.split(',').forEach(d => allUnits.add(d.trim().toUpperCase()));
+ c.dept.split(',').forEach(d => allUnits.add(d.trim().toUpperCase()));
 }
 });
 }
@@ -179,7 +182,7 @@ unitsLoaded = true;
 
 if (companyContacts.length > 0) {
 companyContacts.forEach(c => {
-    c.formattedName = window.formatContactName(c.name, c.dept);
+   c.formattedName = window.formatContactName(c.name, c.dept);
 });
 
 const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -193,8 +196,8 @@ attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, formattedName: `zz A
 
 window.appCustomKahGroups.forEach(g => {
 const customNames = g.members.map(phone => {
-    const c = companyContacts.find(contact => String(contact.phone) === String(phone));
-    return c ? c.name : phone;
+   const c = companyContacts.find(contact => String(contact.phone) === String(phone));
+   return c ? c.name : phone;
 }).join(', ');
 attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, formattedName: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
 });
@@ -223,7 +226,7 @@ document.getElementById('admin-behalf-event').classList.add('hidden-view');
 document.getElementById('admin-behalf-combined').classList.add('hidden-view');
 }
 
-await loadLeavesData();
+await loadLeavesData(initialData.leaves);
 
 if (typeof toggleCombinedFields === 'function') toggleCombinedFields();
 
