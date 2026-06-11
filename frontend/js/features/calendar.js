@@ -978,20 +978,20 @@ return false;
 } else if (d) {
 filtered = filtered.filter(l => {
 if (String(l.InfoAll).toUpperCase() === 'TRUE') return true;
-if (String(l.Department||'').includes(d)) return true;
+if (String(l.Department||'').toUpperCase().includes(d.toUpperCase())) return true;
 
 // Robustly check Attendees JSON to restore visibility if getLeaves overwrote the Department column
 if (l.Attendees) {
 try {
 const att = JSON.parse(l.Attendees);
 return att.some(a => {
-if (a.dept && String(a.dept).includes(d)) return true;
+if (a.dept && String(a.dept).toUpperCase().includes(d.toUpperCase())) return true;
 if (a.type === 'group' && a.dept === 'Custom') {
 const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
 if (customG) {
 return customG.members.some(phone => {
    const contact = companyContacts.find(c => String(c.phone) === String(phone));
-   return contact && contact.dept && String(contact.dept).includes(d);
+   return contact && contact.dept && String(contact.dept).toUpperCase().includes(d.toUpperCase());
 });
 }
 }
@@ -1001,7 +1001,7 @@ return false;
 const phones = String(l.Attendees).split(',');
 return phones.some(phone => {
 const contact = companyContacts.find(c => String(c.phone) === String(phone.trim()));
-return contact && contact.dept && String(contact.dept).includes(d);
+return contact && contact.dept && String(contact.dept).toUpperCase().includes(d.toUpperCase());
 });
 }
 }

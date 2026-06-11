@@ -17,8 +17,8 @@ if (devBanner && ENV !== 'Prod') {
 devBanner.classList.remove('hidden');
 devBanner.innerText = `${ENV.toUpperCase()} MODE`;
 if (ENV === 'Exp') {
-   devBanner.classList.remove('bg-red-600');
-   devBanner.classList.add('bg-purple-600');
+  devBanner.classList.remove('bg-red-600');
+  devBanner.classList.add('bg-purple-600');
 }
 }
 
@@ -127,8 +127,8 @@ applyMenuOrder(mOrder);
 if (user.role !== 'admin' && companyContacts.length > 0) {
 const myContact = companyContacts.find(c => c.phone == user.phone);
 if (myContact && myContact.dept) {
-   user.departments = myContact.dept.split(',').map(s=>s.trim());
-   localStorage.setItem('user', JSON.stringify(user));
+  user.departments = myContact.dept.split(',').map(s=>s.trim());
+  localStorage.setItem('user', JSON.stringify(user));
 }
 }
 
@@ -139,14 +139,22 @@ if(companyStructure) {
 if (companyContacts.length > 0) {
 companyContacts.forEach(c => {
 if (c.dept && c.dept !== 'Unassigned') {
- c.dept.split(',').forEach(d => allUnits.add(d.trim().toUpperCase()));
+c.dept.split(',').forEach(d => allUnits.add(d.trim().toUpperCase()));
 }
 });
 }
 
 companyStructure = Array.from(allUnits);
+
 // Universal Meeting Room Injection
 allUnits.add('Cloud Meeting Room');
+
+// Dedicated Custom KAH Group Calendars Injection
+if (window.appCustomKahGroups) {
+window.appCustomKahGroups.forEach(g => {
+  if (g.hasCalendar && g.calendarName) allUnits.add(g.calendarName);
+});
+}
 
 const uniqueDepts = Array.from(allUnits).sort((a, b) => {
 const idxA = window.appDashboardDeptOrder.indexOf(a);
@@ -170,7 +178,13 @@ deptHtml += uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
 deptNav.innerHTML = deptHtml;
 }
 
-const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
+const uniqueRegDepts = Array.from(allUnits).filter(u => u !== 'Cloud Meeting Room' && !window.appCustomKahGroups.some(g => g.calendarName === u)).sort((a, b) => {
+if (a.toUpperCase() === 'HQ') return -1;
+if (b.toUpperCase() === 'HQ') return 1;
+return a.localeCompare(b);
+});
+
+const regOptions = '<option value="" disabled selected>Select...</option>' + uniqueRegDepts.map(d => `<option value="${d}">${d}</option>`).join('');
 const regUnit = document.getElementById('reg-unit');
 const adminRegUnit = document.getElementById('admin-reg-unit');
 const editUserUnit = document.getElementById('edit-user-unit');
@@ -182,7 +196,7 @@ unitsLoaded = true;
 
 if (companyContacts.length > 0) {
 companyContacts.forEach(c => {
-   c.formattedName = window.formatContactName(c.name, c.dept);
+  c.formattedName = window.formatContactName(c.name, c.dept);
 });
 
 const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -190,14 +204,14 @@ validContactNames = uniqueNames.map(n => n.toLowerCase());
 fuseAllContacts = new Fuse(companyContacts, { keys:['formattedName', 'name', 'dept', 'phone'], threshold: 0.3 });
 
 let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, formattedName: c.formattedName, dept: c.dept, type: 'contact' }));
-uniqueDepts.forEach(dept => {
+uniqueRegDepts.forEach(dept => {
 attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, formattedName: `zz All in ${dept}`, dept: dept, type: 'group', expandedNames: `All in ${dept}` });
 });
 
 window.appCustomKahGroups.forEach(g => {
 const customNames = g.members.map(phone => {
-   const c = companyContacts.find(contact => String(contact.phone) === String(phone));
-   return c ? c.name : phone;
+  const c = companyContacts.find(contact => String(contact.phone) === String(phone));
+  return c ? c.name : phone;
 }).join(', ');
 attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, formattedName: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
 });

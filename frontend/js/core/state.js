@@ -58,7 +58,8 @@ const TAB_NAMES = {
 'kah-management': 'KAH Management',
 'admin-structure': 'Organisational Structure',
 'admin-event-templates': 'Event Types & Templates',
-'admin-acronyms': 'Acronyms / Shortforms'
+'admin-acronyms': 'Acronyms / Shortforms',
+'admin-gcal-access': 'Google Calendar Access Rights'
 };
 
 const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-combined'];
