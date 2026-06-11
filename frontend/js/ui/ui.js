@@ -78,9 +78,9 @@ const controlsWrapper = document.getElementById('dash-controls-wrapper');
 if (controlsWrapper) {
 if (tabId === 'dashboard' || tabId === 'my-leaves') {
 if (tabId === 'dashboard') {
-  if (deptNav) deptNav.classList.remove('hidden');
+ if (deptNav) deptNav.classList.remove('hidden');
 } else {
-  if (deptNav) deptNav.classList.add('hidden');
+ if (deptNav) deptNav.classList.add('hidden');
 }
 controlsWrapper.classList.remove('hidden');
 controlsWrapper.classList.add('flex');
@@ -92,6 +92,7 @@ controlsWrapper.classList.remove('flex');
 
 if (tabId === 'parade-state' && typeof renderParadeState === 'function') renderParadeState();
 if (tabId === 'admin-structure' && typeof renderStructureUI === 'function') renderStructureUI();
+if (tabId === 'admin-gcal-access' && typeof renderGcalAccessUI === 'function') renderGcalAccessUI();
 }
 
 function toggleTheme() {
@@ -183,22 +184,22 @@ checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ?
 
 window.downloadVCF = function() {
 if (!companyContacts || companyContacts.length === 0) {
- alert("Directory is empty or still loading.");
- return;
+alert("Directory is empty or still loading.");
+return;
 }
 
 let vcfData = "";
 companyContacts.forEach(c => {
- const name = c.name || "";
- const phone = c.phone || "";
- const org = c.dept ? c.dept.split(',')[0].trim() : "Cloudy";
- 
- vcfData += "BEGIN:VCARD\r\n";
- vcfData += "VERSION:3.0\r\n";
- vcfData += `FN:${name}\r\n`;
- if (org) vcfData += `ORG:${org}\r\n`;
- if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
- vcfData += "END:VCARD\r\n";
+const name = c.name || "";
+const phone = c.phone || "";
+const org = c.dept ? c.dept.split(',')[0].trim() : "Cloudy";
+
+vcfData += "BEGIN:VCARD\r\n";
+vcfData += "VERSION:3.0\r\n";
+vcfData += `FN:${name}\r\n`;
+if (org) vcfData += `ORG:${org}\r\n`;
+if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
+vcfData += "END:VCARD\r\n";
 });
 
 const blob = new Blob([vcfData], { type: 'text/vcard;charset=utf-8;' });
