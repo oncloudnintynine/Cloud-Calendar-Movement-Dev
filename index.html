@@ -70,6 +70,7 @@ darkmuted: '#9ca3af'
 <button onclick="switchTab('admin-structure')" id="menu-admin-structure" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 text-base transition">Org Structure</button>
 <button onclick="switchTab('admin-event-templates')" id="menu-admin-event-templates" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 text-base transition">Event Types & Templates</button>
 <button onclick="switchTab('admin-acronyms')" id="menu-admin-acronyms" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 text-base transition">Acronyms / Shortforms</button>
+<button onclick="switchTab('admin-gcal-access')" id="menu-admin-gcal-access" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 text-base transition">GCal Access Rights</button>
 </div>
 </div>
 
@@ -1038,6 +1039,16 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
+<div id="view-admin-gcal-access" class="tab-content hidden-view flex-col w-full h-full md:p-6 md:max-w-3xl mx-auto relative">
+<div class="flex-grow flex flex-col h-full bg-white dark:bg-darksurface md:rounded-3xl md:shadow-xl md:border border-gray-200 dark:border-darkborder overflow-hidden w-full">
+<div class="flex-grow overflow-y-auto p-5 md:p-8 w-full">
+<h2 class="text-xl font-extrabold border-b-2 border-gray-200 dark:border-darkborder pb-2 text-blue-600 dark:text-blue-400 mb-6">Google Calendar Access Rights</h2>
+<p class="text-sm text-gray-500 dark:text-darkmuted mb-6 leading-relaxed">Manage who has access to view or modify each specific Google Calendar created by this system.</p>
+<div id="gcal-access-container" class="space-y-4"></div>
+</div>
+</div>
+</div>
+
 </main>
 </div>
 
@@ -1069,17 +1080,17 @@ darkmuted: '#9ca3af'
 </div>
 </div>
 
-<script src="frontend/js/core/config.js?v=114"></script>
-<script src="frontend/js/core/state.js?v=114"></script>
-<script src="frontend/js/core/api.js?v=114"></script>
-<script src="frontend/js/core/auth.js?v=114"></script>
-<script src="frontend/js/ui/ui.js?v=114"></script>
-<script src="frontend/js/features/calendar.js?v=114"></script>
-<script src="frontend/js/features/parade.js?v=114"></script>
-<script src="frontend/js/ui/forms.js?v=114"></script>
-<script src="frontend/js/ui/picker.js?v=114"></script>
-<script src="frontend/js/admin/admin.js?v=114"></script>
-<script src="frontend/js/admin/structure.js?v=114"></script> 
-<script src="frontend/js/core/app.js?v=114"></script>
+<script src="frontend/js/core/config.js?v=115"></script>
+<script src="frontend/js/core/state.js?v=115"></script>
+<script src="frontend/js/core/api.js?v=115"></script>
+<script src="frontend/js/core/auth.js?v=115"></script>
+<script src="frontend/js/ui/ui.js?v=115"></script>
+<script src="frontend/js/features/calendar.js?v=115"></script>
+<script src="frontend/js/features/parade.js?v=115"></script>
+<script src="frontend/js/ui/forms.js?v=115"></script>
+<script src="frontend/js/ui/picker.js?v=115"></script>
+<script src="frontend/js/admin/admin.js?v=115"></script>
+<script src="frontend/js/admin/structure.js?v=115"></script> 
+<script src="frontend/js/core/app.js?v=115"></script>
 </body>
 </html>
