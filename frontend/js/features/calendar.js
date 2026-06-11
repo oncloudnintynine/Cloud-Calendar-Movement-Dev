@@ -326,17 +326,17 @@ if (isAtBottom) {
 for (let i = groups.length - 1; i >= 0; i--) {
 const rect = groups[i].getBoundingClientRect();
 if (rect.top < containerBottom) {
- topDateStr = groups[i].dataset.date; 
- break;
+topDateStr = groups[i].dataset.date; 
+break;
 }
 }
 } else {
 for (const group of groups) {
 const rect = group.getBoundingClientRect();
 if (rect.top >= containerTop && rect.top <= containerTop + 100) {
- topDateStr = group.dataset.date; break;
+topDateStr = group.dataset.date; break;
 } else if (rect.top < containerTop && rect.bottom > containerTop + 20) {
- topDateStr = group.dataset.date; break;
+topDateStr = group.dataset.date; break;
 }
 }
 }
@@ -351,15 +351,15 @@ if (isDash) dashDate = new Date(y, m - 1, d);
 else myDate = new Date(y, m - 1, d);
 
 if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
- if (isDash) {
-     dashMonth = new Date(y, m - 1, 1);
- } else {
-     myMonth = new Date(y, m - 1, 1);
- }
- renderMiniCalendar(ctx);
- updateInfoAllDisplay(ctx);
+if (isDash) {
+    dashMonth = new Date(y, m - 1, 1);
 } else {
- updateMiniCalendarSelection(ctx, d);
+    myMonth = new Date(y, m - 1, 1);
+}
+renderMiniCalendar(ctx);
+updateInfoAllDisplay(ctx);
+} else {
+updateMiniCalendarSelection(ctx, d);
 }
 }
 }
@@ -606,10 +606,10 @@ if (hasVariables && !hasPresentValue) continue;
 if (line.trim() !== '') {
 // Cleanup artifacts like trailing commas, stray hyphens, empty parens left by missing variables
 line = line.replace(/,\s*(?=[,\)]|$)/g, "")  // Remove trailing commas
-     .replace(/\(\s*\)/g, "")          // Remove empty parentheses
-     .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
-     .replace(/\s+/g, " ")             // Normalize spaces
-     .trim();
+    .replace(/\(\s*\)/g, "")          // Remove empty parentheses
+    .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
+    .replace(/\s+/g, " ")             // Normalize spaces
+    .trim();
 
 if (line.endsWith('-')) line = line.slice(0, -1).trim();
 if (line.endsWith(':')) line = line.slice(0, -1).trim();
@@ -699,25 +699,25 @@ attendeesDisplay = attArr.map(a => {
 if (a.expandedNames) return a.expandedNames;
 
 if (a.type === 'group') {
- if (a.name.startsWith('zz KAH:')) {
-     const dept = a.dept;
-     if (dept === 'Custom') {
-         const gName = a.name.replace('zz KAH: ', '').trim();
-         const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
-         if (cGrp) {
-             return cGrp.members.map(ph => {
-                 const c = companyContacts.find(x => String(x.phone) === String(ph));
-                 return c ? c.name : ph;
-             }).join(', ');
-         }
-     } else {
-         const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
-         if (kahMems.length > 0) return kahMems.join(', ');
-     }
- } else if (a.name.startsWith('zz All in ')) {
-     return a.name.replace('zz ', '');
- }
- return a.name.replace('zz KAH: ', '').replace('zz ', '');
+if (a.name.startsWith('zz KAH:')) {
+    const dept = a.dept;
+    if (dept === 'Custom') {
+        const gName = a.name.replace('zz KAH: ', '').trim();
+        const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
+        if (cGrp) {
+            return cGrp.members.map(ph => {
+                const c = companyContacts.find(x => String(x.phone) === String(ph));
+                return c ? c.name : ph;
+            }).join(', ');
+        }
+    } else {
+        const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
+        if (kahMems.length > 0) return kahMems.join(', ');
+    }
+} else if (a.name.startsWith('zz All in ')) {
+    return a.name.replace('zz ', '');
+}
+return a.name.replace('zz KAH: ', '').replace('zz ', '');
 }
 return a.name;
 }).join(', ');
@@ -801,7 +801,7 @@ const finalDetailsHtml = detailsRaw ? parseAndCleanTemplate(detailsRaw, tplVars)
 const hasBody = finalDetailsHtml.trim() !== '' || (isInfoAllContext ? compactActionBtns !== '' : actionBtns !== '');
 
 if (isInfoAllContext) {
-return `<div class="p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-900/10 shadow-sm flex flex-col transition hover:shadow-md">
+return `<div class="p-2 rounded-lg border border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-900/10 shadow-sm flex flex-col transition hover:shadow-md">
 <div class="flex justify-between items-start ${hasBody ? 'cursor-pointer select-none' : ''}" ${hasBody ? 'onclick="toggleAgendaCard(this)"' : ''}>
 <div class="flex-grow pr-2">
 <h3 class="font-bold text-[11px] md:text-sm text-blue-900 dark:text-blue-300 leading-tight">${finalTitle}</h3>
@@ -811,15 +811,15 @@ ${hasBody ? `<svg class="w-4 h-4 text-blue-500 transition-transform duration-300
 </div>
 ${hasBody ? `
 <div class="agenda-card-body ${isCollapsed ? 'hidden-view' : ''}">
-<div class="flex flex-col mt-1.5">
+<div class="flex flex-col mt-1">
 ${finalDetailsHtml ? `<div class="whitespace-pre-wrap w-full">${finalDetailsHtml}</div>` : ''}
-${compactActionBtns ? `<div class="flex justify-end space-x-1 mt-1.5 pt-1.5 border-t border-blue-100 dark:border-blue-800/50">${compactActionBtns}</div>` : ''}
+${compactActionBtns ? `<div class="flex justify-end space-x-1 mt-1 pt-1 border-t border-blue-100 dark:border-blue-800/50">${compactActionBtns}</div>` : ''}
 </div>
 </div>` : ''}
 </div>`;
 }
 
-return `<div class="p-3 md:p-4 rounded-xl bg-white dark:bg-darkinput shadow-sm flex flex-col transition hover:shadow-md border border-gray-200 dark:border-darkborder">
+return `<div class="p-2.5 md:p-3 rounded-xl bg-white dark:bg-darkinput shadow-sm flex flex-col transition hover:shadow-md border border-gray-200 dark:border-darkborder">
 <div class="flex justify-between items-start ${hasBody ? 'cursor-pointer select-none' : ''}" ${hasBody ? 'onclick="toggleAgendaCard(this)"' : ''}>
 <div class="flex-grow pr-2">
 <h3 class="font-bold text-sm md:text-base text-gray-900 dark:text-gray-100 leading-tight">${finalTitle}</h3>
@@ -832,8 +832,8 @@ ${hasBody ? `<svg class="w-5 h-5 ml-1.5 text-gray-400 dark:text-darkmuted transi
 </div>
 ${hasBody ? `
 <div class="agenda-card-body ${isCollapsed ? 'hidden-view' : ''}">
-<div class="flex justify-between items-end gap-2 mt-2">
-${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow pt-1.5">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
+<div class="flex justify-between items-end gap-2 mt-1.5">
+${finalDetailsHtml ? `<div class="whitespace-pre-wrap flex-grow pt-1">${finalDetailsHtml}</div>` : '<div class="flex-grow"></div>'}
 ${actionBtns ? `<div class="flex shrink-0 space-x-1.5 pb-0.5">${actionBtns}</div>` : ''}
 </div>
 </div>` : ''}
@@ -888,12 +888,12 @@ const mm = String(d.getMonth() + 1).padStart(2, '0');
 const dd = String(d.getDate()).padStart(2, '0');
 
 html += `
-<div class="agenda-day-group mb-3 md:mb-4" data-date="${yyyy}-${mm}-${dd}">
-<div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
-  <h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
+<div class="agenda-day-group mb-2.5 md:mb-3" data-date="${yyyy}-${mm}-${dd}">
+<div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-1.5 md:mb-2">
+ <h3 class="font-bold text-[13px] md:text-sm text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
 </div>
-<div class="space-y-2 px-1">
-  ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
+<div class="space-y-1.5 px-1">
+ ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
 </div>
 </div>`;
 }
@@ -918,13 +918,13 @@ let group = container.querySelector(`.agenda-day-group[data-date="${dateStr}"]`)
 
 if (!group) {
 group = document.createElement('div');
-group.className = 'agenda-day-group mb-3 md:mb-4';
+group.className = 'agenda-day-group mb-2.5 md:mb-3';
 group.dataset.date = dateStr;
 group.innerHTML = `
-<div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-2.5">
-<h3 class="font-bold text-sm md:text-base text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
+<div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-1.5 md:mb-2">
+<h3 class="font-bold text-[13px] md:text-sm text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(targetDateObj)}</h3>
 </div>
-<div class="space-y-2 px-1">
+<div class="space-y-1.5 px-1">
 <p class="text-gray-500 dark:text-darkmuted text-center italic text-xs mt-2">No records for this date.</p>
 </div>`;
 
@@ -961,12 +961,12 @@ return att.some(a => {
 if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
 if (a.type === 'group') {
 if (a.dept === 'Custom') {
-  const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-  return customG && customG.members.includes(String(user.phone));
+ const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+ return customG && customG.members.includes(String(user.phone));
 } else if (a.name.startsWith('zz KAH:')) {
-  return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+ return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
 } else {
-  return (user.departments ||[]).includes(a.dept); // Safety fallback
+ return (user.departments ||[]).includes(a.dept); // Safety fallback
 }
 }
 return false;
@@ -990,8 +990,8 @@ if (a.type === 'group' && a.dept === 'Custom') {
 const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
 if (customG) {
 return customG.members.some(phone => {
-    const contact = companyContacts.find(c => String(c.phone) === String(phone));
-    return contact && contact.dept && String(contact.dept).includes(d);
+   const contact = companyContacts.find(c => String(c.phone) === String(phone));
+   return contact && contact.dept && String(contact.dept).includes(d);
 });
 }
 }
@@ -1059,12 +1059,12 @@ return att.some(a => {
 if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
 if (a.type === 'group') {
 if (a.dept === 'Custom') {
-  const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-  return customG && customG.members.includes(String(user.phone));
+ const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+ return customG && customG.members.includes(String(user.phone));
 } else if (a.name.startsWith('zz KAH:')) {
-  return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+ return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
 } else {
-  return (user.departments ||[]).includes(a.dept); // Safety fallback
+ return (user.departments ||[]).includes(a.dept); // Safety fallback
 }
 }
 return false;
