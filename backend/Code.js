@@ -41,25 +41,25 @@ if (t.name === 'Meeting') { t.name = 'Generic'; updated = true; }
 if (t.defaultLoc === 'Office') { t.defaultLoc = 'In Camp'; updated = true; }
 if (t.defaultLoc === 'Others') { t.defaultLoc = 'Out of Camp'; updated = true; }
 if (!t.fields) {
-  t.fields = {
-      location: {show: t.isEvent, req: t.isEvent},
-      locationDetails: {show: t.isEvent, req: false},
-      attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
-      remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
-  };
-  updated = true;
+ t.fields = {
+     location: {show: t.isEvent, req: t.isEvent},
+     locationDetails: {show: t.isEvent, req: false},
+     attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
+     remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
+ };
+ updated = true;
 }
 if (!t.fieldOrder) {
-  if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
-      t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
-  } else {
-      t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
-  }
-  updated = true;
+ if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
+     t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
+ } else {
+     t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
+ }
+ updated = true;
 }
 if (typeof t.isKahRelevant === 'undefined') {
-  t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
-  updated = true;
+ t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
+ updated = true;
 }
 });
 if (updated) props.setProperty('typicalEventTypes', JSON.stringify(existing));
@@ -146,7 +146,7 @@ var lock = LockService.getScriptLock();
 var payload = JSON.parse(e.postData.contents);
 var action = payload.action;
 
-var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts', 'backfillCustomCalendar'].indexOf(action) !== -1;
+var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts', 'backfillCustomCalendar', 'addCalendarAcl', 'removeCalendarAcl'].indexOf(action) !== -1;
 if (needsLock) lock.waitLock(15000); 
 
 try {
@@ -154,7 +154,7 @@ var data = payload.data || {};
 var credentials = payload.credentials || {};
 var responseData = {};
 
-var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts', 'deleteCalendar', 'backfillCustomCalendar', 'getInitialData'];
+var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts', 'deleteCalendar', 'backfillCustomCalendar', 'getInitialData', 'getCalendarAcls', 'addCalendarAcl', 'removeCalendarAcl'];
 if (secureActions.indexOf(action) !== -1) {
 if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
 
@@ -184,6 +184,9 @@ else if (action === 'renameUnit') responseData = renameUnit(data);
 else if (action === 'forceSyncContacts') responseData = forceSyncContacts(data);
 else if (action === 'deleteCalendar') responseData = deleteCalendar(data);
 else if (action === 'backfillCustomCalendar') responseData = backfillCustomCalendar(data);
+else if (action === 'getCalendarAcls') responseData = getCalendarAcls(data);
+else if (action === 'addCalendarAcl') responseData = addCalendarAcl(data);
+else if (action === 'removeCalendarAcl') responseData = removeCalendarAcl(data);
 else if (action === 'getInitialData') responseData = { settings: getSettings(data), leaves: getLeaves(data) };
 
 return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
