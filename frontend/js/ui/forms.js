@@ -94,7 +94,7 @@ if (input) {
 input.required = config.req;
 const label = document.getElementById(`label-${inputId}`);
 if (label && wrapperId) {
-    label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
+   label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
 }
 }
 };
@@ -549,7 +549,7 @@ state = document.getElementById(`form-${ctx}-state`) ? document.getElementById(`
 if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
 eventAttendees.forEach(a => { 
 if (a.dept !== 'Custom' && a.dept) {
- a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
+a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 } 
 });
 finalAttendeesStr = JSON.stringify(eventAttendees);
@@ -577,6 +577,38 @@ a.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim()); });
 finalAttendeesStr = JSON.stringify(eventAttendees);
 }
 }
+
+// --- Custom Calendar Auto-Population Engine ---
+let involvedPhones = new Set();
+involvedPhones.add(String(targetPhone));
+
+if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
+eventAttendees.forEach(a => {
+if (a.type === 'contact') {
+    involvedPhones.add(String(a.id));
+} else if (a.type === 'group') {
+    if (a.dept === 'Custom') {
+         const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+         if (customG) customG.members.forEach(m => involvedPhones.add(String(m)));
+    } else if (a.name.startsWith('zz KAH:')) {
+         window.appKahList.filter(k => k.dept === a.dept).forEach(k => involvedPhones.add(String(k.phone)));
+    } else {
+         companyContacts.filter(c => c.dept && String(c.dept).includes(a.dept)).forEach(c => involvedPhones.add(String(c.phone)));
+    }
+}
+});
+}
+
+if (window.appCustomKahGroups) {
+window.appCustomKahGroups.forEach(g => {
+if (g.hasCalendar && g.calendarName) {
+    if (g.members.some(m => involvedPhones.has(String(m)))) {
+        targetDepts.add(g.calendarName);
+    }
+}
+});
+}
+// ----------------------------------------------
 
 const isEdit = !!currentEditId;
 const targetId = currentEditId || generateLocalUUID();
