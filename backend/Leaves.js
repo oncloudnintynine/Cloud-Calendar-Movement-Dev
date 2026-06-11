@@ -49,10 +49,10 @@ var sheetRows = sheet.getDataRange().getValues();
 recalculateAllKahStatuses(props, sheet, headers, sheetRows);
 var freshRows = sheet.getDataRange().getValues();
 for (var i = freshRows.length - 1; i >= 1; i--) {
-  if (freshRows[i][headers.indexOf('ID')] === id) {
-      finalStatus = freshRows[i][headers.indexOf('Status')];
-      break;
-  }
+ if (freshRows[i][headers.indexOf('ID')] === id) {
+     finalStatus = freshRows[i][headers.indexOf('Status')];
+     break;
+ }
 }
 } catch(e) {
 // Fallback if recalc fails
@@ -91,15 +91,15 @@ if (!calAndEvt) return;
 try {
 var parts = calAndEvt.split('|');
 if (parts.length === 2) {
-  var cal = CalendarApp.getCalendarById(parts[0]);
-  if (cal) {
-    var evt = cal.getEventById(parts[1]);
-    if (evt) evt.deleteEvent();
-    else {
-      var series = cal.getEventSeriesById(parts[1]);
-      if (series) series.deleteEventSeries();
-    }
-  }
+ var cal = CalendarApp.getCalendarById(parts[0]);
+ if (cal) {
+   var evt = cal.getEventById(parts[1]);
+   if (evt) evt.deleteEvent();
+   else {
+     var series = cal.getEventSeriesById(parts[1]);
+     if (series) series.deleteEventSeries();
+   }
+ }
 }
 } catch(e) {}
 });
@@ -156,11 +156,25 @@ var cache = CacheService.getScriptCache();
 var cached = cache.get("sg_holidays_json");
 if (cached) return JSON.parse(cached);
 
-var url = 'https://calendar.google.com/calendar/ical/en.sg%23holiday%40group.v.calendar.google.com/public/basic.ics';
-var res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-if (res.getResponseCode() !== 200) return [];
+var urls = [
+'https://calendar.google.com/calendar/ical/en.singapore%23holiday%40group.v.calendar.google.com/public/basic.ics',
+'https://calendar.google.com/calendar/ical/en.sg.official%23holiday%40group.v.calendar.google.com/public/basic.ics',
+'https://calendar.google.com/calendar/ical/en.sg%23holiday%40group.v.calendar.google.com/public/basic.ics'
+];
 
-var ics = res.getContentText();
+var ics = "";
+for (var u = 0; u < urls.length; u++) {
+try {
+  var res = UrlFetchApp.fetch(urls[u], { muteHttpExceptions: true });
+  if (res.getResponseCode() === 200) {
+      ics = res.getContentText();
+      if (ics.indexOf('BEGIN:VEVENT') !== -1) break;
+  }
+} catch(e) {}
+}
+
+if (!ics || ics.indexOf('BEGIN:VEVENT') === -1) return [];
+
 var events = [];
 var lines = ics.split(/\r?\n/);
 var currentEvent = null;
@@ -171,36 +185,36 @@ var line = lines[i];
 if (line.indexOf('BEGIN:VEVENT') === 0) currentEvent = {};
 else if (line.indexOf('END:VEVENT') === 0 && currentEvent) {
 if (currentEvent.start && currentEvent.summary) {
-   var y = parseInt(currentEvent.start.substring(0,4), 10);
-   var m = parseInt(currentEvent.start.substring(4,6), 10) - 1;
-   var d = parseInt(currentEvent.start.substring(6,8), 10);
-   if (y >= yearLimitStart) {
-       var sDate = new Date(y, m, d);
-       var eDate = new Date(y, m, d, 23, 59, 59);
-       events.push({
-          ID: 'HOLIDAY_' + (currentEvent.uid || Utilities.getUuid()),
-          Timestamp: sDate.toISOString(),
-          Phone: 'SYSTEM',
-          Name: currentEvent.summary.replace(/\\,/g, ','),
-          Department: 'ALL',
-          LeaveType: 'Public Holiday',
-          StartDate: sDate.toISOString(),
-          EndDate: eDate.toISOString(),
-          HalfDay: 'NONE',
-          CoveringPerson: '',
-          Country: 'Singapore',
-          State: '',
-          Remarks: 'Singapore Public Holiday',
-          Status: 'Holiday',
-          EventIDs: '',
-          Location: 'Singapore',
-          Attendees: '',
-          InfoAll: 'TRUE',
-          IsAllDay: 'TRUE',
-          UntilDate: '',
-          LocationDetails: ''
-       });
-   }
+  var y = parseInt(currentEvent.start.substring(0,4), 10);
+  var m = parseInt(currentEvent.start.substring(4,6), 10) - 1;
+  var d = parseInt(currentEvent.start.substring(6,8), 10);
+  if (y >= yearLimitStart) {
+      var sDate = new Date(y, m, d);
+      var eDate = new Date(y, m, d, 23, 59, 59);
+      events.push({
+         ID: 'HOLIDAY_' + (currentEvent.uid || Utilities.getUuid()),
+         Timestamp: sDate.toISOString(),
+         Phone: 'SYSTEM',
+         Name: currentEvent.summary.replace(/\\,/g, ','),
+         Department: 'ALL',
+         LeaveType: 'Public Holiday',
+         StartDate: sDate.toISOString(),
+         EndDate: eDate.toISOString(),
+         HalfDay: 'NONE',
+         CoveringPerson: '',
+         Country: 'Singapore',
+         State: '',
+         Remarks: 'Singapore Public Holiday',
+         Status: 'Holiday',
+         EventIDs: '',
+         Location: 'Singapore',
+         Attendees: '',
+         InfoAll: 'TRUE',
+         IsAllDay: 'TRUE',
+         UntilDate: '',
+         LocationDetails: ''
+      });
+  }
 }
 currentEvent = null;
 }
@@ -240,6 +254,14 @@ if(depts.length > 0) phoneToDepts[phone] = depts.join(',');
 }
 });
 
+var customCalNames = [];
+try {
+var customKahGroups = JSON.parse(props.getProperty('customKahGroups') || "[]");
+customKahGroups.forEach(function(g) {
+  if (g.hasCalendar && g.calendarName) customCalNames.push(g.calendarName);
+});
+} catch(e) {}
+
 var now = new Date();
 var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -252,33 +274,43 @@ if (obj.Status !== 'Cancelled' && obj.EventIDs && new Date(obj.EndDate) >= today
 var eventPairs = String(obj.EventIDs).split(',');
 var allDeleted = true;
 for (var e = 0; e < eventPairs.length; e++) {
-  if (!eventPairs[e]) continue;
-  var parts = eventPairs[e].split('|');
-  if (parts.length === 2) {
-      try {
-          var cal = CalendarApp.getCalendarById(parts[0]);
-          if (cal) {
-              var evt = cal.getEventById(parts[1]) || cal.getEventSeriesById(parts[1]);
-              if (evt) {
-                  allDeleted = false;
-                  break; // At least one event still exists, keep active
-              }
-          }
-      } catch(err) {
-          // Ignore API errors, assume exists to be safe
-          allDeleted = false; 
-      }
-  }
+ if (!eventPairs[e]) continue;
+ var parts = eventPairs[e].split('|');
+ if (parts.length === 2) {
+     try {
+         var cal = CalendarApp.getCalendarById(parts[0]);
+         if (cal) {
+             var evt = cal.getEventById(parts[1]) || cal.getEventSeriesById(parts[1]);
+             if (evt) {
+                 allDeleted = false;
+                 break; // At least one event still exists, keep active
+             }
+         }
+     } catch(err) {
+         // Ignore API errors, assume exists to be safe
+         allDeleted = false; 
+     }
+ }
 }
 if (allDeleted && eventPairs.length > 0) {
-  obj.Status = 'Cancelled';
-  rows[i][headers.indexOf('Status')] = 'Cancelled';
-  updates = true;
+ obj.Status = 'Cancelled';
+ rows[i][headers.indexOf('Status')] = 'Cancelled';
+ updates = true;
 }
 }
 // -----------------------------------------------------
 
 var currentActualDepts = phoneToDepts[obj.Phone] ? phoneToDepts[obj.Phone].split(',') :[];
+
+// Preserve Custom KAH Calendars tags
+var existingDepts = (obj.Department || "").split(',');
+existingDepts.forEach(function(d) {
+var trimmed = d.trim();
+if (customCalNames.indexOf(trimmed) !== -1 && currentActualDepts.indexOf(trimmed) === -1) {
+  currentActualDepts.push(trimmed);
+}
+});
+
 var attDepts =[];
 
 if (obj.Attendees) {
@@ -286,10 +318,10 @@ try {
 var att = JSON.parse(obj.Attendees);
 att.forEach(function(a) {
 if (a.dept && a.dept !== 'Custom') {
-  var dp = a.dept.split(',');
-  dp.forEach(function(d) {
-    if (d.trim() && attDepts.indexOf(d.trim()) === -1) attDepts.push(d.trim());
-  });
+ var dp = a.dept.split(',');
+ dp.forEach(function(d) {
+   if (d.trim() && attDepts.indexOf(d.trim()) === -1) attDepts.push(d.trim());
+ });
 }
 });
 } catch(e) {}
@@ -349,15 +381,15 @@ if (!calAndEvt) return;
 try {
 var parts = calAndEvt.split('|');
 if(parts.length === 2) {
-  var cal = CalendarApp.getCalendarById(parts[0]);
-  if (cal) {
-    var evt = cal.getEventById(parts[1]);
-    if (evt) evt.deleteEvent();
-    else {
-      var series = cal.getEventSeriesById(parts[1]);
-      if (series) series.deleteEventSeries();
-    }
-  }
+ var cal = CalendarApp.getCalendarById(parts[0]);
+ if (cal) {
+   var evt = cal.getEventById(parts[1]);
+   if (evt) evt.deleteEvent();
+   else {
+     var series = cal.getEventSeriesById(parts[1]);
+     if (series) series.deleteEventSeries();
+   }
+ }
 }
 } catch(e) {}
 });
@@ -391,7 +423,7 @@ var limit = parseInt(props.getProperty('kahLimit') || "50");
 
 var userKAHData = kahList.filter(function(k) { return String(k.phone) === String(data.phone); });
 var userCustomGroups = customKahGroups.filter(function(g) { 
-  return g.members.map(function(m) { return String(m); }).indexOf(String(data.phone)) !== -1; 
+ return g.members.map(function(m) { return String(m); }).indexOf(String(data.phone)) !== -1; 
 });
 
 if (userKAHData.length === 0 && userCustomGroups.length === 0) return false;
@@ -423,18 +455,18 @@ if (typicalEventTypes[k].name === rType && typicalEventTypes[k].isKahRelevant) {
 }
 
 if (rKahRel) {
- var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
- rStart.setHours(0, 0, 0, 0);
- var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
- rEnd.setHours(23, 59, 59, 999);
- 
- if (rStart > reqEnd || rEnd < reqStart) continue;
+var rStart = new Date(rows[i][headers.indexOf('StartDate')]);
+rStart.setHours(0, 0, 0, 0);
+var rEnd = new Date(rows[i][headers.indexOf('EndDate')]);
+rEnd.setHours(23, 59, 59, 999);
 
- otherKAHLeaves.push({
-     phone: String(rows[i][headers.indexOf('Phone')]),
-     start: rStart,
-     end: rEnd
- });
+if (rStart > reqEnd || rEnd < reqStart) continue;
+
+otherKAHLeaves.push({
+    phone: String(rows[i][headers.indexOf('Phone')]),
+    start: rStart,
+    end: rEnd
+});
 }
 }
 
@@ -449,23 +481,23 @@ if (totalKahInDept === 0) return;
 var maxConcurrentOut = 0;
 
 for (var current = new Date(reqStart); current <= reqEnd; current.setDate(current.getDate() + 1)) {
- var outToday = [String(data.phone)]; 
- 
- otherKAHLeaves.forEach(function(l) {
-     if (l.start <= current && l.end >= current) {
-         if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
-             outToday.push(l.phone);
-         }
-     }
- });
- 
- if (outToday.length > maxConcurrentOut) {
-     maxConcurrentOut = outToday.length;
- }
+var outToday = [String(data.phone)]; 
+
+otherKAHLeaves.forEach(function(l) {
+    if (l.start <= current && l.end >= current) {
+        if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
+            outToday.push(l.phone);
+        }
+    }
+});
+
+if (outToday.length > maxConcurrentOut) {
+    maxConcurrentOut = outToday.length;
+}
 }
 
 if ((maxConcurrentOut / totalKahInDept) * 100 > limit) {
- exceededDepts.push(dept);
+exceededDepts.push(dept);
 }
 });
 
@@ -480,23 +512,23 @@ if (totalKahInDept === 0) return;
 var maxConcurrentOut = 0;
 
 for (var current = new Date(reqStart); current <= reqEnd; current.setDate(current.getDate() + 1)) {
- var outToday = [String(data.phone)]; 
- 
- otherKAHLeaves.forEach(function(l) {
-     if (l.start <= current && l.end >= current) {
-         if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
-             outToday.push(l.phone);
-         }
-     }
- });
- 
- if (outToday.length > maxConcurrentOut) {
-     maxConcurrentOut = outToday.length;
- }
+var outToday = [String(data.phone)]; 
+
+otherKAHLeaves.forEach(function(l) {
+    if (l.start <= current && l.end >= current) {
+        if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
+            outToday.push(l.phone);
+        }
+    }
+});
+
+if (outToday.length > maxConcurrentOut) {
+    maxConcurrentOut = outToday.length;
+}
 }
 
 if ((maxConcurrentOut / totalKahInDept) * 100 > limit) {
- exceededDepts.push(dept);
+exceededDepts.push(dept);
 }
 });
 
