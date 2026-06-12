@@ -16,7 +16,6 @@ var props = PropertiesService.getScriptProperties();
 if (!props.getProperty('adminPassword')) props.setProperty('adminPassword', 'P@ssw0rd');
 if (!props.getProperty('kahLimit')) props.setProperty('kahLimit', '50');
 if (!props.getProperty('approvingAuthority')) props.setProperty('approvingAuthority', Session.getActiveUser().getEmail());
-if (!props.getProperty('kahList')) props.setProperty('kahList', JSON.stringify([]));
 if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringify(['dashboard', 'parade-state', 'my-leaves', 'submit-combined']));
 if (!props.getProperty('landingPage')) props.setProperty('landingPage', 'dashboard');
 if (!props.getProperty('dashboardDeptOrder')) props.setProperty('dashboardDeptOrder', JSON.stringify([]));
@@ -41,25 +40,25 @@ if (t.name === 'Meeting') { t.name = 'Generic'; updated = true; }
 if (t.defaultLoc === 'Office') { t.defaultLoc = 'In Camp'; updated = true; }
 if (t.defaultLoc === 'Others') { t.defaultLoc = 'Out of Camp'; updated = true; }
 if (!t.fields) {
- t.fields = {
-     location: {show: t.isEvent, req: t.isEvent},
-     locationDetails: {show: t.isEvent, req: false},
-     attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
-     remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
- };
- updated = true;
+t.fields = {
+    location: {show: t.isEvent, req: t.isEvent},
+    locationDetails: {show: t.isEvent, req: false},
+    attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
+    remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
+};
+updated = true;
 }
 if (!t.fieldOrder) {
- if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
-     t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
- } else {
-     t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
- }
- updated = true;
+if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
+    t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
+} else {
+    t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
+}
+updated = true;
 }
 if (typeof t.isKahRelevant === 'undefined') {
- t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
- updated = true;
+t.isKahRelevant = (t.name === 'Official Trip' || t.name === 'Overseas Leave');
+updated = true;
 }
 });
 if (updated) props.setProperty('typicalEventTypes', JSON.stringify(existing));

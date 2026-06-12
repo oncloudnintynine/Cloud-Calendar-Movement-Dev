@@ -17,8 +17,8 @@ if (devBanner && ENV !== 'Prod') {
 devBanner.classList.remove('hidden');
 devBanner.innerText = `${ENV.toUpperCase()} MODE`;
 if (ENV === 'Exp') {
-  devBanner.classList.remove('bg-red-600');
-  devBanner.classList.add('bg-purple-600');
+ devBanner.classList.remove('bg-red-600');
+ devBanner.classList.add('bg-purple-600');
 }
 }
 
@@ -46,10 +46,6 @@ if(resCA) resCA.classList.add('hidden-view');
 if(!e.target.closest('#form-leave-attendee-search') && !e.target.closest('#leave-attendees-results')) {
 const resLA = document.getElementById('leave-attendees-results');
 if(resLA) resLA.classList.add('hidden-view');
-}
-if(!e.target.closest('#kah-search') && !e.target.closest('#kah-results')) {
-const resK = document.getElementById('kah-results');
-if(resK) resK.classList.add('hidden-view');
 }
 if(!e.target.closest('#form-leave-behalf-search') && !e.target.closest('#behalf-results-leave')) {
 const resBHL = document.getElementById('behalf-results-leave');
@@ -109,8 +105,6 @@ if (!primaryDept || primaryDept === 'Unassigned' || primaryDept === 'UNASSIGNED'
 return window.appContactNameFormat.replace(/{Name}/g, name).replace(/{Unit}/g, primaryDept);
 };
 
-window.kahPhones = (settings.kahList ||[]).map(k => String(k.phone));
-window.appKahList = settings.kahList ||[];
 window.appCustomKahGroups = settings.customKahGroups ||[];
 
 companyStructure = settings.companyStructure ? (Array.isArray(settings.companyStructure) ? settings.companyStructure : Object.keys(settings.companyStructure)) :[];
@@ -127,8 +121,8 @@ applyMenuOrder(mOrder);
 if (user.role !== 'admin' && companyContacts.length > 0) {
 const myContact = companyContacts.find(c => c.phone == user.phone);
 if (myContact && myContact.dept) {
-  user.departments = myContact.dept.split(',').map(s=>s.trim());
-  localStorage.setItem('user', JSON.stringify(user));
+ user.departments = myContact.dept.split(',').map(s=>s.trim());
+ localStorage.setItem('user', JSON.stringify(user));
 }
 }
 
@@ -152,7 +146,7 @@ allUnits.add('Cloud Meeting Room');
 // Dedicated Custom KAH Group Calendars Injection
 if (window.appCustomKahGroups) {
 window.appCustomKahGroups.forEach(g => {
-  if (g.hasCalendar && g.calendarName) allUnits.add(g.calendarName);
+ if (g.hasCalendar && g.calendarName) allUnits.add(g.calendarName);
 });
 }
 
@@ -196,7 +190,7 @@ unitsLoaded = true;
 
 if (companyContacts.length > 0) {
 companyContacts.forEach(c => {
-  c.formattedName = window.formatContactName(c.name, c.dept);
+ c.formattedName = window.formatContactName(c.name, c.dept);
 });
 
 const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -210,16 +204,10 @@ attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, formattedName: `zz A
 
 window.appCustomKahGroups.forEach(g => {
 const customNames = g.members.map(phone => {
-  const c = companyContacts.find(contact => String(contact.phone) === String(phone));
-  return c ? c.name : phone;
+ const c = companyContacts.find(contact => String(contact.phone) === String(phone));
+ return c ? c.name : phone;
 }).join(', ');
 attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, formattedName: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
-});
-
-const kahUnits =[...new Set(window.appKahList.map(k => k.dept))];
-kahUnits.forEach(dept => {
-const unitNames = window.appKahList.filter(k => k.dept === dept).map(k => k.name).join(', ');
-attendeeOptions.push({ id: `kah_unit_${dept}`, name: `zz KAH: ${dept}`, formattedName: `zz KAH: ${dept}`, dept: dept, type: 'group', expandedNames: unitNames });
 });
 
 fuseAttendees = new Fuse(attendeeOptions, { keys:['formattedName', 'name'], threshold: 0.3 });

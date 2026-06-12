@@ -13,7 +13,6 @@ let fuseAttendees = null;
 
 let tempTypicalEventTypes =[];
 let tempAcronyms = {};
-let adminKAHList =[];
 let customKahGroups =[];
 let tempMenuOrder =[];
 let tempAdminSectionsOrder =[];
