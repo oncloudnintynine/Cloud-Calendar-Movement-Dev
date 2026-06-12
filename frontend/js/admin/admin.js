@@ -50,14 +50,14 @@ let allDepts = new Set(companyStructure);
 if(companyContacts) {
 companyContacts.forEach(c => {
 if(c.dept && c.dept !== 'Unassigned') {
- c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
+c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
 }
 });
 }
 allDepts.add('Cloud Meeting Room');
 if (window.appCustomKahGroups) {
 window.appCustomKahGroups.forEach(g => {
-  if (g.hasCalendar && g.calendarName) allDepts.add(g.calendarName);
+ if (g.hasCalendar && g.calendarName) allDepts.add(g.calendarName);
 });
 }
 
@@ -84,9 +84,7 @@ else tempAcronyms[key] = val;
 }
 renderAcronyms();
 
-adminKAHList = settings.kahList ||[];
 customKahGroups = settings.customKahGroups ||[];
-renderKAHSelected();
 renderCustomKahGroups();
 
 // Initialize General Settings Container
@@ -202,8 +200,8 @@ if(!list) return;
 const buildChips = (inputId) => {
 const vars = ['{EventType}','{Name}','{Attendees}','{Department}','{Location}','{LocationDetails}','{Country}','{State}','{StartTime}','{EndTime}','{Remarks}','{EventDescription}'];
 return `<div class="flex flex-wrap gap-1 mt-1.5 mb-2">` + 
- vars.map(v => `<button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>`).join('') + 
- `</div>`;
+vars.map(v => `<button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>`).join('') + 
+`</div>`;
 };
 
 let html = '';
@@ -269,31 +267,31 @@ let templatesHtml = `
 <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-2">Display Templates Override</h4>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm mb-1">
 <div>
-    <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">GCal Title Override</label>
-    <input type="text" id="evt-tpl-gcal-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.gcalTemplate || ''}" onchange="updateTypicalEventType(${i}, 'gcalTemplate', this.value)">
-    ${buildChips(`evt-tpl-gcal-${i}`)}
+   <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">GCal Title Override</label>
+   <input type="text" id="evt-tpl-gcal-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.gcalTemplate || ''}" onchange="updateTypicalEventType(${i}, 'gcalTemplate', this.value)">
+   ${buildChips(`evt-tpl-gcal-${i}`)}
 </div>
 <div>
-    <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Title Override</label>
-    <input type="text" id="evt-tpl-agenda-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.agendaTemplate || ''}" onchange="updateTypicalEventType(${i}, 'agendaTemplate', this.value)">
-    ${buildChips(`evt-tpl-agenda-${i}`)}
+   <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Title Override</label>
+   <input type="text" id="evt-tpl-agenda-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.agendaTemplate || ''}" onchange="updateTypicalEventType(${i}, 'agendaTemplate', this.value)">
+   ${buildChips(`evt-tpl-agenda-${i}`)}
 </div>
 <div>
-    <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Title Override</label>
-    <input type="text" id="evt-tpl-infoall-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.infoAllTemplate || ''}" onchange="updateTypicalEventType(${i}, 'infoAllTemplate', this.value)">
-    ${buildChips(`evt-tpl-infoall-${i}`)}
+   <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Title Override</label>
+   <input type="text" id="evt-tpl-infoall-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition" placeholder="Global default if blank" value="${t.infoAllTemplate || ''}" onchange="updateTypicalEventType(${i}, 'infoAllTemplate', this.value)">
+   ${buildChips(`evt-tpl-infoall-${i}`)}
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
 <div>
-    <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Details Override</label>
-    <textarea id="evt-tpl-agedet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'agendaDetailsTemplate', this.value)">${t.agendaDetailsTemplate || ''}</textarea>
-    ${buildChips(`evt-tpl-agedet-${i}`)}
+   <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Agenda Details Override</label>
+   <textarea id="evt-tpl-agedet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'agendaDetailsTemplate', this.value)">${t.agendaDetailsTemplate || ''}</textarea>
+   ${buildChips(`evt-tpl-agedet-${i}`)}
 </div>
 <div>
-    <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Details Override</label>
-    <textarea id="evt-tpl-infdet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'infoAllDetailsTemplate', this.value)">${t.infoAllDetailsTemplate || ''}</textarea>
-    ${buildChips(`evt-tpl-infdet-${i}`)}
+   <label class="block font-semibold text-[10px] uppercase text-gray-500 dark:text-darkmuted mb-1 tracking-wide">Info All Details Override</label>
+   <textarea id="evt-tpl-infdet-${i}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg p-1.5 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-xs outline-none focus:border-blue-500 transition resize-none" placeholder="Global default if blank. Enter a space ' ' to intentionally hide details." rows="2" onchange="updateTypicalEventType(${i}, 'infoAllDetailsTemplate', this.value)">${t.infoAllDetailsTemplate || ''}</textarea>
+   ${buildChips(`evt-tpl-infdet-${i}`)}
 </div>
 </div>
 </div>
@@ -312,8 +310,8 @@ let currentOrder = t.fieldOrder || defaultOrder;
 // Ensure missing blocks are appended to prevent UI loss from corrupted databases
 const missingBlocks = defaultOrder.filter(b => !currentOrder.includes(b));
 if (missingBlocks.length > 0) {
- currentOrder = [...currentOrder, ...missingBlocks];
- t.fieldOrder = currentOrder; 
+currentOrder = [...currentOrder, ...missingBlocks];
+t.fieldOrder = currentOrder; 
 }
 
 const blockNames = {
@@ -327,12 +325,12 @@ const blockNames = {
 
 currentOrder.forEach(block => {
 if(blockNames[block]) {
-    orderHtml += `
-    <div data-id="${block}" class="flex items-center space-x-2 bg-gray-50 dark:bg-[#2a2a2a] p-2 rounded border border-gray-200 dark:border-gray-600 cursor-grab shadow-sm">
-       <svg class="w-4 h-4 text-gray-400 dark:text-darkmuted field-handle shrink-0 cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-       <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">${blockNames[block]}</span>
-    </div>
-    `;
+   orderHtml += `
+   <div data-id="${block}" class="flex items-center space-x-2 bg-gray-50 dark:bg-[#2a2a2a] p-2 rounded border border-gray-200 dark:border-gray-600 cursor-grab shadow-sm">
+      <svg class="w-4 h-4 text-gray-400 dark:text-darkmuted field-handle shrink-0 cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+      <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">${blockNames[block]}</span>
+   </div>
+   `;
 }
 });
 orderHtml += `</div></div>`;
@@ -359,23 +357,23 @@ ${removeBtnHtml}
 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 w-full pl-8 mt-1">
 
 <div class="flex flex-wrap items-center gap-2">
-   <label class="flex items-center space-x-1.5 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-2 rounded-lg border border-yellow-300 dark:border-yellow-700 cursor-pointer transition hover:bg-yellow-100 dark:hover:bg-yellow-900/40" title="If checked, this event type counts towards the Unit KAH out-of-office limit.">
-     <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-4 h-4 text-yellow-600 cursor-pointer rounded border-gray-300 shrink-0" ${t.isKahRelevant ? 'checked' : ''}>
-     <span class="text-xs font-bold text-yellow-800 dark:text-yellow-400 whitespace-nowrap">KAH Tracker</span>
-   </label>
-   ${locHtml ? `<div class="flex-grow sm:flex-grow-0">${locHtml}</div>` : ''}
+  <label class="flex items-center space-x-1.5 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-2 rounded-lg border border-yellow-300 dark:border-yellow-700 cursor-pointer transition hover:bg-yellow-100 dark:hover:bg-yellow-900/40" title="If checked, this event type counts towards the KAH limit if the user's custom group has limit enforcement turned on.">
+    <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-4 h-4 text-yellow-600 cursor-pointer rounded border-gray-300 shrink-0" ${t.isKahRelevant ? 'checked' : ''}>
+    <span class="text-xs font-bold text-yellow-800 dark:text-yellow-400 whitespace-nowrap">KAH Tracker</span>
+  </label>
+  ${locHtml ? `<div class="flex-grow sm:flex-grow-0">${locHtml}</div>` : ''}
 </div>
 
 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
- <button type="button" onclick="document.getElementById('event-type-order-${i}').classList.toggle('hidden-view')" class="flex-1 lg:flex-none flex justify-center items-center text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 px-3 py-2 rounded-lg transition text-xs font-bold whitespace-nowrap bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-300 dark:border-emerald-700 shadow-sm" title="Field Order">
-    Order ↕️
- </button>
- <button type="button" onclick="document.getElementById('event-type-fields-${i}').classList.toggle('hidden-view')" class="flex-1 lg:flex-none flex justify-center items-center text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 px-3 py-2 rounded-lg transition text-xs font-bold whitespace-nowrap bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700 shadow-sm" title="Configure Form Fields">
-    Fields ⚙️
- </button>
- <button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="flex-1 lg:flex-none flex justify-center items-center text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3 py-2 rounded-lg transition text-xs font-bold whitespace-nowrap bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 shadow-sm" title="Specific Templates">
-    Templates 📝
- </button>
+<button type="button" onclick="document.getElementById('event-type-order-${i}').classList.toggle('hidden-view')" class="flex-1 lg:flex-none flex justify-center items-center text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 px-3 py-2 rounded-lg transition text-xs font-bold whitespace-nowrap bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-300 dark:border-emerald-700 shadow-sm" title="Field Order">
+   Order ↕️
+</button>
+<button type="button" onclick="document.getElementById('event-type-fields-${i}').classList.toggle('hidden-view')" class="flex-1 lg:flex-none flex justify-center items-center text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 px-3 py-2 rounded-lg transition text-xs font-bold whitespace-nowrap bg-purple-50 dark:bg-purple-900/20 border border-purple-300 dark:border-purple-700 shadow-sm" title="Configure Form Fields">
+   Fields ⚙️
+</button>
+<button type="button" onclick="document.getElementById('event-type-tpl-${i}').classList.toggle('hidden-view')" class="flex-1 lg:flex-none flex justify-center items-center text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3 py-2 rounded-lg transition text-xs font-bold whitespace-nowrap bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 shadow-sm" title="Specific Templates">
+   Templates 📝
+</button>
 </div>
 </div>
 
@@ -408,12 +406,12 @@ if(window['fieldOrderSortable' + i]) window['fieldOrderSortable' + i].destroy();
 const orderList = document.getElementById(`sortable-field-order-${i}`);
 if (orderList) {
 window['fieldOrderSortable' + i] = new Sortable(orderList, {
-    animation: 150,
-    handle: '.field-handle',
-    ghostClass: 'opacity-50',
-    onEnd: function() {
-        tempTypicalEventTypes[i].fieldOrder = Array.from(orderList.children).map(el => el.dataset.id);
-    }
+   animation: 150,
+   handle: '.field-handle',
+   ghostClass: 'opacity-50',
+   onEnd: function() {
+       tempTypicalEventTypes[i].fieldOrder = Array.from(orderList.children).map(el => el.dataset.id);
+   }
 });
 }
 });
@@ -455,9 +453,9 @@ if (field === 'name' && FIXED_TYPICAL_EVENTS.includes(tempTypicalEventTypes[idx]
 
 if (['gcalTemplate', 'agendaTemplate', 'agendaDetailsTemplate', 'infoAllTemplate', 'infoAllDetailsTemplate'].includes(field)) {
 if (val === '') {
- delete tempTypicalEventTypes[idx][field];
+delete tempTypicalEventTypes[idx][field];
 } else {
- tempTypicalEventTypes[idx][field] = val;
+tempTypicalEventTypes[idx][field] = val;
 }
 } else {
 tempTypicalEventTypes[idx][field] = val;
@@ -469,10 +467,10 @@ if (field === 'isEvent') renderTypicalEventTypes();
 function updateEventTypeField(idx, fieldKey, prop, val) {
 if (!tempTypicalEventTypes[idx].fields) {
 tempTypicalEventTypes[idx].fields = {
- location: {show: true, req: false},
- locationDetails: {show: true, req: false},
- attendees: {show: true, req: false},
- remarks: {show: true, req: false, label: 'Remarks'}
+location: {show: true, req: false},
+locationDetails: {show: true, req: false},
+attendees: {show: true, req: false},
+remarks: {show: true, req: false, label: 'Remarks'}
 };
 }
 tempTypicalEventTypes[idx].fields[fieldKey][prop] = val;
@@ -535,82 +533,6 @@ delete tempAcronyms[key];
 renderAcronyms();
 }
 
-function searchKAH() {
-const q = document.getElementById('kah-search').value;
-const resC = document.getElementById('kah-results');
-if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
-const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
-if(results.length > 0) {
-resC.innerHTML = results.map(c => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover" onclick="addKAH('${c.phone}', '${c.name.replace(/'/g, "\\'")}', '${c.dept}')"><span class="font-semibold">${c.formattedName}</span></div>`).join('');
-resC.classList.remove('hidden-view');
-} else {
-resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
-}
-}
-
-function addKAH(phone, name, dept) {
-if(!adminKAHList.some(k => k.phone === phone)) { adminKAHList.push({ phone, name, dept }); renderKAHSelected(); }
-document.getElementById('kah-search').value = '';
-document.getElementById('kah-results').classList.add('hidden-view');
-}
-
-function removeKAH(phone) { adminKAHList = adminKAHList.filter(k => k.phone !== phone); renderKAHSelected(); }
-
-function renderKAHSelected() {
-const list = document.getElementById('kah-selected-list');
-if(!list) return;
-if (adminKAHList.length === 0) {
-list.innerHTML = `<p class="text-gray-500 dark:text-darkmuted text-sm text-center italic py-2">No unit KAH personnel added yet.</p>`;
-return;
-}
-
-const grouped = {};
-adminKAHList.forEach(k => {
-const d = k.dept.toUpperCase();
-let parent = d;
-let child = null;
-if (d.includes('-')) {
-const parts = d.split('-');
-parent = parts[0];
-child = parts.slice(1).join('-');
-}
-
-if (!grouped[parent]) grouped[parent] = {};
-if (child) {
-if (!grouped[parent][child]) grouped[parent][child] =[];
-grouped[parent][child].push(k);
-} else {
-if (!grouped[parent]['_direct']) grouped[parent]['_direct'] =[];
-grouped[parent]['_direct'].push(k);
-}
-});
-
-let html = '';
-for (const parent in grouped) {
-html += `<div class="mb-4"><h4 class="font-bold text-lg text-gray-800 dark:text-gray-200 border-b-2 border-gray-300 dark:border-gray-600 pb-1 mb-2">${parent}</h4>`;
-
-if (grouped[parent]['_direct']) {
-html += `<div class="space-y-1">`;
-grouped[parent]['_direct'].forEach(k => {
-html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
-});
-html += `</div>`;
-}
-
-for (const child in grouped[parent]) {
-if (child !== '_direct') {
-html += `<h5 class="font-semibold text-sm text-gray-600 dark:text-gray-400 mt-2 mb-1 pl-2 border-l-2 border-blue-400">${child}</h5><div class="space-y-1">`;
-grouped[parent][child].forEach(k => {
-html += `<div class="flex justify-between items-center bg-white dark:bg-darksurface p-2 rounded-lg border border-gray-300 dark:border-darkborder shadow-sm pl-4"><span class="font-medium">${k.name} <span class="text-xs text-gray-500 ml-1">(${k.dept})</span></span><button onclick="removeKAH('${k.phone}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg font-bold px-3 transition">&times;</button></div>`;
-});
-html += `</div>`;
-}
-}
-html += `</div>`;
-}
-list.innerHTML = html;
-}
-
 function updateKahGroupCalendarName(idx, newName) {
 if (!newName.trim()) return;
 customKahGroups[idx].calendarName = newName.trim();
@@ -641,14 +563,20 @@ container.innerHTML = customKahGroups.map((g, i) => `
 <button onclick="removeCustomKahGroup(${i})" class="text-red-500 hover:text-red-700 text-xs font-bold transition">Delete Group</button>
 </div>
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 bg-blue-50 dark:bg-blue-900/20 p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/50 gap-2">
-<div class="flex items-center space-x-2 w-full sm:w-auto">
- <input type="checkbox" id="kah-group-cal-${i}" class="w-4 h-4 text-blue-600 rounded cursor-pointer" ${g.hasCalendar ? 'checked' : ''} onchange="toggleKahGroupCalendar(${i}, this.checked)">
- <label for="kah-group-cal-${i}" class="text-xs font-bold text-blue-800 dark:text-blue-300 cursor-pointer">Enable Dedicated Group Calendar</label>
+<div class="flex flex-col space-y-2 w-full sm:w-auto">
+   <div class="flex items-center space-x-2">
+       <input type="checkbox" id="kah-group-cal-${i}" class="w-4 h-4 text-blue-600 rounded cursor-pointer" ${g.hasCalendar ? 'checked' : ''} onchange="toggleKahGroupCalendar(${i}, this.checked)">
+       <label for="kah-group-cal-${i}" class="text-xs font-bold text-blue-800 dark:text-blue-300 cursor-pointer">Enable Dedicated Group Calendar</label>
+   </div>
+   <div class="flex items-center space-x-2">
+       <input type="checkbox" id="kah-group-limit-${i}" class="w-4 h-4 text-yellow-600 rounded cursor-pointer" ${g.applyLimit ? 'checked' : ''} onchange="toggleKahGroupLimit(${i}, this.checked)">
+       <label for="kah-group-limit-${i}" class="text-xs font-bold text-yellow-800 dark:text-yellow-400 cursor-pointer">Enforce Global KAH Out-Of-Office Percentage Limit</label>
+   </div>
 </div>
 ${g.hasCalendar ? `
 <div class="flex items-center space-x-2 w-full sm:w-auto mt-2 sm:mt-0">
- <input type="text" id="kah-group-cal-name-${i}" value="${g.calendarName || g.name}" onchange="updateKahGroupCalendarName(${i}, this.value)" class="text-[11px] font-bold text-blue-900 dark:text-blue-100 bg-white dark:bg-darksurface px-2 py-1.5 rounded shadow-sm border border-blue-300 dark:border-blue-700 outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-36" placeholder="Calendar Name">
- <button type="button" onclick="backfillKahGroupCalendar(${i})" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded font-bold transition shadow-sm whitespace-nowrap shrink-0 border border-transparent">Sync Past Events</button>
+<input type="text" id="kah-group-cal-name-${i}" value="${g.calendarName || g.name}" onchange="updateKahGroupCalendarName(${i}, this.value)" class="text-[11px] font-bold text-blue-900 dark:text-blue-100 bg-white dark:bg-darksurface px-2 py-1.5 rounded shadow-sm border border-blue-300 dark:border-blue-700 outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-36" placeholder="Calendar Name">
+<button type="button" onclick="backfillKahGroupCalendar(${i})" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded font-bold transition shadow-sm whitespace-nowrap shrink-0 border border-transparent">Sync Past Events</button>
 </div>` : ''}
 </div>
 <div class="space-y-1.5 mb-3">
@@ -673,7 +601,7 @@ const input = document.getElementById('new-kah-group-name');
 const name = input.value.trim();
 if (name) {
 if (customKahGroups.some(g => g.name.toLowerCase() === name.toLowerCase())) return alert("Group name already exists.");
-customKahGroups.push({ name: name, members:[], hasCalendar: false, calendarName: '' });
+customKahGroups.push({ name: name, members:[], hasCalendar: false, calendarName: '', applyLimit: false });
 input.value = '';
 renderCustomKahGroups();
 }
@@ -683,20 +611,24 @@ async function removeCustomKahGroup(idx) {
 const g = customKahGroups[idx];
 if (confirm("Are you sure you want to delete this custom group?")) {
 if (g.hasCalendar) {
- if (confirm(`This group has a dedicated Google Calendar ("${g.calendarName || g.name}"). Do you also want to PERMANENTLY DELETE this calendar and all its events? (Click Cancel to keep the calendar but delete the group)`)) {
-    showLoader(true);
-    try {
-      await apiCall('deleteCalendar', { adminPass: user.pass, calendarName: g.calendarName || g.name });
-    } catch(e) {
-      alert("Error deleting calendar: " + e.message);
-    } finally {
-      showLoader(false);
-    }
- }
+if (confirm(`This group has a dedicated Google Calendar ("${g.calendarName || g.name}"). Do you also want to PERMANENTLY DELETE this calendar and all its events? (Click Cancel to keep the calendar but delete the group)`)) {
+   showLoader(true);
+   try {
+     await apiCall('deleteCalendar', { adminPass: user.pass, calendarName: g.calendarName || g.name });
+   } catch(e) {
+     alert("Error deleting calendar: " + e.message);
+   } finally {
+     showLoader(false);
+   }
+}
 }
 customKahGroups.splice(idx, 1);
 renderCustomKahGroups();
 }
+}
+
+function toggleKahGroupLimit(idx, isChecked) {
+customKahGroups[idx].applyLimit = isChecked;
 }
 
 async function toggleKahGroupCalendar(idx, isChecked) {
@@ -707,21 +639,21 @@ g.calendarName = g.name;
 renderCustomKahGroups();
 } else {
 if (confirm(`Are you sure you want to disable and PERMANENTLY DELETE the dedicated Google Calendar for "${g.name}"? This action cannot be undone and will wipe all past events in it.`)) {
- showLoader(true);
- try {
-   await apiCall('deleteCalendar', { adminPass: user.pass, calendarName: g.calendarName || g.name });
-   g.hasCalendar = false;
-   g.calendarName = '';
-   renderCustomKahGroups();
-   alert("Calendar successfully deleted.");
- } catch(e) {
-   alert("Error deleting calendar: " + e.message);
-   renderCustomKahGroups(); 
- } finally {
-   showLoader(false);
- }
+showLoader(true);
+try {
+  await apiCall('deleteCalendar', { adminPass: user.pass, calendarName: g.calendarName || g.name });
+  g.hasCalendar = false;
+  g.calendarName = '';
+  renderCustomKahGroups();
+  alert("Calendar successfully deleted.");
+} catch(e) {
+  alert("Error deleting calendar: " + e.message);
+  renderCustomKahGroups(); 
+} finally {
+  showLoader(false);
+}
 } else {
- renderCustomKahGroups(); 
+renderCustomKahGroups(); 
 }
 }
 }
@@ -895,7 +827,6 @@ const payload = {
 adminPass: user.pass,
 kahLimit: document.getElementById('set-kah-limit').value,
 approvingAuthority: document.getElementById('set-appr-email').value,
-kahList: adminKAHList,
 customKahGroups: customKahGroups,
 kahEmailSubject: document.getElementById('set-kah-subject').value.trim(),
 kahEmailBody: document.getElementById('set-kah-body').value.trim()
@@ -944,10 +875,10 @@ const sortedAcls = [...cal.acls].sort((a, b) => (roleWeights[a.role] || 99) - (r
 
 sortedAcls.forEach((acl, aIdx) => {
 const badgeColors = {
-  'owner': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-  'writer': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  'reader': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  'freeBusyReader': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+ 'owner': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+ 'writer': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+ 'reader': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+ 'freeBusyReader': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
 };
 const colorClass = badgeColors[acl.role] || badgeColors['freeBusyReader'];
 const typeLabel = acl.type === 'default' ? 'Public (Anyone)' : (acl.type === 'user' ? 'User' : acl.type);
