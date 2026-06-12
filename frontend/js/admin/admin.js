@@ -851,7 +851,6 @@ if (!calendarAclsCache) {
 container.innerHTML = `<div class="flex justify-center items-center py-10"><div class="spinner"></div></div>`;
 try {
 calendarAclsCache = await apiCall('getCalendarAcls', { adminPass: user.pass });
-// Sort alphabetically by summary
 calendarAclsCache.sort((a, b) => (a.summary || '').localeCompare(b.summary || ''));
 } catch (e) {
 container.innerHTML = `<p class="text-red-500 text-center py-5">Error fetching calendars: ${e.message}</p>`;
@@ -862,42 +861,65 @@ return;
 let html = '';
 calendarAclsCache.forEach((cal, cIdx) => {
 const isGroup = cal.id.includes('group.calendar.google.com');
+const isMaster = cal.id === cal.primaryOwner; // Prevent deletion of main user calendar
+
 html += `
 <div class="bg-white dark:bg-darksurface border border-gray-200 dark:border-darkborder rounded-2xl p-4 md:p-6 mb-4 shadow-sm relative">
-<h3 class="font-extrabold text-lg text-gray-900 dark:text-white mb-4 border-b border-gray-100 dark:border-darkborder pb-2">${cal.summary} <span class="text-xs text-gray-400 font-normal ml-2 break-all inline-block align-middle max-w-full">(${cal.id})</span></h3>
+<div class="flex justify-between items-start mb-4 border-b border-gray-100 dark:border-darkborder pb-2">
+<div>
+    <h3 class="font-extrabold text-lg text-gray-900 dark:text-white">${cal.summary}</h3>
+    <span class="text-xs text-gray-400 font-normal break-all">${cal.id}</span>
+</div>
+${!isMaster ? `
+<button type="button" onclick="deleteFullCalendar(${cIdx})" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition shrink-0" title="Delete Entire Calendar">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+</button>
+` : ''}
+</div>
 <div class="space-y-3 mb-5">
 `;
 
 if (cal.acls && cal.acls.length > 0) {
-// Sort ACLs: Owners first, then writers, then readers
+const visibleAcls = cal.acls.filter(a => a.value !== cal.primaryOwner && !a.value.includes('appspot.gserviceaccount.com'));
+
+if (visibleAcls.length > 0) {
 const roleWeights = { 'owner': 1, 'writer': 2, 'reader': 3, 'freeBusyReader': 4 };
-const sortedAcls = [...cal.acls].sort((a, b) => (roleWeights[a.role] || 99) - (roleWeights[b.role] || 99));
+const sortedAcls = visibleAcls.sort((a, b) => (roleWeights[a.role] || 99) - (roleWeights[b.role] || 99));
 
 sortedAcls.forEach((acl, aIdx) => {
-const badgeColors = {
- 'owner': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
- 'writer': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
- 'reader': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
- 'freeBusyReader': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-};
-const colorClass = badgeColors[acl.role] || badgeColors['freeBusyReader'];
 const typeLabel = acl.type === 'default' ? 'Public (Anyone)' : (acl.type === 'user' ? 'User' : acl.type);
+
+let roleHtml = '';
+if (acl.type === 'user') {
+    roleHtml = `
+    <select onchange="updateCalendarRole(${cIdx}, '${acl.id}', this.value)" class="text-[10px] md:text-xs font-bold bg-gray-100 dark:bg-darkinput border border-gray-300 dark:border-gray-600 rounded-md py-1.5 px-2 text-gray-800 dark:text-gray-200 outline-none focus:border-blue-500 transition cursor-pointer uppercase tracking-wider">
+        <option value="reader" ${acl.role === 'reader' ? 'selected' : ''}>Reader</option>
+        <option value="writer" ${acl.role === 'writer' ? 'selected' : ''}>Writer</option>
+        <option value="owner" ${acl.role === 'owner' ? 'selected' : ''}>Owner</option>
+    </select>
+    `;
+} else {
+    roleHtml = `<span class="px-2.5 py-1 rounded-md text-[10px] md:text-xs font-bold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 uppercase tracking-wide">${acl.role}</span>`;
+}
 
 html += `
 <div class="flex items-center justify-between bg-gray-50 dark:bg-darkinput p-3 rounded-xl border border-gray-200 dark:border-gray-700">
-<div class="min-w-0 flex-1 pr-4">
-<p class="font-semibold text-gray-800 dark:text-gray-200 text-sm truncate">${acl.value || typeLabel}</p>
-<p class="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">${acl.type}</p>
-</div>
-<div class="flex items-center shrink-0 space-x-3">
-<span class="px-2.5 py-1 rounded-md text-xs font-bold ${colorClass} uppercase tracking-wide">${acl.role}</span>
-<button type="button" onclick="removeCalendarAcl(${cIdx}, '${acl.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg transition" title="Remove Access">
-<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-</button>
-</div>
+    <div class="min-w-0 flex-1 pr-4">
+        <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm truncate">${acl.value || typeLabel}</p>
+        <p class="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">${acl.type}</p>
+    </div>
+    <div class="flex items-center shrink-0 space-x-2 md:space-x-3">
+        ${roleHtml}
+        <button type="button" onclick="removeCalendarAcl(${cIdx}, '${acl.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg transition" title="Remove Access">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+        </button>
+    </div>
 </div>
 `;
 });
+} else {
+html += `<p class="text-sm text-gray-500 italic">No shared access rules found (excluding primary owner).</p>`;
+}
 } else {
 html += `<p class="text-sm text-gray-500 italic">No access rules found.</p>`;
 }
@@ -963,6 +985,38 @@ showLoader(true);
 try {
 await apiCall('removeCalendarAcl', { adminPass: user.pass, calendarId: cal.id, ruleId: ruleId });
 calendarAclsCache = null; // Invalidate cache
+await renderGcalAccessUI();
+} catch (e) {
+alert(e.message);
+} finally {
+showLoader(false);
+}
+}
+
+async function updateCalendarRole(cIdx, ruleId, newRole) {
+const cal = calendarAclsCache[cIdx];
+showLoader(true);
+try {
+await apiCall('updateCalendarAcl', { adminPass: user.pass, calendarId: cal.id, ruleId: ruleId, role: newRole });
+calendarAclsCache = null; 
+await renderGcalAccessUI();
+} catch(e) {
+alert(e.message);
+calendarAclsCache = null; 
+await renderGcalAccessUI();
+} finally {
+showLoader(false);
+}
+}
+
+async function deleteFullCalendar(cIdx) {
+const cal = calendarAclsCache[cIdx];
+if (!confirm(`WARNING: Are you absolutely sure you want to permanently delete the calendar "${cal.summary}"? All events inside will be wiped.`)) return;
+
+showLoader(true);
+try {
+await apiCall('deleteCalendar', { adminPass: user.pass, calendarId: cal.id });
+calendarAclsCache = null;
 await renderGcalAccessUI();
 } catch (e) {
 alert(e.message);
