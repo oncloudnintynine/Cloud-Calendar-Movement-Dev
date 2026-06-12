@@ -352,9 +352,9 @@ else myDate = new Date(y, m - 1, d);
 
 if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
 if (isDash) {
-    dashMonth = new Date(y, m - 1, 1);
+   dashMonth = new Date(y, m - 1, 1);
 } else {
-    myMonth = new Date(y, m - 1, 1);
+   myMonth = new Date(y, m - 1, 1);
 }
 renderMiniCalendar(ctx);
 updateInfoAllDisplay(ctx);
@@ -606,10 +606,10 @@ if (hasVariables && !hasPresentValue) continue;
 if (line.trim() !== '') {
 // Cleanup artifacts like trailing commas, stray hyphens, empty parens left by missing variables
 line = line.replace(/,\s*(?=[,\)]|$)/g, "")  // Remove trailing commas
-    .replace(/\(\s*\)/g, "")          // Remove empty parentheses
-    .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
-    .replace(/\s+/g, " ")             // Normalize spaces
-    .trim();
+   .replace(/\(\s*\)/g, "")          // Remove empty parentheses
+   .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
+   .replace(/\s+/g, " ")             // Normalize spaces
+   .trim();
 
 if (line.endsWith('-')) line = line.slice(0, -1).trim();
 if (line.endsWith(':')) line = line.slice(0, -1).trim();
@@ -700,22 +700,17 @@ if (a.expandedNames) return a.expandedNames;
 
 if (a.type === 'group') {
 if (a.name.startsWith('zz KAH:')) {
-    const dept = a.dept;
-    if (dept === 'Custom') {
-        const gName = a.name.replace('zz KAH: ', '').trim();
-        const cGrp = window.appCustomKahGroups.find(g => g.name === gName);
-        if (cGrp) {
-            return cGrp.members.map(ph => {
-                const c = companyContacts.find(x => String(x.phone) === String(ph));
-                return c ? c.name : ph;
-            }).join(', ');
-        }
-    } else {
-        const kahMems = window.appKahList.filter(k => k.dept === dept).map(k => k.name);
-        if (kahMems.length > 0) return kahMems.join(', ');
-    }
+   const gName = a.name.replace('zz KAH: ', '').trim();
+   const cGrp = window.appCustomKahGroups && window.appCustomKahGroups.find(g => g.name === gName);
+   if (cGrp) {
+       return cGrp.members.map(ph => {
+           const c = companyContacts.find(x => String(x.phone) === String(ph));
+           return c ? c.name : ph;
+       }).join(', ');
+   }
+   return a.name.replace('zz KAH: ', '');
 } else if (a.name.startsWith('zz All in ')) {
-    return a.name.replace('zz ', '');
+   return a.name.replace('zz ', '');
 }
 return a.name.replace('zz KAH: ', '').replace('zz ', '');
 }
@@ -890,10 +885,10 @@ const dd = String(d.getDate()).padStart(2, '0');
 html += `
 <div class="agenda-day-group mb-2.5 md:mb-3" data-date="${yyyy}-${mm}-${dd}">
 <div class="sticky top-0 bg-gray-50/95 dark:bg-darkbase/95 backdrop-blur-md z-10 py-1 border-b border-gray-200 dark:border-darkborder mb-1.5 md:mb-2">
- <h3 class="font-bold text-[13px] md:text-sm text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
+<h3 class="font-bold text-[13px] md:text-sm text-blue-700 dark:text-blue-400 pl-1">${formatDisplayDate(d)}</h3>
 </div>
 <div class="space-y-1.5 px-1">
- ${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
+${buildAgendaHtml(dayEvents, ctx === 'my' || (ctx==='dash' && document.getElementById('dash-dept-nav').value==='MY_CALENDAR'), false)}
 </div>
 </div>`;
 }
@@ -960,13 +955,12 @@ const att = JSON.parse(l.Attendees);
 return att.some(a => {
 if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
 if (a.type === 'group') {
-if (a.dept === 'Custom') {
- const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
- return customG && customG.members.includes(String(user.phone));
-} else if (a.name.startsWith('zz KAH:')) {
- return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+if (a.name.startsWith('zz KAH:')) {
+const gName = a.name.replace('zz KAH: ', '').trim();
+const customG = window.appCustomKahGroups && window.appCustomKahGroups.find(cg => cg.name === gName);
+return customG && customG.members.includes(String(user.phone));
 } else {
- return (user.departments ||[]).includes(a.dept); // Safety fallback
+return (user.departments ||[]).includes(a.dept); // Safety fallback
 }
 }
 return false;
@@ -986,12 +980,12 @@ try {
 const att = JSON.parse(l.Attendees);
 return att.some(a => {
 if (a.dept && String(a.dept).toUpperCase().includes(d.toUpperCase())) return true;
-if (a.type === 'group' && a.dept === 'Custom') {
-const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+if (a.type === 'group' && a.name.startsWith('zz KAH:')) {
+const customG = window.appCustomKahGroups && window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', '').trim());
 if (customG) {
 return customG.members.some(phone => {
-   const contact = companyContacts.find(c => String(c.phone) === String(phone));
-   return contact && contact.dept && String(contact.dept).toUpperCase().includes(d.toUpperCase());
+  const contact = companyContacts.find(c => String(c.phone) === String(phone));
+  return contact && contact.dept && String(contact.dept).toUpperCase().includes(d.toUpperCase());
 });
 }
 }
@@ -1058,13 +1052,12 @@ const att = JSON.parse(l.Attendees);
 return att.some(a => {
 if (a.type === 'contact' && String(a.id) === String(user.phone)) return true;
 if (a.type === 'group') {
-if (a.dept === 'Custom') {
- const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
- return customG && customG.members.includes(String(user.phone));
-} else if (a.name.startsWith('zz KAH:')) {
- return window.appKahList.some(k => k.dept === a.dept && String(k.phone) === String(user.phone));
+if (a.name.startsWith('zz KAH:')) {
+const gName = a.name.replace('zz KAH: ', '').trim();
+const customG = window.appCustomKahGroups && window.appCustomKahGroups.find(cg => cg.name === gName);
+return customG && customG.members.includes(String(user.phone));
 } else {
- return (user.departments ||[]).includes(a.dept); // Safety fallback
+return (user.departments ||[]).includes(a.dept); // Safety fallback
 }
 }
 return false;
