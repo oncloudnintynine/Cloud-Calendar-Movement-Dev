@@ -93,6 +93,12 @@ var ss = SpreadsheetApp.openById(dbId);
 var mainSheet = ss.getSheetByName("Leaves") || ss.getSheets()[0];
 verifySchema(mainSheet);
 }
+
+// Proactive generation of the static Cloud Meeting Room calendar
+try {
+var cmr = CalendarApp.getCalendarsByName("Cloud Meeting Room");
+if (cmr.length === 0) CalendarApp.createCalendar("Cloud Meeting Room");
+} catch(e) {}
 }
 
 function verifySchema(sheet) {

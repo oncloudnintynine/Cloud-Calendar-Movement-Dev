@@ -131,7 +131,6 @@ var oldFormat = props.getProperty('contactNameFormat') || '{Name} (Cloud Group :
 if (data.contactNameFormat !== oldFormat) {
 props.setProperty('contactNameFormat', data.contactNameFormat);
 var cg = getContactsAndGroups();
-var batchChanges = [];
 
 cg.connections.forEach(function(person) {
    var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.phoneNumbers[0].value.replace(/\D/g, '').slice(-8) : "";
@@ -158,16 +157,66 @@ invalidateContactsCache();
 }
 
 if (data.acronyms !== undefined) props.setProperty('acronyms', JSON.stringify(data.acronyms));
+
+// --- Custom KAH Groups Calendar Sync ---
 if (data.customKahGroups !== undefined) {
+var oldKahStr = props.getProperty('customKahGroups') || "[]";
+var oldKahGroups = JSON.parse(oldKahStr);
+var newKahGroups = data.customKahGroups;
+
+newKahGroups.forEach(function(ng) {
+    if (ng.hasCalendar && ng.calendarName) {
+        var oldGroup = oldKahGroups.filter(function(og) { return og.name === ng.name; })[0];
+        if (oldGroup && oldGroup.hasCalendar && oldGroup.calendarName && oldGroup.calendarName !== ng.calendarName) {
+            // Rename the calendar natively inside GCal
+            var cals = CalendarApp.getCalendarsByName(oldGroup.calendarName);
+            if (cals.length > 0) { try { cals[0].setName(ng.calendarName); } catch(e) {} }
+        } else if (!oldGroup || !oldGroup.hasCalendar) {
+            // It's a brand new calendar or newly toggled
+            var cals2 = CalendarApp.getCalendarsByName(ng.calendarName);
+            if (cals2.length === 0) { try { CalendarApp.createCalendar(ng.calendarName); } catch(e) {} }
+        }
+    }
+});
+
 props.setProperty('customKahGroups', JSON.stringify(data.customKahGroups));
 triggerKahRecalc = true;
 }
+
+// --- Company Structure Calendar Auto-Generation Sync ---
+if (data.companyStructure !== undefined) {
+var oldStructStr = props.getProperty('companyStructure') || "[]";
+var oldStructure = JSON.parse(oldStructStr);
+if (!Array.isArray(oldStructure)) oldStructure = Object.keys(oldStructure);
+var newStructure = data.companyStructure;
+
+newStructure.forEach(function(unit) {
+    if (oldStructure.indexOf(unit) === -1) {
+        var cals = CalendarApp.getCalendarsByName(unit);
+        if (cals.length === 0) { try { CalendarApp.createCalendar(unit); } catch(e) {} }
+    }
+});
+
+oldStructure.forEach(function(unit) {
+    if (newStructure.indexOf(unit) === -1) {
+        var cals = CalendarApp.getCalendarsByName(unit);
+        cals.forEach(function(c) { try { c.deleteCalendar(); } catch(e) {} });
+    }
+});
+
+props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
+}
+
+// --- Fail-safe injection for CMR ---
+try {
+var cmr = CalendarApp.getCalendarsByName("Cloud Meeting Room");
+if (cmr.length === 0) CalendarApp.createCalendar("Cloud Meeting Room");
+} catch(e) {}
 
 if (data.landingPage !== undefined) props.setProperty('landingPage', data.landingPage);
 if (data.dashboardDeptOrder !== undefined) props.setProperty('dashboardDeptOrder', JSON.stringify(data.dashboardDeptOrder));
 if (data.userKeyword !== undefined) props.setProperty('userKeyword', data.userKeyword);
 if (data.appMode !== undefined) props.setProperty('appMode', data.appMode);
-if (data.companyStructure !== undefined) props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
 if (data.menuOrder !== undefined) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
 if (data.adminSectionsOrder !== undefined) props.setProperty('adminSectionsOrder', JSON.stringify(data.adminSectionsOrder));
 if (data.adminContactsSectionsOrder !== undefined) props.setProperty('adminContactsSectionsOrder', JSON.stringify(data.adminContactsSectionsOrder));
