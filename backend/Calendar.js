@@ -154,13 +154,21 @@ return eventIds;
 
 function deleteCalendar(data) {
 if (data._userRole !== 'admin') throw new Error("Unauthorized");
-if (!data.calendarName) throw new Error("Missing calendar name");
 
+if (data.calendarId) {
+try {
+var cal = CalendarApp.getCalendarById(data.calendarId);
+if (cal) cal.deleteCalendar();
+} catch(e) { throw new Error("Failed to delete by ID: " + e.message); }
+} else if (data.calendarName) {
 var cals = CalendarApp.getCalendarsByName(data.calendarName);
 if (cals.length > 0) {
 cals.forEach(function(cal) { 
     try { cal.deleteCalendar(); } catch(e) {} 
 });
+}
+} else {
+throw new Error("Missing calendar name or ID");
 }
 return { success: true };
 }
@@ -310,13 +318,16 @@ return { success: true };
 function getCalendarAcls(data) {
 if (data._userRole !== 'admin') throw new Error("Unauthorized");
 var calendars = Calendar.CalendarList.list({ minAccessRole: 'owner' }).items || [];
+var adminEmail = Session.getActiveUser().getEmail();
 var result = [];
+
 calendars.forEach(function(cal) {
 try {
 var acls = Calendar.Acl.list(cal.id).items || [];
 result.push({
  id: cal.id,
  summary: cal.summary,
+ primaryOwner: adminEmail,
  acls: acls.map(function(a) {
      return { id: a.id, role: a.role, value: a.scope.value || '', type: a.scope.type };
  })
@@ -349,5 +360,16 @@ Calendar.Acl.remove(data.calendarId, data.ruleId);
 return { success: true };
 } catch(e) {
 throw new Error("Failed to remove access. You may be trying to remove the primary owner or a core service account rule.");
+}
+}
+
+function updateCalendarAcl(data) {
+if (data._userRole !== 'admin') throw new Error("Unauthorized");
+var rule = { role: data.role };
+try {
+Calendar.Acl.patch(rule, data.calendarId, data.ruleId);
+return { success: true };
+} catch(e) {
+throw new Error("Failed to update access. " + e.message);
 }
 }
