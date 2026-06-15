@@ -17,11 +17,19 @@ if (devBanner && ENV !== 'Prod') {
 devBanner.classList.remove('hidden');
 devBanner.innerText = `${ENV.toUpperCase()} MODE`;
 if (ENV === 'Exp') {
- devBanner.classList.remove('bg-red-600');
- devBanner.classList.add('bg-purple-600');
+devBanner.classList.remove('bg-red-600');
+devBanner.classList.add('bg-purple-600');
 }
 }
 
+const urlParams = new URLSearchParams(window.location.search);
+const extToken = urlParams.get('ext');
+
+if (extToken) {
+window.isExternalMode = true;
+window.externalToken = extToken;
+showExternalApp();
+} else {
 if (user) {
 if (!user.pass) {
 logout(); 
@@ -30,6 +38,7 @@ showApp();
 }
 } else {
 showLogin();
+}
 }
 
 document.getElementById('login-pass').addEventListener('keypress', e => e.key === 'Enter' && handleLogin());
@@ -67,6 +76,76 @@ if(resM) resM.classList.add('hidden-view');
 
 initDates();
 });
+
+async function showExternalApp() {
+showLoader(true);
+document.getElementById('login-view').classList.add('hidden-view');
+document.getElementById('app-view').classList.remove('hidden-view');
+
+// Hide standard nav & sidebars for external guests
+const nav = document.querySelector('nav');
+if(nav) nav.classList.add('hidden-view');
+const slideMenu = document.getElementById('slide-menu');
+if(slideMenu) slideMenu.classList.add('hidden-view', '!hidden', 'lg:!hidden');
+
+try {
+const extData = await apiCall('getExternalData', { extToken: window.externalToken });
+
+window.appTypicalEventTypes = extData.typicalEventTypes || [];
+window.appAcronyms = extData.acronyms || {};
+window.appContactNameFormat = extData.contactNameFormat || '{Name} (Cloud Group : {Unit})';
+window.appCustomKahGroups = extData.customKahGroups || [];
+
+companyContacts = extData.companyContacts || [];
+window.formatContactName = function(name, dept) {
+if (!name) return "";
+if (!window.appContactNameFormat) return name;
+let primaryDept = dept ? dept.split(',')[0].trim() : '';
+if (!primaryDept || primaryDept === 'Unassigned' || primaryDept === 'UNASSIGNED') return name;
+return window.appContactNameFormat.replace(/{Name}/g, name).replace(/{Unit}/g, primaryDept);
+};
+
+companyContacts.forEach(c => {
+c.formattedName = window.formatContactName(c.name, c.dept);
+});
+
+let attendeeOptions = companyContacts.map(c => ({ id: c.phone, name: c.name, formattedName: c.formattedName, dept: c.dept, type: 'contact' }));
+fuseAttendees = new Fuse(attendeeOptions, { keys: ['formattedName', 'name'], threshold: 0.3 });
+
+// UI adjustments for external
+const typeInput = document.getElementById('form-combined-type');
+if (typeInput) {
+typeInput.innerHTML = '<option value="Generic">Generic Booking</option>';
+typeInput.value = 'Generic';
+typeInput.disabled = true;
+typeInput.parentElement.classList.add('hidden-view'); // Hide type selector completely
+}
+
+const guestFields = document.getElementById('external-guest-fields');
+if (guestFields) guestFields.classList.remove('hidden-view');
+
+const infoAllBtn = document.getElementById('form-combined-infoall-btn');
+if (infoAllBtn) infoAllBtn.classList.add('hidden-view');
+
+// Override external wrapper appearance
+const formWrapper = document.getElementById('view-submit-combined');
+if (formWrapper) {
+formWrapper.classList.add('pt-4', 'md:pt-10');
+const title = document.createElement('h2');
+title.className = "text-3xl font-extrabold text-center mb-6 text-gray-900 dark:text-white tracking-tight";
+title.innerText = "External Booking Portal";
+formWrapper.prepend(title);
+}
+
+switchTab('submit-combined');
+if (typeof toggleCombinedFields === 'function') toggleCombinedFields();
+
+} catch (e) {
+console.error("External init error:", e);
+alert("Error loading external booking form. The link may be invalid or revoked.");
+}
+showLoader(false);
+}
 
 async function showApp() {
 showLoader(true);
@@ -121,8 +200,8 @@ applyMenuOrder(mOrder);
 if (user.role !== 'admin' && companyContacts.length > 0) {
 const myContact = companyContacts.find(c => c.phone == user.phone);
 if (myContact && myContact.dept) {
- user.departments = myContact.dept.split(',').map(s=>s.trim());
- localStorage.setItem('user', JSON.stringify(user));
+user.departments = myContact.dept.split(',').map(s=>s.trim());
+localStorage.setItem('user', JSON.stringify(user));
 }
 }
 
@@ -146,7 +225,7 @@ allUnits.add('Cloud Meeting Room');
 // Dedicated Custom KAH Group Calendars Injection
 if (window.appCustomKahGroups) {
 window.appCustomKahGroups.forEach(g => {
- if (g.hasCalendar && g.calendarName) allUnits.add(g.calendarName);
+if (g.hasCalendar && g.calendarName) allUnits.add(g.calendarName);
 });
 }
 
@@ -190,7 +269,7 @@ unitsLoaded = true;
 
 if (companyContacts.length > 0) {
 companyContacts.forEach(c => {
- c.formattedName = window.formatContactName(c.name, c.dept);
+c.formattedName = window.formatContactName(c.name, c.dept);
 });
 
 const uniqueNames =[...new Set(companyContacts.map(c => c.name))];
@@ -204,8 +283,8 @@ attendeeOptions.push({ id: dept, name: `zz All in ${dept}`, formattedName: `zz A
 
 window.appCustomKahGroups.forEach(g => {
 const customNames = g.members.map(phone => {
- const c = companyContacts.find(contact => String(contact.phone) === String(phone));
- return c ? c.name : phone;
+const c = companyContacts.find(contact => String(contact.phone) === String(phone));
+return c ? c.name : phone;
 }).join(', ');
 attendeeOptions.push({ id: `kah_custom_${g.name}`, name: `zz KAH: ${g.name}`, formattedName: `zz KAH: ${g.name}`, dept: 'Custom', type: 'group', expandedNames: customNames });
 });

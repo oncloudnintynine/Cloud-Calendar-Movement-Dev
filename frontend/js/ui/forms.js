@@ -94,7 +94,7 @@ if (input) {
 input.required = config.req;
 const label = document.getElementById(`label-${inputId}`);
 if (label && wrapperId) {
-  label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
+ label.innerHTML = `${wrapperId.includes('attendees') ? 'Attendees' : (wrapperId.includes('location-details') ? 'Location Details' : 'Location')} ${config.req ? '<span class="text-red-500">*</span>' : '<span class="text-xs font-normal text-gray-500 dark:text-gray-400">(Optional)</span>'}`;
 }
 }
 };
@@ -133,7 +133,7 @@ show('block-combined-time-event');
 show('block-combined-repeat');
 hide('block-combined-time-leave');
 hide('block-combined-overseas');
-if(btnInfoAll) btnInfoAll.classList.remove('hidden-view');
+if(btnInfoAll && !window.isExternalMode) btnInfoAll.classList.remove('hidden-view');
 
 if (!locationInput.value || locationInput.value.trim() === '') {
 let defLoc = typeObj && typeObj.defaultLoc ? typeObj.defaultLoc : 'In Camp';
@@ -316,7 +316,7 @@ const ctx = appMode === 'combined' ? 'combined' : (isEvent ? 'event' : 'leave');
 appData[ctx].startD = new Date(l.StartDate);
 appData[ctx].endD = new Date(l.EndDate);
 
-if (user.role === 'admin') {
+if (user && user.role === 'admin') {
 selectBehalf(ctx, l.Name, l.Phone, l.Department);
 }
 
@@ -475,11 +475,21 @@ tPM.classList.remove(act); tPM.classList.add(...inact);
 }
 }
 
-function submitForm(ctx) {
-let targetName = user.name;
-let targetPhone = user.phone;
+async function submitForm(ctx) {
+let targetName = user ? user.name : '';
+let targetPhone = user ? user.phone : '';
 let targetDepts = new Set();
 
+if (window.isExternalMode) {
+const extNameEl = document.getElementById('ext-guest-name');
+const extContactEl = document.getElementById('ext-guest-contact');
+if (!extNameEl.value.trim() || !extContactEl.value.trim()) {
+alert("Please provide your Name and Contact Info.");
+return;
+}
+targetName = `${extNameEl.value.trim()} (${extContactEl.value.trim()})`;
+targetPhone = 'EXTERNAL';
+} else {
 if (user.departments) {
 user.departments.forEach(d => { if (d) targetDepts.add(d.trim()); });
 }
@@ -495,10 +505,11 @@ adminBehalfUser.dept.split(',').forEach(d => { if (d) targetDepts.add(d.trim());
 alert("Admin: Please select a user to submit on behalf of.");
 return;
 }
+}
 
 const typeValue = document.getElementById(`form-${ctx}-type`) ? document.getElementById(`form-${ctx}-type`).value : document.getElementById(`form-${ctx}-name`).value;
 const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === typeValue) : null;
-const isEvent = ctx === 'event' || (ctx === 'combined' && typeObj && typeObj.isEvent);
+const isEvent = ctx === 'event' || (ctx === 'combined' && typeObj && typeObj.isEvent) || window.isExternalMode;
 
 // Clone dates to avoid mutating UI state unintentionally
 const startCopy = new Date(appData[ctx].startD);
@@ -585,16 +596,16 @@ involvedPhones.add(String(targetPhone));
 if (typeObj && typeObj.fields && typeObj.fields.attendees && typeObj.fields.attendees.show) {
 eventAttendees.forEach(a => {
 if (a.type === 'contact') {
-   involvedPhones.add(String(a.id));
+  involvedPhones.add(String(a.id));
 } else if (a.type === 'group') {
-   if (a.dept === 'Custom') {
-        const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
-        if (customG) customG.members.forEach(m => involvedPhones.add(String(m)));
-   } else if (a.name.startsWith('zz KAH:')) {
-        // Fallback for transition
-   } else {
-        companyContacts.filter(c => c.dept && String(c.dept).includes(a.dept)).forEach(c => involvedPhones.add(String(c.phone)));
-   }
+  if (a.dept === 'Custom') {
+       const customG = window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', ''));
+       if (customG) customG.members.forEach(m => involvedPhones.add(String(m)));
+  } else if (a.name.startsWith('zz KAH:')) {
+       // Fallback for transition
+  } else {
+       companyContacts.filter(c => c.dept && String(c.dept).includes(a.dept)).forEach(c => involvedPhones.add(String(c.phone)));
+  }
 }
 });
 }
@@ -602,9 +613,9 @@ if (a.type === 'contact') {
 if (window.appCustomKahGroups) {
 window.appCustomKahGroups.forEach(g => {
 if (g.hasCalendar && g.calendarName) {
-   if (g.members.some(m => involvedPhones.has(String(m)))) {
-       targetDepts.add(g.calendarName);
-   }
+  if (g.members.some(m => involvedPhones.has(String(m)))) {
+      targetDepts.add(g.calendarName);
+  }
 }
 });
 }
@@ -628,6 +639,25 @@ infoAll: finalInfoAll,
 isAllDay: eventIsAllDay,
 untilDate: eventUntilDate
 };
+
+if (window.isExternalMode) {
+showLoader(true);
+try {
+await apiCall('submitExternalEvent', { ...payload, extToken: window.externalToken });
+alert("Your booking has been submitted successfully!");
+document.getElementById('combined-form').reset();
+eventAttendees = [];
+renderAttendees('combined');
+appData.combined.startD = new Date();
+appData.combined.endD = new Date(new Date().getTime() + 60 * 60 * 1000);
+updateButtonLabels();
+} catch (e) {
+alert("Error submitting booking: " + e.message);
+} finally {
+showLoader(false);
+}
+return;
+}
 
 // Optimistic UI Update
 const localMock = {

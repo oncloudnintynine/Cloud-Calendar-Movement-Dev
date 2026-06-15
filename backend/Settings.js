@@ -30,7 +30,7 @@ var bdayStr = "";
 if (person.birthdays && person.birthdays.length > 0 && person.birthdays[0].date) {
 var d = person.birthdays[0].date;
 if (d.year && d.month && d.day) {
- bdayStr = d.year + "-" + ('0' + d.month).slice(-2) + "-" + ('0' + d.day).slice(-2);
+bdayStr = d.year + "-" + ('0' + d.month).slice(-2) + "-" + ('0' + d.day).slice(-2);
 }
 }
 
@@ -48,18 +48,18 @@ if (t.defaultLoc === 'Office') { t.defaultLoc = 'In Camp'; updatedTypical = true
 if (t.defaultLoc === 'Others') { t.defaultLoc = 'Out of Camp'; updatedTypical = true; }
 if (!t.fields) {
 t.fields = {
-    location: {show: t.isEvent, req: t.isEvent},
-    locationDetails: {show: t.isEvent, req: false},
-    attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
-    remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
+   location: {show: t.isEvent, req: t.isEvent},
+   locationDetails: {show: t.isEvent, req: false},
+   attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
+   remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
 };
 updatedTypical = true;
 }
 if (!t.fieldOrder) {
 if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
-    t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
+   t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
 } else {
-    t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
+   t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
 }
 updatedTypical = true;
 }
@@ -95,6 +95,7 @@ menuOrder: JSON.parse(props.getProperty('menuOrder') || 'null'),
 adminSectionsOrder: JSON.parse(props.getProperty('adminSectionsOrder') || "null"),
 adminContactsSectionsOrder: JSON.parse(props.getProperty('adminContactsSectionsOrder') || "null"),
 userKeyword: props.getProperty('userKeyword') || 'peace',
+externalToken: props.getProperty('externalToken'),
 appMode: props.getProperty('appMode') || 'combined',
 companyStructure: JSON.parse(props.getProperty('companyStructure') || "{}"),
 allContacts: allContacts
@@ -133,24 +134,24 @@ props.setProperty('contactNameFormat', data.contactNameFormat);
 var cg = getContactsAndGroups();
 
 cg.connections.forEach(function(person) {
-   var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.phoneNumbers[0].value.replace(/\D/g, '').slice(-8) : "";
-   if (phone && person.names && person.names.length > 0) {
-       var baseName = extractName(person.names[0].displayName, oldFormat);
-       var depts = [];
-       if (person.memberships) {
-           person.memberships.forEach(function(m) {
-               if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-                   var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
-                   if (gName) depts.push(gName);
-               }
-           });
-       }
-       var primaryUnit = depts.length > 0 ? depts[0] : "UNASSIGNED";
-       if (primaryUnit !== "UNASSIGNED") {
-           person.names = [{ givenName: formatContactName(baseName, primaryUnit, data.contactNameFormat) }];
-           try { People.People.updateContact(person, person.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
-       }
-   }
+  var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.phoneNumbers[0].value.replace(/\D/g, '').slice(-8) : "";
+  if (phone && person.names && person.names.length > 0) {
+      var baseName = extractName(person.names[0].displayName, oldFormat);
+      var depts = [];
+      if (person.memberships) {
+          person.memberships.forEach(function(m) {
+              if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+                  var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+                  if (gName) depts.push(gName);
+              }
+          });
+      }
+      var primaryUnit = depts.length > 0 ? depts[0] : "UNASSIGNED";
+      if (primaryUnit !== "UNASSIGNED") {
+          person.names = [{ givenName: formatContactName(baseName, primaryUnit, data.contactNameFormat) }];
+          try { People.People.updateContact(person, person.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
+      }
+  }
 });
 invalidateContactsCache();
 }
@@ -165,18 +166,18 @@ var oldKahGroups = JSON.parse(oldKahStr);
 var newKahGroups = data.customKahGroups;
 
 newKahGroups.forEach(function(ng) {
-    if (ng.hasCalendar && ng.calendarName) {
-        var oldGroup = oldKahGroups.filter(function(og) { return og.name === ng.name; })[0];
-        if (oldGroup && oldGroup.hasCalendar && oldGroup.calendarName && oldGroup.calendarName !== ng.calendarName) {
-            // Rename the calendar natively inside GCal
-            var cals = CalendarApp.getCalendarsByName(oldGroup.calendarName);
-            if (cals.length > 0) { try { cals[0].setName(ng.calendarName); } catch(e) {} }
-        } else if (!oldGroup || !oldGroup.hasCalendar) {
-            // It's a brand new calendar or newly toggled
-            var cals2 = CalendarApp.getCalendarsByName(ng.calendarName);
-            if (cals2.length === 0) { try { CalendarApp.createCalendar(ng.calendarName); } catch(e) {} }
-        }
-    }
+   if (ng.hasCalendar && ng.calendarName) {
+       var oldGroup = oldKahGroups.filter(function(og) { return og.name === ng.name; })[0];
+       if (oldGroup && oldGroup.hasCalendar && oldGroup.calendarName && oldGroup.calendarName !== ng.calendarName) {
+           // Rename the calendar natively inside GCal
+           var cals = CalendarApp.getCalendarsByName(oldGroup.calendarName);
+           if (cals.length > 0) { try { cals[0].setName(ng.calendarName); } catch(e) {} }
+       } else if (!oldGroup || !oldGroup.hasCalendar) {
+           // It's a brand new calendar or newly toggled
+           var cals2 = CalendarApp.getCalendarsByName(ng.calendarName);
+           if (cals2.length === 0) { try { CalendarApp.createCalendar(ng.calendarName); } catch(e) {} }
+       }
+   }
 });
 
 props.setProperty('customKahGroups', JSON.stringify(data.customKahGroups));
@@ -191,17 +192,17 @@ if (!Array.isArray(oldStructure)) oldStructure = Object.keys(oldStructure);
 var newStructure = data.companyStructure;
 
 newStructure.forEach(function(unit) {
-    if (oldStructure.indexOf(unit) === -1) {
-        var cals = CalendarApp.getCalendarsByName(unit);
-        if (cals.length === 0) { try { CalendarApp.createCalendar(unit); } catch(e) {} }
-    }
+   if (oldStructure.indexOf(unit) === -1) {
+       var cals = CalendarApp.getCalendarsByName(unit);
+       if (cals.length === 0) { try { CalendarApp.createCalendar(unit); } catch(e) {} }
+   }
 });
 
 oldStructure.forEach(function(unit) {
-    if (newStructure.indexOf(unit) === -1) {
-        var cals = CalendarApp.getCalendarsByName(unit);
-        cals.forEach(function(c) { try { c.deleteCalendar(); } catch(e) {} });
-    }
+   if (newStructure.indexOf(unit) === -1) {
+       var cals = CalendarApp.getCalendarsByName(unit);
+       cals.forEach(function(c) { try { c.deleteCalendar(); } catch(e) {} });
+   }
 });
 
 props.setProperty('companyStructure', JSON.stringify(data.companyStructure));
@@ -327,17 +328,17 @@ cg.connections.forEach(function(contact) {
 var inOldGroup = false;
 if (contact.memberships) {
 contact.memberships.forEach(function(m) {
-    if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName === oldGroupId) inOldGroup = true;
+   if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName === oldGroupId) inOldGroup = true;
 });
 }
 
 if (inOldGroup) {
 contactsToMove.push(contact.resourceName);
 if (contact.names && contact.names.length > 0) {
-    var nameObj = contact.names[0];
-    var clean = extractName(nameObj.displayName || nameObj.givenName || "");
-    contact.names = [{ givenName: formatContactName(clean, newName) }];
-    try { People.People.updateContact(contact, contact.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
+   var nameObj = contact.names[0];
+   var clean = extractName(nameObj.displayName || nameObj.givenName || "");
+   contact.names = [{ givenName: formatContactName(clean, newName) }];
+   try { People.People.updateContact(contact, contact.resourceName, { updatePersonFields: 'names' }); } catch(e) {}
 }
 }
 });
@@ -369,17 +370,17 @@ var headers = values[0];
 var deptIdx = headers.indexOf('Department');
 if (deptIdx !== -1) {
 for (var i = 1; i < values.length; i++) {
-    var depts = (values[i][deptIdx] || "").split(',');
-    var changed = false;
-    for (var d = 0; d < depts.length; d++) {
-        if (depts[d].trim().toUpperCase() === oldName.toUpperCase()) {
-            depts[d] = newName; 
-            changed = true;
-        }
-    }
-    if (changed) {
-        sheet.getRange(i + 1, deptIdx + 1).setValue(depts.join(','));
-    }
+   var depts = (values[i][deptIdx] || "").split(',');
+   var changed = false;
+   for (var d = 0; d < depts.length; d++) {
+       if (depts[d].trim().toUpperCase() === oldName.toUpperCase()) {
+           depts[d] = newName; 
+           changed = true;
+       }
+   }
+   if (changed) {
+       sheet.getRange(i + 1, deptIdx + 1).setValue(depts.join(','));
+   }
 }
 }
 }
@@ -399,7 +400,7 @@ structure.forEach(function(unit) {
 var foundId = null;
 for (var grpRes in cg.groupMap) {
 if (cg.groupMap[grpRes].toUpperCase() === unit.toUpperCase()) {
-    foundId = grpRes; break;
+   foundId = grpRes; break;
 }
 }
 if (!foundId) {
@@ -422,9 +423,9 @@ var targetGroupId = structureGroupIds[targetUnit] || null;
 var currentGroupIds =[];
 if (contact.memberships) {
 contact.memberships.forEach(function(m) {
-    if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-        currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
-    }
+   if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+       currentGroupIds.push(m.contactGroupMembership.contactGroupResourceName);
+   }
 });
 }
 
@@ -439,7 +440,7 @@ try { People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetG
 }
 if (toRemove.length > 0) {
 toRemove.forEach(function(gId) { 
-    try { People.ContactGroups.Members.modify({ resourceNamesToRemove: [fc.resourceName] }, gId); } catch(e) {}
+   try { People.ContactGroups.Members.modify({ resourceNamesToRemove: [fc.resourceName] }, gId); } catch(e) {}
 });
 }
 
@@ -453,4 +454,12 @@ try { People.People.updateContact(contact, fc.resourceName, { updatePersonFields
 
 invalidateContactsCache();
 return { success: true };
+}
+
+function regenerateExternalToken(data) {
+if (data._userRole !== 'admin') throw new Error("Unauthorized");
+var props = PropertiesService.getScriptProperties();
+var token = Utilities.getUuid();
+props.setProperty('externalToken', token);
+return { success: true, token: token };
 }
