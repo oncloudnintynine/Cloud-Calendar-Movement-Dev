@@ -2,6 +2,59 @@
 // Code.js - Main Router & DB Setup
 // ==========================================
 
+function putCachedData(key, data, expirationInSeconds) {
+try {
+var cache = CacheService.getScriptCache();
+var json = JSON.stringify(data);
+var chunkSize = 90000; // 90KB chunking to bypass Google's 100KB limit
+var chunks = Math.ceil(json.length / chunkSize);
+var dataObj = { chunks: chunks };
+cache.put(key, JSON.stringify(dataObj), expirationInSeconds);
+for (var i = 0; i < chunks; i++) {
+cache.put(key + "_" + i, json.substring(i * chunkSize, (i + 1) * chunkSize), expirationInSeconds);
+}
+} catch (e) {
+console.error("Cache put error", e);
+}
+}
+
+function getCachedData(key) {
+try {
+var cache = CacheService.getScriptCache();
+var metaStr = cache.get(key);
+if (!metaStr) return null;
+var meta = JSON.parse(metaStr);
+var chunks = meta.chunks;
+var json = "";
+for (var i = 0; i < chunks; i++) {
+var chunk = cache.get(key + "_" + i);
+if (!chunk) return null;
+json += chunk;
+}
+return JSON.parse(json);
+} catch (e) {
+console.error("Cache get error", e);
+return null;
+}
+}
+
+function removeCachedData(key) {
+try {
+var cache = CacheService.getScriptCache();
+var metaStr = cache.get(key);
+if (metaStr) {
+try {
+  var meta = JSON.parse(metaStr);
+  var chunks = meta.chunks;
+  for (var i = 0; i < chunks; i++) {
+    cache.remove(key + "_" + i);
+  }
+} catch(e){}
+}
+cache.remove(key);
+} catch (e) {}
+}
+
 function INITIAL_SETUP() {
 try {
 People.ContactGroups.list({ pageSize: 1 });
@@ -42,18 +95,18 @@ if (t.defaultLoc === 'Office') { t.defaultLoc = 'In Camp'; updated = true; }
 if (t.defaultLoc === 'Others') { t.defaultLoc = 'Out of Camp'; updated = true; }
 if (!t.fields) {
 t.fields = {
-   location: {show: t.isEvent, req: t.isEvent},
-   locationDetails: {show: t.isEvent, req: false},
-   attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
-   remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
+  location: {show: t.isEvent, req: t.isEvent},
+  locationDetails: {show: t.isEvent, req: false},
+  attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
+  remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
 };
 updated = true;
 }
 if (!t.fieldOrder) {
 if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
-   t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
+  t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
 } else {
-   t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
+  t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
 }
 updated = true;
 }
@@ -95,7 +148,6 @@ var mainSheet = ss.getSheetByName("Leaves") || ss.getSheets()[0];
 verifySchema(mainSheet);
 }
 
-// Proactive generation of the static Cloud Meeting Room calendar
 try {
 var cmr = CalendarApp.getCalendarsByName("Cloud Meeting Room");
 if (cmr.length === 0) CalendarApp.createCalendar("Cloud Meeting Room");
@@ -119,7 +171,6 @@ var result = text;
 
 var acronymKeys = Object.keys(acronymsObj);
 
-// Sort by length of full text descending to avoid partial replacements of nested words
 acronymKeys.sort(function(a, b) {
 var fullA = typeof acronymsObj[a] === 'object' ? (acronymsObj[a].full || "") : (acronymsObj[a] || "");
 var fullB = typeof acronymsObj[b] === 'object' ? (acronymsObj[b].full || "") : (acronymsObj[b] || "");
@@ -136,8 +187,6 @@ var active = typeof val === 'object' ? val.active : true;
 if (!active || !full) continue;
 
 var escapedFull = full.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-
-// Safe boundary application. Avoids regex breaking when full phrases contain punctuation.
 var prefix = /^[\w\u00C0-\u017F]/.test(full) ? "\\b" : "";
 var suffix = /[\w\u00C0-\u017F]$/.test(full) ? "\\b" : "";
 
@@ -148,6 +197,16 @@ return result;
 }
 
 function getExternalData(data) {
+var cacheKey = "external_data_cache";
+var cached = getCachedData(cacheKey);
+if (cached) return cached;
+
+var lock = LockService.getScriptLock();
+lock.waitLock(15000);
+try {
+cached = getCachedData(cacheKey);
+if (cached) return cached;
+
 var props = PropertiesService.getScriptProperties();
 if (data.extToken !== props.getProperty('externalToken')) throw new Error("Invalid or revoked external link.");
 
@@ -160,28 +219,34 @@ var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.pho
 if (phone && person.names && person.names.length > 0) {
 var name = extractName(person.names[0].displayName, format);
 if (person.memberships) {
-  var depts = [];
-  person.memberships.forEach(function(m) {
-      if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-          var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
-          if (gName) depts.push(gName);
-      }
-  });
-  if (depts.length > 0) {
-      var deptsStr = depts.join(',');
-      allContacts.push({ name: name, phone: phone, dept: deptsStr });
-  }
+ var depts = [];
+ person.memberships.forEach(function(m) {
+     if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+         var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+         if (gName) depts.push(gName);
+     }
+ });
+ if (depts.length > 0) {
+     var deptsStr = depts.join(',');
+     allContacts.push({ name: name, phone: phone, dept: deptsStr });
+ }
 }
 }
 });
 
-return {
+var result = {
 typicalEventTypes: JSON.parse(props.getProperty('typicalEventTypes') || "[]"),
 acronyms: JSON.parse(props.getProperty('acronyms') || "{}"),
 companyContacts: allContacts,
 customKahGroups: JSON.parse(props.getProperty('customKahGroups') || "[]"),
 contactNameFormat: format
 };
+
+putCachedData(cacheKey, result, 1800);
+return result;
+} finally {
+lock.releaseLock();
+}
 }
 
 function submitExternalEvent(data) {
@@ -201,7 +266,12 @@ var payload = JSON.parse(e.postData.contents);
 var action = payload.action;
 
 var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts', 'backfillCustomCalendar', 'addCalendarAcl', 'removeCalendarAcl', 'updateCalendarAcl', 'deleteCalendar', 'submitExternalEvent', 'regenerateExternalToken'].indexOf(action) !== -1;
-if (needsLock) lock.waitLock(15000); 
+if (needsLock) {
+var lockSuccess = lock.tryLock(28000); 
+if (!lockSuccess) {
+  return ContentService.createTextOutput(JSON.stringify({ success: false, error: "System busy processing high volume of requests. Please wait a moment and try again." })).setMimeType(ContentService.MimeType.JSON);
+}
+}
 
 try {
 var data = payload.data || {};

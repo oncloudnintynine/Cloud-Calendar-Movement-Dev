@@ -78,9 +78,9 @@ const controlsWrapper = document.getElementById('dash-controls-wrapper');
 if (controlsWrapper) {
 if (tabId === 'dashboard' || tabId === 'my-leaves') {
 if (tabId === 'dashboard') {
- if (deptNav) deptNav.classList.remove('hidden');
+if (deptNav) deptNav.classList.remove('hidden');
 } else {
- if (deptNav) deptNav.classList.add('hidden');
+if (deptNav) deptNav.classList.add('hidden');
 }
 controlsWrapper.classList.remove('hidden');
 controlsWrapper.classList.add('flex');
@@ -235,3 +235,16 @@ for (let name of names) await caches.delete(name);
 }
 window.location.reload();
 }
+
+window.debouncedDashSearch = debounce(function() {
+window.agendaDirty = true; 
+renderDashboard();
+}, 300);
+
+window.debouncedBehalfSearch = debounce(function(ctx) {
+searchBehalf(ctx);
+}, 300);
+
+window.debouncedAttendeesSearch = debounce(function(ctx) {
+searchAttendees(ctx);
+}, 300);
