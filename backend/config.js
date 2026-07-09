@@ -1,5 +1,5 @@
 // ==========================================
-// config.js - Application Configuration
+// config.js - Application Configuration 
 // ==========================================
 
 // ENVIRONMENT TOGGLE
