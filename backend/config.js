@@ -4,7 +4,7 @@
 
 // ENVIRONMENT TOGGLE
 // Options: 'Exp' (Experimental) | 'Dev' (Development) | 'Prod' (Production)
-const ENV = 'Prod'; 
+const ENV = 'Dev'; 
 
 // ENVIRONMENT API ENDPOINTS (Google Apps Script Web App URLs)
 // Replace these with your respective deployment URLs
