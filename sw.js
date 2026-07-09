@@ -1,11 +1,11 @@
-const CACHE_NAME = 'cloudy-v121';
+const CACHE_NAME = 'cloudy-v122';
 
 const urlsToCache =[
 './',
 './index.html',
 './manifest.json',
 './frontend/css/styles.css',
-'./frontend/js/core/config.js',
+'./backend/config.js',
 './frontend/js/core/state.js',
 './frontend/js/core/api.js',
 './frontend/js/core/auth.js',
