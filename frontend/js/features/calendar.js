@@ -352,9 +352,9 @@ else myDate = new Date(y, m - 1, d);
 
 if (targetMonth.getMonth() !== (m-1) || targetMonth.getFullYear() !== y) {
 if (isDash) {
-   dashMonth = new Date(y, m - 1, 1);
+  dashMonth = new Date(y, m - 1, 1);
 } else {
-   myMonth = new Date(y, m - 1, 1);
+  myMonth = new Date(y, m - 1, 1);
 }
 renderMiniCalendar(ctx);
 updateInfoAllDisplay(ctx);
@@ -374,8 +374,9 @@ if (l.Status === 'Cancelled') return false;
 const s = new Date(l.StartDate); s.setHours(0,0,0,0);
 const e = new Date(l.EndDate); e.setHours(0,0,0,0);
 
+const isExternal = l.Status === 'External (GCal)' || l._isExternal;
 const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
-const isEvent = typeObj ? typeObj.isEvent : false;
+const isEvent = isExternal ? true : (typeObj ? typeObj.isEvent : false);
 
 if (!isEvent || !l.HalfDay || l.HalfDay === 'NONE' || l.HalfDay === 'None') return targetDate >= s && targetDate <= e;
 
@@ -450,8 +451,9 @@ endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
 let instances =[];
 data.forEach(l => {
 if (l.Status === 'Cancelled') return;
+const isExternal = l.Status === 'External (GCal)' || l._isExternal;
 const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
-const isEvent = typeObj ? typeObj.isEvent : false;
+const isEvent = isExternal ? true : (typeObj ? typeObj.isEvent : false);
 const isLeave = !isEvent;
 const isRepeating = isEvent && l.HalfDay && l.HalfDay !== 'NONE' && l.HalfDay !== 'None';
 
@@ -521,7 +523,8 @@ html += `<div class="flex-1 border-r border-gray-200 last:border-r-0 dark:border
 html += `<div class="absolute top-7 left-0 right-0 bottom-0 pointer-events-none overflow-hidden">`;
 segments.forEach(seg => {
 const isPublicHoliday = seg.l.LeaveType === 'Public Holiday';
-const color = isPublicHoliday ? 'bg-indigo-500 dark:bg-indigo-600 text-white' : (seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white'));
+const isExternal = seg.l.Status === 'External (GCal)' || seg.l._isExternal;
+const color = isPublicHoliday ? 'bg-indigo-500 dark:bg-indigo-600 text-white' : (isExternal ? 'bg-cyan-500 dark:bg-cyan-600 text-white' : (seg.isLeave ? 'bg-[#e26d5c] dark:bg-[#c25a4a] text-white' : (seg.len > 1 ? 'bg-[#f4c264] dark:bg-[#d6a54d] text-gray-900' : 'bg-[#50b182] dark:bg-[#3d9369] text-white')));
 
 let locStr = seg.l.Location || '';
 if (seg.l.LocationDetails) locStr += ` - ${seg.l.LocationDetails}`;
@@ -534,7 +537,7 @@ if (dispName === (seg.l.Name || "")) {
 dispName = dispName.split(' ')[0];
 }
 
-const titleRawStr = isPublicHoliday ? seg.l.Name : (seg.isLeave ? `${dispName} : ${displayType}` : displayType);
+const titleRawStr = isPublicHoliday ? seg.l.Name : (isExternal ? seg.l.Name : (seg.isLeave ? `${dispName} : ${displayType}` : displayType));
 const appliedTitle = applyAcronymsFront(titleRawStr);
 
 const left = (seg.sDay / 7) * 100;
@@ -559,6 +562,7 @@ return html;
 function getBadgeClass(status, leaveType) {
 if(leaveType === 'Public Holiday') return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400';
 const safeStatus = String(status || '');
+if(safeStatus.includes('External (GCal)')) return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400';
 if(safeStatus.includes('Pending')) return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400';
 if(safeStatus.includes('Cancelled')) return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
 return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
@@ -606,10 +610,10 @@ if (hasVariables && !hasPresentValue) continue;
 if (line.trim() !== '') {
 // Cleanup artifacts like trailing commas, stray hyphens, empty parens left by missing variables
 line = line.replace(/,\s*(?=[,\)]|$)/g, "")  // Remove trailing commas
-   .replace(/\(\s*\)/g, "")          // Remove empty parentheses
-   .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
-   .replace(/\s+/g, " ")             // Normalize spaces
-   .trim();
+  .replace(/\(\s*\)/g, "")          // Remove empty parentheses
+  .replace(/:\s*[,|-]\s*/g, ": ")   // Remove stray hyphens or commas immediately after a label colon
+  .replace(/\s+/g, " ")             // Normalize spaces
+  .trim();
 
 if (line.endsWith('-')) line = line.slice(0, -1).trim();
 if (line.endsWith(':')) line = line.slice(0, -1).trim();
@@ -630,8 +634,9 @@ const isCollapsed = window.isAgendaCollapsed[ctx];
 
 return items.map(l => {
 const isPublicHoliday = l.LeaveType === 'Public Holiday';
+const isExternal = l.Status === 'External (GCal)' || l._isExternal;
 const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === l.LeaveType) : null;
-const isEvent = isPublicHoliday ? true : (typeObj ? typeObj.isEvent : false);
+const isEvent = isPublicHoliday || isExternal ? true : (typeObj ? typeObj.isEvent : false);
 
 let timeStr = "";
 let startTimeStr = "";
@@ -672,7 +677,13 @@ endTimeStr = eD;
 
 let actionBtns = '';
 let compactActionBtns = '';
-if ((String(l.Phone) === String(user.phone) || user.role === 'admin') && l.Status !== 'Cancelled' && !isPublicHoliday) {
+
+let canEdit = (String(l.Phone) === String(user.phone) || user.role === 'admin');
+if (isExternal) {
+canEdit = user.role === 'admin' || (user.departments && user.departments.includes(l.Department));
+}
+
+if (canEdit && l.Status !== 'Cancelled' && !isPublicHoliday) {
 actionBtns = `
 <button onclick="triggerEdit('${l.ID}')" class="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition shrink-0" title="Edit Record">
 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.89 1.147l-2.952.81a.375.375 0 01-.465-.465l.81-2.952a4.5 4.5 0 011.147-1.89L16.862 4.487z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125L16.862 4.487" /></svg>
@@ -700,17 +711,17 @@ if (a.expandedNames) return a.expandedNames;
 
 if (a.type === 'group') {
 if (a.name.startsWith('zz KAH:')) {
-   const gName = a.name.replace('zz KAH: ', '').trim();
-   const cGrp = window.appCustomKahGroups && window.appCustomKahGroups.find(g => g.name === gName);
-   if (cGrp) {
-       return cGrp.members.map(ph => {
-           const c = companyContacts.find(x => String(x.phone) === String(ph));
-           return c ? c.name : ph;
-       }).join(', ');
-   }
-   return a.name.replace('zz KAH: ', '');
+  const gName = a.name.replace('zz KAH: ', '').trim();
+  const cGrp = window.appCustomKahGroups && window.appCustomKahGroups.find(g => g.name === gName);
+  if (cGrp) {
+      return cGrp.members.map(ph => {
+          const c = companyContacts.find(x => String(x.phone) === String(ph));
+          return c ? c.name : ph;
+      }).join(', ');
+  }
+  return a.name.replace('zz KAH: ', '');
 } else if (a.name.startsWith('zz All in ')) {
-   return a.name.replace('zz ', '');
+  return a.name.replace('zz ', '');
 }
 return a.name.replace('zz KAH: ', '').replace('zz ', '');
 }
@@ -759,6 +770,9 @@ else if (!isInfoAllContext && typeObj.agendaTemplate) titleRaw = typeObj.agendaT
 
 if (isMyCalendar && !isInfoAllContext) titleRaw = '{EventType}'; 
 if (isPublicHoliday) titleRaw = '🇸🇬 {Name}';
+if (isExternal) {
+titleRaw = '{Name}';
+}
 
 let titleStr = titleRaw
 .replace(/{EventType}/g, tplVars.EventType)
@@ -778,7 +792,10 @@ let titleStr = titleRaw
 titleStr = titleStr.replace(/,\s*(?=[,\)]|$)/g, "").replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
 if (titleStr.endsWith('-')) titleStr = titleStr.slice(0, -1).trim();
 
-const finalTitle = applyAcronymsFront(titleStr);
+let finalTitle = applyAcronymsFront(titleStr);
+if (isExternal) {
+finalTitle = applyAcronymsFront(l.Name);
+}
 
 let detailsRaw = isInfoAllContext ? window.appInfoAllDetailsTemplate : window.appAgendaDetailsTemplate;
 if (typeObj) {
@@ -790,6 +807,7 @@ detailsRaw = typeObj.agendaDetailsTemplate;
 }
 
 if (isPublicHoliday) detailsRaw = '';
+if (isExternal) detailsRaw = 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nDescription: {Remarks}';
 
 const finalDetailsHtml = detailsRaw ? parseAndCleanTemplate(detailsRaw, tplVars) : '';
 
@@ -984,8 +1002,8 @@ if (a.type === 'group' && a.name.startsWith('zz KAH:')) {
 const customG = window.appCustomKahGroups && window.appCustomKahGroups.find(cg => cg.name === a.name.replace('zz KAH: ', '').trim());
 if (customG) {
 return customG.members.some(phone => {
-  const contact = companyContacts.find(c => String(c.phone) === String(phone));
-  return contact && contact.dept && String(contact.dept).toUpperCase().includes(d.toUpperCase());
+ const contact = companyContacts.find(c => String(c.phone) === String(phone));
+ return contact && contact.dept && String(contact.dept).toUpperCase().includes(d.toUpperCase());
 });
 }
 }

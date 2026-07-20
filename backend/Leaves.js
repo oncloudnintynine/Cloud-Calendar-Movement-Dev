@@ -51,8 +51,8 @@ recalculateAllKahStatuses(props, sheet, headers, sheetRows);
 var freshRows = sheet.getDataRange().getValues();
 for (var i = freshRows.length - 1; i >= 1; i--) {
 if (freshRows[i][headers.indexOf('ID')] === id) {
-   finalStatus = freshRows[i][headers.indexOf('Status')];
-   break;
+  finalStatus = freshRows[i][headers.indexOf('Status')];
+  break;
 }
 }
 } catch(e) {
@@ -68,6 +68,22 @@ return { status: finalStatus };
 }
 
 function editLeave(data) {
+if (data.id && data.id.indexOf('EXT_') === 0) {
+// Intercepting an external event adoption natively into Cloudy
+var extParts = data.id.substring(4).split('|');
+if (extParts.length === 2) {
+try {
+  var calObj = CalendarApp.getCalendarById(extParts[0]);
+  if (calObj) {
+      var evtObj = calObj.getEventById(extParts[1]);
+      if (evtObj) evtObj.deleteEvent();
+  }
+} catch(e) {}
+}
+data.id = Utilities.getUuid();
+return submitLeave(data);
+}
+
 var props = PropertiesService.getScriptProperties();
 var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
 var headers = verifySchema(sheet);
@@ -95,12 +111,12 @@ var parts = calAndEvt.split('|');
 if (parts.length === 2) {
 var cal = CalendarApp.getCalendarById(parts[0]);
 if (cal) {
- var evt = cal.getEventById(parts[1]);
- if (evt) evt.deleteEvent();
- else {
-   var series = cal.getEventSeriesById(parts[1]);
-   if (series) series.deleteEventSeries();
- }
+var evt = cal.getEventById(parts[1]);
+if (evt) evt.deleteEvent();
+else {
+  var series = cal.getEventSeriesById(parts[1]);
+  if (series) series.deleteEventSeries();
+}
 }
 }
 } catch(e) {}
@@ -171,8 +187,8 @@ for (var u = 0; u < urls.length; u++) {
 try {
 var res = UrlFetchApp.fetch(urls[u], { muteHttpExceptions: true });
 if (res.getResponseCode() === 200) {
-    ics = res.getContentText();
-    if (ics.indexOf('BEGIN:VEVENT') !== -1) break;
+   ics = res.getContentText();
+   if (ics.indexOf('BEGIN:VEVENT') !== -1) break;
 }
 } catch(e) {}
 }
@@ -193,31 +209,31 @@ var y = parseInt(currentEvent.start.substring(0,4), 10);
 var m = parseInt(currentEvent.start.substring(4,6), 10) - 1;
 var d = parseInt(currentEvent.start.substring(6,8), 10);
 if (y >= yearLimitStart) {
-    var sDate = new Date(y, m, d);
-    var eDate = new Date(y, m, d, 23, 59, 59);
-    events.push({
-       ID: 'HOLIDAY_' + (currentEvent.uid || Utilities.getUuid()),
-       Timestamp: sDate.toISOString(),
-       Phone: 'SYSTEM',
-       Name: currentEvent.summary.replace(/\\,/g, ','),
-       Department: 'ALL',
-       LeaveType: 'Public Holiday',
-       StartDate: sDate.toISOString(),
-       EndDate: eDate.toISOString(),
-       HalfDay: 'NONE',
-       CoveringPerson: '',
-       Country: 'Singapore',
-       State: '',
-       Remarks: 'Singapore Public Holiday',
-       Status: 'Holiday',
-       EventIDs: '',
-       Location: 'Singapore',
-       Attendees: '',
-       InfoAll: 'TRUE',
-       IsAllDay: 'TRUE',
-       UntilDate: '',
-       LocationDetails: ''
-    });
+   var sDate = new Date(y, m, d);
+   var eDate = new Date(y, m, d, 23, 59, 59);
+   events.push({
+      ID: 'HOLIDAY_' + (currentEvent.uid || Utilities.getUuid()),
+      Timestamp: sDate.toISOString(),
+      Phone: 'SYSTEM',
+      Name: currentEvent.summary.replace(/\\,/g, ','),
+      Department: 'ALL',
+      LeaveType: 'Public Holiday',
+      StartDate: sDate.toISOString(),
+      EndDate: eDate.toISOString(),
+      HalfDay: 'NONE',
+      CoveringPerson: '',
+      Country: 'Singapore',
+      State: '',
+      Remarks: 'Singapore Public Holiday',
+      Status: 'Holiday',
+      EventIDs: '',
+      Location: 'Singapore',
+      Attendees: '',
+      InfoAll: 'TRUE',
+      IsAllDay: 'TRUE',
+      UntilDate: '',
+      LocationDetails: ''
+   });
 }
 }
 currentEvent = null;
@@ -280,6 +296,8 @@ if (g.hasCalendar && g.calendarName) customCalNames.push(g.calendarName);
 var now = new Date();
 var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
+var dbEventIdsForGcalSync = {};
+
 for(var i = 0; i < rows.length; i++) {
 var obj = {};
 headers.forEach(function(h, idx) { obj[h] = rows[i][idx]; });
@@ -292,19 +310,23 @@ for (var e = 0; e < eventPairs.length; e++) {
 if (!eventPairs[e]) continue;
 var parts = eventPairs[e].split('|');
 if (parts.length === 2) {
-   try {
-       var cal = CalendarApp.getCalendarById(parts[0]);
-       if (cal) {
-           var evt = cal.getEventById(parts[1]) || cal.getEventSeriesById(parts[1]);
-           if (evt) {
-               allDeleted = false;
-               break; // At least one event still exists, keep active
-           }
-       }
-   } catch(err) {
-       // Ignore API errors, assume exists to be safe
-       allDeleted = false; 
-   }
+  dbEventIdsForGcalSync[parts[0] + "|" + parts[1]] = true;
+  var rawId = parts[1];
+  var usIdx = rawId.lastIndexOf('_');
+  if (usIdx !== -1) dbEventIdsForGcalSync[parts[0] + "|" + rawId.substring(0, usIdx)] = true;
+
+  try {
+      var cal = CalendarApp.getCalendarById(parts[0]);
+      if (cal) {
+          var evt = cal.getEventById(parts[1]) || cal.getEventSeriesById(parts[1]);
+          if (evt) {
+              allDeleted = false;
+          }
+      }
+  } catch(err) {
+      // Ignore API errors, assume exists to be safe
+      allDeleted = false; 
+  }
 }
 }
 if (allDeleted && eventPairs.length > 0) {
@@ -335,7 +357,7 @@ att.forEach(function(a) {
 if (a.dept && a.dept !== 'Custom') {
 var dp = a.dept.split(',');
 dp.forEach(function(d) {
- if (d.trim() && attDepts.indexOf(d.trim()) === -1) attDepts.push(d.trim());
+if (d.trim() && attDepts.indexOf(d.trim()) === -1) attDepts.push(d.trim());
 });
 }
 });
@@ -374,6 +396,60 @@ var holidays = fetchSGHolidays();
 result = result.concat(holidays);
 } catch(e) {}
 
+// --- Fetch External GCal Events ---
+try {
+var gcalSyncCalendars = JSON.parse(props.getProperty('gcalSyncCalendars') || "[]");
+if (gcalSyncCalendars.length > 0) {
+var futureDate = new Date(todayStart.getTime() + (365 * 24 * 60 * 60 * 1000));
+var pastDate = new Date(todayStart.getTime() - (14 * 24 * 60 * 60 * 1000));
+
+gcalSyncCalendars.forEach(function(calName) {
+try {
+  var extCals = CalendarApp.getCalendarsByName(calName);
+  if (extCals.length > 0) {
+      var syncCal = extCals[0];
+      var syncCalId = syncCal.getId();
+      var extEvents = syncCal.getEvents(pastDate, futureDate);
+      
+      extEvents.forEach(function(extEvt) {
+          var evtId = extEvt.getId();
+          var baseId = evtId;
+          var uIdx = evtId.lastIndexOf('_');
+          if (uIdx !== -1) baseId = evtId.substring(0, uIdx);
+          
+          if (!dbEventIdsForGcalSync[syncCalId + "|" + evtId] && !dbEventIdsForGcalSync[syncCalId + "|" + baseId]) {
+              result.push({
+                  ID: 'EXT_' + syncCalId + '|' + evtId,
+                  Timestamp: extEvt.getDateCreated() ? extEvt.getDateCreated().toISOString() : new Date().toISOString(),
+                  Phone: 'EXTERNAL',
+                  Name: extEvt.getTitle() || '(No Title)',
+                  Department: calName,
+                  LeaveType: 'External Event',
+                  StartDate: extEvt.getStartTime().toISOString(),
+                  EndDate: extEvt.getEndTime().toISOString(),
+                  HalfDay: 'NONE',
+                  CoveringPerson: '',
+                  Country: '',
+                  State: '',
+                  Remarks: extEvt.getDescription() || '',
+                  Status: 'External (GCal)',
+                  EventIDs: syncCalId + '|' + evtId,
+                  Location: extEvt.getLocation() || '',
+                  Attendees: '[]',
+                  InfoAll: 'FALSE',
+                  IsAllDay: extEvt.isAllDayEvent() ? 'TRUE' : 'FALSE',
+                  UntilDate: '',
+                  LocationDetails: '',
+                  _isExternal: true
+              });
+          }
+      });
+  }
+} catch(errSync) {}
+});
+}
+} catch(e) {}
+
 putCachedData(cacheKey, result, 300); // Cache leaves for 5 mins to serve high concurrency reads
 return result;
 
@@ -383,6 +459,21 @@ lock.releaseLock();
 }
 
 function cancelLeave(data) {
+if (data.id && data.id.indexOf('EXT_') === 0) {
+var extParts = data.id.substring(4).split('|');
+if (extParts.length === 2) {
+try {
+  var calObj = CalendarApp.getCalendarById(extParts[0]);
+  if (calObj) {
+      var evtObj = calObj.getEventById(extParts[1]);
+      if (evtObj) evtObj.deleteEvent();
+  }
+} catch(e) {}
+}
+removeCachedData("leaves_cache");
+return { success: true };
+}
+
 var props = PropertiesService.getScriptProperties();
 var sheet = SpreadsheetApp.openById(props.getProperty('dbSheetId')).getActiveSheet();
 var headers = verifySchema(sheet);
@@ -405,12 +496,12 @@ var parts = calAndEvt.split('|');
 if(parts.length === 2) {
 var cal = CalendarApp.getCalendarById(parts[0]);
 if (cal) {
- var evt = cal.getEventById(parts[1]);
- if (evt) evt.deleteEvent();
- else {
-   var series = cal.getEventSeriesById(parts[1]);
-   if (series) series.deleteEventSeries();
- }
+var evt = cal.getEventById(parts[1]);
+if (evt) evt.deleteEvent();
+else {
+  var series = cal.getEventSeriesById(parts[1]);
+  if (series) series.deleteEventSeries();
+}
 }
 }
 } catch(e) {}
@@ -484,9 +575,9 @@ rEnd.setHours(23, 59, 59, 999);
 if (rStart > reqEnd || rEnd < reqStart) continue;
 
 otherKAHLeaves.push({
-  phone: String(rows[i][headers.indexOf('Phone')]),
-  start: rStart,
-  end: rEnd
+ phone: String(rows[i][headers.indexOf('Phone')]),
+ start: rStart,
+ end: rEnd
 });
 }
 }
@@ -505,15 +596,15 @@ for (var current = new Date(reqStart); current <= reqEnd; current.setDate(curren
 var outToday = [String(data.phone)]; 
 
 otherKAHLeaves.forEach(function(l) {
-  if (l.start <= current && l.end >= current) {
-      if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
-          outToday.push(l.phone);
-      }
-  }
+ if (l.start <= current && l.end >= current) {
+     if (deptKAHPhones.indexOf(l.phone) !== -1 && outToday.indexOf(l.phone) === -1) {
+         outToday.push(l.phone);
+     }
+ }
 });
 
 if (outToday.length > maxConcurrentOut) {
-  maxConcurrentOut = outToday.length;
+ maxConcurrentOut = outToday.length;
 }
 }
 

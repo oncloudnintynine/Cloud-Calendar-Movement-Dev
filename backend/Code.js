@@ -44,11 +44,11 @@ var cache = CacheService.getScriptCache();
 var metaStr = cache.get(key);
 if (metaStr) {
 try {
-  var meta = JSON.parse(metaStr);
-  var chunks = meta.chunks;
-  for (var i = 0; i < chunks; i++) {
-    cache.remove(key + "_" + i);
-  }
+ var meta = JSON.parse(metaStr);
+ var chunks = meta.chunks;
+ for (var i = 0; i < chunks; i++) {
+   cache.remove(key + "_" + i);
+ }
 } catch(e){}
 }
 cache.remove(key);
@@ -72,9 +72,10 @@ if (!props.getProperty('approvingAuthority')) props.setProperty('approvingAuthor
 if (!props.getProperty('menuOrder')) props.setProperty('menuOrder', JSON.stringify(['dashboard', 'parade-state', 'my-leaves', 'submit-combined']));
 if (!props.getProperty('landingPage')) props.setProperty('landingPage', 'dashboard');
 if (!props.getProperty('dashboardDeptOrder')) props.setProperty('dashboardDeptOrder', JSON.stringify([]));
-if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['landing-page', 'app-mode', 'dashboard-filter-order', 'admin-pass', 'user-keyword', 'external-booking', 'menu-order']));
+if (!props.getProperty('adminSectionsOrder')) props.setProperty('adminSectionsOrder', JSON.stringify(['landing-page', 'app-mode', 'dashboard-filter-order', 'admin-pass', 'user-keyword', 'external-booking', 'gcal-sync', 'menu-order']));
 if (!props.getProperty('adminContactsSectionsOrder')) props.setProperty('adminContactsSectionsOrder', JSON.stringify(['contact-format', 'register-user', 'manage-users']));
 if (!props.getProperty('externalToken')) props.setProperty('externalToken', Utilities.getUuid());
+if (!props.getProperty('gcalSyncCalendars')) props.setProperty('gcalSyncCalendars', JSON.stringify([]));
 
 var typicalEventTypes = props.getProperty('typicalEventTypes');
 if (!typicalEventTypes) {
@@ -95,18 +96,18 @@ if (t.defaultLoc === 'Office') { t.defaultLoc = 'In Camp'; updated = true; }
 if (t.defaultLoc === 'Others') { t.defaultLoc = 'Out of Camp'; updated = true; }
 if (!t.fields) {
 t.fields = {
-  location: {show: t.isEvent, req: t.isEvent},
-  locationDetails: {show: t.isEvent, req: false},
-  attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
-  remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
+ location: {show: t.isEvent, req: t.isEvent},
+ locationDetails: {show: t.isEvent, req: false},
+ attendees: {show: t.isEvent || t.name === 'Official Trip', req: false},
+ remarks: {show: true, req: t.name==='Generic', label: t.name==='Generic'?'Meeting Description':'Remarks'}
 };
 updated = true;
 }
 if (!t.fieldOrder) {
 if (t.name === 'Official Trip' || t.name === 'Overseas Leave') {
-  t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
+ t.fieldOrder = ['overseas', 'time', 'remarks', 'attendees', 'location', 'repeat'];
 } else {
-  t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
+ t.fieldOrder = ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas'];
 }
 updated = true;
 }
@@ -219,17 +220,17 @@ var phone = (person.phoneNumbers && person.phoneNumbers.length > 0) ? person.pho
 if (phone && person.names && person.names.length > 0) {
 var name = extractName(person.names[0].displayName, format);
 if (person.memberships) {
- var depts = [];
- person.memberships.forEach(function(m) {
-     if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
-         var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
-         if (gName) depts.push(gName);
-     }
- });
- if (depts.length > 0) {
-     var deptsStr = depts.join(',');
-     allContacts.push({ name: name, phone: phone, dept: deptsStr });
- }
+var depts = [];
+person.memberships.forEach(function(m) {
+    if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+        var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+        if (gName) depts.push(gName);
+    }
+});
+if (depts.length > 0) {
+    var deptsStr = depts.join(',');
+    allContacts.push({ name: name, phone: phone, dept: deptsStr });
+}
 }
 }
 });
@@ -269,7 +270,7 @@ var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'upda
 if (needsLock) {
 var lockSuccess = lock.tryLock(28000); 
 if (!lockSuccess) {
-  return ContentService.createTextOutput(JSON.stringify({ success: false, error: "System busy processing high volume of requests. Please wait a moment and try again." })).setMimeType(ContentService.MimeType.JSON);
+ return ContentService.createTextOutput(JSON.stringify({ success: false, error: "System busy processing high volume of requests. Please wait a moment and try again." })).setMimeType(ContentService.MimeType.JSON);
 }
 }
 
