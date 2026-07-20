@@ -396,59 +396,20 @@ var holidays = fetchSGHolidays();
 result = result.concat(holidays);
 } catch(e) {}
 
-// --- Fetch External GCal Events ---
-try {
-var gcalSyncCalendars = JSON.parse(props.getProperty('gcalSyncCalendars') || "[]");
-if (gcalSyncCalendars.length > 0) {
-var futureDate = new Date(todayStart.getTime() + (365 * 24 * 60 * 60 * 1000));
-var pastDate = new Date(todayStart.getTime() - (14 * 24 * 60 * 60 * 1000));
-
-gcalSyncCalendars.forEach(function(calName) {
-try {
-  var extCals = CalendarApp.getCalendarsByName(calName);
-  if (extCals.length > 0) {
-      var syncCal = extCals[0];
-      var syncCalId = syncCal.getId();
-      var extEvents = syncCal.getEvents(pastDate, futureDate);
-      
-      extEvents.forEach(function(extEvt) {
-          var evtId = extEvt.getId();
-          var baseId = evtId;
-          var uIdx = evtId.lastIndexOf('_');
-          if (uIdx !== -1) baseId = evtId.substring(0, uIdx);
-          
-          if (!dbEventIdsForGcalSync[syncCalId + "|" + evtId] && !dbEventIdsForGcalSync[syncCalId + "|" + baseId]) {
-              result.push({
-                  ID: 'EXT_' + syncCalId + '|' + evtId,
-                  Timestamp: extEvt.getDateCreated() ? extEvt.getDateCreated().toISOString() : new Date().toISOString(),
-                  Phone: 'EXTERNAL',
-                  Name: extEvt.getTitle() || '(No Title)',
-                  Department: calName,
-                  LeaveType: 'External Event',
-                  StartDate: extEvt.getStartTime().toISOString(),
-                  EndDate: extEvt.getEndTime().toISOString(),
-                  HalfDay: 'NONE',
-                  CoveringPerson: '',
-                  Country: '',
-                  State: '',
-                  Remarks: extEvt.getDescription() || '',
-                  Status: 'External (GCal)',
-                  EventIDs: syncCalId + '|' + evtId,
-                  Location: extEvt.getLocation() || '',
-                  Attendees: '[]',
-                  InfoAll: 'FALSE',
-                  IsAllDay: extEvt.isAllDayEvent() ? 'TRUE' : 'FALSE',
-                  UntilDate: '',
-                  LocationDetails: '',
-                  _isExternal: true
-              });
-          }
-      });
-  }
-} catch(errSync) {}
+// --- Fetch Pre-computed External GCal Events ---
+var externalEvents = getCachedData("external_gcal_events_cache");
+if (externalEvents && externalEvents.length > 0) {
+var filteredExternalEvents = externalEvents.filter(function(extEvt) {
+  var fullId = extEvt.EventIDs;
+  var parts = fullId.split('|');
+  var baseId = parts[1];
+  var uIdx = baseId.lastIndexOf('_');
+  if (uIdx !== -1) baseId = baseId.substring(0, uIdx);
+  
+  return !dbEventIdsForGcalSync[fullId] && !dbEventIdsForGcalSync[parts[0] + "|" + baseId];
 });
+result = result.concat(filteredExternalEvents);
 }
-} catch(e) {}
 
 putCachedData(cacheKey, result, 300); // Cache leaves for 5 mins to serve high concurrency reads
 return result;

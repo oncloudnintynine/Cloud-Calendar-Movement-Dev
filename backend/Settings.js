@@ -238,7 +238,10 @@ if (data.appMode !== undefined) props.setProperty('appMode', data.appMode);
 if (data.menuOrder !== undefined) props.setProperty('menuOrder', JSON.stringify(data.menuOrder));
 if (data.adminSectionsOrder !== undefined) props.setProperty('adminSectionsOrder', JSON.stringify(data.adminSectionsOrder));
 if (data.adminContactsSectionsOrder !== undefined) props.setProperty('adminContactsSectionsOrder', JSON.stringify(data.adminContactsSectionsOrder));
-if (data.gcalSyncCalendars !== undefined) props.setProperty('gcalSyncCalendars', JSON.stringify(data.gcalSyncCalendars));
+if (data.gcalSyncCalendars !== undefined) {
+props.setProperty('gcalSyncCalendars', JSON.stringify(data.gcalSyncCalendars));
+try { ensureGcalSyncTrigger(); } catch(e) {}
+}
 
 if (triggerKahRecalc && typeof recalculateAllKahStatuses === 'function') {
 recalculateAllKahStatuses(props);

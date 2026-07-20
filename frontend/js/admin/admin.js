@@ -254,6 +254,21 @@ tempGcalSyncCalendars = tempGcalSyncCalendars.filter(c => c !== calName);
 }
 };
 
+window.forceSyncExternalCals = async function() {
+if (!confirm("This will trigger a background job to scan external Google Calendars for changes. It might take a moment. Proceed?")) return;
+showLoader(true);
+try {
+await apiCall('forceSyncExternalCals', { adminPass: user.pass });
+alert("Sync requested successfully. The dashboard will reflect any changes shortly.");
+if(window.agendaDirty !== undefined) window.agendaDirty = true;
+if(window.myAgendaDirty !== undefined) window.myAgendaDirty = true;
+} catch(e) {
+alert("Sync Error: " + e.message);
+} finally {
+showLoader(false);
+}
+};
+
 function renderTypicalEventTypes() {
 const list = document.getElementById('typical-event-types-list');
 if(!list) return;
