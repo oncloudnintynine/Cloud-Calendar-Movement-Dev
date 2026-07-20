@@ -61,7 +61,16 @@ darkmuted: '#9ca3af'
 <button onclick="switchTab('submit-leave')" id="menu-submit-leave" class="text-left px-4 py-3 rounded-xl font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 hidden text-base transition">Add Leave/MC (Classic)</button>
 <button onclick="switchTab('submit-event')" id="menu-submit-event" class="text-left px-4 py-3 rounded-xl font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 hidden text-base transition">Add Event (Classic)</button>
 
-<button onclick="window.downloadVCF(); closeMenu();" id="menu-save-directory" class="text-left px-4 py-3 rounded-xl font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-base transition flex items-center justify-between mt-2 border border-indigo-100 dark:border-indigo-900/30">Save Contacts <span><svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg></span></button>
+<div class="flex space-x-2 mt-2">
+<button onclick="window.downloadVCF(); closeMenu();" id="menu-save-directory" class="w-1/2 text-center px-2 py-3 rounded-xl font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm transition flex flex-col items-center justify-center border border-indigo-100 dark:border-indigo-900/30">
+<span><svg class="w-5 h-5 shrink-0 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg></span>
+Save Contacts
+</button>
+<button onclick="window.forceSyncExternalCals(false); closeMenu();" id="menu-sync-gcal" class="w-1/2 text-center px-2 py-3 rounded-xl font-semibold text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 text-sm transition flex flex-col items-center justify-center border border-cyan-100 dark:border-cyan-900/30">
+<span><svg class="w-5 h-5 shrink-0 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg></span>
+Sync GCal (Pull)
+</button>
+</div>
 
 <div id="menu-admin-group" class="hidden border-t border-gray-200 dark:border-darkborder mt-3 pt-3 space-y-1">
 <button onclick="switchTab('admin')" id="menu-admin" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 text-base transition">General Settings</button>
@@ -696,11 +705,6 @@ darkmuted: '#9ca3af'
 </div>
 <p class="text-xs text-gray-500 mb-4 leading-snug font-medium">Select which calendars should actively pull events created externally via the Google Calendar app into Cloudy.</p>
 
-<button type="button" onclick="forceSyncExternalCals()" class="mb-4 w-full bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 font-bold py-2.5 rounded-xl transition shadow-sm text-sm flex justify-center items-center">
-<svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-Force Sync Now
-</button>
-
 <div id="gcal-sync-list" class="space-y-1"></div>
 </div>
 
@@ -1112,17 +1116,17 @@ Force Sync Now
 </div>
 </div>
 
-<script src="backend/config.js?v=126"></script>
-<script src="frontend/js/core/state.js?v=126"></script>
-<script src="frontend/js/core/api.js?v=126"></script>
-<script src="frontend/js/core/auth.js?v=126"></script>
-<script src="frontend/js/ui/ui.js?v=126"></script>
-<script src="frontend/js/features/calendar.js?v=126"></script>
-<script src="frontend/js/features/parade.js?v=126"></script>
-<script src="frontend/js/ui/forms.js?v=126"></script>
-<script src="frontend/js/ui/picker.js?v=126"></script>
-<script src="frontend/js/admin/admin.js?v=126"></script>
-<script src="frontend/js/admin/structure.js?v=126"></script> 
-<script src="frontend/js/core/app.js?v=126"></script>
+<script src="backend/config.js?v=129"></script>
+<script src="frontend/js/core/state.js?v=129"></script>
+<script src="frontend/js/core/api.js?v=129"></script>
+<script src="frontend/js/core/auth.js?v=129"></script>
+<script src="frontend/js/ui/ui.js?v=129"></script>
+<script src="frontend/js/features/calendar.js?v=129"></script>
+<script src="frontend/js/features/parade.js?v=129"></script>
+<script src="frontend/js/ui/forms.js?v=129"></script>
+<script src="frontend/js/ui/picker.js?v=129"></script>
+<script src="frontend/js/admin/admin.js?v=129"></script>
+<script src="frontend/js/admin/structure.js?v=129"></script> 
+<script src="frontend/js/core/app.js?v=129"></script>
 </body>
 </html>

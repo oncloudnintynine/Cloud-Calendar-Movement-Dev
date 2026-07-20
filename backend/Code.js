@@ -105,10 +105,13 @@ try {
           var sDate = extEvt.getStartTime();
           var eDate = extEvt.getEndTime();
           
-          // Fix for Google Apps Script returning midnight of the next day for 1-day all-day events
           if (isAllDay) {
-              // Subtract 12 hours to safely land on the exact correct date regardless of SGT/UTC timezone conversions
-              eDate = new Date(eDate.getTime() - (12 * 60 * 60 * 1000));
+              // GCal natively returns the end date as midnight of the *following* day.
+              // Subtracting exactly 24 hours locks it to the correct inclusive boundary.
+              eDate = new Date(eDate.getTime() - (24 * 60 * 60 * 1000));
+              if (eDate.getTime() < sDate.getTime()) {
+                  eDate = new Date(sDate.getTime());
+              }
           }
           
           result.push({

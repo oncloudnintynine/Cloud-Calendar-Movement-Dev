@@ -244,6 +244,14 @@ if (icon) icon.classList.remove('animate-spin');
 }
 
 async function updateApp() {
+if (!window.isOffline && typeof user !== 'undefined' && user && user.pass) {
+try { 
+await apiCall('forceSyncExternalCals'); 
+} catch(e) { 
+console.warn("Background GCal sync skipped", e); 
+}
+}
+
 if ('serviceWorker' in navigator) {
 try { 
 const regs = await navigator.serviceWorker.getRegistrations(); 
