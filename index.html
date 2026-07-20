@@ -695,8 +695,13 @@ darkmuted: '#9ca3af'
 <svg class="w-6 h-6 text-gray-400 dark:text-darkmuted cursor-grab section-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16" /></svg>
 </div>
 <p class="text-xs text-gray-500 mb-4 leading-snug font-medium">Select which calendars should actively pull events created externally via the Google Calendar app into Cloudy.</p>
+
+<button type="button" onclick="forceSyncExternalCals()" class="mb-4 w-full bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 font-bold py-2.5 rounded-xl transition shadow-sm text-sm flex justify-center items-center">
+<svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+Force Sync Now
+</button>
+
 <div id="gcal-sync-list" class="space-y-1"></div>
-<button type="button" onclick="forceSyncExternalCals()" class="mt-4 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-extrabold py-3 rounded-xl shadow-sm transition text-sm border border-transparent">Force Sync External Calendars</button>
 </div>
 
 <div data-section="menu-order" class="bg-white dark:bg-darksurface md:rounded-3xl md:shadow-sm border border-gray-200 dark:border-darkborder p-6 w-full shadow-sm rounded-2xl">
