@@ -254,22 +254,6 @@ tempGcalSyncCalendars = tempGcalSyncCalendars.filter(c => c !== calName);
 }
 };
 
-window.forceSyncExternalCals = async function() {
-if (!confirm("This will scan external Google Calendars for changes. It might take a moment. Proceed?")) return;
-showLoader(true);
-try {
-await apiCall('forceSyncExternalCals', { adminPass: user.pass });
-alert("Sync completed successfully!");
-if (typeof loadLeavesData === 'function') {
-  await loadLeavesData();
-}
-} catch(e) {
-alert("Sync Error: " + e.message);
-} finally {
-showLoader(false);
-}
-};
-
 function renderTypicalEventTypes() {
 const list = document.getElementById('typical-event-types-list');
 if(!list) return;

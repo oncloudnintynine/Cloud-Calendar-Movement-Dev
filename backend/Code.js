@@ -107,7 +107,8 @@ try {
           
           // Fix for Google Apps Script returning midnight of the next day for 1-day all-day events
           if (isAllDay) {
-              eDate = new Date(eDate.getTime() - 1);
+              // Subtract 12 hours to safely land on the exact correct date regardless of SGT/UTC timezone conversions
+              eDate = new Date(eDate.getTime() - (12 * 60 * 60 * 1000));
           }
           
           result.push({
@@ -409,7 +410,6 @@ else if (action === 'removeCalendarAcl') responseData = removeCalendarAcl(data);
 else if (action === 'updateCalendarAcl') responseData = updateCalendarAcl(data);
 else if (action === 'regenerateExternalToken') responseData = regenerateExternalToken(data);
 else if (action === 'forceSyncExternalCals') {
-if (data._userRole !== 'admin') throw new Error("Unauthorized");
 syncExternalCalendars();
 removeCachedData("leaves_cache");
 responseData = { success: true };

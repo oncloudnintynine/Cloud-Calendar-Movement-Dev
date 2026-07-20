@@ -213,6 +213,27 @@ document.body.removeChild(link);
 URL.revokeObjectURL(url);
 };
 
+window.forceSyncExternalCals = async function(skipConfirm) {
+if (!skipConfirm && !confirm("This will scan external Google Calendars for changes. It might take a moment. Proceed?")) return;
+showLoader(true);
+try {
+await apiCall('forceSyncExternalCals');
+if (typeof loadLeavesData === 'function') {
+await loadLeavesData();
+}
+const btn = document.getElementById('menu-sync-gcal');
+if (btn) {
+const originalText = btn.innerHTML;
+btn.innerHTML = 'Synced! ✓';
+setTimeout(() => btn.innerHTML = originalText, 2000);
+}
+} catch(e) {
+alert("Sync Error: " + e.message);
+} finally {
+showLoader(false);
+}
+};
+
 function animateAndUpdate(btn) { 
 const icon = btn.querySelector('svg'); 
 if (icon) icon.classList.add('animate-spin'); 
