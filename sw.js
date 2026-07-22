@@ -1,8 +1,20 @@
-const CACHE_NAME = 'cloudy-v130';
+const CACHE_NAME = 'cloudy-v131';
 
 const urlsToCache =[
 './',
 './index.html',
+'./parade.html',
+'./my-leaves.html',
+'./submit-combined.html',
+'./submit-leave.html',
+'./submit-event.html',
+'./admin.html',
+'./admin-contacts.html',
+'./kah-management.html',
+'./admin-structure.html',
+'./admin-event-templates.html',
+'./admin-acronyms.html',
+'./admin-gcal-access.html',
 './manifest.json',
 './frontend/css/styles.css',
 './backend/config.js',

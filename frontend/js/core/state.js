@@ -5,6 +5,7 @@
 let user = JSON.parse(localStorage.getItem('user')) || null;
 let allLeaves =[];
 let currentEditId = null;
+let lastLocalChange = 0; // Concurrency timestamp tracker
 
 let companyContacts =[];
 let validContactNames =[];
@@ -41,13 +42,13 @@ manageUser: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false }
 let dashDate = new Date(); dashDate.setHours(0,0,0,0);
 let myDate = new Date(); myDate.setHours(0,0,0,0);
 let dashMonth = new Date(dashDate.getFullYear(), dashDate.getMonth(), 1);
-let myMonth = new Date(myDate.getFullYear(), myDate.getMonth(), 1);
+let myMonth = new Date(myDate.getFullYear(), myMonth.getMonth(), 1);
 
 const mos =['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 const TAB_NAMES = {
-'dashboard': 'Dashboard',
-'parade-state': 'Parade State',
+'index': 'Dashboard',
+'parade': 'Parade State',
 'my-leaves': 'My Calendar',
 'submit-leave': 'Add Leave/MC/OIL (Classic)',
 'submit-event': 'Add Event (Classic)',
