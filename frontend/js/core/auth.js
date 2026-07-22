@@ -10,6 +10,13 @@ document.getElementById('app-view').classList.add('hidden-view');
 document.getElementById('logout-btn').classList.add('hidden');
 document.getElementById('menu-btn').classList.add('hidden');
 document.getElementById('active-tab-title').classList.add('hidden');
+document.body.classList.add('logged-out');
+
+const navUserName = document.getElementById('nav-user-name');
+if (navUserName) navUserName.classList.add('hidden-view');
+
+const navRefreshBtn = document.getElementById('nav-refresh-btn');
+if (navRefreshBtn) navRefreshBtn.classList.add('hidden-view');
 
 const controlsWrapper = document.getElementById('dash-controls-wrapper');
 if (controlsWrapper) {

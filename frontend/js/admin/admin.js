@@ -10,16 +10,6 @@ const FIXED_TYPICAL_EVENTS =["Generic", "Others", "Official Trip", "Overseas Lea
 
 let tempGcalSyncCalendars = [];
 
-// --- DEBOUNCER HELPER FOR SEARCH ---
-function debounce(func, wait) {
-let timeout;
-return function(...args) {
-const context = this;
-clearTimeout(timeout);
-timeout = setTimeout(() => func.apply(context, args), wait);
-};
-}
-
 // --- TEMPLATE CHIPS HELPER ---
 function insertAtCursor(inputId, text) {
 const input = document.getElementById(inputId);

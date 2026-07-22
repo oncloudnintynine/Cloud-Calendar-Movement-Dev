@@ -42,7 +42,7 @@ manageUser: { birthdayD: new Date(2000, 0, 1), birthdaySelected: false }
 let dashDate = new Date(); dashDate.setHours(0,0,0,0);
 let myDate = new Date(); myDate.setHours(0,0,0,0);
 let dashMonth = new Date(dashDate.getFullYear(), dashDate.getMonth(), 1);
-let myMonth = new Date(myDate.getFullYear(), myMonth.getMonth(), 1);
+let myMonth = new Date(myDate.getFullYear(), myDate.getMonth(), 1);
 
 const mos =['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -63,3 +63,13 @@ const TAB_NAMES = {
 };
 
 const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-combined'];
+
+// --- DEBOUNCER HELPER FOR SEARCH ---
+function debounce(func, wait) {
+let timeout;
+return function(...args) {
+const context = this;
+clearTimeout(timeout);
+timeout = setTimeout(() => func.apply(context, args), wait);
+};
+}

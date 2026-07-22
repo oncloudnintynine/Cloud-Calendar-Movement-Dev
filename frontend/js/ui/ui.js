@@ -183,6 +183,10 @@ checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ?
 }
 
 window.downloadVCF = function() {
+if (!window.user || window.externalToken) {
+alert("You must be logged in to download contacts.");
+return;
+}
 if (!companyContacts || companyContacts.length === 0) {
 alert("Directory is empty or still loading.");
 return;

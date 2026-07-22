@@ -128,6 +128,9 @@ const infoAllBtn = document.getElementById('form-combined-infoall-btn');
 if (infoAllBtn) infoAllBtn.classList.add('hidden-view');
 
 // Override external wrapper appearance
+const saveContactsBtn = document.getElementById('menu-save-directory');
+if (saveContactsBtn) saveContactsBtn.classList.add('hidden-view');
+
 const formWrapper = document.getElementById('view-submit-combined');
 if (formWrapper) {
 formWrapper.classList.add('pt-4', 'md:pt-10');
@@ -149,11 +152,28 @@ showLoader(false);
 
 async function showApp() {
 showLoader(true);
+document.body.classList.remove('logged-out');
 document.getElementById('login-view').classList.add('hidden-view');
 document.getElementById('app-view').classList.remove('hidden-view');
 document.getElementById('logout-btn').classList.remove('hidden');
 document.getElementById('menu-btn').classList.remove('hidden');
 document.getElementById('active-tab-title').classList.remove('hidden');
+
+const navUserName = document.getElementById('nav-user-name');
+if (navUserName) navUserName.classList.remove('hidden-view');
+
+const navRefreshBtn = document.getElementById('nav-refresh-btn');
+if (navRefreshBtn) navRefreshBtn.classList.remove('hidden-view');
+
+const saveContactsBtn = document.getElementById('menu-save-directory');
+if (saveContactsBtn) {
+  saveContactsBtn.classList.remove('hidden-view');
+  saveContactsBtn.classList.remove('hidden');
+}
+const syncGcalBtn = document.getElementById('menu-sync-gcal');
+if (syncGcalBtn) {
+  syncGcalBtn.classList.remove('hidden');
+}
 
 user.departments = user.departments ||[]; // Safety fallback for Admins
 

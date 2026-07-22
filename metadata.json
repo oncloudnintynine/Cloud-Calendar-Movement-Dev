@@ -1,0 +1,6 @@
+{
+  "name": "Cloudy Calendar Movement",
+  "description": "Event and leave management calendar system with Apps Script backend integration",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

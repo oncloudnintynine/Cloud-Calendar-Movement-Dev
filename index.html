@@ -33,7 +33,7 @@ darkmuted: '#9ca3af'
 }
 </script>
 </head>
-<body class="bg-gray-50 text-gray-900 dark:bg-darkbase dark:text-darktext transition-colors duration-200 h-[100dvh] flex flex-col text-base overflow-hidden">
+<body class="bg-gray-50 text-gray-900 dark:bg-darkbase dark:text-darktext transition-colors duration-200 h-[100dvh] flex flex-col text-base overflow-hidden logged-out">
 
 <div id="loader" class="fixed inset-0 bg-white/90 dark:bg-darkbase/90 backdrop-blur-sm z-[100] flex-col items-center justify-center hidden">
 <div class="spinner mb-4"></div><p class="font-bold text-xl text-blue-600 dark:text-blue-400 tracking-wide">Processing...</p>
@@ -62,11 +62,11 @@ darkmuted: '#9ca3af'
 <button onclick="switchTab('submit-event')" id="menu-submit-event" class="text-left px-4 py-3 rounded-xl font-semibold text-gray-700 dark:text-darktext hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-400 hidden text-base transition">Add Event (Classic)</button>
 
 <div class="flex space-x-2 mt-2">
-<button onclick="window.downloadVCF(); closeMenu();" id="menu-save-directory" class="w-1/2 text-center px-2 py-3 rounded-xl font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm transition flex flex-col items-center justify-center border border-indigo-100 dark:border-indigo-900/30">
+<button onclick="window.downloadVCF(); closeMenu();" id="menu-save-directory" class="hidden w-1/2 text-center px-2 py-3 rounded-xl font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-sm transition flex flex-col items-center justify-center border border-indigo-100 dark:border-indigo-900/30">
 <span><svg class="w-5 h-5 shrink-0 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg></span>
 Save Contacts
 </button>
-<button onclick="window.forceSyncExternalCals(false); closeMenu();" id="menu-sync-gcal" class="w-1/2 text-center px-2 py-3 rounded-xl font-semibold text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 text-sm transition flex flex-col items-center justify-center border border-cyan-100 dark:border-cyan-900/30">
+<button onclick="window.forceSyncExternalCals(false); closeMenu();" id="menu-sync-gcal" class="hidden w-1/2 text-center px-2 py-3 rounded-xl font-semibold text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 text-sm transition flex flex-col items-center justify-center border border-cyan-100 dark:border-cyan-900/30">
 <span><svg class="w-5 h-5 shrink-0 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg></span>
 Sync GCal (Pull)
 </button>
@@ -119,7 +119,7 @@ Sync GCal (Pull)
 <div class="flex items-center justify-end space-x-1.5 md:space-x-3 flex-1 min-w-0">
 <span id="nav-user-name" class="font-bold hidden lg:block mr-2 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[150px]"></span>
 <button onclick="toggleTheme()" class="text-xl md:text-2xl p-1 transition shrink-0" title="Toggle Theme">🌗</button>
-<button onclick="animateAndUpdate(this)" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition shrink-0" title="Sync / Refresh">
+<button id="nav-refresh-btn" onclick="animateAndUpdate(this)" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition shrink-0" title="Sync / Refresh">
  <svg class="w-5 h-5 md:w-[22px] md:h-[22px] transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
 </button>
 <button id="logout-btn" onclick="logout()" class="p-1.5 text-gray-500 dark:text-darkmuted hover:text-red-600 dark:hover:text-red-400 rounded-full transition hidden shrink-0" title="Logout">
