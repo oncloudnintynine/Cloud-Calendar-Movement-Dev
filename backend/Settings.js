@@ -45,7 +45,8 @@ bdayStr = d.year + "-" + ('0' + d.month).slice(-2) + "-" + ('0' + d.day).slice(-
 }
 }
 
-allContacts.push({ name: name, phone: phone, dept: deptsStr, resourceName: person.resourceName, birthday: bdayStr });
+var email = (person.emailAddresses && person.emailAddresses.length > 0) ? person.emailAddresses[0].value : "";
+allContacts.push({ name: name, phone: phone, email: email, dept: deptsStr, resourceName: person.resourceName, birthday: bdayStr });
 }
 }
 }
@@ -255,8 +256,33 @@ function deleteUser(data) {
 if (data._userRole !== 'admin') throw new Error("Unauthorized");
 if (!data.resourceName) throw new Error("Missing contact identifier.");
 try {
-People.People.deleteContact(data.resourceName);
-invalidateContactsCache();
+  var contact = People.People.get(data.resourceName, { personFields: 'emailAddresses,memberships' });
+  var email = (contact.emailAddresses && contact.emailAddresses.length > 0) ? contact.emailAddresses[0].value : null;
+  if (email && contact.memberships) {
+      var cg = getContactsAndGroups();
+      contact.memberships.forEach(function(m) {
+          if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+              var gName = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+              if (gName) {
+                  try {
+                      var cals = CalendarApp.getCalendarsByName(gName);
+                      if (cals.length > 0) {
+                          var calId = cals[0].getId();
+                          var acls = Calendar.Acl.list(calId).items || [];
+                          acls.forEach(function(rule) {
+                              if (rule.scope && rule.scope.type === 'user' && rule.scope.value.toLowerCase() === email.toLowerCase()) {
+                                  Calendar.Acl.remove(calId, rule.id);
+                              }
+                          });
+                      }
+                  } catch(e) {}
+              }
+          }
+      });
+  }
+
+  People.People.deleteContact(data.resourceName);
+  invalidateContactsCache();
 } catch(e) { throw new Error("Failed to delete user: " + e.message); }
 return { success: true };
 }

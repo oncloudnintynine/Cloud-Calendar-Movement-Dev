@@ -365,11 +365,15 @@ toggleMeetingRoomCheckbox(ctx);
 }
 
 const locDetEl = document.getElementById(`form-${ctx}-location-details`);
-if (locDetEl) locDetEl.value = l.LocationDetails || '';
+if (locDetEl) {
+    let det = l.LocationDetails || '';
+    det = det.replace('Cloud Meeting Room, ', '').replace(', Cloud Meeting Room', '').replace('Cloud Meeting Room', '').trim();
+    locDetEl.value = det;
+}
 
 const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
 if (meetRoomCb) {
-meetRoomCb.checked = (l.Department || '').includes('Cloud Meeting Room');
+meetRoomCb.checked = (l.LocationDetails || '').includes('Cloud Meeting Room') || (l.Department || '').includes('Cloud Meeting Room');
 }
 
 document.getElementById(`form-${ctx}-repeat`).value = l.HalfDay || 'NONE'; 
@@ -537,11 +541,6 @@ let eventUntilDate = '';
 let country = '';
 let state = '';
 
-const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
-if (meetRoomCb && meetRoomCb.checked && document.getElementById(`form-${ctx}-location`).value !== 'Out of Camp') {
-targetDepts.add('Cloud Meeting Room');
-}
-
 if (!isEvent) {
 if (typeValue === 'Official Trip') {
 calculatedHalfDay = 'None';
@@ -572,7 +571,17 @@ calculatedHalfDay = document.getElementById(`form-${ctx}-repeat`).value;
 loc = document.getElementById(`form-${ctx}-location`) ? document.getElementById(`form-${ctx}-location`).value : '';
 
 const locDetEl = document.getElementById(`form-${ctx}-location-details`);
-if (locDetEl) locDetails = locDetEl.value.trim();
+if (locDetEl) {
+    locDetails = locDetEl.value.trim();
+    const meetRoomCb = document.getElementById(`form-${ctx}-meeting-room`);
+    if (meetRoomCb && meetRoomCb.checked && document.getElementById(`form-${ctx}-location`).value !== 'Out of Camp') {
+        if (!locDetails.includes('Cloud Meeting Room')) {
+            locDetails = locDetails ? 'Cloud Meeting Room, ' + locDetails : 'Cloud Meeting Room';
+        }
+    } else {
+        locDetails = locDetails.replace('Cloud Meeting Room, ', '').replace(', Cloud Meeting Room', '').replace('Cloud Meeting Room', '').trim();
+    }
+}
 
 finalInfoAll = isInfoAll;
 eventIsAllDay = appData[ctx].isAllDay;

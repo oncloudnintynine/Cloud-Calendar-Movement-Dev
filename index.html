@@ -157,6 +157,7 @@ Sync GCal (Pull)
 <div id="register-alert" class="hidden bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 text-base p-4 rounded-xl mb-6 text-center font-semibold"></div>
 <div class="space-y-4 mb-8">
 <div><label class="block font-bold mb-2 text-gray-700 dark:text-gray-300">Full Name</label><input type="text" id="reg-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-lg font-medium"></div>
+<div><label class="block font-bold mb-2 text-gray-700 dark:text-gray-300">Personal Email</label><input type="email" id="reg-email" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-lg font-medium"></div>
 <div><label class="block font-bold mb-2 text-gray-700 dark:text-gray-300">Mobile No</label><input type="tel" id="reg-mobile" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-lg font-medium"></div>
 <div><label class="block font-bold mb-2 text-gray-700 dark:text-gray-300">Unit</label><select id="reg-unit" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition cursor-pointer text-lg font-medium"><option value="" disabled selected>Select...</option></select></div>
 <div><label class="block font-bold mb-2 text-gray-700 dark:text-gray-300">Birthday</label><button type="button" id="btn-register-birthday" onclick="openPicker('date', 'register', 'birthday')" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput hover:bg-white dark:hover:bg-black text-left outline-none font-medium transition text-gray-900 dark:text-white focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 text-lg">Select...</button></div>
@@ -750,6 +751,10 @@ Sync GCal (Pull)
 <input type="text" id="admin-reg-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium" placeholder="e.g. Tan Ah Kow">
 </div>
 <div>
+<label class="block font-bold mb-2 text-sm text-gray-700 dark:text-gray-300">Personal Email</label>
+<input type="email" id="admin-reg-email" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium" placeholder="e.g. user@gmail.com">
+</div>
+<div>
 <label class="block font-bold mb-2 text-sm text-gray-700 dark:text-gray-300">Mobile No</label>
 <input type="tel" id="admin-reg-mobile" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium" placeholder="e.g. 96745345">
 </div>
@@ -788,6 +793,10 @@ Sync GCal (Pull)
 <div>
 <label class="block font-bold mb-2 text-sm text-gray-700 dark:text-gray-300">Full Name</label>
 <input type="text" id="edit-user-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-black text-base font-medium py-3 px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition">
+</div>
+<div>
+<label class="block font-bold mb-2 text-sm text-gray-700 dark:text-gray-300">Personal Email</label>
+<input type="email" id="edit-user-email" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-black text-base font-medium py-3 px-4 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition">
 </div>
 <div>
 <label class="block font-bold mb-2 text-sm text-gray-700 dark:text-gray-300">Mobile No</label>

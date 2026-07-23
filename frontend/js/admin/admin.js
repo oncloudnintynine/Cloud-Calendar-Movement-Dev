@@ -64,7 +64,6 @@ c.dept.split(',').forEach(d => allDepts.add(d.trim().toUpperCase()));
 }
 });
 }
-allDepts.add('Cloud Meeting Room');
 if (window.appCustomKahGroups) {
 window.appCustomKahGroups.forEach(g => {
 if (g.hasCalendar && g.calendarName) allDepts.add(g.calendarName);
@@ -743,7 +742,7 @@ if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
 
 const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if(results.length > 0) {
-resC.innerHTML = results.map(c => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-400" onclick="selectUserToManage('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}', '${c.birthday || ''}')"><span class="font-semibold">${c.formattedName}</span></div>`).join('');
+resC.innerHTML = results.map(c => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-400" onclick="selectUserToManage('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}', '${c.birthday || ''}', '${c.email || ''}')"><span class="font-semibold">${c.formattedName}</span></div>`).join('');
 resC.classList.remove('hidden-view');
 } else {
 resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
@@ -751,9 +750,10 @@ resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.cla
 }
 window.debouncedSearchUserToManage = debounce(searchUserToManage, 300);
 
-function selectUserToManage(resourceName, name, phone, dept, birthday) {
+function selectUserToManage(resourceName, name, phone, dept, birthday, email) {
 userToManageResource = resourceName;
 document.getElementById('edit-user-name').value = name;
+document.getElementById('edit-user-email').value = email || '';
 document.getElementById('edit-user-mobile').value = phone;
 
 const primaryDept = dept ? dept.split(',')[0].trim().toUpperCase() : '';
@@ -784,6 +784,7 @@ document.getElementById('admin-manage-search').classList.remove('hidden-view');
 async function confirmUpdateUser() {
 if (!userToManageResource) return;
 const name = document.getElementById('edit-user-name').value.trim();
+const email = document.getElementById('edit-user-email').value.trim();
 const mobile = document.getElementById('edit-user-mobile').value.trim();
 const unit = document.getElementById('edit-user-unit').value;
 
@@ -795,7 +796,7 @@ const bdayStr = `${bday.getFullYear()}-${String(bday.getMonth()+1).padStart(2,'0
 
 showLoader(true);
 try {
-await apiCall('updateUser', { adminPass: user.pass, resourceName: userToManageResource, fullName: name, mobile: mobile, unit: unit, birthday: bdayStr });
+await apiCall('updateUser', { adminPass: user.pass, resourceName: userToManageResource, fullName: name, email: email, mobile: mobile, unit: unit, birthday: bdayStr });
 alert("User successfully updated.");
 cancelManageUser(); await loadAdminSettings();
 } catch(e) { alert("Error updating user: " + e.message); } finally { showLoader(false); }

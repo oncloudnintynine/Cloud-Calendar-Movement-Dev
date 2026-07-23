@@ -90,11 +90,12 @@ const prefix = context === 'admin' ? 'admin-reg-' : 'reg-';
 const ctxObj = context === 'admin' ? 'adminRegister' : 'register';
 
 const name = document.getElementById(prefix + 'name').value.trim();
+const email = document.getElementById(prefix + 'email').value.trim();
 const mobile = document.getElementById(prefix + 'mobile').value.trim();
 const unit = document.getElementById(prefix + 'unit').value;
 
-if (!name || !mobile || !unit) {
- alertError(context === 'admin' ? 'admin-alert' : 'register-alert', 'Please fill in all fields including the Unit.');
+if (!name || !email || !mobile || !unit) {
+ alertError(context === 'admin' ? 'admin-alert' : 'register-alert', 'Please fill in all fields including the Unit and Email.');
  return;
 }
 
@@ -108,11 +109,12 @@ const bdayStr = `${bday.getFullYear()}-${String(bday.getMonth()+1).padStart(2,'0
 
 showLoader(true);
 try {
- await apiCall('registerUser', { fullName: name, mobile: mobile, unit: unit, birthday: bdayStr });
+ await apiCall('registerUser', { fullName: name, email: email, mobile: mobile, unit: unit, birthday: bdayStr });
  alert('User successfully registered!');
  if (context === 'self') toggleRegisterView(false);
  
  document.getElementById(prefix + 'name').value = '';
+ document.getElementById(prefix + 'email').value = '';
  document.getElementById(prefix + 'mobile').value = '';
  document.getElementById(prefix + 'unit').value = '';
  initDates(); 

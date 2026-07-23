@@ -55,6 +55,7 @@ throw err;
 // --- OPTIMISTIC UI BACKGROUND SYNC ---
 
 function queueSyncAction(action, payload, snapshot) {
+lastLocalChange = Date.now();
 window.syncQueue.push({ action, payload, id: payload.id || Date.now() });
 if (snapshot && payload.id) {
 window.failedSyncRecoveryCache[payload.id] = snapshot;
@@ -109,12 +110,16 @@ try {
   const fetchStartTime = Date.now();
   const res = await apiCall(task.action, task.payload);
   
-  if ((task.action === 'submitLeave' || task.action === 'editLeave') && res && res.status) {
+  if ((task.action === 'submitLeave' || task.action === 'editLeave' || task.action === 'cancelLeave') && res && res.status) {
       if (lastLocalChange < fetchStartTime) {
           const localRec = allLeaves.find(l => l.ID === task.payload.id);
           if (localRec) {
               localRec.Status = res.status;
               localStorage.setItem('cloudy_allLeaves', JSON.stringify(allLeaves));
+              
+              const page = document.body.dataset.page;
+              if (page === 'index') { window.agendaDirty = true; renderDashboard(); }
+              if (page === 'my-leaves') { window.myAgendaDirty = true; renderMyLeaves(); }
           }
       }
   }

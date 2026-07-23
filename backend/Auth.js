@@ -135,6 +135,10 @@ names: [{ givenName: formatContactName(data.fullName, data.unit) }],
 phoneNumbers: [{ value: data.mobile, type: "mobile" }]
 };
 
+if (data.email) {
+contactPayload.emailAddresses = [{ value: data.email }];
+}
+
 if (data.birthday) {
 var parts = data.birthday.split('-');
 contactPayload.birthdays =[{
@@ -159,6 +163,16 @@ groupId = newGroup.resourceName;
 }
 
 People.ContactGroups.Members.modify({ resourceNamesToAdd: [resourceName] }, groupId);
+
+if (data.email) {
+  try {
+      var cals = CalendarApp.getCalendarsByName(data.unit);
+      if (cals.length > 0) {
+          Calendar.Acl.insert({role: 'writer', scope: {type: 'user', value: data.email}}, cals[0].getId());
+      }
+  } catch(e) {}
+}
+
 invalidateContactsCache();
 
 return { success: true, message: "User registered successfully." };
@@ -169,11 +183,18 @@ if (data._userRole !== 'admin') throw new Error("Unauthorized");
 if (!data.resourceName) throw new Error("Missing contact identifier.");
 
 try {
-var contact = People.People.get(data.resourceName, { personFields: 'names,phoneNumbers,memberships,birthdays' });
+var contact = People.People.get(data.resourceName, { personFields: 'names,phoneNumbers,emailAddresses,memberships,birthdays' });
+var oldEmail = (contact.emailAddresses && contact.emailAddresses.length > 0) ? contact.emailAddresses[0].value : null;
 
 // Provide a fresh array with only givenName to explicitly erase any orphaned familyName strings
 contact.names = [{ givenName: formatContactName(data.fullName, data.unit) }];
 contact.phoneNumbers =[{ value: data.mobile, type: "mobile" }];
+
+if (data.email) {
+contact.emailAddresses = [{ value: data.email }];
+} else {
+contact.emailAddresses = [];
+}
 
 if (data.birthday) {
 var parts = data.birthday.split('-');
@@ -184,7 +205,7 @@ contact.birthdays = [{
 contact.birthdays =[]; 
 }
 
-People.People.updateContact(contact, data.resourceName, { updatePersonFields: 'names,phoneNumbers,birthdays' });
+People.People.updateContact(contact, data.resourceName, { updatePersonFields: 'names,phoneNumbers,emailAddresses,birthdays' });
 
 var cg = getContactsAndGroups();
 var targetGroupId = null;
@@ -215,6 +236,42 @@ var toAdd = currentGroupIds.indexOf(targetGroupId) === -1 ? [data.resourceName] 
 if (toAdd.length > 0) People.ContactGroups.Members.modify({ resourceNamesToAdd: toAdd }, targetGroupId);
 if (toRemove.length > 0) {
 toRemove.forEach(function(gId) { People.ContactGroups.Members.modify({ resourceNamesToRemove: [data.resourceName] }, gId); });
+}
+
+// Update Calendar ACLs
+var emailChanged = (oldEmail || '').toLowerCase() !== (data.email || '').toLowerCase();
+var deptChanged = (toAdd.length > 0 || toRemove.length > 0);
+
+if (emailChanged || deptChanged) {
+  // Remove old email from old and current groups
+  if (oldEmail) {
+      currentGroupIds.forEach(function(gId) {
+          var gName = cg.groupMap[gId];
+          if (gName) {
+              try {
+                  var cals = CalendarApp.getCalendarsByName(gName);
+                  if (cals.length > 0) {
+                      var calId = cals[0].getId();
+                      var acls = Calendar.Acl.list(calId).items || [];
+                      acls.forEach(function(rule) {
+                          if (rule.scope && rule.scope.type === 'user' && rule.scope.value.toLowerCase() === oldEmail.toLowerCase()) {
+                              Calendar.Acl.remove(calId, rule.id);
+                          }
+                      });
+                  }
+              } catch(e) {}
+          }
+      });
+  }
+  // Add new email to new target group
+  if (data.email) {
+      try {
+          var cals = CalendarApp.getCalendarsByName(targetGroupName);
+          if (cals.length > 0) {
+              Calendar.Acl.insert({role: 'writer', scope: {type: 'user', value: data.email}}, cals[0].getId());
+          }
+      } catch(e) {}
+  }
 }
 
 invalidateContactsCache();

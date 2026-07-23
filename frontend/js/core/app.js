@@ -240,7 +240,7 @@ c.dept.split(',').forEach(d => allUnits.add(d.trim().toUpperCase()));
 companyStructure = Array.from(allUnits);
 
 // Universal Meeting Room Injection
-allUnits.add('Cloud Meeting Room');
+// Removed as per request
 
 // Dedicated Custom KAH Group Calendars Injection
 if (window.appCustomKahGroups) {
@@ -259,7 +259,6 @@ if (idxB !== -1) return 1;
 
 if (a.toUpperCase() === 'HQ') return -1;
 if (b.toUpperCase() === 'HQ') return 1;
-if (a === 'Cloud Meeting Room') return -1; 
 return a.localeCompare(b);
 });
 
@@ -271,7 +270,7 @@ deptHtml += uniqueDepts.map(d => `<option value="${d}">${d}</option>`).join('');
 deptNav.innerHTML = deptHtml;
 }
 
-const uniqueRegDepts = Array.from(allUnits).filter(u => u !== 'Cloud Meeting Room' && !window.appCustomKahGroups.some(g => g.calendarName === u)).sort((a, b) => {
+const uniqueRegDepts = Array.from(allUnits).filter(u => !window.appCustomKahGroups.some(g => g.calendarName === u)).sort((a, b) => {
 if (a.toUpperCase() === 'HQ') return -1;
 if (b.toUpperCase() === 'HQ') return 1;
 return a.localeCompare(b);
