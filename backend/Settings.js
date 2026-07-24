@@ -96,7 +96,7 @@ agendaTemplate: props.getProperty('agendaTemplate') !== null ? props.getProperty
 agendaDetailsTemplate: props.getProperty('agendaDetailsTemplate') !== null ? props.getProperty('agendaDetailsTemplate') : 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}',
 infoAllTemplate: props.getProperty('infoAllTemplate') !== null ? props.getProperty('infoAllTemplate') : '{EventType} - {Name} ({Department})',
 infoAllDetailsTemplate: props.getProperty('infoAllDetailsTemplate') !== null ? props.getProperty('infoAllDetailsTemplate') : 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nEvent Description: {EventDescription}',
-contactNameFormat: props.getProperty('contactNameFormat') || '{Name} (Cloud Group : {Unit})',
+contactNameFormat: props.getProperty('contactNameFormat') || '{Name} (CG : {Unit})',
 
 acronyms: JSON.parse(props.getProperty('acronyms') || "{}"),
 customKahGroups: JSON.parse(props.getProperty('customKahGroups') || "[]"),
@@ -146,7 +146,7 @@ if (data.infoAllTemplate !== undefined) props.setProperty('infoAllTemplate', dat
 if (data.infoAllDetailsTemplate !== undefined) props.setProperty('infoAllDetailsTemplate', data.infoAllDetailsTemplate);
 
 if (data.contactNameFormat !== undefined) {
-var oldFormat = props.getProperty('contactNameFormat') || '{Name} (Cloud Group : {Unit})';
+var oldFormat = props.getProperty('contactNameFormat') || '{Name} (CG : {Unit})';
 if (data.contactNameFormat !== oldFormat) {
 props.setProperty('contactNameFormat', data.contactNameFormat);
 var cg = getContactsAndGroups();
@@ -308,7 +308,7 @@ cg.groupMap[targetGroupId] = newUnit;
 }
 }
 
-var contact = People.People.get(resName, { personFields: 'names,memberships,phoneNumbers' });
+var contact = People.People.get(resName, { personFields: 'names,memberships,phoneNumbers,emailAddresses' });
 var currentGroupIds =[];
 if (contact.memberships) {
 contact.memberships.forEach(function(m) {
@@ -331,6 +331,35 @@ var nameObj = contact.names[0];
 var cleanNm = extractName(nameObj.displayName || nameObj.givenName || "");
 contact.names = [{ givenName: newUnit !== "UNASSIGNED" ? formatContactName(cleanNm, newUnit) : cleanNm }];
 try { People.People.updateContact(contact, resName, { updatePersonFields: 'names' }); } catch(e) {}
+}
+
+var email = (contact.emailAddresses && contact.emailAddresses.length > 0) ? contact.emailAddresses[0].value : null;
+if (email) {
+  toRemove.forEach(function(gId) {
+    var gName = cg.groupMap[gId];
+    if (gName) {
+      try {
+        var cals = CalendarApp.getCalendarsByName(gName);
+        if (cals.length > 0) {
+          var calId = cals[0].getId();
+          var acls = Calendar.Acl.list(calId).items || [];
+          acls.forEach(function(rule) {
+            if (rule.scope && rule.scope.type === 'user' && rule.scope.value.toLowerCase() === email.toLowerCase()) {
+              Calendar.Acl.remove(calId, rule.id);
+            }
+          });
+        }
+      } catch(e) {}
+    }
+  });
+  if (newUnit !== "UNASSIGNED") {
+    try {
+      var cals = CalendarApp.getCalendarsByName(newUnit);
+      if (cals.length > 0) {
+        Calendar.Acl.insert({role: 'writer', scope: {type: 'user', value: email}}, cals[0].getId());
+      }
+    } catch(e) {}
+  }
 }
 }
 invalidateContactsCache();
@@ -512,4 +541,33 @@ props.setProperty('externalToken', token);
 removeCachedData("external_data_cache");
 removeCachedData("settings_cache");
 return { success: true, token: token };
+}
+
+function forceSyncFromGoogleContacts(data) {
+if (data._userRole !== 'admin') throw new Error("Unauthorized");
+invalidateContactsCache();
+var cg = getContactsAndGroups();
+
+if (cg.connections) {
+  cg.connections.forEach(function(person) {
+    var email = (person.emailAddresses && person.emailAddresses.length > 0) ? person.emailAddresses[0].value : null;
+    if (email && person.memberships) {
+      person.memberships.forEach(function(m) {
+        if (m.contactGroupMembership && m.contactGroupMembership.contactGroupResourceName) {
+          var unit = cg.groupMap[m.contactGroupMembership.contactGroupResourceName];
+          if (unit && unit !== 'DSTA Contacts' && unit !== 'Unassigned' && unit !== 'UNASSIGNED') {
+            try {
+              var cals = CalendarApp.getCalendarsByName(unit);
+              if (cals.length > 0) {
+                Calendar.Acl.insert({role: 'writer', scope: {type: 'user', value: email}}, cals[0].getId());
+              }
+            } catch(e) {}
+          }
+        }
+      });
+    }
+  });
+}
+
+return { success: true };
 }

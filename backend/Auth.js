@@ -27,7 +27,7 @@ if (g.groupType === 'USER_CONTACT_GROUP' && groupName !== "DSTA Contacts") {
 var connections =[];
 var pageToken = null;
 do {
-var req = { personFields: 'names,phoneNumbers,memberships,birthdays', pageSize: 1000 };
+var req = { personFields: 'names,phoneNumbers,emailAddresses,memberships,birthdays', pageSize: 1000 };
 if (pageToken) req.pageToken = pageToken;
 var res = People.People.Connections.list('people/me', req);
 if (res.connections) connections = connections.concat(res.connections);
@@ -50,7 +50,7 @@ removeCachedData("external_data_cache");
 }
 
 function getContactNameFormat() {
-return PropertiesService.getScriptProperties().getProperty('contactNameFormat') || "{Name} (Cloud Group : {Unit})";
+return PropertiesService.getScriptProperties().getProperty('contactNameFormat') || "{Name} (CG : {Unit})";
 }
 
 function formatContactName(name, unit, format) {
@@ -73,7 +73,7 @@ if (match && match.groups && match.groups.name) {
 } catch (e) {}
 
 // Fallback for transition / robust cleanup
-return fullName.replace(/\s*\(Cloud Group\s*:\s*.*?\)\s*/gi, '').trim();
+return fullName.replace(/\s*\((?:Cloud Group|CG)\s*:\s*.*?\)\s*/gi, '').trim();
 }
 
 function handleLogin(data) {

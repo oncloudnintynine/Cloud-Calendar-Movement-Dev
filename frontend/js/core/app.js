@@ -93,7 +93,7 @@ const extData = await apiCall('getExternalData', { extToken: window.externalToke
 
 window.appTypicalEventTypes = extData.typicalEventTypes || [];
 window.appAcronyms = extData.acronyms || {};
-window.appContactNameFormat = extData.contactNameFormat || '{Name} (Cloud Group : {Unit})';
+window.appContactNameFormat = extData.contactNameFormat || '{Name} (CG : {Unit})';
 window.appCustomKahGroups = extData.customKahGroups || [];
 
 companyContacts = extData.companyContacts || [];
@@ -191,7 +191,7 @@ window.appAgendaTemplate = settings.agendaTemplate !== undefined && settings.age
 window.appAgendaDetailsTemplate = settings.agendaDetailsTemplate !== undefined && settings.agendaDetailsTemplate !== null ? settings.agendaDetailsTemplate : 'Time: {Time}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}';
 window.appInfoAllTemplate = settings.infoAllTemplate !== undefined && settings.infoAllTemplate !== null ? settings.infoAllTemplate : '{EventType} - {Name} ({Department})';
 window.appInfoAllDetailsTemplate = settings.infoAllDetailsTemplate !== undefined && settings.infoAllDetailsTemplate !== null ? settings.infoAllDetailsTemplate : 'Time: {Time}\nLocation: {Location}\nEvent Description: {EventDescription}';
-window.appContactNameFormat = settings.contactNameFormat || '{Name} (Cloud Group : {Unit})';
+window.appContactNameFormat = settings.contactNameFormat || '{Name} (CG : {Unit})';
 appMode = settings.appMode || 'combined';
 window.appLandingPage = settings.landingPage || 'dashboard';
 window.appDashboardDeptOrder = settings.dashboardDeptOrder || [];

@@ -221,7 +221,7 @@ if (props.getProperty('agendaTemplate') === null) props.setProperty('agendaTempl
 if (props.getProperty('agendaDetailsTemplate') === null) props.setProperty('agendaDetailsTemplate', 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nAttendees: {Attendees}\nEvent Description: {EventDescription}');
 if (props.getProperty('infoAllTemplate') === null) props.setProperty('infoAllTemplate', '{EventType} - {Name} ({Department})');
 if (props.getProperty('infoAllDetailsTemplate') === null) props.setProperty('infoAllDetailsTemplate', 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nEvent Description: {EventDescription}');
-if (!props.getProperty('contactNameFormat')) props.setProperty('contactNameFormat', '{Name} (Cloud Group : {Unit})');
+if (!props.getProperty('contactNameFormat')) props.setProperty('contactNameFormat', '{Name} (CG : {Unit})');
 
 if (!props.getProperty('acronyms')) props.setProperty('acronyms', JSON.stringify({}));
 if (!props.getProperty('customKahGroups')) props.setProperty('customKahGroups', JSON.stringify([]));
@@ -362,7 +362,7 @@ var lock = LockService.getScriptLock();
 var payload = JSON.parse(e.postData.contents);
 var action = payload.action;
 
-var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts', 'backfillCustomCalendar', 'addCalendarAcl', 'removeCalendarAcl', 'updateCalendarAcl', 'deleteCalendar', 'submitExternalEvent', 'regenerateExternalToken', 'forceSyncExternalCals'].indexOf(action) !== -1;
+var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts', 'forceSyncFromGoogleContacts', 'backfillCustomCalendar', 'addCalendarAcl', 'removeCalendarAcl', 'updateCalendarAcl', 'deleteCalendar', 'submitExternalEvent', 'regenerateExternalToken', 'forceSyncExternalCals'].indexOf(action) !== -1;
 if (needsLock) {
 var lockSuccess = lock.tryLock(28000); 
 if (!lockSuccess) {
@@ -375,7 +375,7 @@ var data = payload.data || {};
 var credentials = payload.credentials || {};
 var responseData = {};
 
-var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts', 'deleteCalendar', 'backfillCustomCalendar', 'getInitialData', 'getCalendarAcls', 'addCalendarAcl', 'removeCalendarAcl', 'updateCalendarAcl', 'regenerateExternalToken', 'forceSyncExternalCals'];
+var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts', 'forceSyncFromGoogleContacts', 'deleteCalendar', 'backfillCustomCalendar', 'getInitialData', 'getCalendarAcls', 'addCalendarAcl', 'removeCalendarAcl', 'updateCalendarAcl', 'regenerateExternalToken', 'forceSyncExternalCals'];
 if (secureActions.indexOf(action) !== -1) {
 if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
 
@@ -405,6 +405,7 @@ else if (action === 'deleteUser') responseData = deleteUser(data);
 else if (action === 'updateUserUnits') responseData = updateUserUnits(data);
 else if (action === 'renameUnit') responseData = renameUnit(data);
 else if (action === 'forceSyncContacts') responseData = forceSyncContacts(data);
+else if (action === 'forceSyncFromGoogleContacts') responseData = forceSyncFromGoogleContacts(data);
 else if (action === 'deleteCalendar') responseData = deleteCalendar(data);
 else if (action === 'backfillCustomCalendar') responseData = backfillCustomCalendar(data);
 else if (action === 'getCalendarAcls') responseData = getCalendarAcls(data);

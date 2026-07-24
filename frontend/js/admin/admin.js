@@ -49,7 +49,7 @@ safeSet('set-agenda-details-template', settings.agendaDetailsTemplate || 'Start:
 safeSet('set-infoall-template', settings.infoAllTemplate || '{EventType} - {Name} ({Department})');
 safeSet('set-infoall-details-template', settings.infoAllDetailsTemplate || 'Start: {StartTime}\nEnd: {EndTime}\nLocation: {Location}\nEvent Description: {EventDescription}');
 safeSet('set-landing-page', settings.landingPage || 'dashboard');
-safeSet('set-contact-format', settings.contactNameFormat || '{Name} (Cloud Group : {Unit})');
+safeSet('set-contact-format', settings.contactNameFormat || '{Name} (CG : {Unit})');
 
 const radios = document.getElementsByName('app-mode');
 if (radios) {
@@ -853,7 +853,7 @@ const payload = {
 adminPass: user.pass, newAdminPass: newPass, appMode: selectedMode,
 landingPage: document.getElementById('set-landing-page') ? document.getElementById('set-landing-page').value : 'dashboard',
 dashboardDeptOrder: tempDashboardDeptOrder,
-contactNameFormat: document.getElementById('set-contact-format') ? document.getElementById('set-contact-format').value.trim() : '{Name} (Cloud Group : {Unit})',
+contactNameFormat: document.getElementById('set-contact-format') ? document.getElementById('set-contact-format').value.trim() : '{Name} (CG : {Unit})',
 userKeyword: document.getElementById('set-user-keyword') ? document.getElementById('set-user-keyword').value.trim() : 'peace',
 menuOrder: tempMenuOrder,
 adminSectionsOrder: tempAdminSectionsOrder,
@@ -1099,6 +1099,20 @@ calendarAclsCache = null;
 await renderGcalAccessUI();
 } catch (e) {
 alert(e.message);
+} finally {
+showLoader(false);
+}
+}
+
+async function manualSyncFromGoogleContacts() {
+if (!confirm("Perform a 100% manual sync from Google Contacts to the app?")) return;
+showLoader(true);
+try {
+await apiCall('forceSyncFromGoogleContacts', { adminPass: user.pass });
+alert("Successfully synchronized 100% data from Google Contacts to the app!");
+await loadAdminSettings();
+} catch (e) {
+alert("Error syncing from Google Contacts: " + e.message);
 } finally {
 showLoader(false);
 }
