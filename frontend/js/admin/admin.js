@@ -78,6 +78,9 @@ tempDashboardDeptOrder = tempDashboardDeptOrder.filter(d => allDepts.has(d));
 renderDashboardFilterOrder();
 
 tempMenuOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+DEFAULT_MENU.forEach(item => {
+  if (!tempMenuOrder.includes(item)) tempMenuOrder.push(item);
+});
 renderMenuOrder();
 
 tempTypicalEventTypes = settings.typicalEventTypes ||[];

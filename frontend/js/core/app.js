@@ -214,7 +214,10 @@ const el = document.getElementById(id);
 if (el) el.innerHTML = typeOptionsHtml;
 });
 
-const mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+let mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+DEFAULT_MENU.forEach(item => {
+  if (!mOrder.includes(item)) mOrder.push(item);
+});
 applyMenuOrder(mOrder);
 
 if (user.role !== 'admin' && companyContacts.length > 0) {
