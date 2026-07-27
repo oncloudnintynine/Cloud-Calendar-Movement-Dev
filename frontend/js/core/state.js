@@ -53,6 +53,7 @@ const TAB_NAMES = {
 'submit-leave': 'Add Leave/MC/OIL (Classic)',
 'submit-event': 'Add Event (Classic)',
 'submit-combined': 'Add Event / Leave',
+'duty-planner': 'Duty Planner',
 'admin': 'General Settings',
 'admin-contacts': 'Contacts & Users Management',
 'kah-management': 'KAH Management',
@@ -62,7 +63,7 @@ const TAB_NAMES = {
 'admin-gcal-access': 'Google Calendar Access Rights'
 };
 
-const DEFAULT_MENU =['dashboard', 'parade-state', 'my-leaves', 'submit-combined'];
+const DEFAULT_MENU =['dashboard', 'duty-planner', 'parade-state', 'my-leaves', 'submit-combined'];
 
 // --- DEBOUNCER HELPER FOR SEARCH ---
 function debounce(func, wait) {

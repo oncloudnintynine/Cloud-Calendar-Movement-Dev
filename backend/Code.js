@@ -362,7 +362,7 @@ var lock = LockService.getScriptLock();
 var payload = JSON.parse(e.postData.contents);
 var action = payload.action;
 
-var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts', 'forceSyncFromGoogleContacts', 'backfillCustomCalendar', 'addCalendarAcl', 'removeCalendarAcl', 'updateCalendarAcl', 'deleteCalendar', 'submitExternalEvent', 'regenerateExternalToken', 'forceSyncExternalCals'].indexOf(action) !== -1;
+var needsLock =['submitLeave', 'editLeave', 'cancelLeave', 'registerUser', 'updateUser', 'deleteUser', 'updateUserUnits', 'saveSettings', 'renameUnit', 'forceSyncContacts', 'forceSyncFromGoogleContacts', 'backfillCustomCalendar', 'addCalendarAcl', 'removeCalendarAcl', 'updateCalendarAcl', 'deleteCalendar', 'submitExternalEvent', 'regenerateExternalToken', 'forceSyncExternalCals'].indexOf(action) !== -1 || action.indexOf('dp_') === 0;
 if (needsLock) {
 var lockSuccess = lock.tryLock(28000); 
 if (!lockSuccess) {
@@ -376,7 +376,7 @@ var credentials = payload.credentials || {};
 var responseData = {};
 
 var secureActions =['getSettings', 'saveSettings', 'submitLeave', 'editLeave', 'cancelLeave', 'getLeaves', 'updateUser', 'deleteUser', 'updateUserUnits', 'renameUnit', 'forceSyncContacts', 'forceSyncFromGoogleContacts', 'deleteCalendar', 'backfillCustomCalendar', 'getInitialData', 'getCalendarAcls', 'addCalendarAcl', 'removeCalendarAcl', 'updateCalendarAcl', 'regenerateExternalToken', 'forceSyncExternalCals'];
-if (secureActions.indexOf(action) !== -1) {
+if (secureActions.indexOf(action) !== -1 || action.indexOf('dp_') === 0) {
 if (!credentials.pass && !data.adminPass) throw new Error("Unauthorized: Missing credentials");
 
 var checkPass = data.adminPass || credentials.pass;
@@ -418,6 +418,7 @@ syncExternalCalendars();
 removeCachedData("leaves_cache");
 responseData = { success: true };
 }
+else if (action.indexOf('dp_') === 0) responseData = dpHandleAction(data);
 else if (action === 'getInitialData') responseData = { settings: getSettings(data), leaves: getLeaves(data) };
 
 return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);

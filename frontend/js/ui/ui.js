@@ -72,6 +72,13 @@ if (currentEditId && tabId.startsWith('submit-')) titleEl.innerText = "Update Re
 else titleEl.innerText = TAB_NAMES[tabId] || '';
 }
 
+if (tabId === 'duty-planner') {
+if (window.initDutyPlanner && !window.dpInitialized) {
+  window.initDutyPlanner();
+  window.dpInitialized = true;
+}
+}
+
 const deptNav = document.getElementById('dash-dept-nav');
 const controlsWrapper = document.getElementById('dash-controls-wrapper');
 
