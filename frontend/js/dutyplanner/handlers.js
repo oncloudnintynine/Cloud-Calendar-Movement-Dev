@@ -141,8 +141,13 @@ window.dpHandleAssign = (personId) => {
 window.dpHandleSetupDatabase = () => { if(confirm("Initialize schema?")) UI.dispatch('dp_setupDatabase'); };
 window.dpHandleRunMigration = () => { if(confirm("Wipe schedule & migrate?")) UI.dispatch('dp_runMigration'); };
 window.dpHandleAddSeniorityTier = () => {
-   const name = document.getElementById('dpNewSenName').value.trim(); const order = parseInt(document.getElementById('dpNewSenOrder').value);
-   if(!name || isNaN(order)) return UI.showToast("Provide Name and Order", "error"); UI.dispatch('dp_addSeniorityTier', { name, order });
+   const nameEl = document.getElementById('dpNewSenName');
+   const orderEl = document.getElementById('dpNewSenOrder');
+   const name = nameEl.value.trim(); const order = parseInt(orderEl.value);
+   if(!name || isNaN(order)) return UI.showToast("Provide Name and Order", "error"); 
+   UI.dispatch('dp_addSeniorityTier', { name, order });
+   nameEl.value = '';
+   orderEl.value = '';
 };
 window.dpHandleUpdateSeniorityTier = (id) => {
    const name = document.getElementById(`dpSenName_${id}`).value.trim(); const order = parseInt(document.getElementById(`dpSenOrder_${id}`).value);

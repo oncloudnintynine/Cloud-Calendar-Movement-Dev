@@ -153,9 +153,7 @@ for (var i = 1; i < data.length; i++) {
 }
 }
 
-function dpHandleAction(data) {
-  var action = data.action;
-  
+function dpHandleAction(action, data) {
   if (action === "dp_sync") {
     // handled by return below
   } else if (action === "dp_setupDatabase") {
@@ -163,7 +161,9 @@ function dpHandleAction(data) {
   } else if (action === "dp_runMigration") {
     dpRunMigration();
   } else if (action === "dp_addSeniorityTier") {
-    getDpDbSheet().getSheetByName("Seniorities").appendRow([Utilities.getUuid(), data.name, data.order]);
+    var sSheet = getDpDbSheet().getSheetByName("Seniorities");
+    if (!sSheet) throw new Error("Database not initialized. Please click 'Run Setup' under System Actions first.");
+    sSheet.appendRow([Utilities.getUuid(), data.name, data.order]);
   } else if (action === "dp_updateSeniorityTier") {
     dpUpdateRow("Seniorities", data.id, [data.id, data.name, data.order]);
   } else if (action === "dp_deleteSeniorityTier") {
@@ -213,7 +213,9 @@ function dpHandleAction(data) {
     var roleId = Utilities.getUuid();
     var daysStr = Array.isArray(data.daysOfWeek) ? data.daysOfWeek.join(",") : "";
     var concurrentStr = Array.isArray(data.concurrentRoles) ? JSON.stringify(data.concurrentRoles) : "[]";
-    getDpDbSheet().getSheetByName("Roles").appendRow([
+    var rSheet = getDpDbSheet().getSheetByName("Roles");
+    if (!rSheet) throw new Error("Database not initialized. Please click 'Run Setup' under System Actions first.");
+    rSheet.appendRow([
       roleId, data.roleName, data.is247, daysStr, data.roleType, concurrentStr
     ]);
     var sSheet2 = getDpDbSheet().getSheetByName("Shifts");
@@ -252,6 +254,7 @@ function dpHandleAction(data) {
     }
   } else if (action === "dp_tagPerson") {
     var tagsSheet = getDpDbSheet().getSheetByName("Tags");
+    if (!tagsSheet) throw new Error("Database not initialized. Please click 'Run Setup' under System Actions first.");
     var existingTags = tagsSheet.getDataRange().getValues();
     var exists = false;
     for (var x = 1; x < existingTags.length; x++) {
@@ -268,6 +271,7 @@ function dpHandleAction(data) {
     throw new Error("Unknown action: " + action);
   }
   
+  SpreadsheetApp.flush();
   return dpSyncData();
 }
 

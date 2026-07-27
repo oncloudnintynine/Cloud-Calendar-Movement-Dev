@@ -48,11 +48,11 @@ export const UI = {
    },
 
    showToast(msg, type) {
-       // use Cloudy app's toast if possible, otherwise custom
+       // use Cloudy app's toast if possible, otherwise alert
        if (window.showToast) {
          window.showToast(msg, type === 'error');
        } else {
-         console.log("Toast:", msg);
+         alert(type === 'error' ? "Error: " + msg : msg);
        }
    },
    render: () => {} 

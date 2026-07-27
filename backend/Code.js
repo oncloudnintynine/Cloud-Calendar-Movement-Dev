@@ -418,7 +418,7 @@ syncExternalCalendars();
 removeCachedData("leaves_cache");
 responseData = { success: true };
 }
-else if (action.indexOf('dp_') === 0) responseData = dpHandleAction(data);
+else if (action.indexOf('dp_') === 0) responseData = dpHandleAction(action, data);
 else if (action === 'getInitialData') responseData = { settings: getSettings(data), leaves: getLeaves(data) };
 
 return ContentService.createTextOutput(JSON.stringify({ success: true, data: responseData })).setMimeType(ContentService.MimeType.JSON);
