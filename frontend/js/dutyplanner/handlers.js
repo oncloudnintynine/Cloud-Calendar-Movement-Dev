@@ -22,8 +22,8 @@ window.dpRenderShiftInputs = () => {
       <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-4 rounded-xl shadow-sm flex flex-col gap-4 w-full">
           <div class="flex flex-col md:flex-row gap-3 w-full">
               <div class="flex-1 w-full">
-                  <label class="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-1.5 block">Shift ID</label>
-                  <input type="text" id="dpSName_${i}" class="w-full text-[16px] font-medium border border-zinc-300 rounded-lg px-3 py-2.5 outline-none" value="Shift ${i}">
+                  <label class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-1.5 block">Shift ID</label>
+                  <input type="text" id="dpSName_${i}" class="w-full text-[16px] font-medium border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" value="Shift ${i}">
               </div>
               ${hideTimings ? `
               <div class="flex-1 w-full md:w-auto pt-0 md:pt-[26px]">
@@ -34,18 +34,18 @@ window.dpRenderShiftInputs = () => {
               </div>
               ` : `
               <div class="flex flex-row gap-2 w-full md:w-auto">
-                  <div class="flex-1 md:w-32"><label class="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-1.5 block">Start</label><input type="time" id="dpSStart_${i}" step="60" class="w-full border border-zinc-300 rounded-lg px-3 py-2.5"></div>
-                  <div class="flex-1 md:w-32"><label class="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-1.5 block">End</label><input type="time" id="dpSEnd_${i}" step="60" class="w-full border border-zinc-300 rounded-lg px-3 py-2.5"></div>
+                  <div class="flex-1 md:w-32"><label class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-1.5 block">Start</label><input type="time" id="dpSStart_${i}" step="60" class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"></div>
+                  <div class="flex-1 md:w-32"><label class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-1.5 block">End</label><input type="time" id="dpSEnd_${i}" step="60" class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"></div>
               </div>
               `}
           </div>
-          <div class="w-full bg-zinc-50 p-4 rounded-lg border border-zinc-200">
-              <label class="block text-xs font-bold text-emerald-600 mb-3 uppercase tracking-widest flex items-center gap-2 border-b border-zinc-200 pb-2">Headcount Required</label>
+          <div class="w-full bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-lg border border-zinc-200 dark:border-zinc-700/50">
+              <label class="block text-xs font-bold text-emerald-600 dark:text-emerald-500 mb-3 uppercase tracking-widest flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-700/50 pb-2">Headcount Required</label>
               <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full">
                   ${sortedSen.map(sen => `
-                  <div class="flex flex-col items-center bg-white p-2.5 rounded-lg border border-zinc-200 w-full gap-2 shadow-sm">
-                      <span class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest truncate w-full text-center">${sen.name}</span>
-                      <input type="number" id="dpSReq_${sen.id}_${i}" value="0" min="0" class="w-full max-w-[80px] text-center text-xl font-bold border border-zinc-300 rounded-md py-1 px-1 outline-none">
+                  <div class="flex flex-col items-center bg-white dark:bg-zinc-900 p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 w-full gap-2 shadow-sm transition-colors">
+                      <span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest truncate w-full text-center">${sen.name}</span>
+                      <input type="number" id="dpSReq_${sen.id}_${i}" value="0" min="0" class="w-full max-w-[80px] text-center text-xl font-bold border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 rounded-md py-1 px-1 outline-none focus:ring-2 focus:ring-emerald-500 transition-colors">
                   </div>
                   `).join('')}
               </div>

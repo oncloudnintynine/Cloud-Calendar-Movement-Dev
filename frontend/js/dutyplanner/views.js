@@ -296,7 +296,11 @@ function ManageDesktop(state, isMobile) {
        };
    });
    
-   const filteredPersonnel = dpPersonnel.filter(p => p.name.toLowerCase().includes(searchQ));
+   let filteredPersonnel = dpPersonnel;
+   if (searchQ) {
+       const fuse = new window.Fuse(dpPersonnel, { keys: ['name'], threshold: 0.3 });
+       filteredPersonnel = fuse.search(searchQ).map(res => res.item);
+   }
    const selPerson = dpPersonnel.find(p => p.id === state.selectedPersonId);
 
    const showList = !isMobile || (isMobile && !selPerson);
