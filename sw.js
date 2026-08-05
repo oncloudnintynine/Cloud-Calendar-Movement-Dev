@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cloudy-v132';
+const CACHE_NAME = 'cloudy-v131';
 
 const urlsToCache =[
 './',

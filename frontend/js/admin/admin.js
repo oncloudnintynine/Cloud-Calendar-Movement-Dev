@@ -5,9 +5,6 @@
 let userToDeleteResource = null;
 let userToManageResource = null;
 let calendarAclsCache = null;
-let gcalExpandedCards = new Set();
-let gcalSearchQuery = "";
-let gcalShowAllAcls = new Set();
 
 const FIXED_TYPICAL_EVENTS =["Generic", "Others", "Official Trip", "Overseas Leave", "Local Leave"];
 
@@ -42,7 +39,7 @@ if (settings.externalToken) {
 const extLinkEl = document.getElementById('external-link-url');
 if (extLinkEl) {
 const baseUrl = window.location.href.split('?')[0];
-extLinkEl.value = ${baseUrl}?ext=${settings.externalToken};
+extLinkEl.value = `${baseUrl}?ext=${settings.externalToken}`;
 }
 }
 
@@ -81,6 +78,9 @@ tempDashboardDeptOrder = tempDashboardDeptOrder.filter(d => allDepts.has(d));
 renderDashboardFilterOrder();
 
 tempMenuOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
+DEFAULT_MENU.forEach(item => {
+  if (!tempMenuOrder.includes(item)) tempMenuOrder.push(item);
+});
 renderMenuOrder();
 
 tempTypicalEventTypes = settings.typicalEventTypes ||[];
@@ -103,14 +103,14 @@ tempGcalSyncCalendars = settings.gcalSyncCalendars || [];
 renderGcalSyncCalendars();
 
 // Initialize General Settings Container
-tempAdminSectionsOrder = (settings.adminSectionsOrder && settings.adminSectionsOrder.length
-? settings.adminSectionsOrder
+tempAdminSectionsOrder = (settings.adminSectionsOrder && settings.adminSectionsOrder.length 
+? settings.adminSectionsOrder 
 :['landing-page', 'app-mode', 'dashboard-filter-order', 'admin-pass', 'user-keyword', 'external-booking', 'gcal-sync', 'menu-order']).filter(s => s !== 'code-backup');
 
 const container = document.getElementById('admin-sections-container');
 if (container) {
 tempAdminSectionsOrder.forEach(id => {
-const el = container.querySelector([data-section="${id}"]);
+const el = container.querySelector(`[data-section="${id}"]`);
 if (el) container.appendChild(el);
 });
 
@@ -128,14 +128,14 @@ tempAdminSectionsOrder = Array.from(container.children).map(el => el.dataset.sec
 }
 
 // Initialize Contacts & Users Management Container
-tempAdminContactsSectionsOrder = (settings.adminContactsSectionsOrder && settings.adminContactsSectionsOrder.length
-? settings.adminContactsSectionsOrder
+tempAdminContactsSectionsOrder = (settings.adminContactsSectionsOrder && settings.adminContactsSectionsOrder.length 
+? settings.adminContactsSectionsOrder 
 :['contact-format', 'register-user', 'manage-users']).filter(s => s !== 'code-backup' && s !== 'external-sync');
 
 const contactsContainer = document.getElementById('admin-contacts-sections-container');
 if (contactsContainer) {
 tempAdminContactsSectionsOrder.forEach(id => {
-const el = contactsContainer.querySelector([data-section="${id}"]);
+const el = contactsContainer.querySelector(`[data-section="${id}"]`);
 if (el) contactsContainer.appendChild(el);
 });
 
@@ -216,14 +216,19 @@ let allCals = new Set();
 companyStructure.forEach(path => allCals.add(path));
 if (window.appCustomKahGroups) {
 window.appCustomKahGroups.forEach(g => {
-if (g.hasCalendar && g.calendarName) allCals.add(g.calendarName);
+    if (g.hasCalendar && g.calendarName) allCals.add(g.calendarName);
 });
 }
 
 let html = '';
 Array.from(allCals).sort().forEach(calName => {
 const isChecked = tempGcalSyncCalendars.includes(calName);
-html += <label class="flex items-center justify-between p-3 bg-white dark:bg-darksurface border border-gray-200 dark:border-darkborder rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-darkhover transition mb-2"> <span class="font-bold text-gray-800 dark:text-gray-200 text-sm">${calName}</span> <input type="checkbox" class="w-5 h-5 text-blue-600 rounded cursor-pointer" ${isChecked ? 'checked' : ''} onchange="toggleGcalSync('${calName}', this.checked)"> </label>;
+html += `
+<label class="flex items-center justify-between p-3 bg-white dark:bg-darksurface border border-gray-200 dark:border-darkborder rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-darkhover transition mb-2">
+    <span class="font-bold text-gray-800 dark:text-gray-200 text-sm">${calName}</span>
+    <input type="checkbox" class="w-5 h-5 text-blue-600 rounded cursor-pointer" ${isChecked ? 'checked' : ''} onchange="toggleGcalSync('${calName}', this.checked)">
+</label>
+`;
 });
 
 if (html === '') {
@@ -247,9 +252,9 @@ if(!list) return;
 
 const buildChips = (inputId) => {
 const vars = ['{EventType}','{Name}','{Attendees}','{Department}','{Location}','{LocationDetails}','{Country}','{State}','{StartTime}','{EndTime}','{Remarks}','{EventDescription}'];
-return <div class="flex flex-wrap gap-1 mt-1.5 mb-2"> +
-vars.map(v => <button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>).join('') +
-</div>;
+return `<div class="flex flex-wrap gap-1 mt-1.5 mb-2">` + 
+vars.map(v => `<button type="button" onclick="insertAtCursor('${inputId}', '${v}')" class="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm">${v}</button>`).join('') + 
+`</div>`;
 };
 
 let html = '';
@@ -270,9 +275,9 @@ locHtml = `
 
 let removeBtnHtml = '';
 if (!isFixed) {
-removeBtnHtml = <button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-white hover:bg-red-500 p-2 rounded-lg transition shrink-0 ml-1 border border-transparent hover:border-red-600 flex items-center justify-center" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>;
+removeBtnHtml = `<button type="button" onclick="removeTypicalEventType(${i})" class="text-red-500 hover:text-white hover:bg-red-500 p-2 rounded-lg transition shrink-0 ml-1 border border-transparent hover:border-red-600 flex items-center justify-center" title="Remove"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
 } else {
-removeBtnHtml = <div class="w-9 shrink-0 ml-1"></div>;
+removeBtnHtml = `<div class="w-9 shrink-0 ml-1"></div>`;
 }
 
 if (!t.fields) t.fields = { location: {show:true,req:false}, locationDetails: {show:true,req:false}, attendees: {show:true,req:false}, remarks: {show:true,req:false,label:'Remarks'} };
@@ -281,27 +286,32 @@ let fieldConfigHtml = `
 <div class="mt-3 pt-3 border-t border-gray-200 dark:border-darkborder text-sm hidden-view" id="event-type-fields-${i}">
 <h4 class="font-bold text-gray-700 dark:text-gray-300 mb-2">Form Fields Configuration</h4>
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
 <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
 <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Location</div>
 <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'location', 'show', this.checked)" ${t.fields.location.show?'checked':''}> <span>Visible</span></label>
 <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'location', 'req', this.checked)" ${t.fields.location.req?'checked':''} ${!t.fields.location.show?'disabled':''}> <span>Required</span></label>
 </div>
+
 <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
 <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Location Details</div>
 <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'locationDetails', 'show', this.checked)" ${t.fields.locationDetails.show?'checked':''}> <span>Visible</span></label>
 <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'locationDetails', 'req', this.checked)" ${t.fields.locationDetails.req?'checked':''} ${!t.fields.locationDetails.show?'disabled':''}> <span>Required</span></label>
 </div>
+
 <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
 <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Attendees</div>
 <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'attendees', 'show', this.checked)" ${t.fields.attendees.show?'checked':''}> <span>Visible</span></label>
 <label class="flex items-center space-x-1 text-xs cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'attendees', 'req', this.checked)" ${t.fields.attendees.req?'checked':''} ${!t.fields.attendees.show?'disabled':''}> <span>Required</span></label>
 </div>
+
 <div class="bg-gray-50 dark:bg-[#1a1a1a] p-2 rounded border border-gray-200 dark:border-gray-600">
 <div class="font-bold mb-1 text-[11px] uppercase text-gray-500">Remarks</div>
 <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'remarks', 'show', this.checked)" ${t.fields.remarks.show?'checked':''}> <span>Visible</span></label>
 <label class="flex items-center space-x-1 text-xs mb-1 cursor-pointer"><input type="checkbox" onchange="updateEventTypeField(${i}, 'remarks', 'req', this.checked)" ${t.fields.remarks.req?'checked':''} ${!t.fields.remarks.show?'disabled':''}> <span>Required</span></label>
 <input type="text" value="${t.fields.remarks.label || 'Remarks'}" onchange="updateEventTypeField(${i}, 'remarks', 'label', this.value)" class="w-full mt-1 border border-gray-300 dark:border-gray-500 rounded p-1 text-[10px] bg-white dark:bg-black outline-none font-bold" placeholder="Label">
 </div>
+
 </div>
 </div>`;
 
@@ -354,7 +364,7 @@ let currentOrder = t.fieldOrder || defaultOrder;
 const missingBlocks = defaultOrder.filter(b => !currentOrder.includes(b));
 if (missingBlocks.length > 0) {
 currentOrder = [...currentOrder, ...missingBlocks];
-t.fieldOrder = currentOrder;
+t.fieldOrder = currentOrder; 
 }
 
 const blockNames = {
@@ -370,8 +380,8 @@ currentOrder.forEach(block => {
 if(blockNames[block]) {
 orderHtml += `
 <div data-id="${block}" class="flex items-center space-x-2 bg-gray-50 dark:bg-[#2a2a2a] p-2 rounded border border-gray-200 dark:border-gray-600 cursor-grab shadow-sm">
-<svg class="w-4 h-4 text-gray-400 dark:text-darkmuted field-handle shrink-0 cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
-<span class="text-xs font-semibold text-gray-700 dark:text-gray-200">${blockNames[block]}</span>
+  <svg class="w-4 h-4 text-gray-400 dark:text-darkmuted field-handle shrink-0 cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
+  <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">${blockNames[block]}</span>
 </div>
 `;
 }
@@ -380,19 +390,14 @@ orderHtml += `</div></div>`;
 
 html += `
 <div data-idx="${i}" class="flex flex-col gap-3 bg-white dark:bg-darksurface p-3 md:p-4 rounded-xl border border-gray-300 dark:border-darkborder shadow-sm ${!isFixed ? 'cursor-grab' : ''}">
+
+<!-- ROW 1 -->
 <div class="flex items-center gap-2 w-full flex-nowrap">
 <svg class="w-6 h-6 text-gray-400 dark:text-darkmuted shrink-0 ${!isFixed ? 'handle-event-type cursor-grab' : 'hidden'}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" /></svg>
 ${isFixed ? `<div class="w-6 shrink-0"></div>` : ''}
 
-<input type="text" value="
+<input type="text" value="${safeName}" onchange="updateTypicalEventType(${i}, 'name', this.value)" class="flex-grow min-w-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm md:text-base font-bold truncate" ${isFixed ? 'disabled' : ''}>
 
-        
-safeName"onchange="updateTypicalEventType(
-safeName"onchange="updateTypicalEventType(
-
-      
-
-{i}, 'name', this.value)" class="flex-grow min-w-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 bg-gray-50 dark:bg-[#1a1a1a] focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-sm md:text-base font-bold truncate" ${isFixed ? 'disabled' : ''}>
 <select onchange="updateTypicalEventType(${i}, 'isEvent', this.value === 'true')" class="w-[120px] md:w-40 shrink-0 border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-2 bg-gray-50 dark:bg-[#1a1a1a] text-gray-900 dark:text-white outline-none focus:border-blue-500 text-xs md:text-sm font-bold cursor-pointer">
 <option value="true" ${t.isEvent ? 'selected' : ''}>Time-Bound</option>
 <option value="false" ${!t.isEvent ? 'selected' : ''}>All/Half-Day</option>
@@ -400,7 +405,10 @@ safeName"onchange="updateTypicalEventType(
 
 ${removeBtnHtml}
 </div>
+
+<!-- ROW 2 -->
 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 w-full pl-8 mt-1">
+
 <div class="flex flex-wrap items-center gap-2">
 <label class="flex items-center space-x-1.5 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-2 rounded-lg border border-yellow-300 dark:border-yellow-700 cursor-pointer transition hover:bg-yellow-100 dark:hover:bg-yellow-900/40" title="If checked, this event type counts towards the KAH limit if the user's custom group has limit enforcement turned on.">
 <input type="checkbox" onchange="updateTypicalEventType(${i}, 'isKahRelevant', this.checked)" class="w-4 h-4 text-yellow-600 cursor-pointer rounded border-gray-300 shrink-0" ${t.isKahRelevant ? 'checked' : ''}>
@@ -408,6 +416,7 @@ ${removeBtnHtml}
 </label>
 ${locHtml ? `<div class="flex-grow sm:flex-grow-0">${locHtml}</div>` : ''}
 </div>
+
 <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
 <button type="button" onclick="document.getElementById('event-type-order-${i}').classList.toggle('hidden-view')" class="flex-1 lg:flex-none flex justify-center items-center text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 px-3 py-2 rounded-lg transition text-xs font-bold whitespace-nowrap bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-300 dark:border-emerald-700 shadow-sm" title="Field Order">
 Order ↕️
@@ -431,30 +440,30 @@ list.innerHTML = html;
 
 if(window.eventTypeSortable) window.eventTypeSortable.destroy();
 if (typeof Sortable !== 'undefined') {
-window.eventTypeSortable = new Sortable(list, {
-animation: 150,
-handle: '.handle-event-type',
-ghostClass: 'opacity-50',
-onEnd: function () {
+window.eventTypeSortable = new Sortable(list, { 
+animation: 150, 
+handle: '.handle-event-type', 
+ghostClass: 'opacity-50', 
+onEnd: function () { 
 const newArr =[];
 Array.from(list.children).forEach(el => {
 newArr.push(tempTypicalEventTypes[parseInt(el.dataset.idx)]);
 });
 tempTypicalEventTypes = newArr;
 renderTypicalEventTypes();
-}
+} 
 });
 
 tempTypicalEventTypes.forEach((t, i) => {
 if(window['fieldOrderSortable' + i]) window['fieldOrderSortable' + i].destroy();
-const orderList = document.getElementById(sortable-field-order-${i});
+const orderList = document.getElementById(`sortable-field-order-${i}`);
 if (orderList) {
 window['fieldOrderSortable' + i] = new Sortable(orderList, {
 animation: 150,
 handle: '.field-handle',
 ghostClass: 'opacity-50',
 onEnd: function() {
-tempTypicalEventTypes[i].fieldOrder = Array.from(orderList.children).map(el => el.dataset.id);
+   tempTypicalEventTypes[i].fieldOrder = Array.from(orderList.children).map(el => el.dataset.id);
 }
 });
 }
@@ -465,10 +474,10 @@ tempTypicalEventTypes[i].fieldOrder = Array.from(orderList.children).map(el => e
 function addTypicalEventType() {
 const nameInput = document.getElementById('new-typical-event-type');
 const isEventInput = document.getElementById('new-typical-event-isEvent');
-if(nameInput && nameInput.value.trim()) {
+if(nameInput && nameInput.value.trim()) { 
 const isEvent = isEventInput.value === 'true';
-tempTypicalEventTypes.push({
-name: nameInput.value.trim(),
+tempTypicalEventTypes.push({ 
+name: nameInput.value.trim(), 
 isEvent: isEvent,
 isKahRelevant: false,
 defaultLoc: '',
@@ -479,17 +488,17 @@ attendees: {show: isEvent, req: false},
 remarks: {show: true, req: false, label: 'Remarks'}
 },
 fieldOrder: ['time', 'location', 'attendees', 'remarks', 'repeat', 'overseas']
-});
-nameInput.value = '';
-renderTypicalEventTypes();
+}); 
+nameInput.value = ''; 
+renderTypicalEventTypes(); 
 }
 }
 
-function removeTypicalEventType(idx) {
+function removeTypicalEventType(idx) { 
 const item = tempTypicalEventTypes[idx];
 if (FIXED_TYPICAL_EVENTS.includes(item.name)) return;
-tempTypicalEventTypes.splice(idx, 1);
-renderTypicalEventTypes();
+tempTypicalEventTypes.splice(idx, 1); 
+renderTypicalEventTypes(); 
 }
 
 function updateTypicalEventType(idx, field, val) {
@@ -505,7 +514,7 @@ tempTypicalEventTypes[idx][field] = val;
 tempTypicalEventTypes[idx][field] = val;
 }
 
-if (field === 'isEvent') renderTypicalEventTypes();
+if (field === 'isEvent') renderTypicalEventTypes(); 
 }
 
 function updateEventTypeField(idx, fieldKey, prop, val) {
@@ -535,6 +544,7 @@ html += `
 <span class="font-bold w-1/4 text-sm text-yellow-700 dark:text-yellow-500 truncate" title="${key}">${key}</span>
 <span class="text-gray-400 dark:text-darkmuted w-4 text-center shrink-0">➔</span>
 <span class="flex-grow w-1/2 text-sm text-gray-800 dark:text-gray-200 truncate" title="${acr.full}">${acr.full}</span>
+
 <label class="flex items-center cursor-pointer shrink-0 ml-2" title="Toggle Active Status">
 <div class="relative">
 <input type="checkbox" class="sr-only" ${acr.active ? 'checked' : ''} onchange="toggleAcronymActive('${key}')">
@@ -542,6 +552,7 @@ html += `
 <div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${acr.active ? 'transform translate-x-3' : ''}"></div>
 </div>
 </label>
+
 <button type="button" onclick="removeAcronym('${key}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded p-1.5 shrink-0 ml-1 transition" title="Delete">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
 </button>
@@ -583,7 +594,7 @@ customKahGroups[idx].calendarName = newName.trim();
 async function backfillKahGroupCalendar(idx) {
 const g = customKahGroups[idx];
 if (!g.calendarName) g.calendarName = g.name;
-if (!confirm(This will scan all historical records and sync them into the dedicated Google Calendar "${g.calendarName}". Proceed?)) return;
+if (!confirm(`This will scan all historical records and sync them into the dedicated Google Calendar "${g.calendarName}". Proceed?`)) return;
 showLoader(true);
 try {
 await apiCall('backfillCustomCalendar', { adminPass: user.pass, calendarName: g.calendarName, members: g.members });
@@ -607,12 +618,12 @@ container.innerHTML = customKahGroups.map((g, i) => `
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 bg-blue-50 dark:bg-blue-900/20 p-2.5 rounded-lg border border-blue-200 dark:border-blue-800/50 gap-2">
 <div class="flex flex-col space-y-2 w-full sm:w-auto">
 <div class="flex items-center space-x-2">
-<input type="checkbox" id="kah-group-cal-${i}" class="w-4 h-4 text-blue-600 rounded cursor-pointer" ${g.hasCalendar ? 'checked' : ''} onchange="toggleKahGroupCalendar(${i}, this.checked)">
-<label for="kah-group-cal-${i}" class="text-xs font-bold text-blue-800 dark:text-blue-300 cursor-pointer">Enable Dedicated Group Calendar</label>
+   <input type="checkbox" id="kah-group-cal-${i}" class="w-4 h-4 text-blue-600 rounded cursor-pointer" ${g.hasCalendar ? 'checked' : ''} onchange="toggleKahGroupCalendar(${i}, this.checked)">
+   <label for="kah-group-cal-${i}" class="text-xs font-bold text-blue-800 dark:text-blue-300 cursor-pointer">Enable Dedicated Group Calendar</label>
 </div>
 <div class="flex items-center space-x-2">
-<input type="checkbox" id="kah-group-limit-${i}" class="w-4 h-4 text-yellow-600 rounded cursor-pointer" ${g.applyLimit ? 'checked' : ''} onchange="toggleKahGroupLimit(${i}, this.checked)">
-<label for="kah-group-limit-${i}" class="text-xs font-bold text-yellow-800 dark:text-yellow-400 cursor-pointer">Enforce Global KAH Out-Of-Office Percentage Limit</label>
+   <input type="checkbox" id="kah-group-limit-${i}" class="w-4 h-4 text-yellow-600 rounded cursor-pointer" ${g.applyLimit ? 'checked' : ''} onchange="toggleKahGroupLimit(${i}, this.checked)">
+   <label for="kah-group-limit-${i}" class="text-xs font-bold text-yellow-800 dark:text-yellow-400 cursor-pointer">Enforce Global KAH Out-Of-Office Percentage Limit</label>
 </div>
 </div>
 ${g.hasCalendar ? `
@@ -653,14 +664,14 @@ async function removeCustomKahGroup(idx) {
 const g = customKahGroups[idx];
 if (confirm("Are you sure you want to delete this custom group?")) {
 if (g.hasCalendar) {
-if (confirm(This group has a dedicated Google Calendar ("${g.calendarName || g.name}"). Do you also want to PERMANENTLY DELETE this calendar and all its events? (Click Cancel to keep the calendar but delete the group))) {
+if (confirm(`This group has a dedicated Google Calendar ("${g.calendarName || g.name}"). Do you also want to PERMANENTLY DELETE this calendar and all its events? (Click Cancel to keep the calendar but delete the group)`)) {
 showLoader(true);
 try {
-await apiCall('deleteCalendar', { adminPass: user.pass, calendarName: g.calendarName || g.name });
+ await apiCall('deleteCalendar', { adminPass: user.pass, calendarName: g.calendarName || g.name });
 } catch(e) {
-alert("Error deleting calendar: " + e.message);
+ alert("Error deleting calendar: " + e.message);
 } finally {
-showLoader(false);
+ showLoader(false);
 }
 }
 }
@@ -677,10 +688,10 @@ async function toggleKahGroupCalendar(idx, isChecked) {
 const g = customKahGroups[idx];
 if (isChecked) {
 g.hasCalendar = true;
-g.calendarName = g.name;
+g.calendarName = g.name; 
 renderCustomKahGroups();
 } else {
-if (confirm(Are you sure you want to disable and PERMANENTLY DELETE the dedicated Google Calendar for "${g.name}"? This action cannot be undone and will wipe all past events in it.)) {
+if (confirm(`Are you sure you want to disable and PERMANENTLY DELETE the dedicated Google Calendar for "${g.name}"? This action cannot be undone and will wipe all past events in it.`)) {
 showLoader(true);
 try {
 await apiCall('deleteCalendar', { adminPass: user.pass, calendarName: g.calendarName || g.name });
@@ -690,27 +701,27 @@ renderCustomKahGroups();
 alert("Calendar successfully deleted.");
 } catch(e) {
 alert("Error deleting calendar: " + e.message);
-renderCustomKahGroups();
+renderCustomKahGroups(); 
 } finally {
 showLoader(false);
 }
 } else {
-renderCustomKahGroups();
+renderCustomKahGroups(); 
 }
 }
 }
 
 function searchKahGroupMember(idx) {
-const q = document.getElementById(kah-group-search-${idx}).value;
-const resC = document.getElementById(kah-group-results-${idx});
+const q = document.getElementById(`kah-group-search-${idx}`).value;
+const resC = document.getElementById(`kah-group-results-${idx}`);
 if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
 
 const results = fuseAllContacts.search(q).slice(0, 4).map(r => r.item);
 if(results.length > 0) {
-resC.innerHTML = results.map(c => <div class="p-2 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover text-sm" onclick="addKahGroupMember(${idx}, '${c.phone}')"><span class="font-semibold">${c.formattedName}</span></div>).join('');
+resC.innerHTML = results.map(c => `<div class="p-2 border-b dark:border-darkborder cursor-pointer hover:bg-gray-100 dark:hover:bg-darkhover text-sm" onclick="addKahGroupMember(${idx}, '${c.phone}')"><span class="font-semibold">${c.formattedName}</span></div>`).join('');
 resC.classList.remove('hidden-view');
 } else {
-resC.innerHTML = <div class="p-2 text-gray-500 text-sm">No match found</div>; resC.classList.remove('hidden-view');
+resC.innerHTML = `<div class="p-2 text-gray-500 text-sm">No match found</div>`; resC.classList.remove('hidden-view');
 }
 }
 window.debouncedSearchKahGroupMember = debounce(searchKahGroupMember, 300);
@@ -734,10 +745,10 @@ if(!q || !fuseAllContacts) { resC.classList.add('hidden-view'); return; }
 
 const results = fuseAllContacts.search(q).slice(0, 5).map(r => r.item);
 if(results.length > 0) {
-resC.innerHTML = results.map(c => <div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-400" onclick="selectUserToManage('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}', '${c.birthday || ''}', '${c.email || ''}')"><span class="font-semibold">${c.formattedName}</span></div>).join('');
+resC.innerHTML = results.map(c => `<div class="p-3 border-b dark:border-darkborder cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-700 dark:text-blue-400" onclick="selectUserToManage('${c.resourceName}', '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.dept}', '${c.birthday || ''}', '${c.email || ''}')"><span class="font-semibold">${c.formattedName}</span></div>`).join('');
 resC.classList.remove('hidden-view');
 } else {
-resC.innerHTML = <div class="p-3 text-gray-500">No match found</div>; resC.classList.remove('hidden-view');
+resC.innerHTML = `<div class="p-3 text-gray-500">No match found</div>`; resC.classList.remove('hidden-view');
 }
 }
 window.debouncedSearchUserToManage = debounce(searchUserToManage, 300);
@@ -784,7 +795,7 @@ if (!name || !mobile || !unit) return alert("Please fill in all fields.");
 if (!appData.manageUser.birthdaySelected) return alert("Please select a Birthday.");
 
 const bday = appData.manageUser.birthdayD;
-const bdayStr = ${bday.getFullYear()}-${String(bday.getMonth()+1).padStart(2,'0')}-${String(bday.getDate()).padStart(2,'0')};
+const bdayStr = `${bday.getFullYear()}-${String(bday.getMonth()+1).padStart(2,'0')}-${String(bday.getDate()).padStart(2,'0')}`;
 
 showLoader(true);
 try {
@@ -817,7 +828,7 @@ showLoader(true);
 try {
 const res = await apiCall('regenerateExternalToken', { adminPass: user.pass });
 const baseUrl = window.location.href.split('?')[0];
-document.getElementById('external-link-url').value = ${baseUrl}?ext=${res.token};
+document.getElementById('external-link-url').value = `${baseUrl}?ext=${res.token}`;
 alert("New external booking link generated successfully!");
 } catch (e) {
 alert("Error regenerating link: " + e.message);
@@ -857,7 +868,7 @@ try {
 await apiCall('saveSettings', payload);
 alert("Settings successfully saved! App will reload to apply UI changes.");
 if(newPass) { user.pass = newPass; localStorage.setItem('user', JSON.stringify(user)); }
-window.location.reload();
+window.location.reload(); 
 } catch (err) { alert("Error: " + err.message); showLoader(false); }
 }
 
@@ -914,150 +925,110 @@ window.location.reload();
 // Google Calendar Access Rights Management
 // ==========================================
 
-window.debouncedGcalAccessSearch = debounce(() => {
-gcalSearchQuery = document.getElementById('gcal-access-search').value.toLowerCase();
-renderGcalAccessUI();
-}, 300);
-
-window.toggleGcalAccessCard = function(id) {
-if (gcalExpandedCards.has(id)) gcalExpandedCards.delete(id);
-else gcalExpandedCards.add(id);
-renderGcalAccessUI();
-};
-
-window.toggleGcalAclList = function(id, e) {
-if (e) e.stopPropagation();
-if (gcalShowAllAcls.has(id)) gcalShowAllAcls.delete(id);
-else gcalShowAllAcls.add(id);
-renderGcalAccessUI();
-};
-
-window.bulkToggleGcalCards = function(expand) {
-if (!calendarAclsCache) return;
-if (expand) calendarAclsCache.forEach(c => gcalExpandedCards.add(c.id));
-else gcalExpandedCards.clear();
-renderGcalAccessUI();
-};
-
 async function renderGcalAccessUI() {
 const container = document.getElementById('gcal-access-container');
 if (!container) return;
 
 if (!calendarAclsCache) {
-container.innerHTML = <div class="flex justify-center items-center py-10"><div class="spinner"></div></div>;
+container.innerHTML = `<div class="flex justify-center items-center py-10"><div class="spinner"></div></div>`;
 try {
 calendarAclsCache = await apiCall('getCalendarAcls', { adminPass: user.pass });
 calendarAclsCache.sort((a, b) => (a.summary || '').localeCompare(b.summary || ''));
 } catch (e) {
-container.innerHTML = <p class="text-red-500 text-center py-5">Error fetching calendars: ${e.message}</p>;
+container.innerHTML = `<p class="text-red-500 text-center py-5">Error fetching calendars: ${e.message}</p>`;
 return;
 }
-}
-
-const filtered = calendarAclsCache.filter(c =>
-(c.summary || '').toLowerCase().includes(gcalSearchQuery) ||
-(c.id || '').toLowerCase().includes(gcalSearchQuery)
-);
-
-if (filtered.length === 0) {
-container.innerHTML = <p class="text-gray-500 italic text-center py-10">No calendars found matching "${gcalSearchQuery}"</p>;
-return;
 }
 
 let html = '';
-filtered.forEach((cal, cIdx) => {
-const isExpanded = gcalExpandedCards.has(cal.id);
-const isMaster = cal.id === cal.primaryOwner;
-
-const visibleAcls = (cal.acls || []).filter(a => a.value !== cal.primaryOwner && !a.value.includes('appspot.gserviceaccount.com'));
-const showAllMembers = gcalShowAllAcls.has(cal.id);
-const limit = 3;
-const aclsToRender = showAllMembers ? visibleAcls : visibleAcls.slice(0, limit);
+calendarAclsCache.forEach((cal, cIdx) => {
+const isGroup = cal.id.includes('group.calendar.google.com');
+const isMaster = cal.id === cal.primaryOwner; // Prevent deletion of main user calendar
 
 html += `
-<div class="bg-white dark:bg-darksurface border border-gray-200 dark:border-darkborder rounded-2xl shadow-sm overflow-hidden transition-all duration-200 ${isExpanded ? 'ring-2 ring-blue-500 ring-opacity-20' : ''}">
-<div class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-darkhover transition select-none" onclick="window.toggleGcalAccessCard('${cal.id}')">
-<div class="min-w-0 pr-4">
-<h3 class="font-extrabold text-sm md:text-base text-gray-900 dark:text-white truncate">${cal.summary}</h3>
-<p class="text-[10px] text-gray-400 font-medium truncate">${cal.id}</p>
+<div class="bg-white dark:bg-darksurface border border-gray-200 dark:border-darkborder rounded-2xl p-4 md:p-6 mb-4 shadow-sm relative">
+<div class="flex justify-between items-start mb-4 border-b border-gray-100 dark:border-darkborder pb-2">
+<div>
+<h3 class="font-extrabold text-lg text-gray-900 dark:text-white">${cal.summary}</h3>
+<span class="text-xs text-gray-400 font-normal break-all">${cal.id}</span>
 </div>
-<div class="flex items-center space-x-2 shrink-0">
-<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-darkmuted uppercase">${visibleAcls.length} User${visibleAcls.length !== 1 ? 's' : ''}</span>
-<svg class="w-5 h-5 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-</div>
-</div>
-<div class="${isExpanded ? 'block' : 'hidden-view'} border-t border-gray-100 dark:border-darkborder p-4 md:p-6 space-y-6 bg-white dark:bg-darksurface">
-<div class="space-y-3">
-<div class="flex justify-between items-end mb-2">
-<h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Shared Access</h4>
 ${!isMaster ? `
-<button type="button" onclick="deleteFullCalendar(${cIdx})" class="text-[10px] font-bold text-red-500 hover:text-red-700 transition uppercase tracking-wide">Delete Calendar</button>
+<button type="button" onclick="deleteFullCalendar(${cIdx})" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition shrink-0" title="Delete Entire Calendar">
+<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+</button>
 ` : ''}
 </div>
+<div class="space-y-3 mb-5">
 `;
 
-if (aclsToRender.length > 0) {
-aclsToRender.forEach((acl, aIdx) => {
+if (cal.acls && cal.acls.length > 0) {
+const visibleAcls = cal.acls.filter(a => a.value !== cal.primaryOwner && !a.value.includes('appspot.gserviceaccount.com'));
+
+if (visibleAcls.length > 0) {
+const roleWeights = { 'owner': 1, 'writer': 2, 'reader': 3, 'freeBusyReader': 4 };
+const sortedAcls = visibleAcls.sort((a, b) => (roleWeights[a.role] || 99) - (roleWeights[b.role] || 99));
+
+sortedAcls.forEach((acl, aIdx) => {
 const typeLabel = acl.type === 'default' ? 'Public (Anyone)' : (acl.type === 'user' ? 'User' : acl.type);
+
 let roleHtml = '';
 if (acl.type === 'user') {
-roleHtml = <select onchange="updateCalendarRole(${cIdx}, '${acl.id}', this.value)" class="text-[10px] font-bold bg-gray-100 dark:bg-darkinput border border-gray-300 dark:border-gray-600 rounded-md py-1 px-1.5 text-gray-800 dark:text-gray-200 outline-none focus:border-blue-500 transition cursor-pointer uppercase"> <option value="reader" ${acl.role === 'reader' ? 'selected' : ''}>Reader</option> <option value="writer" ${acl.role === 'writer' ? 'selected' : ''}>Writer</option> <option value="owner" ${acl.role === 'owner' ? 'selected' : ''}>Owner</option> </select>;
+roleHtml = `
+<select onchange="updateCalendarRole(${cIdx}, '${acl.id}', this.value)" class="text-[10px] md:text-xs font-bold bg-gray-100 dark:bg-darkinput border border-gray-300 dark:border-gray-600 rounded-md py-1.5 px-2 text-gray-800 dark:text-gray-200 outline-none focus:border-blue-500 transition cursor-pointer uppercase tracking-wider">
+    <option value="reader" ${acl.role === 'reader' ? 'selected' : ''}>Reader</option>
+    <option value="writer" ${acl.role === 'writer' ? 'selected' : ''}>Writer</option>
+    <option value="owner" ${acl.role === 'owner' ? 'selected' : ''}>Owner</option>
+</select>
+`;
 } else {
-roleHtml = <span class="px-2 py-1 rounded-md text-[10px] font-bold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 uppercase">${acl.role}</span>;
+roleHtml = `<span class="px-2.5 py-1 rounded-md text-[10px] md:text-xs font-bold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 uppercase tracking-wide">${acl.role}</span>`;
 }
-code Code
 
 html += `
-    <div class="flex items-center justify-between bg-gray-50 dark:bg-darkinput p-2.5 rounded-xl border border-gray-200 dark:border-gray-700">
-        <div class="min-w-0 flex-1 pr-3">
-            <p class="font-bold text-gray-800 dark:text-gray-200 text-xs truncate">${acl.value || typeLabel}</p>
-            <p class="text-[9px] text-gray-500 uppercase mt-0.5">${acl.type}</p>
-        </div>
-        <div class="flex items-center shrink-0 space-x-2">
-            ${roleHtml}
-            <button type="button" onclick="removeCalendarAcl(${cIdx}, '${acl.id}')" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg transition">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            </button>
-        </div>
-    </div>`;
+<div class="flex items-center justify-between bg-gray-50 dark:bg-darkinput p-3 rounded-xl border border-gray-200 dark:border-gray-700">
+<div class="min-w-0 flex-1 pr-4">
+    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm truncate">${acl.value || typeLabel}</p>
+    <p class="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">${acl.type}</p>
+</div>
+<div class="flex items-center shrink-0 space-x-2 md:space-x-3">
+    ${roleHtml}
+    <button type="button" onclick="removeCalendarAcl(${cIdx}, '${acl.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg transition" title="Remove Access">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+    </button>
+</div>
+</div>
+`;
 });
-
-if (visibleAcls.length > limit) {
-    html += `
-    <button onclick="window.toggleGcalAclList('${cal.id}', event)" class="w-full py-2 text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-xl hover:bg-blue-100 transition">
-        ${showAllMembers ? 'Show Less' : `Show all ${visibleAcls.length} members`}
-    </button>`;
-}
-
 } else {
-html += <p class="text-xs text-gray-500 italic py-2">No specific sharing rules defined.</p>;
+html += `<p class="text-sm text-gray-500 italic">No shared access rules found (excluding primary owner).</p>`;
+}
+} else {
+html += `<p class="text-sm text-gray-500 italic">No access rules found.</p>`;
 }
 
 html += `
 </div>
-<div class="bg-gray-50 dark:bg-darkinput p-4 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4">
-<h4 class="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Share Calendar</h4>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">Google Email</label>
-<input type="email" id="new-acl-email-${cIdx}" placeholder="user@gmail.com" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-xs outline-none focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white">
+<div class="bg-gray-50 dark:bg-darkinput p-4 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row gap-3 items-end">
+<div class="w-full md:flex-1 min-w-0">
+<label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Share with specific person</label>
+<input type="email" id="new-acl-email-${cIdx}" placeholder="Enter Google Account Email" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-sm outline-none focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white">
 </div>
-<div>
-<label class="block text-[10px] font-bold text-gray-500 mb-1.5 uppercase">Permission</label>
-<select id="new-acl-role-${cIdx}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-xs outline-none cursor-pointer focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white">
-<option value="reader">Reader</option>
-<option value="writer">Writer</option>
-<option value="owner">Owner</option>
+<div class="w-full md:w-48 shrink-0">
+<label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Permission</label>
+<select id="new-acl-role-${cIdx}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-sm outline-none cursor-pointer focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white">
+<option value="reader">See all event details</option>
+<option value="writer">Make changes to events</option>
+<option value="owner">Make changes & manage sharing</option>
 </select>
 </div>
+<button type="button" onclick="addCalendarAcl(${cIdx}, 'user')" class="w-full md:w-auto shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg transition shadow-sm border border-transparent text-sm h-[42px]">Add Person</button>
 </div>
-<button type="button" onclick="addCalendarAcl(${cIdx}, 'user')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition shadow-sm text-xs">Grant Access</button>
+
+<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+<span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Public Link (Make calendar public)</span>
+<button type="button" onclick="addCalendarAcl(${cIdx}, 'default', 'reader')" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold py-1.5 px-4 rounded-lg transition text-xs border border-transparent">Make Public Reader</button>
 </div>
-<div class="pt-4 border-t border-gray-100 dark:border-darkborder flex justify-between items-center">
-<span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Public Read-Only Access</span>
-<button type="button" onclick="addCalendarAcl(${cIdx}, 'default', 'reader')" class="text-[10px] font-extrabold text-blue-600 hover:underline transition uppercase">Enable Public Access</button>
-</div>
-</div>
+
 </div>
 `;
 });
@@ -1071,8 +1042,8 @@ let email = '';
 let role = roleOverride || 'reader';
 
 if (type === 'user') {
-email = document.getElementById(new-acl-email-${cIdx}).value.trim();
-role = document.getElementById(new-acl-role-${cIdx}).value;
+email = document.getElementById(`new-acl-email-${cIdx}`).value.trim();
+role = document.getElementById(`new-acl-role-${cIdx}`).value;
 if (!email) return alert("Please enter an email address.");
 }
 
@@ -1109,11 +1080,11 @@ const cal = calendarAclsCache[cIdx];
 showLoader(true);
 try {
 await apiCall('updateCalendarAcl', { adminPass: user.pass, calendarId: cal.id, ruleId: ruleId, role: newRole });
-calendarAclsCache = null;
+calendarAclsCache = null; 
 await renderGcalAccessUI();
 } catch(e) {
 alert(e.message);
-calendarAclsCache = null;
+calendarAclsCache = null; 
 await renderGcalAccessUI();
 } finally {
 showLoader(false);
@@ -1122,7 +1093,7 @@ showLoader(false);
 
 async function deleteFullCalendar(cIdx) {
 const cal = calendarAclsCache[cIdx];
-if (!confirm(WARNING: Are you absolutely sure you want to permanently delete the calendar "${cal.summary}"? All events inside will be wiped.)) return;
+if (!confirm(`WARNING: Are you absolutely sure you want to permanently delete the calendar "${cal.summary}"? All events inside will be wiped.`)) return;
 
 showLoader(true);
 try {
