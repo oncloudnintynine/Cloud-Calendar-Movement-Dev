@@ -36,3 +36,4 @@ UI.render = function() {
 window.initDutyPlanner = () => {
   UI.init();
 };
+
