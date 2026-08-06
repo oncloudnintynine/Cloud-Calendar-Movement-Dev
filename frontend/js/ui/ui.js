@@ -190,38 +190,39 @@ checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ?
 }
 
 window.downloadVCF = function() {
-if (!window.user || window.externalToken) {
-alert("You must be logged in to download contacts.");
-return;
-}
-if (!companyContacts || companyContacts.length === 0) {
-alert("Directory is empty or still loading.");
-return;
-}
+  const currentUser = user || window.user;
+  if (!currentUser || window.externalToken) {
+    alert("You must be logged in to download contacts.");
+    return;
+  }
+  if (!companyContacts || companyContacts.length === 0) {
+    alert("Directory is empty or still loading.");
+    return;
+  }
 
-let vcfData = "";
-companyContacts.forEach(c => {
-const name = c.name || "";
-const phone = c.phone || "";
-const org = c.dept ? c.dept.split(',')[0].trim() : "Cloudy";
+  let vcfData = "";
+  companyContacts.forEach(c => {
+    const name = c.name || "";
+    const phone = c.phone || "";
+    const org = c.dept ? c.dept.split(',')[0].trim() : "Cloudy";
 
-vcfData += "BEGIN:VCARD\r\n";
-vcfData += "VERSION:3.0\r\n";
-vcfData += `FN:${name}\r\n`;
-if (org) vcfData += `ORG:${org}\r\n`;
-if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
-vcfData += "END:VCARD\r\n";
-});
+    vcfData += "BEGIN:VCARD\r\n";
+    vcfData += "VERSION:3.0\r\n";
+    vcfData += `FN:${name}\r\n`;
+    if (org) vcfData += `ORG:${org}\r\n`;
+    if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
+    vcfData += "END:VCARD\r\n";
+  });
 
-const blob = new Blob([vcfData], { type: 'text/vcard;charset=utf-8;' });
-const url = URL.createObjectURL(blob);
-const link = document.createElement('a');
-link.href = url;
-link.setAttribute('download', 'Cloudy_Directory.vcf');
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
-URL.revokeObjectURL(url);
+  const blob = new Blob([vcfData], { type: 'text/vcard;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'Cloudy_Directory.vcf');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 window.forceSyncExternalCals = async function(skipConfirm) {

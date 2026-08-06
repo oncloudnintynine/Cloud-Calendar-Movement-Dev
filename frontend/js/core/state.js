@@ -3,6 +3,7 @@
 // ==========================================
 
 let user = JSON.parse(localStorage.getItem('user')) || null;
+window.user = user;
 let allLeaves =[];
 let currentEditId = null;
 let lastLocalChange = 0; // Concurrency timestamp tracker

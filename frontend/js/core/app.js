@@ -151,6 +151,7 @@ showLoader(false);
 }
 
 async function showApp() {
+window.user = user;
 showLoader(true);
 document.body.classList.remove('logged-out');
 document.getElementById('login-view').classList.add('hidden-view');

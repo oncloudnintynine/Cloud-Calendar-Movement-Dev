@@ -76,6 +76,7 @@ if (!pass) return alertError('login-alert', 'Please enter your password');
 showLoader(true);
 try {
  user = await apiCall('login', { password: pass });
+ window.user = user;
  localStorage.setItem('user', JSON.stringify(user));
  document.getElementById('login-pass').value = '';
  showApp(); 
@@ -121,4 +122,4 @@ try {
 } catch(e) { alertError(context === 'admin' ? 'admin-alert' : 'register-alert', e.message); } finally { showLoader(false); }
 }
 
-function logout() { localStorage.removeItem('user'); user = null; showLogin(); }
+function logout() { localStorage.removeItem('user'); user = null; window.user = null; showLogin(); }

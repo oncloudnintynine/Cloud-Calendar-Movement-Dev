@@ -925,115 +925,383 @@ window.location.reload();
 // Google Calendar Access Rights Management
 // ==========================================
 
+let gcalSearchQuery = '';
+let gcalRoleFilter = 'all';
+let gcalExpandedCards = {};
+let gcalCardSearchQueries = {};
+
+function safeAttr(str) {
+if (str === null || str === undefined) return '';
+return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeJsStr(str) {
+if (str === null || str === undefined) return "''";
+return "'" + String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '') + "'";
+}
+
+function getContactNameByEmail(email) {
+if (!email || !companyContacts) return null;
+const match = companyContacts.find(c => c.email && c.email.toLowerCase() === email.toLowerCase());
+return match ? `${match.name} (${match.dept ? match.dept.split(',')[0] : 'User'})` : null;
+}
+
+window.copyCalendarId = function(calId) {
+if (!calId) return;
+navigator.clipboard.writeText(calId).then(() => {
+alert(`Calendar ID copied to clipboard:\n${calId}`);
+}).catch(() => {
+prompt("Copy Calendar ID manually:", calId);
+});
+};
+
+window.updateGcalSearchQuery = function(q) {
+gcalSearchQuery = q || '';
+renderGcalAccessUI();
+};
+
+window.updateGcalRoleFilter = function(role) {
+gcalRoleFilter = role || 'all';
+renderGcalAccessUI();
+};
+
+window.toggleGcalCard = function(calId) {
+gcalExpandedCards[calId] = !gcalExpandedCards[calId];
+renderGcalAccessUI();
+};
+
+window.toggleAllGcalCards = function(expandState) {
+if (!calendarAclsCache) return;
+calendarAclsCache.forEach(cal => {
+gcalExpandedCards[cal.id] = expandState;
+});
+renderGcalAccessUI();
+};
+
+window.updateGcalCardSearch = function(calId, q) {
+gcalCardSearchQueries[calId] = q || '';
+renderGcalAccessUI();
+};
+
 async function renderGcalAccessUI() {
 const container = document.getElementById('gcal-access-container');
 if (!container) return;
 
 if (!calendarAclsCache) {
-container.innerHTML = `<div class="flex justify-center items-center py-10"><div class="spinner"></div></div>`;
+container.innerHTML = `<div class="flex justify-center items-center py-12"><div class="spinner"></div></div>`;
 try {
 calendarAclsCache = await apiCall('getCalendarAcls', { adminPass: user.pass });
 calendarAclsCache.sort((a, b) => (a.summary || '').localeCompare(b.summary || ''));
 } catch (e) {
-container.innerHTML = `<p class="text-red-500 text-center py-5">Error fetching calendars: ${e.message}</p>`;
+container.innerHTML = `<p class="text-red-500 text-center py-5 font-semibold">Error fetching calendars: ${safeAttr(e.message)}</p>`;
 return;
 }
 }
 
-let html = '';
-calendarAclsCache.forEach((cal, cIdx) => {
-const isGroup = cal.id.includes('group.calendar.google.com');
-const isMaster = cal.id === cal.primaryOwner; // Prevent deletion of main user calendar
+// Global Stats Calculation
+let totalCalendars = calendarAclsCache.length;
+let totalSharedUsers = 0;
+let totalPublicCalendars = 0;
 
-html += `
-<div class="bg-white dark:bg-darksurface border border-gray-200 dark:border-darkborder rounded-2xl p-4 md:p-6 mb-4 shadow-sm relative">
-<div class="flex justify-between items-start mb-4 border-b border-gray-100 dark:border-darkborder pb-2">
-<div>
-<h3 class="font-extrabold text-lg text-gray-900 dark:text-white">${cal.summary}</h3>
-<span class="text-xs text-gray-400 font-normal break-all">${cal.id}</span>
+calendarAclsCache.forEach(cal => {
+if (cal.acls) {
+const visible = cal.acls.filter(a => a.value !== cal.primaryOwner && !a.value.includes('appspot.gserviceaccount.com'));
+totalSharedUsers += visible.filter(a => a.type === 'user').length;
+if (visible.some(a => a.type === 'default')) totalPublicCalendars++;
+}
+});
+
+// Build Contact Suggestions Datalist HTML
+let contactsDatalistHtml = '';
+if (companyContacts && companyContacts.length > 0) {
+const contactsWithEmail = companyContacts.filter(c => c.email && c.email.trim());
+if (contactsWithEmail.length > 0) {
+contactsDatalistHtml = `<datalist id="gcal-system-contacts-list">` +
+contactsWithEmail.map(c => `<option value="${safeAttr(c.email)}">${safeAttr(c.name)} (${safeAttr(c.dept ? c.dept.split(',')[0] : 'User')})</option>`).join('') +
+`</datalist>`;
+}
+}
+
+// Build Header Controls (Stats & Search Bar)
+let html = `
+${contactsDatalistHtml}
+<div class="mb-6 space-y-4">
+<!-- Overview Badges -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+<div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/40 p-3 rounded-2xl flex items-center space-x-3">
+<div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shrink-0">📅</div>
+<div class="min-w-0">
+    <div class="text-[10px] text-blue-600 dark:text-blue-300 font-bold uppercase tracking-wider">Total Calendars</div>
+    <div class="text-lg font-extrabold text-blue-900 dark:text-blue-100 leading-none mt-0.5">${totalCalendars}</div>
 </div>
-${!isMaster ? `
-<button type="button" onclick="deleteFullCalendar(${cIdx})" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition shrink-0" title="Delete Entire Calendar">
-<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-</button>
-` : ''}
 </div>
-<div class="space-y-3 mb-5">
+<div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 p-3 rounded-2xl flex items-center space-x-3">
+<div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg shrink-0">👥</div>
+<div class="min-w-0">
+    <div class="text-[10px] text-indigo-600 dark:text-indigo-300 font-bold uppercase tracking-wider">Shared Users</div>
+    <div class="text-lg font-extrabold text-indigo-900 dark:text-indigo-100 leading-none mt-0.5">${totalSharedUsers}</div>
+</div>
+</div>
+<div class="col-span-2 sm:col-span-1 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 p-3 rounded-2xl flex items-center space-x-3">
+<div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0">🌐</div>
+<div class="min-w-0">
+    <div class="text-[10px] text-emerald-600 dark:text-emerald-300 font-bold uppercase tracking-wider">Public Access</div>
+    <div class="text-lg font-extrabold text-emerald-900 dark:text-emerald-100 leading-none mt-0.5">${totalPublicCalendars}</div>
+</div>
+</div>
+</div>
+
+<!-- Search & Expand Controls -->
+<div class="flex flex-col md:flex-row gap-3 items-center justify-between bg-gray-50 dark:bg-darkinput p-3.5 rounded-2xl border border-gray-200 dark:border-darkborder shadow-sm">
+<div class="relative w-full md:flex-1 min-w-0">
+<svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-darkmuted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+<input type="text" id="gcal-global-search-input" value="${safeAttr(gcalSearchQuery)}" oninput="updateGcalSearchQuery(this.value)" placeholder="Search calendar name, ID, or shared email..." class="w-full pl-9 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-xs md:text-sm bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition">
+${gcalSearchQuery ? `<button onclick="updateGcalSearchQuery('')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs font-bold">✕</button>` : ''}
+</div>
+
+<div class="flex items-center space-x-2 w-full md:w-auto shrink-0 justify-between md:justify-end">
+<select onchange="updateGcalRoleFilter(this.value)" class="border border-gray-300 dark:border-gray-600 rounded-xl py-2 px-3 text-xs font-bold bg-white dark:bg-black text-gray-900 dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-blue-500 shadow-sm">
+    <option value="all" ${gcalRoleFilter === 'all' ? 'selected' : ''}>All Roles</option>
+    <option value="owner" ${gcalRoleFilter === 'owner' ? 'selected' : ''}>Owners</option>
+    <option value="writer" ${gcalRoleFilter === 'writer' ? 'selected' : ''}>Writers</option>
+    <option value="reader" ${gcalRoleFilter === 'reader' ? 'selected' : ''}>Readers</option>
+</select>
+
+<div class="flex items-center space-x-1">
+    <button type="button" onclick="toggleAllGcalCards(true)" class="bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-xl text-xs font-bold transition border border-blue-200 dark:border-blue-800/50 shadow-sm">
+    Expand All
+    </button>
+
+    <button type="button" onclick="toggleAllGcalCards(false)" class="bg-gray-200/70 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-xl text-xs font-bold transition border border-gray-300 dark:border-gray-700 shadow-sm">
+    Collapse All
+    </button>
+</div>
+</div>
+</div>
+</div>
 `;
 
-if (cal.acls && cal.acls.length > 0) {
-const visibleAcls = cal.acls.filter(a => a.value !== cal.primaryOwner && !a.value.includes('appspot.gserviceaccount.com'));
+let renderedCardsCount = 0;
 
-if (visibleAcls.length > 0) {
+calendarAclsCache.forEach((cal, cIdx) => {
+const isMaster = cal.id === cal.primaryOwner;
+const visibleAcls = (cal.acls || []).filter(a => a.value !== cal.primaryOwner && !a.value.includes('appspot.gserviceaccount.com'));
+
+// Filter check
+const sq = gcalSearchQuery.toLowerCase().trim();
+const matchesCalName = (cal.summary || '').toLowerCase().includes(sq);
+const matchesCalId = (cal.id || '').toLowerCase().includes(sq);
+const matchingAcls = visibleAcls.filter(acl => {
+const matchesQuery = !sq || (acl.value || '').toLowerCase().includes(sq) || (acl.type || '').toLowerCase().includes(sq) || (acl.role || '').toLowerCase().includes(sq) || (getContactNameByEmail(acl.value) || '').toLowerCase().includes(sq);
+const matchesRole = gcalRoleFilter === 'all' || acl.role === gcalRoleFilter;
+return matchesQuery && matchesRole;
+});
+
+if (sq && !matchesCalName && !matchesCalId && matchingAcls.length === 0) {
+return; // Hide card if global search doesn't match
+}
+
+renderedCardsCount++;
+
+// Determine expanded state: auto-expand if active global search, otherwise check cache dictionary
+const isExpanded = sq ? true : (gcalExpandedCards[cal.id] !== undefined ? gcalExpandedCards[cal.id] : (totalCalendars <= 2 || cIdx === 0));
+
+const userAclsCount = visibleAcls.filter(a => a.type === 'user').length;
+const isPublic = visibleAcls.some(a => a.type === 'default');
+
+html += `
+<div class="bg-white dark:bg-darksurface border border-gray-200 dark:border-darkborder rounded-2xl mb-4 shadow-sm relative overflow-hidden transition-all duration-200">
+
+<!-- Collapsible Header -->
+<div onclick="toggleGcalCard(${safeJsStr(cal.id)})" class="p-4 md:p-5 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-darkhover/50 transition select-none bg-gray-50/50 dark:bg-darkinput/30">
+<div class="flex items-center space-x-3 min-w-0 flex-1 pr-3">
+<div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold shrink-0 text-base">
+    ${isMaster ? '⭐' : '📁'}
+</div>
+<div class="min-w-0 flex-1">
+    <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+        <h3 class="font-extrabold text-base md:text-lg text-gray-900 dark:text-white truncate">${safeAttr(cal.summary)}</h3>
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold ${isMaster ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'} uppercase">
+            ${isMaster ? 'Master Calendar' : 'Sub-Calendar'}
+        </span>
+        ${isPublic ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 uppercase">Public</span>` : ''}
+    </div>
+    
+    <div class="flex items-center space-x-2 mt-1">
+        <span class="text-xs text-gray-500 dark:text-darkmuted font-mono truncate max-w-[200px] sm:max-w-md">${safeAttr(cal.id)}</span>
+        <button type="button" onclick="event.stopPropagation(); copyCalendarId(${safeJsStr(cal.id)})" class="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline shrink-0" title="Copy Calendar ID">
+            📋 Copy ID
+        </button>
+    </div>
+</div>
+</div>
+
+<div class="flex items-center space-x-3 shrink-0">
+<div class="bg-gray-100 dark:bg-darkinput px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300">
+    👥 <span class="hidden sm:inline">Users:</span> ${userAclsCount}
+</div>
+
+${!isMaster ? `
+<button type="button" onclick="event.stopPropagation(); deleteFullCalendar(${cIdx})" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-xl transition shrink-0" title="Delete Entire Calendar">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+</button>
+` : ''}
+
+<div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-darkhover flex items-center justify-center text-gray-500 dark:text-darkmuted transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+</div>
+</div>
+</div>
+`;
+
+if (isExpanded) {
+html += `
+<div class="p-4 md:p-6 border-t border-gray-200 dark:border-darkborder space-y-5">
+
+<!-- Internal Card Search Bar (if calendar has many users) -->
+${visibleAcls.length > 3 ? `
+<div class="flex items-center justify-between gap-3 bg-gray-50 dark:bg-darkinput p-2.5 rounded-xl border border-gray-200 dark:border-gray-700">
+<div class="relative flex-1">
+    <svg class="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <input type="text" id="gcal-card-search-${safeAttr(cal.id)}" value="${safeAttr(gcalCardSearchQueries[cal.id] || '')}" oninput="updateGcalCardSearch(${safeJsStr(cal.id)}, this.value)" placeholder="Filter emails in this calendar..." class="w-full pl-8 pr-7 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-xs bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:ring-1 focus:ring-blue-500">
+    ${gcalCardSearchQueries[cal.id] ? `<button onclick="updateGcalCardSearch(${safeJsStr(cal.id)}, '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-bold">✕</button>` : ''}
+</div>
+<span class="text-xs font-semibold text-gray-500 dark:text-darkmuted whitespace-nowrap">
+    Showing ${matchingAcls.length} of ${visibleAcls.length}
+</span>
+</div>
+` : ''}
+
+<!-- Bounded Scrollable User List -->
+<div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+`;
+
+if (matchingAcls.length > 0) {
 const roleWeights = { 'owner': 1, 'writer': 2, 'reader': 3, 'freeBusyReader': 4 };
-const sortedAcls = visibleAcls.sort((a, b) => (roleWeights[a.role] || 99) - (roleWeights[b.role] || 99));
+const sortedAcls = matchingAcls.sort((a, b) => (roleWeights[a.role] || 99) - (roleWeights[b.role] || 99));
 
-sortedAcls.forEach((acl, aIdx) => {
+sortedAcls.forEach((acl) => {
 const typeLabel = acl.type === 'default' ? 'Public (Anyone)' : (acl.type === 'user' ? 'User' : acl.type);
+const matchedContact = getContactNameByEmail(acl.value);
 
 let roleHtml = '';
 if (acl.type === 'user') {
 roleHtml = `
-<select onchange="updateCalendarRole(${cIdx}, '${acl.id}', this.value)" class="text-[10px] md:text-xs font-bold bg-gray-100 dark:bg-darkinput border border-gray-300 dark:border-gray-600 rounded-md py-1.5 px-2 text-gray-800 dark:text-gray-200 outline-none focus:border-blue-500 transition cursor-pointer uppercase tracking-wider">
+<select onchange="updateCalendarRole(${cIdx}, ${safeJsStr(acl.id)}, this.value)" class="text-[10px] md:text-xs font-bold bg-white dark:bg-darkinput border border-gray-300 dark:border-gray-600 rounded-lg py-1.5 px-2.5 text-gray-800 dark:text-gray-200 outline-none focus:ring-2 focus:ring-blue-500 transition cursor-pointer uppercase tracking-wider shadow-sm">
     <option value="reader" ${acl.role === 'reader' ? 'selected' : ''}>Reader</option>
     <option value="writer" ${acl.role === 'writer' ? 'selected' : ''}>Writer</option>
     <option value="owner" ${acl.role === 'owner' ? 'selected' : ''}>Owner</option>
 </select>
 `;
 } else {
-roleHtml = `<span class="px-2.5 py-1 rounded-md text-[10px] md:text-xs font-bold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 uppercase tracking-wide">${acl.role}</span>`;
+roleHtml = `<span class="px-2.5 py-1.5 rounded-lg text-[10px] md:text-xs font-extrabold bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 uppercase tracking-wide">${safeAttr(acl.role)}</span>`;
 }
 
 html += `
-<div class="flex items-center justify-between bg-gray-50 dark:bg-darkinput p-3 rounded-xl border border-gray-200 dark:border-gray-700">
-<div class="min-w-0 flex-1 pr-4">
-    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm truncate">${acl.value || typeLabel}</p>
-    <p class="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">${acl.type}</p>
+<div class="flex items-center justify-between bg-gray-50 dark:bg-darkinput p-3 rounded-xl border border-gray-200/80 dark:border-gray-700/80 hover:border-gray-300 dark:hover:border-gray-600 transition">
+<div class="min-w-0 flex-1 pr-3">
+    <div class="flex items-center space-x-2">
+        <p class="font-bold text-gray-900 dark:text-gray-100 text-xs md:text-sm truncate">${safeAttr(acl.value || typeLabel)}</p>
+    </div>
+    ${matchedContact ? `
+        <p class="text-xs text-blue-600 dark:text-blue-400 font-semibold truncate mt-0.5">👤 ${safeAttr(matchedContact)}</p>
+    ` : `
+        <p class="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5 font-semibold">${safeAttr(acl.type)}</p>
+    `}
 </div>
+
 <div class="flex items-center shrink-0 space-x-2 md:space-x-3">
     ${roleHtml}
-    <button type="button" onclick="removeCalendarAcl(${cIdx}, '${acl.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg transition" title="Remove Access">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+    <button type="button" onclick="removeCalendarAcl(${cIdx}, ${safeJsStr(acl.id)})" class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded-lg transition" title="Remove Access">
+        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
     </button>
 </div>
 </div>
 `;
 });
 } else {
-html += `<p class="text-sm text-gray-500 italic">No shared access rules found (excluding primary owner).</p>`;
-}
-} else {
-html += `<p class="text-sm text-gray-500 italic">No access rules found.</p>`;
+html += `<p class="text-xs md:text-sm text-gray-500 italic p-4 text-center bg-gray-50 dark:bg-darkinput rounded-xl border border-dashed border-gray-200 dark:border-gray-700">No shared permissions found matching search filter.</p>`;
 }
 
 html += `
 </div>
-<div class="bg-gray-50 dark:bg-darkinput p-4 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row gap-3 items-end">
-<div class="w-full md:flex-1 min-w-0">
-<label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Share with specific person</label>
-<input type="email" id="new-acl-email-${cIdx}" placeholder="Enter Google Account Email" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-sm outline-none focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white">
-</div>
-<div class="w-full md:w-48 shrink-0">
-<label class="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Permission</label>
-<select id="new-acl-role-${cIdx}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-sm outline-none cursor-pointer focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white">
-<option value="reader">See all event details</option>
-<option value="writer">Make changes to events</option>
-<option value="owner">Make changes & manage sharing</option>
-</select>
-</div>
-<button type="button" onclick="addCalendarAcl(${cIdx}, 'user')" class="w-full md:w-auto shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg transition shadow-sm border border-transparent text-sm h-[42px]">Add Person</button>
+
+<!-- Add Person Form -->
+<div class="bg-blue-50/60 dark:bg-blue-950/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/40 space-y-3">
+<div class="flex items-center justify-between">
+    <span class="text-xs font-extrabold text-blue-900 dark:text-blue-300 uppercase tracking-wider">➕ Grant Permission to Person</span>
+    <span class="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Type email or select system user</span>
 </div>
 
-<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-<span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Public Link (Make calendar public)</span>
-<button type="button" onclick="addCalendarAcl(${cIdx}, 'default', 'reader')" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold py-1.5 px-4 rounded-lg transition text-xs border border-transparent">Make Public Reader</button>
+<div class="flex flex-col sm:flex-row gap-2.5 items-end">
+    <div class="w-full sm:flex-1 min-w-0">
+        <input type="email" id="new-acl-email-${cIdx}" list="gcal-system-contacts-list" placeholder="Enter email or select system user..." class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-3 text-xs md:text-sm outline-none focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white transition shadow-sm" autocomplete="off">
+    </div>
+    
+    <div class="w-full sm:w-44 shrink-0">
+        <select id="new-acl-role-${cIdx}" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 px-2 text-xs md:text-sm outline-none cursor-pointer focus:border-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white font-bold transition shadow-sm">
+            <option value="reader">Reader (View Events)</option>
+            <option value="writer">Writer (Modify Events)</option>
+            <option value="owner">Owner (Full Access)</option>
+        </select>
+    </div>
+
+    <button type="button" onclick="addCalendarAcl(${cIdx}, 'user')" class="w-full sm:w-auto shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition shadow-md text-xs md:text-sm h-[38px] flex items-center justify-center">
+        Add Person
+    </button>
+</div>
+</div>
+
+<!-- Public Link Switch -->
+<div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-xs">
+<div>
+    <span class="font-bold text-gray-800 dark:text-gray-200">Public Access</span>
+    <p class="text-[10px] text-gray-500 dark:text-darkmuted">Allow anyone with the link to view calendar events</p>
+</div>
+<button type="button" onclick="addCalendarAcl(${cIdx}, 'default', 'reader')" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold py-1.5 px-3.5 rounded-lg transition border border-transparent shrink-0">
+    Make Public Reader
+</button>
 </div>
 
 </div>
 `;
+}
+
+html += `</div>`;
 });
 
+if (renderedCardsCount === 0) {
+html += `
+<div class="text-center py-12 bg-white dark:bg-darksurface rounded-2xl border border-gray-200 dark:border-darkborder p-6">
+<p class="text-gray-500 dark:text-darkmuted text-base font-semibold mb-2">No calendars found matching "${safeAttr(gcalSearchQuery)}"</p>
+<button onclick="updateGcalSearchQuery('')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline text-sm">Clear Search Filter</button>
+</div>
+`;
+}
+
+const activeEl = document.activeElement;
+const activeId = activeEl ? activeEl.id : null;
+let cursorStart = null, cursorEnd = null;
+if (activeId && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+    try { cursorStart = activeEl.selectionStart; cursorEnd = activeEl.selectionEnd; } catch (e) {}
+}
+
 container.innerHTML = html;
+
+if (activeId) {
+    const restoredEl = document.getElementById(activeId);
+    if (restoredEl) {
+        restoredEl.focus();
+        if (cursorStart !== null && cursorEnd !== null) {
+            try { restoredEl.setSelectionRange(cursorStart, cursorEnd); } catch (e) {}
+        }
+    }
+}
 }
 
 async function addCalendarAcl(cIdx, type, roleOverride) {
@@ -1042,15 +1310,18 @@ let email = '';
 let role = roleOverride || 'reader';
 
 if (type === 'user') {
-email = document.getElementById(`new-acl-email-${cIdx}`).value.trim();
-role = document.getElementById(`new-acl-role-${cIdx}`).value;
-if (!email) return alert("Please enter an email address.");
+const emailInput = document.getElementById(`new-acl-email-${cIdx}`);
+email = emailInput ? emailInput.value.trim() : '';
+const roleSelect = document.getElementById(`new-acl-role-${cIdx}`);
+role = roleSelect ? roleSelect.value : 'reader';
+if (!email) return alert("Please enter or select an email address.");
 }
 
 showLoader(true);
 try {
 await apiCall('addCalendarAcl', { adminPass: user.pass, calendarId: cal.id, type: type, email: email, role: role });
 calendarAclsCache = null; // Invalidate cache
+gcalExpandedCards[cal.id] = true; // Keep active calendar expanded
 await renderGcalAccessUI();
 } catch (e) {
 alert(e.message);
@@ -1067,6 +1338,7 @@ showLoader(true);
 try {
 await apiCall('removeCalendarAcl', { adminPass: user.pass, calendarId: cal.id, ruleId: ruleId });
 calendarAclsCache = null; // Invalidate cache
+gcalExpandedCards[cal.id] = true; // Keep active calendar expanded
 await renderGcalAccessUI();
 } catch (e) {
 alert(e.message);
@@ -1081,6 +1353,7 @@ showLoader(true);
 try {
 await apiCall('updateCalendarAcl', { adminPass: user.pass, calendarId: cal.id, ruleId: ruleId, role: newRole });
 calendarAclsCache = null; 
+gcalExpandedCards[cal.id] = true; // Keep active calendar expanded
 await renderGcalAccessUI();
 } catch(e) {
 alert(e.message);
