@@ -214,6 +214,7 @@ const typeOptionsHtml = window.appTypicalEventTypes.map(t => `<option value="${t
 const el = document.getElementById(id);
 if (el) el.innerHTML = typeOptionsHtml;
 });
+if (typeof updateCombinedTitlePreview === 'function') updateCombinedTitlePreview();
 
 let mOrder = settings.menuOrder && settings.menuOrder.length ? settings.menuOrder : DEFAULT_MENU;
 DEFAULT_MENU.forEach(item => {

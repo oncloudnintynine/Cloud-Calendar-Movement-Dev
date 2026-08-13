@@ -303,11 +303,11 @@ Sync GCal (Pull)
 <div id="external-guest-fields" style="order: -1" class="hidden-view grid grid-cols-1 sm:grid-cols-2 gap-4 pb-5 border-b border-gray-200 dark:border-darkborder mb-2 w-full">
 <div>
 <label class="block font-bold mb-2 text-sm text-gray-700 dark:text-gray-300">Your Name <span class="text-red-500">*</span></label>
-<input type="text" id="ext-guest-name" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-base font-medium">
+<input type="text" id="ext-guest-name" oninput="updateCombinedTitlePreview()" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-base font-medium">
 </div>
 <div>
 <label class="block font-bold mb-2 text-sm text-gray-700 dark:text-gray-300">Your Contact Info / Organization <span class="text-red-500">*</span></label>
-<input type="text" id="ext-guest-contact" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-base font-medium">
+<input type="text" id="ext-guest-contact" oninput="updateCombinedTitlePreview()" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-white dark:bg-black text-gray-900 dark:text-white outline-none focus:border-blue-500 transition text-base font-medium">
 </div>
 </div>
 
@@ -328,7 +328,7 @@ Sync GCal (Pull)
 
 <div id="block-combined-remarks" class="w-full">
 <label id="label-combined-remarks" class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Remarks <span class="text-sm font-normal text-gray-500">(Optional)</span></label>
-<textarea id="form-combined-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px';" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium leading-relaxed"></textarea>
+<textarea id="form-combined-remarks" rows="2" oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'; updateCombinedTitlePreview();" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm overflow-hidden resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium leading-relaxed"></textarea>
 </div>
 
 <div id="block-combined-attendees" class="relative hidden-view w-full">
@@ -346,13 +346,13 @@ Sync GCal (Pull)
 <option value="Out of Camp">Out of Camp</option>
 </select>
 <div id="combined-meeting-room-wrapper" class="flex items-center space-x-3 mt-3 ml-1">
-<input type="checkbox" id="form-combined-meeting-room" class="w-5 h-5 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+<input type="checkbox" id="form-combined-meeting-room" onchange="toggleMeetingRoomCheckbox('combined'); updateCombinedTitlePreview();" class="w-5 h-5 cursor-pointer text-blue-600 border-gray-300 rounded focus:ring-blue-500">
 <label for="form-combined-meeting-room" class="font-bold text-sm text-blue-700 dark:text-blue-400 cursor-pointer select-none">🏢 Book Cloud Meeting Room</label>
 </div>
 </div>
 <div id="wrapper-combined-location-details" class="min-w-0">
 <label id="label-form-combined-location-details" class="block font-bold mb-2 text-base text-gray-700 dark:text-gray-300">Location Details <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(Optional)</span></label>
-<input type="text" id="form-combined-location-details" placeholder="e.g. Room 302" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium">
+<input type="text" id="form-combined-location-details" placeholder="e.g. Room 302" oninput="updateCombinedTitlePreview()" class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl py-3 px-4 bg-gray-50 dark:bg-darkinput focus:bg-white dark:focus:bg-black text-gray-900 dark:text-white outline-none shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/40 transition text-base font-medium">
 </div>
 </div>
 
@@ -433,6 +433,14 @@ Sync GCal (Pull)
 </div>
 
 <div class="shrink-0 p-5 md:p-6 bg-white dark:bg-darksurface border-t border-gray-200 dark:border-darkborder shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-20 md:rounded-b-3xl">
+<div class="mb-4 p-4 rounded-2xl border-2 border-blue-200 dark:border-blue-800/60 bg-blue-50/50 dark:bg-blue-900/10">
+<label class="block font-bold mb-1 text-[11px] uppercase tracking-wider text-blue-600 dark:text-blue-400">Calendar Title Preview</label>
+<div id="combined-title-preview-main" class="font-extrabold text-base text-gray-900 dark:text-gray-100 leading-snug break-words">—</div>
+<div id="combined-title-preview-infoall" class="hidden-view mt-2 pt-2 border-t border-blue-200/60 dark:border-blue-800/60">
+<label class="block font-bold mb-1 text-[11px] uppercase tracking-wider text-blue-600 dark:text-blue-400">Announcement Title</label>
+<div id="combined-title-preview-infoall-text" class="font-bold text-sm text-blue-800 dark:text-blue-300 leading-snug break-words">—</div>
+</div>
+</div>
 <button type="submit" id="submit-combined-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-2xl shadow-lg transition text-lg border border-transparent">Save Record</button>
 <button type="button" id="cancel-edit-combined-btn" onclick="cancelEditMode()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded-xl shadow hidden-view mt-3 transition text-base border border-transparent">Cancel Edit</button>
 </div>

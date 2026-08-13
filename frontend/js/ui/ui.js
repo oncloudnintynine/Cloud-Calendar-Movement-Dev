@@ -187,6 +187,8 @@ checkAndUpdate('btn-parade-target', formatDisplayDateTime(appData.parade.targetD
 checkAndUpdate('btn-register-birthday', appData.register.birthdaySelected ? formatDisplayDate(appData.register.birthdayD) : "Select...");
 checkAndUpdate('btn-admin-register-birthday', appData.adminRegister.birthdaySelected ? formatDisplayDate(appData.adminRegister.birthdayD) : "Select...");
 checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ? formatDisplayDate(appData.manageUser.birthdayD) : "Select...");
+
+if (typeof updateCombinedTitlePreview === 'function') updateCombinedTitlePreview();
 }
 
 window.downloadVCF = function() {

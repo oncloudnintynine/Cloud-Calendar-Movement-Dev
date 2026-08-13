@@ -17,6 +17,7 @@ btn.innerHTML = 'Announce';
 btn.className = `shrink-0 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-3 sm:px-5 py-3 font-bold text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-darkinput hover:bg-gray-200 dark:hover:bg-darkhover transition h-[52px] flex items-center justify-center whitespace-nowrap outline-none ${isHidden ? 'hidden-view' : ''}`;
 }
 });
+updateCombinedTitlePreview();
 }
 
 function toggleEventAllDay() {
@@ -42,6 +43,7 @@ else container.classList.remove('hidden-view');
 
 function toggleCombinedRepeatUntil() {
 toggleRepeatUntil('combined');
+updateCombinedTitlePreview();
 }
 
 function toggleMeetingRoomCheckbox(ctx) {
@@ -57,6 +59,7 @@ if (checkbox) checkbox.checked = false;
 wrapper.classList.remove('hidden-view');
 }
 }
+if (ctx === 'combined') updateCombinedTitlePreview();
 }
 
 function applyFieldOrder(ctx, typeObj) {
@@ -161,6 +164,164 @@ if(stateEl) stateEl.value = '';
 }
 
 applyFieldOrder('combined', typeObj);
+updateCombinedTitlePreview();
+}
+
+function updateCombinedTitlePreview() {
+const mainEl = document.getElementById('combined-title-preview-main');
+if (!mainEl) return;
+
+const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+
+const typeValue = getVal('form-combined-type') || 'Generic';
+const typeObj = window.appTypicalEventTypes ? window.appTypicalEventTypes.find(t => t.name === typeValue) : null;
+const isEvent = window.isExternalMode || (typeObj ? typeObj.isEvent : true);
+
+let name = '';
+let dept = '';
+if (window.isExternalMode) {
+const extName = getVal('ext-guest-name').trim();
+const extContact = getVal('ext-guest-contact').trim();
+name = extName ? (extContact ? `${extName} (${extContact})` : extName) : '';
+} else if (user) {
+if (user.role === 'admin' && adminBehalfUser) {
+name = adminBehalfUser.name || '';
+dept = adminBehalfUser.dept || '';
+} else {
+name = user.name || '';
+dept = (user.departments && user.departments.join) ? user.departments.join(',') : '';
+}
+}
+
+const attendeesDisplay = eventAttendees.map(a => a.expandedNames || a.formattedName || a.name).join(', ');
+
+const locDetRaw = getVal('form-combined-location-details');
+const country = getVal('form-combined-country');
+const state = getVal('form-combined-state');
+
+let loc = '';
+if (isEvent) {
+let det = locDetRaw.trim();
+const meetRoomCb = document.getElementById('form-combined-meeting-room');
+const locSel = getVal('form-combined-location');
+if (meetRoomCb && meetRoomCb.checked && locSel !== 'Out of Camp') {
+det = det ? 'Cloud Meeting Room, ' + det : 'Cloud Meeting Room';
+} else {
+det = det.replace('Cloud Meeting Room, ', '').replace(', Cloud Meeting Room', '').replace('Cloud Meeting Room', '').trim();
+}
+loc = det || locSel;
+} else if (typeValue === 'Overseas Leave' && country) {
+loc = country + (state ? ` (${state})` : "");
+}
+
+const d = appData.combined;
+let timeStr = '';
+let startTimeStr = '';
+let endTimeStr = '';
+
+if (isEvent) {
+if (d.isAllDay) {
+const sD = formatDisplayDate(d.startD);
+const eD = formatDisplayDate(d.endD);
+timeStr = sD === eD ? `${sD} (All Day)` : `${sD} to ${eD} (All Day)`;
+startTimeStr = sD + " (All Day)";
+endTimeStr = eD + " (All Day)";
+} else {
+const sD = formatDisplayDateTime(d.startD);
+const eD = formatDisplayDateTime(d.endD);
+timeStr = sD.split(' ')[0] === eD.split(' ')[0] ? `${sD} to ${eD.split(' ').slice(-1)[0]}` : `${sD} to ${eD}`;
+startTimeStr = sD;
+endTimeStr = eD;
+}
+const repeat = getVal('form-combined-repeat') || 'NONE';
+if (repeat !== 'NONE') {
+timeStr += ` ↻ ${repeat}`;
+if (d.untilD) timeStr += ` until ${formatDisplayDate(d.untilD)}`;
+}
+} else {
+const sD = formatDisplayDate(d.startD);
+const eD = formatDisplayDate(d.endD);
+timeStr = sD === eD ? sD : `${sD} to ${eD}`;
+if (typeValue !== 'Official Trip') {
+const isSameDay = d.startD.toDateString() === d.endD.toDateString();
+let calcHD = 'None';
+if (isSameDay) {
+if (d.startAMPM === 'AM' && d.endAMPM === 'AM') calcHD = 'AM';
+else if (d.startAMPM === 'PM' && d.endAMPM === 'PM') calcHD = 'PM';
+} else {
+if (d.startAMPM === 'PM' && d.endAMPM === 'AM') calcHD = 'Start PM, End AM';
+else if (d.startAMPM === 'PM') calcHD = 'Start PM';
+else if (d.endAMPM === 'AM') calcHD = 'End AM';
+}
+if (calcHD !== 'None') timeStr += ` (${calcHD})`;
+}
+startTimeStr = sD;
+endTimeStr = eD;
+}
+
+const remarks = getVal('form-combined-remarks');
+let safeType = typeValue.trim();
+let displayType = safeType;
+if (safeType === 'Generic' && remarks) {
+displayType = safeType + ': ' + remarks.trim();
+}
+const eventDesc = remarks ? remarks.trim() : displayType;
+
+const tplVars = {
+EventType: displayType,
+Name: name,
+Department: dept,
+Attendees: applyAcronymsFront(attendeesDisplay),
+Location: applyAcronymsFront(loc),
+LocationDetails: applyAcronymsFront(locDetRaw),
+Time: timeStr,
+StartTime: startTimeStr,
+EndTime: endTimeStr,
+Remarks: remarks,
+EventDescription: eventDesc,
+Country: country,
+State: state
+};
+
+const buildTitle = (template) => {
+if (!template) return '—';
+let titleRaw = window.isExternalMode ? '{Name}' : template;
+let t = titleRaw
+.replace(/{EventType}/g, tplVars.EventType)
+.replace(/{Name}/g, tplVars.Name)
+.replace(/{Department}/g, tplVars.Department)
+.replace(/{Attendees}/g, tplVars.Attendees)
+.replace(/{Location}/g, tplVars.Location)
+.replace(/{LocationDetails}/g, tplVars.LocationDetails)
+.replace(/{Time}/g, tplVars.Time)
+.replace(/{StartTime}/g, tplVars.StartTime)
+.replace(/{EndTime}/g, tplVars.EndTime)
+.replace(/{Remarks}/g, tplVars.Remarks)
+.replace(/{EventDescription}/g, tplVars.EventDescription)
+.replace(/{Country}/g, tplVars.Country)
+.replace(/{State}/g, tplVars.State);
+t = t.replace(/,\s*(?=[,\)]|$)/g, "").replace(/\(\s*\)/g, "").replace(/\s+/g, " ").trim();
+if (t.endsWith('-')) t = t.slice(0, -1).trim();
+const finalTitle = applyAcronymsFront(t);
+return finalTitle || '—';
+};
+
+let mainTemplate = window.appAgendaTemplate;
+if (typeObj && typeObj.agendaTemplate) mainTemplate = typeObj.agendaTemplate;
+if (mainTemplate === undefined || mainTemplate === null) mainTemplate = '{EventType} - {Name} ({Department})';
+mainEl.textContent = buildTitle(mainTemplate);
+
+const infoAllWrap = document.getElementById('combined-title-preview-infoall');
+if (isInfoAll) {
+let infoTemplate = window.appInfoAllTemplate;
+if (typeObj && typeObj.infoAllTemplate) infoTemplate = typeObj.infoAllTemplate;
+if (infoTemplate === undefined || infoTemplate === null) infoTemplate = mainTemplate;
+const infoTextEl = document.getElementById('combined-title-preview-infoall-text');
+if (infoTextEl) infoTextEl.textContent = buildTitle(infoTemplate);
+if (infoAllWrap) infoAllWrap.classList.remove('hidden-view');
+} else if (infoAllWrap) {
+infoAllWrap.classList.add('hidden-view');
+}
 }
 
 function toggleEventFields() {
@@ -241,12 +402,14 @@ inputEl.value = '';
 inputEl.classList.add('hidden-view');
 inputEl.classList.remove('ring-2', 'ring-emerald-500');
 document.getElementById(`behalf-results-${ctx}`).classList.add('hidden-view');
+if (ctx === 'combined') updateCombinedTitlePreview();
 }
 
 function clearBehalf(ctx) {
 adminBehalfUser = null;
 document.getElementById(`selected-behalf-${ctx}`).innerHTML = '';
 document.getElementById(`form-${ctx}-behalf-search`).classList.remove('hidden-view');
+if (ctx === 'combined') updateCombinedTitlePreview();
 }
 
 // --- Attendees Form Logic ---
@@ -301,6 +464,7 @@ ${a.formattedName || window.formatContactName(a.name, a.dept)}
 </div>
 `).join('');
 }
+if (ctx === 'combined') updateCombinedTitlePreview();
 }
 
 // --- Form Submission & Edits ---
@@ -457,11 +621,13 @@ if (cancelBtn) cancelBtn.classList.add('hidden-view');
 });
 
 switchTab(appMode === 'combined' ? 'dashboard' : 'my-leaves');
+updateCombinedTitlePreview();
 }
 
 function toggleAMPM(type, ctx) {
 appData[ctx][`${type}AMPM`] = appData[ctx][`${type}AMPM`] === 'AM' ? 'PM' : 'AM'; 
 updateTimeSliderVisual(type, appData[ctx][`${type}AMPM`], ctx);
+if (ctx === 'combined') updateCombinedTitlePreview();
 }
 
 function updateTimeSliderVisual(type, val, ctx) {
