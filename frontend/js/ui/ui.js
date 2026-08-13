@@ -191,7 +191,7 @@ checkAndUpdate('btn-manage-user-birthday', appData.manageUser.birthdaySelected ?
 if (typeof updateCombinedTitlePreview === 'function') updateCombinedTitlePreview();
 }
 
-window.downloadVCF = function() {
+window.downloadVCF = async function() {
   const currentUser = user || window.user;
   if (!currentUser || window.externalToken) {
     alert("You must be logged in to download contacts.");
@@ -215,6 +215,16 @@ window.downloadVCF = function() {
     if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
     vcfData += "END:VCARD\r\n";
   });
+
+  const file = new File([vcfData], 'Cloudy_Directory.vcf', { type: 'text/vcard;charset=utf-8' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ title: 'Cloudy Directory', text: 'Add these contacts to your device', files: [file] });
+      return;
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+    }
+  }
 
   const blob = new Blob([vcfData], { type: 'text/vcard;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
