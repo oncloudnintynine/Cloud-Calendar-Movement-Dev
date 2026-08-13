@@ -202,17 +202,27 @@ window.downloadVCF = async function() {
     return;
   }
 
+  const esc = s => String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+
   let vcfData = "";
   companyContacts.forEach(c => {
-    const name = c.name || "";
+    const formatted = (window.formatContactName && window.formatContactName(c.name, c.dept)) || c.name || "";
+    const name = esc(formatted);
     const phone = c.phone || "";
-    const org = c.dept ? c.dept.split(',')[0].trim() : "Cloudy";
+    const org = c.dept ? c.dept.split(',').map(d => d.trim()).filter(Boolean).join(';') : "Cloudy";
+    const email = c.email || "";
+    const birthday = c.birthday || "";
 
     vcfData += "BEGIN:VCARD\r\n";
     vcfData += "VERSION:3.0\r\n";
-    vcfData += `FN:${name}\r\n`;
-    if (org) vcfData += `ORG:${org}\r\n`;
+    if (name) {
+      vcfData += `N:${name};;;;\r\n`;
+      vcfData += `FN:${name}\r\n`;
+    }
+    if (org) vcfData += `ORG:${esc(org)}\r\n`;
     if (phone) vcfData += `TEL;TYPE=CELL:${phone}\r\n`;
+    if (email) vcfData += `EMAIL;TYPE=INTERNET:${esc(email)}\r\n`;
+    if (birthday) vcfData += `BDAY:${birthday}\r\n`;
     vcfData += "END:VCARD\r\n";
   });
 
